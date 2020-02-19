@@ -5,6 +5,9 @@
 *.mp4
 *.bag
 *.avi
+.idea/
+*.iml
+venv/
 
 # Emacs temp files
 *~
