@@ -213,7 +213,7 @@ synchronizedCallback(
                                         t, st_t, pr);
     if (jsonmsg.length() + 1 > udp_buffer_length)
     {
-      ROS_WARN_STREAM("Unexpected: json message doesn?t fit in payload "
+      ROS_WARN_STREAM("Unexpected: json message doesn't fit in payload "
                       << jsonmsg);
       if (not buffer.empty())
       {

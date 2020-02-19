@@ -17,6 +17,7 @@ import recognition_utils as recutils
 
 class FaceFeatureExtractionNode:
 	def __init__(self, sensor_name):
+		self.node_name = 'FaceFeatureExtractionNode'
 		self.sensor_name = sensor_name
 
 		self.cfg_server = Server(FaceFeatureExtractionConfig, self.cfg_callback)
@@ -26,12 +27,12 @@ class FaceFeatureExtractionNode:
 		self.pub = rospy.Publisher('/face_feature_extractor/features', FeatureVectorArray, queue_size=10)
 
 		try:
-			print 'trying to listen raw rgb image topic...'
-			rospy.client.wait_for_message(self.sensor_name + '/hd/image_color', Image, 1.0)
-			img_subscriber = message_filters.Subscriber(self.sensor_name + '/hd/image_color', Image, queue_size=30)
+			print('{}: trying to listen raw rgb image topic...'.format(self.node_name))
+			rospy.client.wait_for_message(self.sensor_name + '/color/image_raw', Image, 1.0)
+			img_subscriber = message_filters.Subscriber(self.sensor_name + '/color/image_raw', Image, queue_size=30)
 		except rospy.ROSException:
-			print 'failed, listen compressed rgb image topic'
-			img_subscriber = message_filters.Subscriber(self.sensor_name + '/hd/image_color/compressed', CompressedImage, queue_size=30)
+			print('{}: failed, listen compressed rgb image topic'.format(self.node_name))
+			img_subscriber = message_filters.Subscriber(self.sensor_name + '/color/image_raw/compressed', CompressedImage, queue_size=30)
 
 		self.subscribers = [
 			img_subscriber,
@@ -57,22 +58,23 @@ class FaceFeatureExtractionNode:
 		self.image_dim_for_openface = config.image_dim_for_openface
 		self.network_path = package_path + config.network_path
 
-		print '--- cfg_callback ---'
-		print 'image_dim_for_dlib', config.image_dim_for_dlib
-		print 'image_dim_for_openface', config.image_dim_for_openface
-		print 'roi_upscale_for_dlib', config.roi_upscale_for_dlib
+		print('{}: --- cfg_callback ---'.format(self.node_name))
+		print('{}: image_dim_for_dlib'.format(self.node_name), config.image_dim_for_dlib)
+		print('{}: image_dim_for_openface'.format(self.node_name), config.image_dim_for_openface)
+		print('{}: roi_upscale_for_dlib'.format(self.node_name), config.roi_upscale_for_dlib)
 		return config
 
 	def reset_time(self, msg):
-		print 'reset time'
+		print('{}: reset time'.format(self.node_name))
 		self.ts = message_filters.ApproximateTimeSynchronizer(self.subscribers, 5, 0.001)
 		self.ts.registerCallback(self.callback)
 
 	# callback
 	def callback(self, rgb_image_msg, detection_msg):
-		if self.sensor_name not in detection_msg.header.frame_id:
-			print 'frame ids conflicted!!'
-			return
+		# not sure how to deal with this error
+		# if self.sensor_name not in detection_msg.header.frame_id:
+		#	print('{}: frame ids conflicted!!'.format(self.node_name))
+		#	return
 
 		# if all the detected face regions are invalid, skip the feature extraction
 		if all((x.box_2D.width <= 0 for x in detection_msg.detections)):
@@ -134,7 +136,7 @@ class FaceFeatureExtractionNode:
 
 def main():
 	sensor_name = '/kinect2_head' if len(sys.argv) < 2 else '/' + sys.argv[1]
-	print 'sensor_name', sensor_name
+	print('FaceFeatureExtractionNode: sensor_name', sensor_name)
 
 	rospy.init_node('face_feature_extraction_node_' + sensor_name[1:])
 	node = FaceFeatureExtractionNode(sensor_name)

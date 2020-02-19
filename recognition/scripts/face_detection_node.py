@@ -32,6 +32,7 @@ def timestampMs():
 # note that the replaced box_2d is on the color image coordinate
 class FaceDetectionNode:
 	def __init__(self, sensor_name):
+		self.node_name = 'FaceDetectionNode'
 		self.sensor_name = sensor_name
 
 		self.cfg_server = Server(FaceDetectionConfig, self.cfg_callback)
@@ -42,27 +43,35 @@ class FaceDetectionNode:
 		# get transformation between world, color, and depth images
 		now = rospy.Time(0)
 		tf_listener = tf.TransformListener()
-		print self.sensor_name
-		self.ir2rgb = recutils.lookupTransform(tf_listener, self.sensor_name + '_ir_optical_frame', self.sensor_name + '_rgb_optical_frame', 10.0, now)
+		print("{}: available channels:".format(self.node_name))
+		print(tf_listener.getFrameStrings())
+		time.sleep(20)
+		print("{}: {}".format(self.node_name, self.sensor_name))
+		# https://answers.ros.org/question/204248/tf-lookuptransform/
+		self.ir2rgb = recutils.lookupTransform(tf_listener, self.sensor_name + '_infra1_optical_frame', self.sensor_name + '_color_optical_frame', 5.0, now)
 		# self.ir2rgb = numpy.eye(4, 4).astype(numpy.float64)
-		print '--- ir2rgb ---\n', self.ir2rgb
-		self.world2rgb = recutils.lookupTransform(tf_listener, '/world', self.sensor_name + '_rgb_optical_frame', 10.0, now)
-		print '--- world2rgb ---\n', self.world2rgb
+		print('{}:--- ir2rgb ---\n'.format(self.node_name), self.ir2rgb)
+		self.world2rgb = recutils.lookupTransform(tf_listener, '/world', self.sensor_name + '_color_optical_frame', 5.0, now)
+		print('{}:--- world2rgb ---\n'.format(self.node_name), self.world2rgb)
 
 		self.pub = rospy.Publisher('/face_detector/detections', DetectionArray, queue_size=10)
 		self.pub_local = rospy.Publisher(self.sensor_name + '/face_detector/detections', DetectionArray, queue_size=10)
 
 		try:
-			print 'tryingnsecs_round to listen raw rgb image topic...'
-			rospy.client.wait_for_message(self.sensor_name + '/hd/image_color', Image, 1.0)
-			img_subscriber = message_filters.Subscriber(self.sensor_name + '/hd/image_color', Image)
+			print('{}: tryingnsecs_round to listen raw rgb image topic...'.format(self.node_name))
+			if self.sensor_name in {'d415, d435'}:
+				rospy.client.wait_for_message(self.sensor_name + '/color/image_raw', Image, 1.0)
+				img_subscriber = message_filters.Subscriber(self.sensor_name + '/color/image_raw', Image)
+			else:
+				rospy.client.wait_for_message(self.sensor_name + '/hd/image_color', Image, 1.0)
+				img_subscriber = message_filters.Subscriber(self.sensor_name + '/hd/image_color', Image)
 		except rospy.ROSException:
-			print 'failed, listen compressed rgb image topic'
+			print('{}: failed, listen compressed rgb image topic'.format(self.node_name))
 			img_subscriber = message_filters.Subscriber(self.sensor_name + '/hd/image_color/compressed', CompressedImage)
 
 		self.subscribers = [
 			img_subscriber,
-			message_filters.Subscriber(self.sensor_name + '/hd/camera_info', CameraInfo),
+			message_filters.Subscriber(self.sensor_name + '/color/camera_info', CameraInfo), #'/hd/camera_info'
 			message_filters.Subscriber('/detector/detections', DetectionArray)
 		]
 
@@ -87,26 +96,26 @@ class FaceDetectionNode:
 		self.upscale_minsize = config.upscale_minsize					# the face detection ROI is upscaled so that its width get larger than #upscale_minsize
 		self.visualization = config.visualization						# if true, the visualization of the detection will be shown
 
-		print '--- cfg_callback ---'
-		print 'confidence_thresh', config.confidence_thresh
-		print 'roi_width', config.roi_width_
-		print 'calc_roi_from_top', config.calc_roi_from_top
-		print 'head_offset_z_top', config.head_offset_z_top
-		print 'head_offset_z_centroid', config.head_offset_z_centroid
-		print 'upscale_minsize', config.upscale_minsize
-		print 'visualization', config.visualization
+		print('{}:--- cfg_callback ---'.format(self.node_name))
+		print('{}: confidence_thresh'.format(self.node_name), config.confidence_thresh)
+		print('{}: roi_width'.format(self.node_name), config.roi_width_)
+		print('{}: calc_roi_from_top'.format(self.node_name), config.calc_roi_from_top)
+		print('{}: head_offset_z_top'.format(self.node_name), config.head_offset_z_top)
+		print('{}: head_offset_z_centroid'.format(self.node_name), config.head_offset_z_centroid)
+		print('{}: upscale_minsize'.format(self.node_name), config.upscale_minsize)
+		print('{}: visualization'.format(self.node_name), config.visualization)
 		return config
 
 	def reset_time(self, msg):
-		print 'reset time'
+		print('{}: reset time'.format(self.node_name))
 		self.ts = message_filters.ApproximateTimeSynchronizer(self.subscribers, 200, 0.00001)
 		self.ts.registerCallback(self.callback)
 
 	# callback
 	def callback(self, rgb_image_msg, rgb_info_msg, detection_msg):
 	
-		if "/" + detection_msg.header.frame_id != self.sensor_name + '_ir_optical_frame':
-			print 'frame_ids not matched'
+		if "/" + detection_msg.header.frame_id != self.sensor_name + '_color_optical_frame' #'_ir_optical_frame':
+			print('{}: frame_ids not matched'.format(self.node_name))
 			return
 
 		t1 = rospy.Time.now()
@@ -116,6 +125,7 @@ class FaceDetectionNode:
 			rgb_image = recutils.decompress(rgb_image_msg)
 		else:
 			rgb_image = self.cv_bridge.imgmsg_to_cv2(rgb_image_msg)
+			rgb_image = rgb_image[..., ::-1]
 		#gray_image = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
 
 		# calculate ROIs and then run the 2D face detector
@@ -135,8 +145,8 @@ class FaceDetectionNode:
 
 		t2 = rospy.Time.now()
 
-		#if self.visualization:
-		#	self.visualize(rgb_image, rois, faces, (t2 - t1).to_sec())
+		if self.visualization:
+			self.visualize(rgb_image, rois, faces, (t2 - t1).to_sec())
 
 	def improve(self, rgb_image):
 		if numpy.amax(rgb_image) > 1:
@@ -341,6 +351,8 @@ class FaceDetectionNode:
 def main():
 	sensor_name = '/kinect2_head' if len(sys.argv) < 2 else '/' + sys.argv[1]
 	print 'sensor_name', sensor_name
+	if sensor_name[1:] in {'/415', '/435'}:
+		sensor_name = '/d' + sensor_name[1:]
 
 	rospy.init_node('face_detection_node_' + sensor_name[1:])
 	node = FaceDetectionNode(sensor_name)

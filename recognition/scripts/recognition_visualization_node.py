@@ -41,6 +41,13 @@ class Camera:
 		#	self.sub = rospy.Subscriber('/%s/rgb/image' % camera_name, Image, self.image_callback, queue_size=1, buff_size=2**24)
 		#except:
 		#	self.sub = rospy.Subscriber('/%s/rgb/image/compressed' % camera_name, CompressedImage, self.image_callback, queue_size=1)
+		print(camera_name)
+		self.camera2world = recutils.lookupTransform(tf_listener, '/%s_color_optical_frame' % camera_name, 'world', 10.0, rospy.Time(0))
+		try:
+			rospy.client.wait_for_message('/%s/color/image_raw' % camera_name, Image, 1.0)
+			self.sub = rospy.Subscriber('/%s/color/image_raw' % camera_name, Image, self.image_callback, queue_size=1, buff_size=2**24)
+		except:
+			self.sub = rospy.Subscriber('/%s/color/image/compressed' % camera_name, CompressedImage, self.image_callback, queue_size=1)
 
 	def image_callback(self, image_msg):
 		if abs((rospy.Time.now() - self.prev_time).to_sec()) < self.refresh_span:
@@ -50,7 +57,9 @@ class Camera:
 		if type(image_msg) is CompressedImage:
 			rgb_image = recutils.decompress(image_msg)
 		else:
+			# cv2 is bgr not rgb
 			rgb_image = self.cv_bridge.imgmsg_to_cv2(image_msg)
+			rgb_image = rgb_image[..., ::-1]
 		height = int(rgb_image.shape[0] * self.image_width / float(rgb_image.shape[1]))
 		rgb_image = cv2.resize(rgb_image, (self.image_width, height))
 		cv2.putText(rgb_image, self.camera_name, (5, 15), cv2.FONT_HERSHEY_PLAIN, 0.8, (255, 255, 255), 2)
@@ -118,11 +127,11 @@ class Camera:
 
 class RecognitionVisualizationNode:
 	def __init__(self):
-		#self.cameras = []
+		self.cameras = []
 		self.cfg_server = Server(RecognitionVisualizationConfig, self.cfg_callback)
 		self.cv_bridge = cv_bridge.CvBridge()
 		self.tf_listener = tf.TransformListener()
-		#self.find_cameras()
+		self.find_cameras()
 
 		self.names = {}
 		self.face_visible_trackers = {}
@@ -166,8 +175,8 @@ class RecognitionVisualizationNode:
 		self.world2map[0, 3] = self.map_size_pix / 2 #03
 		self.world2map[1, 3] = self.map_size_pix / 2 #13
 
-		#for camera in self.cameras:
-		#	camera.refresh_span = config.image_refresh_span
+		for camera in self.cameras:
+			camera.refresh_span = config.image_refresh_span
 
 		return config
 
@@ -177,7 +186,7 @@ class RecognitionVisualizationNode:
 		print 'waiting for topics'
 		rospy.client.wait_for_message('/tf', TFMessage, 10.0)
 		for topic_name, msg_type in rospy.get_published_topics():
-			match = re.match(r'/(kinect.*)/hd/image_color', topic_name)
+			match = re.match(r'/(d.*)/color/image_raw', topic_name)
 			if not match:
 				continue
 			self.cameras.append(Camera(match.group(1), self.tf_listener, self.image_width, self.image_refresh_span))
@@ -189,8 +198,8 @@ class RecognitionVisualizationNode:
 		self.prev_time = rospy.Time.now()
 
 		canvas = numpy.ones((self.map_size_pix, self.map_size_pix, 3), dtype=numpy.uint8) * 255
-		#for camera in self.cameras:
-		#	camera.draw(canvas, self.world2map, self.image_width)
+		for camera in self.cameras:
+			camera.draw(canvas, self.world2map, self.image_width)
 
 		self.face_visible_trackers_lock.acquire()
 		for track, face_tracker in zip(tracker_track_msg.tracks, face_track_msg.tracks):
@@ -239,12 +248,12 @@ class RecognitionVisualizationNode:
 		# callbacks for left button events
 		if event == cv2.EVENT_LBUTTONDOWN:
 			self.grabbed = []
-			#for camera in self.cameras:
-			#	if camera.hit_test(x, y):
-			#		self.grabbed.append(camera)
+			for camera in self.cameras:
+				if camera.hit_test(x, y):
+					self.grabbed.append(camera)
 			if not len(self.grabbed):
 				self.grabbed.append(self)
-				# self.grabbed.extend(self.cameras)
+				self.grabbed.extend(self.cameras)
 
 			for grabbed in self.grabbed:
 				grabbed.mouse_pushed(x, y)

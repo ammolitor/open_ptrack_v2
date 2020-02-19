@@ -42,6 +42,9 @@
 #include "ros/ros.h"
 #include "nodelet/nodelet.h"
 #include <sstream>
+#include <string>
+#include <fstream>
+#include <iostream>
 
 //Publish Messages
 #include "opt_msgs/RoiRect.h"
