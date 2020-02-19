@@ -441,7 +441,7 @@ class Listener :
       if request.serial != '':
         file.write('  <arg name="sensor_id"   default="' + request.serial + '" />\n')
       file.write('  <arg name="sensor_name" default="' + request.id + '" />\n\n')
-      file.write('  <arg name="width" default="640" />\n')
+      file.write('  <arg name="width" default="848" />\n')
       file.write('  <arg name="height" default="480" />\n\n')
       file.write('  <!-- true  = Munaro Based OPT Detection -->\n')
       file.write('  <!-- false = YOLO Based Detection (Must Have YOLO installed to use)-->\n')
