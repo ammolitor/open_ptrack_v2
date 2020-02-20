@@ -361,63 +361,7 @@ private:
     finished_select_rois_from_file=false;
     std::cout<<rois_from_file.size()<<" objects are selected from file"<<std::endl;
   }
-  /*
-    void get_all(const fs::path& root, const std::string& ext, std::vector<fs::path>& ret)
-    {
-        if(!fs::exists(root) || !fs::is_directory(root)) return;
 
-        fs::recursive_directory_iterator it(root);
-        fs::recursive_directory_iterator endit;
-
-        while(it != endit)
-        {
-            if(fs::is_regular_file(*it) && it->path().extension() == ext) ret.push_back(it->path().filename());
-            ++it;
-
-        }
-
-    }
-    void select_rois_from_file_locally()
-    {
-
-        //    std::string sensor_name=topicColor.substr(1, (topicColor.size()-17));
-        //    std::cout<< "sensor_name"<<sensor_name<,std::endl;
-        //    std::string rois_dir_path=ros::package::getPath("opt_gui")+"/data/"+sensor_name;
-
-        std::string rois_dir_path=ros::package::getPath("opt_gui")+"/data/Kinect_1/";
-        std::vector<fs::path> roi_filenames;
-        get_all(rois_dir_path, ".png", roi_filenames);
-
-        //publish roi iamge one by one
-        for(const auto& name : roi_filenames)
-        {
-            cv::Mat image_roi = cv::imread(rois_dir_path+fs::basename(name) + ".png");
-            //      rois_from_file.push_back(image_roi);
-
-            std::string tmp_str=fs::basename(name);
-            std::size_t p2 = tmp_str.find_last_of("{");
-            std::size_t q2 = tmp_str.find_last_of("}");
-            std::string object_name_from_file=tmp_str.substr(p2+1,q2-p2-1);
-
-            Object_Detector newDetector;//create new detector
-            newDetector.setObjectName(object_name_from_file);
-            newDetector.setCurrentRect(Rect(0,0,main_color.size().width,main_color.size().height));//set the whole image as the ROI
-            newDetector.occluded=true;//set the occlusion into true so that the detector will keep searching in the whole image for the object untill it shows up
-            newDetector.roi_from_file=image_roi;// set the roi from the cv::Rect in rois_from_file
-            Object_Detectors.push_back(newDetector);
-            current_detected_boxes.push_back(Rect(0,0,1,1));
-            std::list<Rect> tracks_2D_(10);
-            tracks_2D.push_back(tracks_2D_);
-            bool occlude_=true;
-            occludes.push_back(occlude_);
-            Object_Detector::current_detected_boxes=current_detected_boxes;
-        }
-        objects_selected=true;
-        finished_select_rois_from_file=false;
-        std::cout<<roi_filenames.size()<<" objects are selected from file"<<std::endl;
-
-    }
-*/
   void select_rois_from_gui()
   {
     if(rois_from_gui.empty())//when the "image2D_rois_from_gui_Callback" is activted, the "rois_from_gui" will be filled with cv::Rect
