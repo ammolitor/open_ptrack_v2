@@ -96,6 +96,7 @@ TrackerObject::newFrame(const std::vector<open_ptrack::detection::Detection>& de
   lost_tracks_.clear();
   new_tracks_.clear();
   detections_ = detections;
+  associations_.assign(detections.size(), NULL);
   ros::Time current_detections_time = detections_[0].getSource()->getTime();
 
   for(std::list<open_ptrack::tracking::TrackObject*>::iterator it = tracks_.begin(); it != tracks_.end();)
@@ -141,6 +142,7 @@ TrackerObject::newFrame(const std::vector<open_ptrack::detection::Detection>& de
     }
   }
 }
+
 
 void
 TrackerObject::updateTracks()
@@ -207,6 +209,16 @@ TrackerObject::toMsg(opt_msgs::TrackArray::Ptr& msg,
   }
 }
 
+void
+TrackerObject::getAssociationResult(opt_msgs::Association::Ptr& msg)
+{
+  msg->detection_ids.resize(associations_.size());
+  msg->track_ids.resize(associations_.size());
+  for(int i=0; i<associations_.size(); i++) {
+    msg->detection_ids[i] = i;
+    msg->track_ids[i] = associations_[i] == NULL ? -1 : associations_[i]->getId();
+  }
+}
 
 
 
@@ -281,11 +293,11 @@ TrackerObject::createNewTrack(open_ptrack::detection::Detection& detection)
         velocity_in_motion_term_  );
 
   t->init(detection.getWorldCentroid()(0), detection.getWorldCentroid()(1),detection.getWorldCentroid()(2),
-          detection.getWorldCentroid()(2), detection.getDistance(), detection.getObjectName(),detection.getSource());
+          detection.getHeight(), detection.getDistance(), detection.getObjectName(),detection.getSource());
 
   bool first_update = true;
   t->update(detection.getWorldCentroid()(0), detection.getWorldCentroid()(1), detection.getWorldCentroid()(2),
-            detection.getWorldCentroid()(2), detection.getDistance(), detection.getObjectName(),0.0,
+            detection.getHeight(), detection.getDistance(), detection.getObjectName(),0.0,
             detection.getConfidence(), min_confidence_, min_confidence_detections_, detection.getSource(), first_update);
 
   ROS_INFO("Created %d", t->getId());
@@ -426,8 +438,8 @@ TrackerObject::updateDetectedTracks()
 
           // Update track with the associated detection:
           bool first_update = false;
-
-          t->update(d.getWorldCentroid()(0), d.getWorldCentroid()(1), d.getWorldCentroid()(2),d.getWorldCentroid()(2),
+          associations_[measure] = t;
+          t->update(d.getWorldCentroid()(0), d.getWorldCentroid()(1), d.getWorldCentroid()(2),d.getHeight(),
                       d.getDistance(),d.getObjectName(), distance_matrix_(track, measure),
                       d.getConfidence(), min_confidence_, min_confidence_detections_,
                       d.getSource(), first_update);

@@ -3,20 +3,47 @@ project(recognition)
 
 add_definitions(-std=c++11)
 
+set(TVM_ROOT "/home/nvidia/catkin_ws/src/incubator-tvm")
+
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2 -fPIC -pthread -L${TVM_ROOT}/build -ldl -lpthread -I/usr/local/include/opencv -I/usr/local/include -L/usr/local/lib -L/usr/local/cuda/lib64 -L/usr/lib/x86_64-linux-gnu/ -lopencv_dnn -lopencv_ml -lopencv_objdetect -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_video -lopencv_photo -lopencv_imgproc -lopencv_flann -lopencv_viz -lopencv_core") 
+# -lcublas  -lcuda -lcudart -lcudnn
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2 -fPIC -pthread -L${TVM_ROOT}/build -ldl -lpthread -I/usr/local/include/opencv -I/usr/local/include -L/usr/local/lib -L/usr/lib/aarch64-linux-gnu/ -lopencv_shape -lopencv_videostab -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_video -lopencv_photo -lopencv_imgproc -lopencv_flann -lopencv_viz -lopencv_core -L/usr/local/cuda/lib64 -lcublas  -lcuda -lcudart -lcudnn -ltvm_runtime")
+
+set(Torch_DIR "/home/nvidia/pytorch/torch/share/cmake/Torch")
+
+# list(APPEND CMAKE_PREFIX_PATH "/home/nvidia/pytorch/torch")
+find_package(Torch REQUIRED)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+#set(Torch_DIR "$ENV{TORCH_ROOT}/torch/share/cmake/Torch/")
+
+include_directories(
+    ${TVM_ROOT}/include
+    ${TVM_ROOT}/build
+    ${TVM_ROOT}/3rdparty/dmlc-core/include
+    ${TVM_ROOT}/3rdparty/dlpack/include
+    ${PROJECT_SOURCE_DIR}/include
+    /usr/local/cuda/include
+    /usr/local/cuda/lib64)
+
 # set(CMAKE_BUILD_TYPE RelWithDebInfo)
 find_package(catkin REQUIRED COMPONENTS 
-	rospy 
-	roscpp
-	tf
-	tf_conversions
-	std_msgs
-	sensor_msgs
+    rospy 
+    roscpp
+    tf
+    tf_conversions
+    std_msgs
+    sensor_msgs
     pcl_ros
     pcl_conversions
-	opt_msgs
+    opt_msgs
     cv_bridge
-	dynamic_reconfigure
+    dynamic_reconfigure
 )
+
+# list(APPEND LINKER_LIBS ${CMAKE_DL_LIBS})
+
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -27,8 +54,9 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-# find_package(Eigen REQUIRED)
-# include_directories(${Eigen_INCLUDE_DIRS} include ${catkin_INCLUDE_DIRS})
+# add eigen
+find_package(Eigen3 REQUIRED)
+include_directories(${Eigen_INCLUDE_DIRS} include ${catkin_INCLUDE_DIRS})
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
@@ -36,10 +64,10 @@ add_service_files(FILES OPTSetPredefinedFaces.srv OPTSaveRegisteredFaces.srv OPT
 generate_messages(DEPENDENCIES std_msgs sensor_msgs opt_msgs)
 
 generate_dynamic_reconfigure_options(
-	cfg/FaceDetection.cfg
-	cfg/FaceFeatureExtraction.cfg
+    cfg/FaceDetection.cfg
+    cfg/FaceFeatureExtraction.cfg
     cfg/FaceRecognition.cfg
-	cfg/RecognitionVisualization.cfg
+    cfg/RecognitionVisualization.cfg
 )
 
 catkin_package(
@@ -48,7 +76,99 @@ catkin_package(
   CATKIN_DEPENDS roscpp std_msgs opt_msgs
 #  DEPENDS system_lib
 )
+message(STATUS CURRENT_DIR: ${CMAKE_CURRENT_LIST_DIR})
+find_package(CUDA REQUIRED)
 
+# initial variables\
+list(APPEND LINKER_LIBS "${CMAKE_DL_LIBS}")
+# list(APPEND LINKER_LIBS opencv_dnn)
+#list(APPEND LINKER_LIBS "${TORCH_LIBRARIES}")
+list(APPEND LINKER_LIBS "${CMAKE_DL_LIBS}")
+list(APPEND LINKER_LIBS "${CUDA_CUDA_LIBRARY}")
+list(APPEND LINKER_LIBS "${CUDA_CURAND_LIBRARY}")
+list(APPEND LINKER_LIBS "${CUDA_CUDNN_LIBRARY}")
+list(APPEND LINKER_LIBS "${CUDA_CUDART_LIBRARY}")
+list(APPEND LINKER_LIBS "${CUDA_CUBLAS_LIBRARY}")
+list(APPEND LINKER_LIBS "${CUDA_NVRTC_LIBRARY}")
+list(APPEND LINKER_LIBS "${CUDA_TOOLKIT_ROOT_DIR}")
+list(APPEND LINKER_LIBS "${TVM_RUNTIME_LINKER_LIBS}")
+list(APPEND LINKER_LIBS "${RUNTIME_SRCS}")
+list(APPEND LINKER_LIBS "${OpenCV_LIBS}")
+list(APPEND LINKER_LIBS "tvm_runtime")
+#list(APPEND LINKER_LIBS "${TORCH_LIBRARIES}")
+
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR})
+
+# Hungarian variables
+list(APPEND HUNGARIAN_LIBS include/open_ptrack/hungarian/Hungarian.cpp)
+list(APPEND HUNGARIAN_LIBS include/open_ptrack/hungarian/Hungarian.h)
+
+# face-detecion variables
+list(APPEND DETECTION_LIBS include/open_ptrack/MTCNN/mtcnn_opencv.cpp)
+list(APPEND DETECTION_LIBS include/open_ptrack/FacePreprocess.h)
+list(APPEND DETECTION_LIBS include/open_ptrack/MTCNN/mtcnn_opencv.hpp)
+list(APPEND DETECTION_LIBS include/open_ptrack/RetinaFace/anchor_generator.cpp)
+list(APPEND DETECTION_LIBS include/open_ptrack/RetinaFace/anchor_generator.h)
+list(APPEND DETECTION_LIBS include/open_ptrack/RetinaFace/config.cpp)
+list(APPEND DETECTION_LIBS include/open_ptrack/RetinaFace/config.h)
+list(APPEND DETECTION_LIBS include/open_ptrack/RetinaFace/tools.cpp)
+list(APPEND DETECTION_LIBS include/open_ptrack/RetinaFace/tools.h)
+list(APPEND DETECTION_LIBS include/open_ptrack/RetinaFace/ulsMatF.h)
+list(APPEND DETECTION_LIBS include/FacePreprocess.h)
+list(APPEND DETECTION_LIBS include/facetracking.hpp)
+
+#tvm_runtime_pack.cc
+ADD_LIBRARY(facedetection
+        include/open_ptrack/hungarian/Hungarian.cpp
+        include/open_ptrack/hungarian/Hungarian.h
+        include/open_ptrack/FacePreprocess.h
+        include/open_ptrack/RetinaFace/anchor_generator.cpp
+        include/open_ptrack/RetinaFace/anchor_generator.h
+        include/open_ptrack/RetinaFace/config.cpp
+        include/open_ptrack/RetinaFace/config.h
+        include/open_ptrack/RetinaFace/tools.cpp
+        include/open_ptrack/RetinaFace/tools.h
+        include/open_ptrack/RetinaFace/ulsMatF.h
+        include/open_ptrack/facetracking.hpp)
+
+
+#ADD_LIBRARY(object_detection
+#        include/open_ptrack/yolo_tvm.hpp)
+
+message(STATUS LINKER_LIBS: "${LINKER_LIBS}")
+message(STATUS OPENCV_LIBS: "${OpenCV_LIBS}")
+
+# build the facedetection library
+
+#add_executable(face_detection_node apps/face_detection_node.cpp)
+add_executable(face_detection_node apps/face_detection_node.cpp include/open_ptrack/hungarian/Hungarian.cpp)
+target_link_libraries(face_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
+                                  ${catkin_LIBRARIES} 
+                      ${LINKER_LIBS} 
+                      facedetection 
+                          ${CUDA_CUDA_LIBRARY}
+                      ${CUDA_CUDART_LIBRARY}
+                      ${CUDA_CURAND_LIBRARY}
+                      ${CUDA_CUDNN_LIBRARY}
+                      ${TVM_RUNTIME_LINKER_LIBS})
+
+
+target_link_libraries(facedetection PUBLIC Threads::Threads ${OpenCV_LIBS}
+                                          ${catkin_LIBRARIES}
+                                          ${LINKER_LIBS}
+                                          ${CUDA_CUDA_LIBRARY}
+                                          ${CUDA_CUDART_LIBRARY}
+                                          ${CUDA_CURAND_LIBRARY}
+                                          ${CUDA_CUDNN_LIBRARY}
+                                          ${TVM_RUNTIME_LINKER_LIBS})
+
+
+add_dependencies(face_detection_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+target_include_directories(face_detection_node PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(face_detection_node PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(face_detection_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+
+#install(TARGETS facedetection
 add_executable(face_recognition_node apps/face_recognition_node.cpp)
 target_link_libraries(face_recognition_node ${OpenCV_LIBS} ${catkin_LIBRARIES})
 add_dependencies(face_recognition_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
@@ -56,3 +176,85 @@ add_dependencies(face_recognition_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_ge
 add_executable(map_generation_node apps/map_generation_node.cpp)
 target_link_libraries(map_generation_node ${OpenCV_LIBS} ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(map_generation_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+
+#add_executable(tvmtest apps/tvmtests.cpp)
+#target_link_libraries(face_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS}
+#                                          ${catkin_LIBRARIES}
+#                                          ${LINKER_LIBS}
+#                                          ${CUDA_CUDA_LIBRARY}
+#                                          ${CUDA_CUDART_LIBRARY}
+#                                          ${CUDA_CURAND_LIBRARY}
+#                                          ${CUDA_CUDNN_LIBRARY}
+#                                          ${TVM_RUNTIME_LINKER_LIBS}
+#				          ${TORCH_CXX_FLAGS})
+                  
+#add_dependencies(tvmtest ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+#target_include_directories(tvmtest PUBLIC ${CUDA_INCLUDE_DIRS})
+#target_compile_definitions(tvmtest PUBLIC TVM_CUDA_RUNTIME=1)
+#target_compile_definitions(tvmtest PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+
+
+
+add_executable(face_detection_extraction_node apps/face_detection_extraction_node.cpp include/open_ptrack/hungarian/Hungarian.cpp)
+target_link_libraries(face_detection_extraction_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
+                                  ${catkin_LIBRARIES} 
+                      ${LINKER_LIBS} 
+                      facedetection 
+                          ${CUDA_CUDA_LIBRARY}
+                      ${CUDA_CUDART_LIBRARY}
+                      ${CUDA_CURAND_LIBRARY}
+                      ${CUDA_CUDNN_LIBRARY}
+                      ${TVM_RUNTIME_LINKER_LIBS})
+
+add_dependencies(face_detection_extraction_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+target_include_directories(face_detection_extraction_node PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(face_detection_extraction_node PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(face_detection_extraction_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+
+
+
+#target_link_libraries(object_detection PUBLIC Threads::Threads ${OpenCV_LIBS}
+#                                          ${catkin_LIBRARIES}
+#                                          ${LINKER_LIBS}
+#                                          ${CUDA_CUDA_LIBRARY}
+#                                          ${CUDA_CUDART_LIBRARY}
+#                                          ${CUDA_CURAND_LIBRARY}
+#                                          ${CUDA_CUDNN_LIBRARY}
+#                                          ${TVM_RUNTIME_LINKER_LIBS}
+#                                          ${TORCH_LIBRARIES})
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+add_executable(tvm_detection_node apps/tvm_detection_node.cpp include/open_ptrack/yolo_tvm.hpp)
+target_link_libraries(tvm_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
+                                          ${catkin_LIBRARIES} 
+                                          ${LINKER_LIBS}
+                                          ${CUDA_CUDA_LIBRARY}
+                                          ${CUDA_CUDART_LIBRARY}
+                                          ${CUDA_CURAND_LIBRARY}
+                                          ${CUDA_CUDNN_LIBRARY}
+                                          ${TVM_RUNTIME_LINKER_LIBS}
+                                          ${TORCH_LIBRARIES})
+
+add_dependencies(tvm_detection_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+target_include_directories(tvm_detection_node PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(tvm_detection_node PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(tvm_detection_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+add_executable(debug_tvm_detection_node apps/debug_tvm_detection_node.cpp)
+target_link_libraries(debug_tvm_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS}
+                                          ${catkin_LIBRARIES}
+                                          ${LINKER_LIBS}
+                                          ${CUDA_CUDA_LIBRARY}
+                                          ${CUDA_CUDART_LIBRARY}
+                                          ${CUDA_CURAND_LIBRARY}
+                                          ${CUDA_CUDNN_LIBRARY}
+                                          ${TVM_RUNTIME_LINKER_LIBS}
+                                          ${TORCH_LIBRARIES})
+
+add_dependencies(debug_tvm_detection_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+target_include_directories(debug_tvm_detection_node PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(debug_tvm_detection_node PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(debug_tvm_detection_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1
