@@ -63,7 +63,7 @@
 #include <opt_msgs/IDArray.h>
 #include <opt_msgs/ObjectName.h>
 #include <opt_msgs/ObjectNameArray.h>
-
+#include <opt_msgs/Association.h>
 
 //#include <open_ptrack/opt_utils/ImageConverter.h>
 
@@ -95,6 +95,7 @@ ros::Publisher pointcloud_pub;
 ros::Publisher detection_marker_pub;
 ros::Publisher detection_trajectory_pub;
 ros::Publisher alive_ids_pub;
+ros::Publisher association_result_pub;
 size_t starting_index;
 size_t detection_insert_index;
 tf::Transform camera_frame_to_world_transform;
@@ -377,6 +378,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
 
 
       // Create a TrackingResult message with the output of the tracking process
+      opt_msgs::TrackArray::Ptr tracking_results_msg(new opt_msgs::TrackArray);
       if(output_tracking_results)
       {
         opt_msgs::TrackArray::Ptr tracking_results_msg(new opt_msgs::TrackArray);
@@ -425,6 +427,13 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
       alive_ids_msg->header.frame_id = world_frame_id;
       tracker_object->getAliveIDs (alive_ids_msg);
       alive_ids_pub.publish (alive_ids_msg);
+
+      // Publish the data assocition result:
+      opt_msgs::Association::Ptr association_msg(new opt_msgs::Association());
+      association_msg->header = msg->header;
+      tracker_object->getAssociationResult (association_msg);
+      association_msg->tracks = *tracking_results_msg;
+      association_result_pub.publish (association_msg);
 
       // Show the pose of each tracked object with a 3D marker (to be visualized with ROS RViz)
       if(output_markers)
@@ -624,7 +633,7 @@ main(int argc, char** argv)
   detection_marker_pub = nh.advertise<visualization_msgs::MarkerArray>("/detector/markers_array", 1);
   detection_trajectory_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGBA> >("/detector/history", 1);
   alive_ids_pub = nh.advertise<opt_msgs::IDArray>("/tracker/alive_ids", 1);
-
+  association_result_pub = nh.advertise<opt_msgs::Association>("/tracker/association_result", 1);
   // Dynamic reconfigure
   boost::recursive_mutex config_mutex_;
   boost::shared_ptr<ReconfigureServer> reconfigure_server_;
