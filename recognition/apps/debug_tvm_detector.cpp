@@ -1309,7 +1309,7 @@ private:
    */
   void json_cfg_callback(uint32_t level) {
     json model_config;
-    std::string hard_coded_path = "/config/detection_config.json";
+    std::string hard_coded_path = "/cfg/master.json";
     std::cout << "--- cfg_callback ---" << std::endl;
     std::string package_path = ros::package::getPath("recognition");
     std::string full_path = package_path + hard_coded_path;
