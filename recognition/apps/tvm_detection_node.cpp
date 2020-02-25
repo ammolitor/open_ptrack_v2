@@ -365,12 +365,23 @@ class TVMDetectionNode {
 };
 
 int main(int argc, char** argv) {
+  // read from master config
+  // perhaps even simply read from the config in the begining instead of 
+  // constantly polling the dynamic reconfigure? or do both?
+  // I dunno
+  std::string sensor_name;
+  json master_config;
+  std::string package_path = ros::package::getPath("recognition");
+  std::string master_hard_coded_path = package_path + "/cfg/master.json";
+  std::ifstream json_read(master_hard_coded_path);
+  json_read >> master_config;
+  sensor_name = master_config["sensor_name"]; //the path to the detector model file
+
   std::string sensor_name;
   std::cout << "--- tvm_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_detection_node");
   // something is off here... with the private namespace
-  ros::NodeHandle nh("~");
-  //nh.getParam("sensor_name", sensor_name);
+  ros::NodeHandle nh;
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   TVMDetectionNode node(nh, sensor_name);
