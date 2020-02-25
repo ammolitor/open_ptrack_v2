@@ -679,14 +679,22 @@ class FaceDetectionNode {
 };
 
 int main(int argc, char** argv) {
+
   std::string sensor_name;
   std::string detections_topic;
+  json master_config;
+  std::string package_path = ros::package::getPath("recognition");
+  std::string master_hard_coded_path = package_path + "/cfg/master.json";
+  std::ifstream json_read(master_hard_coded_path);
+  json_read >> master_config;
+  sensor_name = master_config["sensor_name"]; //the path to the detector model file
+  detections_topic = master_config["main_detections_topic"];
+
+
   std::cout << "--- face_detection_extraction_recognition_node ---" << std::endl;
   ros::init(argc, argv, "face_detection_extraction_recognition_node");
   //make sure this call is correct
-  ros::NodeHandle nh("~");
-  nh.getParam("sensor_name", sensor_name);
-  nh.getParam("detections_topic", detections_topic);
+  ros::NodeHandle nh;
 
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "detections_topic: " << detections_topic << std::endl;

@@ -1,0 +1,7 @@
+{
+    "sensor_name":           "d415",
+    "main_detections_topic": "/objects_detector/detections",
+    "hand_detections_topic": "/hand_detector/detections",
+    "face_detector_topic":   "/face_detector/detections",
+    "face_features_topic" :  "/face_feature_extractor/features"
+}
