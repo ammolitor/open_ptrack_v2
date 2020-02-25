@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Camera parameters -->
+  <arg name="sensor_id"               default="" />
+  <arg name="sensor_name"             default="d415" />
+  <arg name="detections_topic"        default="/detector/detections" />		    
+ 		  
+  <!-- Launch ground based people detection node -->
+   <node pkg="recognition" type="face_detection_extraction_node" name="face_detection_extraction_node_$(arg sensor_name)" output="screen" required="true">
+
+      <param name="sensor_name"             value="$(arg sensor_name)" />
+      <param name="detections_topic"        value="$(arg detections_topic)" />
+
+   </node>
+</launch>
+
+<!--
+# https://answers.ros.org/question/272171/error-while-loading-shared-libraries/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/nvidia/catkin_ws/src/incubator-tvm/build/libtvm_runtime.so
+copy libtvm_runtime to /usr/lib
+-->
