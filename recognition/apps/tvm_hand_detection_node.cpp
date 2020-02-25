@@ -86,17 +86,17 @@ float calc_median_of_object(const cv::Mat& Input){
 }
 
 /**
- * @brief The TVMDetectionNode
+ * @brief The TVMHandDetectionNode
  */
-class TVMDetectionNode {
+class TVMHandDetectionNode {
   private:
     ros::NodeHandle node_;
     //std::unique_ptr<YoloTVMGPU256> tvm_object_detector;
-    std::unique_ptr<YoloTVMGPU> tvm_object_detector;
+    std::unique_ptr<YoloTVMGPU320> tvm_object_detector;
     // TF listener
     tf::TransformListener tf_listener;
     // only need this if I need to debug
-    image_transport::ImageTransport image_transport;
+    //image_transport::ImageTransport image_transport;
     
     // ROS
     dynamic_reconfigure::Server<recognition::HandDetectionConfig> cfg_server;
@@ -146,7 +146,7 @@ class TVMDetectionNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMDetectionNode(ros::NodeHandle& nh, std::string sensor_string):
+    TVMHandDetectionNode(ros::NodeHandle& nh, std::string sensor_string):
       node_(nh)
       {
         // Publish Messages
@@ -157,18 +157,18 @@ class TVMDetectionNode {
         depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
         
         // Camera callback for intrinsics matrix update
-        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMDetectionNode::camera_info_callback, this);
+        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMHandDetectionNode::camera_info_callback, this);
 
         //Time sync policies for the subscribers
         approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(10), rgb_image_sub, depth_image_sub));
-        approximate_sync_->registerCallback(boost::bind(&TVMDetectionNode::callback, this, _1, _2));
+        approximate_sync_->registerCallback(boost::bind(&TVMHandDetectionNode::callback, this, _1, _2));
 
         // create callback config 
-        cfg_server.setCallback(boost::bind(&TVMDetectionNode::cfg_callback, this, _1, _2));      
+        cfg_server.setCallback(boost::bind(&TVMHandDetectionNode::cfg_callback, this, _1, _2));      
 
         // create object-detector pointer
         //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
-        tvm_object_detector.reset(new YoloTVMGPU(model_folder_path));
+        tvm_object_detector.reset(new YoloTVMGPU320(model_folder_path));
         sensor_name = sensor_string;
       }
 
@@ -202,11 +202,11 @@ class TVMDetectionNode {
 
       // set detection variables here
       yoloresults* output;
-      cv::Size image_size
-      float height
-      float width
-      ros::Time begin
-      double duration
+      cv::Size image_size;
+      float height;
+      float width;
+      ros::Time begin;
+      double duration;
 
       // set publication messages vars here
       // generate new detection array message with the header from the rbg image
@@ -366,15 +366,15 @@ class TVMDetectionNode {
 
 int main(int argc, char** argv) {
   std::string sensor_name;
-  std::cout << "--- tvm_detection_node ---" << std::endl;
-  ros::init(argc, argv, "tvm_detection_node");
+  std::cout << "--- tvm_hand_detection_node ---" << std::endl;
+  ros::init(argc, argv, "tvm_hand_detection_node");
   // something is off here... with the private namespace
   ros::NodeHandle nh("~");
   //nh.getParam("sensor_name", sensor_name);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMDetectionNode node(nh, sensor_name);
-  std::cout << "detection node init " << std::endl;
+  TVMHandDetectionNode node(nh, sensor_name);
+  std::cout << "hand detection node init " << std::endl;
   ros::spin();
   return 0;
 }

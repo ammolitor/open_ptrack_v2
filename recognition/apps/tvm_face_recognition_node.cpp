@@ -30,6 +30,17 @@
 #include <open_ptrack/recognition/nn/face_recognizer_nn.hpp>
 #include <open_ptrack/recognition/bayes/face_recognizer_bayes.hpp>
 
+
+inline float CosineDistance(const cv::Mat &v1, const cv::Mat &v2) {
+    /**
+     * This module is using to computing the cosine distance between input feature and ground truth feature
+     */
+    double dot = v1.dot(v2);
+    double denom_v1 = cv::norm(v1);
+    double denom_v2 = cv::norm(v2);
+    return dot / (denom_v1 * denom_v2);
+}
+
 /**
  * @brief The FaceRecognitionNode
  */
