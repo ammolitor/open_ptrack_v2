@@ -96,7 +96,7 @@ class TVMDetectionNode {
     // TF listener
     tf::TransformListener tf_listener;
     // only need this if I need to debug
-    image_transport::ImageTransport image_transport;
+    //image_transport::ImageTransport image_transport;
     
     // ROS
     dynamic_reconfigure::Server<recognition::GenDetectionConfig> cfg_server;
@@ -202,11 +202,11 @@ class TVMDetectionNode {
 
       // set detection variables here
       yoloresults* output;
-      cv::Size image_size
-      float height
-      float width
-      ros::Time begin
-      double duration
+      cv::Size image_size;
+      float height;
+      float width;
+      ros::Time begin;
+      double duration;
 
       // set publication messages vars here
       // generate new detection array message with the header from the rbg image
@@ -378,5 +378,3 @@ int main(int argc, char** argv) {
   ros::spin();
   return 0;
 }
-
-
