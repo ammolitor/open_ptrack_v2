@@ -338,7 +338,7 @@ class TVMDetectionNode {
       std::cout << "--- cfg_callback ---" << std::endl;
       std::string package_path = ros::package::getPath("recognition");
       std::cout << package_path << std::endl;
-      model_folder_path = package_path + config.model_folder_path; //the path to the face detector model file
+      model_folder_path = package_path + config.detector_path; //the path to the face detector model file
       std::cout << model_folder_path << std::endl;
       std::cout << "overwriting default model_folder_path" << std::endl;
       confidence_thresh = config.confidence_thresh; // the threshold for confidence of detection
@@ -352,14 +352,14 @@ class TVMDetectionNode {
      */
     void json_cfg_callback(uint32_t level) {
       json model_config;
-      std::string hard_coded_path = "/cfg/detection_config.json";
+      std::string hard_coded_path = "/cfg/master.json";
       std::cout << "--- detector cfg_callback ---" << std::endl;
       std::string package_path = ros::package::getPath("recognition");
       std::string full_path = package_path + hard_coded_path;
       std::ifstream json_read(full_path);
       json_read >> model_config;
 
-      model_folder_path = model_config["model_folder"]; //the path to the detector model file
+      model_folder_path = model_config["detector_path"]; //the path to the detector model file
       confidence_thresh = model_config["confidence_thresh"]; // the threshold for confidence of detection
     }
 };

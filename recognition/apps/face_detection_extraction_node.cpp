@@ -612,7 +612,7 @@ class FaceDetectionNode {
         std::cout << "--- cfg_callback ---" << std::endl;
         std::string package_path = ros::package::getPath("recognition");
         std::cout << package_path << std::endl;
-        detector_model_folder_path = package_path + config.model_folder_path; //the path to the face detector model file
+        detector_model_folder_path = package_path + config.face_detector_path; //the path to the face detector model file
         std::cout << detector_model_folder_path << std::endl;
 
         confidence_thresh = config.confidence_thresh; // the threshold for confidence of face detection
@@ -633,7 +633,7 @@ class FaceDetectionNode {
         std::cout << "--- cfg_callback ---" << std::endl;
         std::string package_path = ros::package::getPath("recognition");
         std::cout << package_path << std::endl;
-        embedder_model_folder_path = package_path + config.embedder_folder_path; //the path to the face detector model file
+        embedder_model_folder_path = package_path + config.embedder_path; //the path to the face detector model file
         std::cout << model_folder_path << std::endl;
     }
 
@@ -644,14 +644,14 @@ class FaceDetectionNode {
      */
     void json_cfg_callback_detector(uint32_t level) {
         json model_config;
-        std::string hard_coded_path = "/cfg/detection_config.json";
+        std::string hard_coded_path = "/cfg/master.json";
         std::cout << "--- detector cfg_callback ---" << std::endl;
         std::string package_path = ros::package::getPath("recognition");
         std::string full_path = package_path + hard_coded_path;
         std::ifstream json_read(full_path);
         json_read >> model_config;
 
-        detector_model_folder_path = model_config["model_folder"]; //the path to the face detector model file
+        detector_model_folder_path = model_config["face_detector_path"]; //the path to the face detector model file
         confidence_thresh = model_config["confidence_thresh"]; // the threshold for confidence of face detection
         roi_width = model_config["roi_width_"]; //the width of a face detection ROI in the world space [m]
         calc_roi_from_top = model_config["calc_roi_from_top"]; // if true, ROIs are calculated from the top positions of detected clusters
@@ -667,19 +667,19 @@ class FaceDetectionNode {
      */
     void json_cfg_callback_embedder(uint32_t level) {
         json model_config;
-        std::string hard_coded_path = "/cfg/embedder_config.json";
+        std::string hard_coded_path = "/cfg/master.json";
         std::cout << "--- embedder cfg_callback ---" << std::endl;
         std::string package_path = ros::package::getPath("recognition");
         std::string full_path = package_path + hard_coded_path;
         std::ifstream json_read(full_path);
         json_read >> model_config;
         // embbeder only needs the parameter folder
-        embedder_model_folder_path = model_config["model_folder"]; //the path to the face detector model file
+        embedder_model_folder_path = model_config["embedder_path"]; //the path to the face detector model file
     }
 };
 
 int main(int argc, char** argv) {
-
+  // read json parameters
   std::string sensor_name;
   std::string detections_topic;
   json master_config;
@@ -695,7 +695,6 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "face_detection_extraction_recognition_node");
   //make sure this call is correct
   ros::NodeHandle nh;
-
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "detections_topic: " << detections_topic << std::endl;
   std::cout << "nodehandle init " << std::endl; 
