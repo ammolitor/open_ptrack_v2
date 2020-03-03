@@ -1,6 +1,6 @@
 <launch>
 
-  <!-- Load calibration results -->
+  <!-- Load calibration results - cant test code without the opt_calibration_results file -->
   <include file="$(find opt_calibration)/launch/opt_calibration_results.launch"/>
 
   <!-- Calibration refinement -->
