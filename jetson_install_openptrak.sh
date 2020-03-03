@@ -136,6 +136,20 @@ ${APT_CMD} install \
 
 ${APT_CMD} purge libeigen3-dev || true
 
+echo "#########################################################################"
+echo "# install eigen to most updated version                                 #"
+echo "#########################################################################"
+# https://github.com/eigenteam/eigen-git-mirror/blob/master/INSTALL
+mkdir -p ${INSTALL_SRC}/eigen
+pushd ${INSTALL_SRC}/eigen || pushd_fail
+git clone https://github.com/eigenteam/eigen-git-mirror .
+mkdir -p build
+pushd build || pushd_fail
+cmake ..
+sudo make install -j"${NPROC}"
+popd || popd_fail
+popd || popd_fail
+
 pip install requests numpy pyyaml
 pip3 install cython  # this is by itself on purpose (numpy needs it and I
                      # dont trust pip to install them in the right order)
@@ -173,20 +187,6 @@ echo "#########################################################################"
 mkdir -p ${CATKIN_SRC}/iai_kinect2
 pushd ${CATKIN_SRC}/iai_kinect2 || pushd_fail
 git clone https://github.com/code-iai/iai_kinect2.git .
-popd || popd_fail
-
-echo "#########################################################################"
-echo "# install eigen to most updated version                                 #"
-echo "#########################################################################"
-# https://github.com/eigenteam/eigen-git-mirror/blob/master/INSTALL
-mkdir -p ${INSTALL_SRC}/eigen
-pushd ${INSTALL_SRC}/eigen || pushd_fail
-git clone https://github.com/eigenteam/eigen-git-mirror .
-mkdir -p build
-pushd build || pushd_fail
-cmake ..
-sudo make install -j"${NPROC}"
-popd || popd_fail
 popd || popd_fail
 
 echo "#########################################################################"
@@ -282,18 +282,33 @@ python3 setup.py install --user
 popd || popd_fail
 popd || popd_fail
 
+#echo "#########################################################################"
+#echo "# install pytorch and pytorch deps                                      #"
+#echo "#########################################################################"
+#mkdir -p ${INSTALL_SRC}/pytorch
+#pushd ${INSTALL_SRC}/pytorch || pushd_fail
+# https://github.com/pytorch/pytorch#from-source
+# https://devtalk.nvidia.com/default/topic/1049071/jetson-nano/pytorch-for-jetson-nano/
+#curl -L https://nvidia.box.com/shared/static/1v2cc4ro6zvsbu0p8h6qcuaqco1qcsif.whl -o torch-1.4.0-cp27-cp27mu-linux_aarch64.whl
+#pip install torch-1.4.0-cp27-cp27mu-linux_aarch64.whl
+
+#curl -L https://nvidia.box.com/shared/static/ncgzus5o23uck9i5oth2n8n06k340l6k.whl -o torch-1.4.0-cp36-cp36m-linux_aarch64.whl
+#pip3 install torch-1.4.0-cp36-cp36m-linux_aarch64.whl
+
 echo "#########################################################################"
 echo "# install pytorch and pytorch deps                                      #"
 echo "#########################################################################"
 mkdir -p ${INSTALL_SRC}/pytorch
 pushd ${INSTALL_SRC}/pytorch || pushd_fail
-# https://github.com/pytorch/pytorch#from-source
-# https://devtalk.nvidia.com/default/topic/1049071/jetson-nano/pytorch-for-jetson-nano/
-curl -L https://nvidia.box.com/shared/static/1v2cc4ro6zvsbu0p8h6qcuaqco1qcsif.whl -o torch-1.4.0-cp27-cp27mu-linux_aarch64.whl
-pip install torch-1.4.0-cp27-cp27mu-linux_aarch64.whl
+git clone --recursive https://github.com/pytorch/pytorch .
+git submodule sync
+git submodule update --init --recursive
+# python3 setup.py install
+python3 setup.py install
+# i think we have to copy the directories to use
+popd || popd_fail
 
-curl -L https://nvidia.box.com/shared/static/ncgzus5o23uck9i5oth2n8n06k340l6k.whl -o torch-1.4.0-cp36-cp36m-linux_aarch64.whl
-pip3 install torch-1.4.0-cp36-cp36m-linux_aarch64.whl
+
 
 echo "#########################################################################"
 echo "# openptrack deps and clone necessary deps                               #"
@@ -337,6 +352,9 @@ echo "#########################################################################"
 ${APT_CMD} install ros-melodic-rqt-common-plugins \
   ros-melodic-camera-calibration \
   libcanberra-gtk-module
+
+
+
 pushd ${CATKIN_WS} || pushd_fail
 . /opt/ros/melodic/setup.bash
 rosdep install -y -r --from-paths .
