@@ -72,8 +72,6 @@ echo " install opencv and as many apt/ python installs as possible            #"
 echo "#########################################################################"
 ${APT_CMD} purge libopencv || true
 
-${APT_CMD} remove update-manager || true
-
 ${APT_CMD} install \
   build-essential \
   cmake \
