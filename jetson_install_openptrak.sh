@@ -315,7 +315,7 @@ echo "# openptrack deps and clone necessary deps                               #
 echo "#########################################################################"
 mkdir -p ${CATKIN_SRC}/open_ptrack
 pushd ${CATKIN_SRC}/open_ptrack || pushd_fail
-git clone --branch 1804 https://github.com/ammolitor/open_ptrack_v2 .
+git clone https://github.com/ammolitor/open_ptrack_v2 .
 curl -kL https://pjreddie.com/media/files/yolo.weights -o ${CATKIN_SRC}/open_ptrack/yolo_detector/darknet_opt/coco.weights
 sudo cp -r /usr/local/include/eigen3 /usr/include/eigen3
 popd || popd_fail
