@@ -183,6 +183,10 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::computeFromTF (tf::Transf
   return ground_coeffs;
 }
 
+
+
+// THIS IS WHERE THE MAGIC HAPPENS, 
+// WE TRANSFORM ALL POINTCLOUD POINTS RESPECTIVE TO THE WORLD VIEW
 template <typename PointT> tf::Transform
 open_ptrack::detection::GroundplaneEstimation<PointT>::readTFFromFile (std::string filename, std::string camera_name)
 {
@@ -211,6 +215,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::readTFFromFile (std::stri
 
   return worldToCamTransform;
 }
+
 
 
 void checkBoundary(cv::Rect cropRect, cv::Mat img){
@@ -391,6 +396,77 @@ cv::Rect open_ptrack::detection::GroundplaneEstimation<PointT>::compute_new ()
   return rect; 
 }
 
+
+template <typename PointT> Eigen::VectorXf
+open_ptrack::detection::GroundplaneEstimation<PointT>::computeAreaFromTF (tf::Transform worldToCamTransform)
+{
+  // Select 3 points in world reference frame:
+  pcl::PointCloud<pcl::PointXYZ>::Ptr ground_points (new pcl::PointCloud<pcl::PointXYZ>);
+  ground_points->points.push_back(pcl::PointXYZ(0.0, 0.0, 0.0));
+  ground_points->points.push_back(pcl::PointXYZ(1.0, 0.0, 0.0));
+  ground_points->points.push_back(pcl::PointXYZ(0.0, 1.0, 0.0));
+
+  // Transform points to camera reference frame:
+  for (unsigned int i = 0; i < ground_points->points.size(); i++)
+  {
+    tf::Vector3 current_point(ground_points->points[i].x, ground_points->points[i].y, ground_points->points[i].z);
+    current_point = worldToCamTransform(current_point);
+    ground_points->points[i].x = current_point.x();
+    ground_points->points[i].y = current_point.y();
+    ground_points->points[i].z = current_point.z();
+  }
+
+  // Compute ground equation:
+  std::vector<int> ground_points_indices;
+  for (unsigned int i = 0; i < ground_points->points.size(); i++)
+    ground_points_indices.push_back(i);
+  pcl::SampleConsensusModelPlane<pcl::PointXYZ> model_plane(ground_points);
+  Eigen::VectorXf ground_coeffs;
+  model_plane.computeModelCoefficients(ground_points_indices,ground_coeffs);
+  std::cout << "Ground plane coefficients obtained from calibration: " << ground_coeffs(0) << ", " << ground_coeffs(1) << ", " << ground_coeffs(2) <<
+      ", " << ground_coeffs(3) << "." << std::endl;
+
+  return ground_coeffs;
+}
+
+cv::Rect open_ptrack::detection::GroundplaneEstimation<PointT>::computeNewMulticamera (bool ground_from_extrinsic_calibration, bool read_ground_from_file,
+    std::string pointcloud_topic, int sampling_factor, float voxel_size)
+{
+  cv::Rect area_of_interest;
+  area_of_interest = compute();
+
+  std::string frame_id = cloud_->header.frame_id;
+  if (strcmp(frame_id.substr(0,1).c_str(), "/") == 0)
+  {
+    frame_id = frame_id.substr(1, frame_id.length()-1);
+  }
+
+  // If manual ground plane selection, save the result to file:
+  //if (ground_estimation_mode_ == 0)
+  //{
+  std::ofstream area_file;
+  area_file.open ((ros::package::getPath("detection") + "/conf/area_" + frame_id + ".txt").c_str());
+  area_file << "x" << area_of_interest.x << "y" << area_of_interest.y;
+  area_file << "width" << area_of_interest.width << "height" << area_of_interest.height;
+  //area_file << area_of_interest;
+  area_file.close();
+  std::cout << "Area plane saved to " << ros::package::getPath("detection") + "/conf/area_" + frame_id + ".txt" << std::endl;
+  //}
+  
+  
+  // CREATE WORLDTOSINK TRANSFORM USING THE BLEOW GUIDE
+  // Read worldToCam transform from file:
+  std::string filename = ros::package::getPath("detection") + "/launch/camera_poses.txt";
+  tf::Transform worldToCamTransform = readTFFromFile (filename, camera_name);
+
+  // Compute ground coeffs from world to camera transform:
+  Eigen::VectorXf ground_coeffs_calib = computeAreaFromTF (worldToCamTransform);
+  
+  
+  
+  
+  return area_of_interest;
+}
 
 
 
