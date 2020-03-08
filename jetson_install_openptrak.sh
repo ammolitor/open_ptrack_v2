@@ -52,6 +52,8 @@ pick_your_blaster() {
   fi
 }
 
+pick_your_blaster "openblas"
+
 NPROC=$(nproc)
 IP_ADDR=$(ip addr show eth0 | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
 HOSTNAME=$(hostname -s)
@@ -70,7 +72,8 @@ pushd ${INSTALL_ROOT} || pushd_fail
 echo "#########################################################################"
 echo " install opencv and as many apt/ python installs as possible            #"
 echo "#########################################################################"
-${APT_CMD} purge libopencv || true
+${APT_CMD} purge libopencv\* || true
+${APT_CMD} autoremove || true
 
 ${APT_CMD} install \
   build-essential \
@@ -104,6 +107,7 @@ ${APT_CMD} install \
   libleveldb-dev \
   liblmdb-dev \
   libopenblas-base \
+  libopenblas-dev \
   libopenni2-dev \
   libpcl-dev \
   libpng-dev \
@@ -280,33 +284,17 @@ python3 setup.py install --user
 popd || popd_fail
 popd || popd_fail
 
-#echo "#########################################################################"
-#echo "# install pytorch and pytorch deps                                      #"
-#echo "#########################################################################"
-#mkdir -p ${INSTALL_SRC}/pytorch
-#pushd ${INSTALL_SRC}/pytorch || pushd_fail
-# https://github.com/pytorch/pytorch#from-source
-# https://devtalk.nvidia.com/default/topic/1049071/jetson-nano/pytorch-for-jetson-nano/
-#curl -L https://nvidia.box.com/shared/static/1v2cc4ro6zvsbu0p8h6qcuaqco1qcsif.whl -o torch-1.4.0-cp27-cp27mu-linux_aarch64.whl
-#pip install torch-1.4.0-cp27-cp27mu-linux_aarch64.whl
-
-#curl -L https://nvidia.box.com/shared/static/ncgzus5o23uck9i5oth2n8n06k340l6k.whl -o torch-1.4.0-cp36-cp36m-linux_aarch64.whl
-#pip3 install torch-1.4.0-cp36-cp36m-linux_aarch64.whl
-
 echo "#########################################################################"
 echo "# install pytorch and pytorch deps                                      #"
 echo "#########################################################################"
 mkdir -p ${INSTALL_SRC}/pytorch
 pushd ${INSTALL_SRC}/pytorch || pushd_fail
-git clone --recursive https://github.com/pytorch/pytorch .
+git clone --branch v1.4.0 --recursive https://github.com/pytorch/pytorch .
 git submodule sync
 git submodule update --init --recursive
-# python3 setup.py install
-python3 setup.py install
+python setup.py install
 # i think we have to copy the directories to use
 popd || popd_fail
-
-
 
 echo "#########################################################################"
 echo "# openptrack deps and clone necessary deps                               #"
@@ -350,8 +338,6 @@ echo "#########################################################################"
 ${APT_CMD} install ros-melodic-rqt-common-plugins \
   ros-melodic-camera-calibration \
   libcanberra-gtk-module
-
-
 
 pushd ${CATKIN_WS} || pushd_fail
 . /opt/ros/melodic/setup.bash
