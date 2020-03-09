@@ -50,9 +50,14 @@ pick_your_blaster() {
     sudo update-alternatives --set liblapack.so-aarch64-linux-gnu /usr/lib/aarch64-linux-gnu/openblas/liblapack.so
     sudo update-alternatives --set liblapack.so.3-aarch64-linux-gnu /usr/lib/aarch64-linux-gnu/openblas/liblapack.so.3
   fi
-}
 
-pick_your_blaster "openblas"
+  if [ "${1}" == "auto" ]; then
+    sudo update-alternatives --auto libblas.so-aarch65-linux-gnu
+    sudo update-alternatives --auto libblas.so.4-aarch64-linux-gnu
+    sudo update-alternatives --auto liblapack.so-aarch65-linux-gnu
+    sudo update-alternatives --auto liblapack.so.4-aarch64-linux-gnu
+  fi
+}
 
 NPROC=$(nproc)
 IP_ADDR=$(ip addr show eth0 | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
@@ -72,7 +77,6 @@ pushd ${INSTALL_ROOT} || pushd_fail
 echo "#########################################################################"
 echo " install opencv and as many apt/ python installs as possible            #"
 echo "#########################################################################"
-${APT_CMD} purge libopencv\* || true
 ${APT_CMD} autoremove || true
 
 ${APT_CMD} install \
@@ -87,10 +91,6 @@ ${APT_CMD} install \
   gnuplot-x11 \
   imagemagick \
   ipython \
-  libatlas-base-dev \
-  libatlas3-base \
-  libblas-dev \
-  libblas3 \
   libboost-all-dev \
   libedit-dev \
   libfftw3-dev \
@@ -106,8 +106,6 @@ ${APT_CMD} install \
   liblapack3 \
   libleveldb-dev \
   liblmdb-dev \
-  libopenblas-base \
-  libopenblas-dev \
   libopenni2-dev \
   libpcl-dev \
   libpng-dev \
@@ -125,18 +123,33 @@ ${APT_CMD} install \
   libzmq3-dev \
   ncurses-dev \
   ninja-build \
+  nlohmann-json-dev \
   ntp \
   pkg-config \
   protobuf-compiler \
   python-pip \
   python-qt4 \
   python3-pip \
+  python3-numpy \
+  python3-opencv \
   software-properties-common \
   sox \
+  tree \
+  tig \
   unzip \
   zlib1g-dev
 
+${APT_CMD} install \
+  libatlas3-base \
+  libatlas-base-dev \
+  libblas3 \
+  libblas-dev \
+  libopenblas-base \
+  libopenblas-dev
+
 ${APT_CMD} purge libeigen3-dev || true
+
+# pick_your_blaster "openblas"
 
 echo "#########################################################################"
 echo "# install eigen to most updated version                                 #"
@@ -205,42 +218,6 @@ pushd build || pushd_fail
 cmake .. -DCMAKE_INSTALL_PREFIX=/opt/freenect2
 make -j"${NPROC}"
 sudo make install -j"${NPROC}"
-popd || popd_fail
-popd || popd_fail
-
-echo "#########################################################################"
-echo "# install opencv to most updated version                                #"
-echo "#########################################################################"
-# https://github.com/eigenteam/eigen-git-mirror/blob/master/INSTALL
-mkdir -p ${INSTALL_SRC}/opencv
-mkdir -p ${INSTALL_SRC}/opencv_contrib
-export OPENCV_CONTRIB_PATH="${INSTALL_SRC}/opencv_contrib"
-git clone https://github.com/opencv/opencv.git ${INSTALL_SRC}/opencv
-git clone https://github.com/opencv/opencv_contrib.git ${OPENCV_CONTRIB_PATH}
-pushd ${INSTALL_SRC}/opencv || pushd_fail
-mkdir -p build
-pushd build || pushd_fail
-# not sure if this will work, but we'll see
-cmake -D CMAKE_BUILD_TYPE=RELEASE \
-  -D CMAKE_INSTALL_PREFIX=/usr/local \
-  -D INSTALL_C_EXAMPLES=OFF \
-  -D INSTALL_PYTHON_EXAMPLES=ON \
-  -D BUILD_EXAMPLES=ON \
-  -D PYTHON3_EXECUTABLE="$(command -v python3)" \
-  -D PYTHON_INCLUDE_DIR="$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")" \
-  -D PYTHON_INCLUDE_DIR2="$(python3 -c "from os.path import dirname; from distutils.sysconfig import get_config_h_filename; print(dirname(get_config_h_filename()))")" \
-  -D PYTHON_LIBRARY="$(python3 -c "from distutils.sysconfig import get_config_var;from os.path import dirname,join ; print(join(dirname(get_config_var('LIBPC')),get_config_var('LDLIBRARY')))")" \
-  -D PYTHON3_NUMPY_INCLUDE_DIRS="$(python3 -c "import numpy; print(numpy.get_include())")" \
-  -D PYTHON3_PACKAGES_PATH="$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")" \
-  -D PYTHON2_EXECUTABLE="$(command -v python2)" \
-  -D PYTHON2_INCLUDE_DIR="$(python2 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")" \
-  -D PYTHON2_INCLUDE_DIR2="$(python2 -c "from os.path import dirname; from distutils.sysconfig import get_config_h_filename; print(dirname(get_config_h_filename()))")" \
-  -D PYTHON_LIBRARY="$(python2 -c "from distutils.sysconfig import get_config_var;from os.path import dirname,join ; print(join(dirname(get_config_var('LIBPC')),get_config_var('LDLIBRARY')))")" \
-  -D PYTHON2_NUMPY_INCLUDE_DIRS="$(python2 -c "import numpy; print(numpy.get_include())")" \
-  -D PYTHON2_PACKAGES_PATH="$(python2 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")" \
-  -D OPENCV_EXTRA_MODULES_PATH=${OPENCV_CONTRIB_PATH}/modules ..
-make -j"${NPROC}"
-# sudo make install -j"${NPROC}"
 popd || popd_fail
 popd || popd_fail
 
@@ -318,6 +295,7 @@ ${APT_CMD} install python-rosdep \
   ros-melodic-compressed-depth-image-transport \
   ros-melodic-compressed-image-transport \
   ros-melodic-cv-bridge \
+  ros-melodic-driver-base \
   ros-melodic-rgbd-launch \
   ros-melodic-rqt-common-plugins \
   ros-melodic-rviz
@@ -342,7 +320,7 @@ ${APT_CMD} install ros-melodic-rqt-common-plugins \
 pushd ${CATKIN_WS} || pushd_fail
 . /opt/ros/melodic/setup.bash
 rosdep install -y -r --from-paths .
-export ROS_PARALLEL_JOBS="-j1 -l1"
+# export ROS_PARALLEL_JOBS="-j1 -l1"  # for debugging catkin_make errors
 catkin_make
 popd || popd_fail
 
