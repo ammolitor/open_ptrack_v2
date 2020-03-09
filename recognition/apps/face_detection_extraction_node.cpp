@@ -42,6 +42,8 @@
 #include <std_msgs/Float32MultiArray.h>
 
 #include <dynamic_reconfigure/server.h>
+#include <recognition/FaceDetectionConfig.h>
+#include <recognition/FaceEmbeddingConfig.h>
 
 #include <open_ptrack/hungarian/Hungarian.h>
 #include <open_ptrack/facetracking.hpp>

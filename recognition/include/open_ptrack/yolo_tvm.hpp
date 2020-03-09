@@ -1018,7 +1018,7 @@ class YoloTVMCPUNoTorch{
         static constexpr int64_t deploy_tvm_id_and_score_size[deploy_out_ndim] = {1, 100, 1};
         static constexpr int64_t deploy_tvm_box_size[deploy_out_ndim] = {1, 100, 4};    
 
-        YoloTVMCPU(std::string model_folder) {
+        YoloTVMCPUNoTorch(std::string model_folder) {
             // tvm module for compiled functions
             tvm::runtime::Module mod_syslib = tvm::runtime::Module::LoadFromFile(model_folder + "/deploy_lib_cpu.so");
             // json graph
