@@ -196,7 +196,7 @@ class FaceDetectionNode {
     
     //image specific
     tf::TransformListener tf_listener;
-    image_transport::ImageTransport image_transport;
+    //image_transport::ImageTransport image_transport;
     
     // ROS SERVERS
     dynamic_reconfigure::Server<recognition::FaceDetectionConfig> detector_cfg_server;
