@@ -1,8 +1,3 @@
-/*
- * Created on Tue Apr 16 2019
- * Author: EpsAvlc
- */
-
 #include <mutex>
 #include <memory>
 #include <fstream>
@@ -40,13 +35,18 @@
 #include <image_transport/subscriber_filter.h>
 
 #include <opt_msgs/DetectionArray.h>
-#include <opt_msgs/TrackArray.h>
-#include <opt_msgs/Association.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
+#include <opt_msgs/TrackArray.h>
+#include <opt_msgs/Association.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
+
+#include <dynamic_reconfigure/server.h>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 
 #include <pcl/segmentation/organized_multi_plane_segmentation.h>
@@ -67,16 +67,10 @@
 
 
 
-#include <dynamic_reconfigure/server.h>
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/console/time.h>
 #include <pcl/filters/passthrough.h>
-
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 typedef sensor_msgs::Image Image;
@@ -84,7 +78,8 @@ typedef sensor_msgs::CameraInfo CameraInfo;
 using namespace message_filters::sync_policies;
 using namespace std;
 using namespace cv;
-
+using namespace std;
+using namespace cv;
 typedef pcl::PointXYZRGB PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT> PointCloud;
@@ -121,6 +116,9 @@ tf::Transform readTFFromFile(std::string filename, std::string camera_name)
   return worldToCamTransform;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // positions pointer
 struct callback_args_image {
   cv::Point P1;
@@ -130,8 +128,6 @@ struct callback_args_image {
   bool selection_finished;
   std::vector<cv::Point> clicked_points_2d;
 };
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void box_cb(int event, int x, int y, int flags, void* args)
 {
@@ -196,35 +192,20 @@ void box_cb(int event, int x, int y, int flags, void* args)
   }
 }
 
-//void
-//cameraInfoCallback (const sensor_msgs::CameraInfo::ConstPtr & msg)
-//{
-//  if (!intrinsics_already_set)
-//  {
-//    intrinsics_matrix << msg->K.elems[0], msg->K.elems[1], msg->K.elems[2],
-//        msg->K.elems[3], msg->K.elems[4], msg->K.elems[5],
-//        msg->K.elems[6], msg->K.elems[7], msg->K.elems[8];
-//    intrinsics_already_set = true;
-//  }
-//}
-
 /**
  * @brief The AreaDefinitionNode
  */
 class AreaDefinitionNode {
   private:
     ros::NodeHandle node_;
-    //(new PointCloudT);
-    bool new_cloud_available_flag = false;
-    //sensor_msgs::PointCloud2 msg_pointcloud;
     
     //image specific
     tf::TransformListener tf_listener;
-    //image_transport::ImageTransport image_transport;
-    ros::ServiceServer camera_info_matrix_server;
-    //ros::Subscriber sub = nh.subscribe(pointcloud_topic, 1, cloud_cb);
     tf::Transform worldToCamTransform;
-
+    //image_transport::ImageTransport image_transport;
+    //PointCloudT::Ptr cloud_;//(new PointCloudT);
+    //PointCloudT::Ptr cloud_(new PointCloudT);
+    bool new_cloud_available_flag = false;
     // Publishers
     ros::Publisher result_pub;
     ros::Publisher point_cloud_publish;
@@ -236,9 +217,9 @@ class AreaDefinitionNode {
     ros::Subscriber camera_info_sub;
     ros::Subscriber detector_sub;
     ros::Subscriber camera_info_matrix;
-    ros::Subscriber cloud_sub;
+    //ros::Subscriber cloud_sub;
 
-    // Message Filters
+      // Message Filters
     message_filters::Subscriber<sensor_msgs::Image> rgb_image_sub;
     message_filters::Subscriber<sensor_msgs::Image> depth_image_sub;
     //pcl cloud?????
@@ -248,7 +229,7 @@ class AreaDefinitionNode {
     message_filters::Subscriber<opt_msgs::TrackArray> tracks_sub;
     message_filters::Subscriber<opt_msgs::TrackArray> track_correction_sub;
     message_filters::Subscriber<opt_msgs::Association> association_sub;
-    
+    message_filters::Subscriber<PointCloudT> cloud_sub;
 
     // Time sync
     //detections_sub, hand_detections_sub, tracking_sub, tracks_sub, track_correction_sub
@@ -257,7 +238,7 @@ class AreaDefinitionNode {
     //boost::shared_ptr<ApproximateSync> approximate_sync_;
     
     //seconday sync??????
-    typedef ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> ImageApproximatePolicy;
+    typedef ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, PointCloudT> ImageApproximatePolicy;
     typedef message_filters::Synchronizer<ImageApproximatePolicy> ImageApproximateSync;
     boost::shared_ptr<ImageApproximateSync> image_approximate_sync_;
 
@@ -284,6 +265,7 @@ class AreaDefinitionNode {
     double _constant_y;
     vector<tf::Vector3> worldpoints;
     PointCloudT::Ptr cloud_;
+    //PointCloudT::Ptr cloud_(new PointCloudT);
     //pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_(new pcl::PointCloud<pcl::PointXYZRGB>);
     /**
      * @brief constructor
@@ -294,11 +276,9 @@ class AreaDefinitionNode {
     AreaDefinitionNode(ros::NodeHandle& nh, std::string sensor_string, std::string detections_topic):
         node_(nh)
     {
-      // initialize pointer cloud
+      //PointCloudT::Ptr cloud_(new PointCloudT);
       // Published Messages
       // TODO - what to publish, and where?????
-      PointCloudT::Ptr cloud_(new PointCloudT);
-      //pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_(new pcl::PointCloud<pcl::PointXYZRGB>);
       result_pub = node_.advertise<opt_msgs::DetectionArray>("/results/results", 3);
       point_cloud_publish = node_.advertise<sensor_msgs::PointCloud2>("detect_result_cloud", 1);
       image_pub = node_.advertise<sensor_msgs::Image>("image_result", 1);
@@ -311,14 +291,15 @@ class AreaDefinitionNode {
       tracks_sub.subscribe(node_, "/tracker/tracks_smoothed", 10);
       track_correction_sub.subscribe(node_, "/face_recognition/people_tracks", 10);
       association_sub.subscribe(node_, "/tracker/association_result", 10);
+      cloud_sub.subscribe(node_, sensor_string + "/depth_registered/points", 10);
 
       // get 
       camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &AreaDefinitionNode::camera_info_callback, this);
-      cloud_sub = node_.subscribe(sensor_string + "/depth_registered/points", 1, &AreaDefinitionNode::cloud_cb, this);
+      //cloud_sub = node_.subscribe(sensor_string + "/depth_registered/points", 1, &AreaDefinitionNode::cloud_cb, this);
 
       // camera time sync 
-      image_approximate_sync_.reset(new ImageApproximateSync(ImageApproximatePolicy(10), rgb_image_sub, depth_image_sub));
-      image_approximate_sync_->registerCallback(boost::bind(&AreaDefinitionNode::area_callback, this, _1, _2));
+      image_approximate_sync_.reset(new ImageApproximateSync(ImageApproximatePolicy(10), rgb_image_sub, depth_image_sub, cloud_sub));
+      image_approximate_sync_->registerCallback(boost::bind(&AreaDefinitionNode::area_callback, this, _1, _2, _3));
 
       // TODO - manage incoming detections
       //approximate_sync_.reset(new ApproximateSync(
@@ -326,7 +307,7 @@ class AreaDefinitionNode {
       //approximate_sync_->registerCallback(boost::bind(&AreaDefinitionNode::callback, this, _1, _2, _3, _4, _5));
   
       sensor_name = sensor_string;
-      
+
       // not sure of the exact structure of this..
       area_thres_["person"] = pair<double, double>(1.8, 0.5);
       //area_thres_["car"] = pair<double, double>(2.7, 1.8);
@@ -338,6 +319,7 @@ class AreaDefinitionNode {
     }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
+	//printf("running camera_info_callback\n");
         intrinsics_matrix << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
         cam_intrins_ << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1; 
         _cx = msg->K[2];
@@ -346,9 +328,10 @@ class AreaDefinitionNode {
         _constant_y = 1.0f /  msg->K[4];
         camera_info_available_flag = true;
     }
-
     void cloud_cb (const PointCloudT::ConstPtr& callback_cloud)
     {
+    printf("running cloud_cb\n");
+    PointCloudT::Ptr cloud_(new PointCloudT);
     *cloud_ = *callback_cloud;
 
     // single_camera_tracking_node_azure.launch sets depth_mode to NFOV_UNBINNED = 640x576.
@@ -379,14 +362,11 @@ class AreaDefinitionNode {
 
   private:
 
-
-
-
     vector<Point3f> clusterPoints(vector<Point3f>& points)
     {
-        cv::Mat labels;
-        cv::kmeans(points, 2,  labels, TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0), 3, KMEANS_PP_CENTERS);
-        
+        Mat labels;
+        cv::kmeans(points, 2,  labels,TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0), 3, KMEANS_PP_CENTERS);
+
         vector<Point3f> points_class[2];
         double z[2];
         for(int i = 0; i < points.size(); i++ )
@@ -494,7 +474,8 @@ class AreaDefinitionNode {
     }
 
   void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
-                     const sensor_msgs::Image::ConstPtr& depth_image) {
+                     const sensor_msgs::Image::ConstPtr& depth_image,
+		             const PointCloudT::ConstPtr& cloud_) {
     printf("running algorithm callback");
     //tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
     //tf_listener.lookupTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ir2rgb_transform);
@@ -502,13 +483,8 @@ class AreaDefinitionNode {
     tf_listener.lookupTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), world2rgb_transform);
 
     //std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud->header);
-    //rgb_image_ = pcl::PointCloud<pcl::RGB>::Ptr(new pcl::PointCloud<pcl::RGB>);
+
     sensor_msgs::PointCloud2 msg_pointcloud;
-
-
-    // no_ground_cloud_ = PointCloudPtr (new PointCloud);
-
-
     // transform to eigen
     tf::transformTFToEigen(world2rgb_transform, world2rgb);
     // open_ptrack::opt_utils::Conversions converter;
@@ -606,6 +582,7 @@ class AreaDefinitionNode {
     cv::Rect cropRect(0, 0, 0, 0);
     cv::Point P1(0, 0);
     cv::Point P2(0, 0);
+    //struct callback_args_image cb_args;
     callback_args_image cb_args;
     cb_args.clicked_points_2d = clicked_points_2d;
     cb_args.selection_finished = selection_finished;
@@ -673,6 +650,7 @@ class AreaDefinitionNode {
 
     // get the points w.r.t. 3d cloud
     vector<Point3f> points;
+    //vector<Point3f> worldpoints;
     vector<tf::Vector3> worldpoints;
     Point3f tmp;
     Point3f world_to_temp;
@@ -686,14 +664,16 @@ class AreaDefinitionNode {
             tmp.x = points_3d_in_cam(0, i);
             tmp.y = points_3d_in_cam(1, i);
             tmp.z = points_3d_in_cam(2, i);
-            // transform point here
-            world_to_temp.x =  static_cast<float>(tmp.x);
+
+	    world_to_temp.x =  static_cast<float>(tmp.x);
             world_to_temp.y =  static_cast<float>(tmp.y);
             world_to_temp.z =  static_cast<float>(tmp.z);
 
-            // this isn't working
             tf::Vector3 current_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
             current_point = worldToCamTransform(current_point);
+
+
+            // transform point here
 
             points.push_back(tmp);
             worldpoints.push_back(current_point);
@@ -746,13 +726,13 @@ class AreaDefinitionNode {
         cv::putText(src_img, loc_str, cv::Point(rect.x + 15, rect.y - 25), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
         }
 
-    cv::imshow("Displacement", src_img);
+    cv::imshow("disp", src_img);
     cv::waitKey(5);
 
     sensor_msgs::PointCloud2 out_cloud_ros;
     pcl::toROSMsg(*out_cloud, out_cloud_ros);
     out_cloud_ros.header.frame_id = "world";
-    out_cloud_ros.header.stamp =  cv_ptr_rgb->header.stamp;
+    out_cloud_ros.header.stamp = cv_ptr_rgb->header.stamp;
     point_cloud_publish.publish(out_cloud_ros);
 
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", src_img).toImageMsg();
@@ -775,8 +755,8 @@ int main(int argc, char** argv) {
   sensor_name = master_config["sensor_name"]; //the path to the detector model file
   detections_topic = master_config["main_detections_topic"];
 
-  std::cout << "--- face_detection_extraction_recognition_node ---" << std::endl;
-  ros::init(argc, argv, "face_detection_extraction_recognition_node");
+  std::cout << "--- area_node ---" << std::endl;
+  ros::init(argc, argv, "area_node");
   //make sure this call is correct
   ros::NodeHandle nh;
   std::cout << "sensor_name: " << sensor_name << std::endl;
