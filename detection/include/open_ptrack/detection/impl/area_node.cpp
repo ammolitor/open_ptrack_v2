@@ -257,7 +257,7 @@ class AreaDefinitionNode {
     //boost::shared_ptr<ApproximateSync> approximate_sync_;
     
     //seconday sync??????
-    typedef ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> ImageApproximatePolicy;
+    typedef ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::PointCloud2> ImageApproximatePolicy;
     typedef message_filters::Synchronizer<ImageApproximatePolicy> ImageApproximateSync;
     boost::shared_ptr<ImageApproximateSync> image_approximate_sync_;
 
@@ -309,10 +309,11 @@ class AreaDefinitionNode {
       tracks_sub.subscribe(node_, "/tracker/tracks_smoothed", 10);
       track_correction_sub.subscribe(node_, "/face_recognition/people_tracks", 10);
       association_sub.subscribe(node_, "/tracker/association_result", 10);
+      cloud_sub = node_.subscribe(sensor_string + "/depth_registered/points", 10);
 
       // get 
       camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &AreaDefinitionNode::camera_info_callback, this);
-      cloud_sub = node_.subscribe(sensor_string + "/depth_registered/points", 1, &AreaDefinitionNode::cloud_cb, this);
+      //cloud_sub = node_.subscribe(sensor_string + "/depth_registered/points", 1, &AreaDefinitionNode::cloud_cb, this);
 
       // camera time sync 
       image_approximate_sync_.reset(new ImageApproximateSync(ImageApproximatePolicy(10), rgb_image_sub, depth_image_sub));
@@ -347,6 +348,7 @@ class AreaDefinitionNode {
 
     void cloud_cb (const PointCloudT::ConstPtr& callback_cloud)
     {
+    PointCloudT::Ptr cloud_(new PointCloudT);
     *cloud_ = *callback_cloud;
 
     // single_camera_tracking_node_azure.launch sets depth_mode to NFOV_UNBINNED = 640x576.
@@ -492,7 +494,8 @@ class AreaDefinitionNode {
     }
 
   void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
-                     const sensor_msgs::Image::ConstPtr& depth_image) {
+                     const sensor_msgs::Image::ConstPtr& depth_image,
+                     const PointCloudT::ConstPtr& cloud_) {
     printf("running algorithm callback");
     //tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
     //tf_listener.lookupTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ir2rgb_transform);

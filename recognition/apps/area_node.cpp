@@ -284,6 +284,7 @@ class AreaDefinitionNode {
     double _constant_y;
     vector<tf::Vector3> worldpoints;
     PointCloudT::Ptr cloud_;
+    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_(new pcl::PointCloud<pcl::PointXYZRGB>);
     /**
      * @brief constructor
      * @param nh node handler
@@ -297,6 +298,7 @@ class AreaDefinitionNode {
       // Published Messages
       // TODO - what to publish, and where?????
       PointCloudT::Ptr cloud_(new PointCloudT);
+      //pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_(new pcl::PointCloud<pcl::PointXYZRGB>);
       result_pub = node_.advertise<opt_msgs::DetectionArray>("/results/results", 3);
       point_cloud_publish = node_.advertise<sensor_msgs::PointCloud2>("detect_result_cloud", 1);
       image_pub = node_.advertise<sensor_msgs::Image>("image_result", 1);

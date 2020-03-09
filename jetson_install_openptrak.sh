@@ -140,12 +140,12 @@ ${APT_CMD} install \
   zlib1g-dev
 
 ${APT_CMD} install \
-  libatlas3-base \
-  libatlas-base-dev \
   libblas3 \
   libblas-dev \
   libopenblas-base \
   libopenblas-dev
+  # libatlas3-base \
+  # libatlas-base-dev
 
 ${APT_CMD} purge libeigen3-dev || true
 
@@ -269,9 +269,11 @@ pushd ${INSTALL_SRC}/pytorch || pushd_fail
 git clone --branch v1.4.0 --recursive https://github.com/pytorch/pytorch .
 git submodule sync
 git submodule update --init --recursive
-python setup.py install
-# i think we have to copy the directories to use
+# USE_NCCL=0 USE_DISTRIBUTED=0 TORCH_CUDA_ARCH_LIST="5.3;6.2;7.2" python setup.py install
+USE_NCCL=0 USE_DISTRIBUTED=0 TORCH_CUDA_ARCH_LIST="5.3;6.2;7.2" python3 setup.py install
 popd || popd_fail
+
+
 
 echo "#########################################################################"
 echo "# openptrack deps and clone necessary deps                               #"
