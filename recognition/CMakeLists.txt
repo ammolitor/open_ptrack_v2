@@ -68,6 +68,9 @@ generate_dynamic_reconfigure_options(
     cfg/FaceFeatureExtraction.cfg
     cfg/FaceRecognition.cfg
     cfg/RecognitionVisualization.cfg
+    cfg/GenDetection.cfg
+    cfg/FaceEmbedding.cfg
+
 )
 
 catkin_package(
@@ -177,22 +180,6 @@ add_executable(map_generation_node apps/map_generation_node.cpp)
 target_link_libraries(map_generation_node ${OpenCV_LIBS} ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(map_generation_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 
-#add_executable(tvmtest apps/tvmtests.cpp)
-#target_link_libraries(face_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS}
-#                                          ${catkin_LIBRARIES}
-#                                          ${LINKER_LIBS}
-#                                          ${CUDA_CUDA_LIBRARY}
-#                                          ${CUDA_CUDART_LIBRARY}
-#                                          ${CUDA_CURAND_LIBRARY}
-#                                          ${CUDA_CUDNN_LIBRARY}
-#                                          ${TVM_RUNTIME_LINKER_LIBS}
-#				          ${TORCH_CXX_FLAGS})
-                  
-#add_dependencies(tvmtest ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-#target_include_directories(tvmtest PUBLIC ${CUDA_INCLUDE_DIRS})
-#target_compile_definitions(tvmtest PUBLIC TVM_CUDA_RUNTIME=1)
-#target_compile_definitions(tvmtest PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
-
 
 
 add_executable(face_detection_extraction_node apps/face_detection_extraction_node.cpp include/open_ptrack/hungarian/Hungarian.cpp)
@@ -211,17 +198,6 @@ target_include_directories(face_detection_extraction_node PUBLIC ${CUDA_INCLUDE_
 target_compile_definitions(face_detection_extraction_node PUBLIC TVM_CUDA_RUNTIME=1)
 target_compile_definitions(face_detection_extraction_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
-
-
-#target_link_libraries(object_detection PUBLIC Threads::Threads ${OpenCV_LIBS}
-#                                          ${catkin_LIBRARIES}
-#                                          ${LINKER_LIBS}
-#                                          ${CUDA_CUDA_LIBRARY}
-#                                          ${CUDA_CUDART_LIBRARY}
-#                                          ${CUDA_CURAND_LIBRARY}
-#                                          ${CUDA_CUDNN_LIBRARY}
-#                                          ${TVM_RUNTIME_LINKER_LIBS}
-#                                          ${TORCH_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 

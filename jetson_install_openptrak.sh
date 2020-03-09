@@ -84,8 +84,6 @@ ${APT_CMD} install \
   gnuplot-x11 \
   imagemagick \
   ipython \
-  libatlas-base-dev \
-  libatlas3-base \
   libblas-dev \
   libblas3 \
   libboost-all-dev \
@@ -131,6 +129,8 @@ ${APT_CMD} install \
   sox \
   unzip \
   zlib1g-dev
+  # libatlas-base-dev \
+  # libatlas3-base \
 
 ${APT_CMD} purge libeigen3-dev || true
 
@@ -236,7 +236,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
   -D PYTHON2_PACKAGES_PATH="$(python2 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")" \
   -D OPENCV_EXTRA_MODULES_PATH=${OPENCV_CONTRIB_PATH}/modules ..
 make -j"${NPROC}"
-# sudo make install -j"${NPROC}"
+make install -j"${NPROC}"
 popd || popd_fail
 popd || popd_fail
 
@@ -302,7 +302,7 @@ git clone --recursive https://github.com/pytorch/pytorch .
 git submodule sync
 git submodule update --init --recursive
 # python3 setup.py install
-python3 setup.py install
+USE_NCCL=0 USE_DISTRIBUTED=0 TORCH_CUDA_ARCH_LIST="5.3;6.2;7.2" python3 setup.py install
 # i think we have to copy the directories to use
 popd || popd_fail
 
@@ -313,7 +313,7 @@ echo "# openptrack deps and clone necessary deps                               #
 echo "#########################################################################"
 mkdir -p ${CATKIN_SRC}/open_ptrack
 pushd ${CATKIN_SRC}/open_ptrack || pushd_fail
-git clone --branch 1804 https://github.com/ammolitor/open_ptrack_v2 .
+git clone --branch matt-branch https://github.com/ammolitor/open_ptrack_v2 .
 curl -kL https://pjreddie.com/media/files/yolo.weights -o ${CATKIN_SRC}/open_ptrack/yolo_detector/darknet_opt/coco.weights
 sudo cp -r /usr/local/include/eigen3 /usr/include/eigen3
 popd || popd_fail
