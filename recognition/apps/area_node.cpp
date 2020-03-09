@@ -504,7 +504,7 @@ class AreaDefinitionNode {
     sensor_msgs::PointCloud2 msg_pointcloud;
 
 
-    no_ground_cloud_ = PointCloudPtr (new PointCloud);
+    // no_ground_cloud_ = PointCloudPtr (new PointCloud);
 
 
     // transform to eigen

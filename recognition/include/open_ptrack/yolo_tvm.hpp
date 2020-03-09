@@ -856,7 +856,7 @@ class TVMObjectDetectorGPU{
             cv::Mat resized_image;
             cv::Mat rgb;
             // bgr to rgb
-            cv::cvtColor(frame, rgb,  cv::COLOR_BGR2RG
+            cv::cvtColor(frame, rgb,  cv::COLOR_BGR2RGB);
             cv::resize(rgb, resized_image, new_size);
             cv::Mat resized_image_floats(new_size, CV_32FC3);
             // convert resized image to floats and normalize
@@ -1225,7 +1225,7 @@ class YoloTVMCPUNoTorch{
         static constexpr int64_t deploy_tvm_id_and_score_size[deploy_out_ndim] = {1, 100, 1};
         static constexpr int64_t deploy_tvm_box_size[deploy_out_ndim] = {1, 100, 4};    
 
-        YoloTVMCPU(std::string model_folder) {
+        YoloTVMCPUNoTorch(std::string model_folder) {
             // tvm module for compiled functions
             tvm::runtime::Module mod_syslib = tvm::runtime::Module::LoadFromFile(model_folder + "/deploy_lib_cpu.so");
             // json graph
@@ -1402,4 +1402,4 @@ class YoloTVMCPUNoTorch{
 
             return results;
     }
-};    
+};

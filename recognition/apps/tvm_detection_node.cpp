@@ -377,7 +377,6 @@ int main(int argc, char** argv) {
   json_read >> master_config;
   sensor_name = master_config["sensor_name"]; //the path to the detector model file
 
-  std::string sensor_name;
   std::cout << "--- tvm_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_detection_node");
   // something is off here... with the private namespace
