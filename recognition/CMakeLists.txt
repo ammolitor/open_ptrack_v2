@@ -65,11 +65,11 @@ generate_messages(DEPENDENCIES std_msgs sensor_msgs opt_msgs)
 
 generate_dynamic_reconfigure_options(
     cfg/FaceDetection.cfg
-    cfg/FaceEmbedding.cfg
     cfg/FaceFeatureExtraction.cfg
     cfg/FaceRecognition.cfg
-    cfg/GenDetection.cfg
     cfg/RecognitionVisualization.cfg
+    cfg/GenDetection.cfg
+    cfg/FaceEmbedding.cfg
 )
 
 catkin_package(
@@ -250,7 +250,7 @@ target_link_libraries(debug_tvm_detection_node PUBLIC Threads::Threads ${OpenCV_
 add_dependencies(debug_tvm_detection_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 target_include_directories(debug_tvm_detection_node PUBLIC ${CUDA_INCLUDE_DIRS})
 target_compile_definitions(debug_tvm_detection_node PUBLIC TVM_CUDA_RUNTIME=1)
-target_compile_definitions(debug_tvm_detection_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1
+target_compile_definitions(debug_tvm_detection_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
