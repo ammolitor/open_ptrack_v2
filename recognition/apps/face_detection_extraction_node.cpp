@@ -196,7 +196,7 @@ class FaceDetectionNode {
     
     //image specific
     tf::TransformListener tf_listener;
-    //image_transport::ImageTransport image_transport;
+    // image_transport::ImageTransport image_transport;
     
     // ROS SERVERS
     dynamic_reconfigure::Server<recognition::FaceDetectionConfig> detector_cfg_server;
@@ -285,7 +285,7 @@ class FaceDetectionNode {
 
       // face_detector and embedder callbacks
       detector_cfg_server.setCallback(boost::bind(&FaceDetectionNode::detector_cfg_callback, this, _1, _2));
-      embedding_cfg_server.setCallback(boost::bind(&FaceEmbeddingNode::embedder_cfg_callback, this, _1, _2));    
+      embedding_cfg_server.setCallback(boost::bind(&FaceDetectionNode::embedder_cfg_callback, this, _1, _2));
       //embedder_model_folder_path = "/home/nvidia/catkin_ws/src/open_ptrak/recognition/data/embedding_folder";
     
       // initialize detector and embedder
@@ -636,7 +636,7 @@ class FaceDetectionNode {
         std::string package_path = ros::package::getPath("recognition");
         std::cout << package_path << std::endl;
         embedder_model_folder_path = package_path + config.embedder_path; //the path to the face detector model file
-        std::cout << model_folder_path << std::endl;
+        std::cout << embedder_model_folder_path << std::endl;
     }
 
     // BOTH JSON CALLBACKS HAVEN'T BEEN USED YET

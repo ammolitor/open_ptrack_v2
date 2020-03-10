@@ -65,11 +65,12 @@ generate_messages(DEPENDENCIES std_msgs sensor_msgs opt_msgs)
 
 generate_dynamic_reconfigure_options(
     cfg/FaceDetection.cfg
+    cfg/FaceEmbedding.cfg
     cfg/FaceFeatureExtraction.cfg
     cfg/FaceRecognition.cfg
-    cfg/RecognitionVisualization.cfg
     cfg/GenDetection.cfg
-    cfg/FaceEmbedding.cfg
+    cfg/HandDetection.cfg
+    cfg/RecognitionVisualization.cfg
 )
 
 catkin_package(
