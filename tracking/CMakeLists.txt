@@ -44,6 +44,7 @@ catkin_package(
    LIBRARIES ${PROJECT_NAME}
    CATKIN_DEPENDS roscpp bayes opencv2 pcl_ros detection tf tf_conversions opt_msgs opt_utils message_filters
 )
+message(STATUS CURRENT_DIR: ${CMAKE_CURRENT_LIST_DIR})
 
 add_library(${PROJECT_NAME}
   src/munkres.cpp
@@ -59,25 +60,25 @@ add_library(${PROJECT_NAME}
   src/tracker_object.cpp
   )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencpp)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 
 
 add_executable(tracker apps/tracker_node.cpp)
 target_link_libraries(tracker ${PROJECT_NAME} ${catkin_LIBRARIES})
+add_dependencies(tracker ${PROJECT_NAME}_gencfg)
+
 add_executable(tracker_object apps/tracker_object_node.cpp)
 target_link_libraries(tracker_object ${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(tracker_object ${PROJECT_NAME}_gencfg)
+
 add_executable(tracker3d apps/tracker_node_3d.cpp)
 target_link_libraries(tracker3d ${PROJECT_NAME} ${catkin_LIBRARIES})
+add_dependencies(tracker3d ${PROJECT_NAME}_gencfg)
 
-add_executable(${PROJECT_NAME}_skeleton_tracker_node
-  apps/skeleton_tracker_node.cpp
-  )
-target_link_libraries(${PROJECT_NAME}_skeleton_tracker_node
-  ${PROJECT_NAME}
-  ${catkin_LIBRARIES}
- )
+add_executable(${PROJECT_NAME}_skeleton_tracker_node apps/skeleton_tracker_node.cpp)
+target_link_libraries(${PROJECT_NAME}_skeleton_tracker_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME}_skeleton_tracker_node ${PROJECT_NAME}_gencfg)
 
 add_executable(moving_average_filter apps/moving_average_filter_node.cpp)
-add_dependencies(moving_average_filter ${PROJECT_NAME}_gencfg)
 target_link_libraries(moving_average_filter ${PROJECT_NAME} ${catkin_LIBRARIES})
+add_dependencies(moving_average_filter ${PROJECT_NAME}_gencfg)
