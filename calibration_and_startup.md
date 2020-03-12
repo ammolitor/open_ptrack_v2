@@ -27,16 +27,15 @@ vim $(find /opt/catkin_ws -name rs_rgbd.launch)
 ```
 
 ### OPT LINKS
-https://github.com/KayneWest/open_ptrack_lite/tree/matt-branch
-https://github.com/OpenPTrack/open_ptrack_v2/wiki/Camera-Network-Calibration
-https://github.com/OpenPTrack/open_ptrack_v2/wiki/Calibration-in-Practice
-https://github.com/OpenPTrack/open_ptrack_v2/wiki/Calibration-Refinement-(Person-Based)
-https://github.com/OpenPTrack/open_ptrack_v2/wiki/Multi-Imager-Calibration-Refinement-(Manual)
-https://github.com/OpenPTrack/open_ptrack_v2/wiki/Manual-Ground-Plane
-https://github.com/OpenPTrack/open_ptrack_v2/wiki/Supported-Hardware
-https://github.com/OpenPTrack/open_ptrack_v2/wiki/Tested-Hardware
-https://github.com/OpenPTrack/open_ptrack_v2/wiki/Deployment-Guide
-https://github.com/OpenPTrack/open_ptrack_v2/wiki/Imager-Settings
+* https://github.com/OpenPTrack/open_ptrack_v2/wiki/Camera-Network-Calibration
+* https://github.com/OpenPTrack/open_ptrack_v2/wiki/Calibration-in-Practice
+* https://github.com/OpenPTrack/open_ptrack_v2/wiki/Calibration-Refinement-(Person-Based)
+* https://github.com/OpenPTrack/open_ptrack_v2/wiki/Multi-Imager-Calibration-Refinement-(Manual)
+* https://github.com/OpenPTrack/open_ptrack_v2/wiki/Manual-Ground-Plane
+* https://github.com/OpenPTrack/open_ptrack_v2/wiki/Supported-Hardware
+* https://github.com/OpenPTrack/open_ptrack_v2/wiki/Tested-Hardware
+* https://github.com/OpenPTrack/open_ptrack_v2/wiki/Deployment-Guide
+* https://github.com/OpenPTrack/open_ptrack_v2/wiki/Imager-Settings
 
 ## CALIBRATION
 * MASTER: `roscore`
