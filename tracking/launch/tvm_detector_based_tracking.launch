@@ -3,9 +3,11 @@
 <launch>
 
     <arg name="sensor_name" default="realsense_head" />
+    <arg name="enable_pointcloud" default="false" />
 
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
         <arg name="camera" value="$(arg sensor_name)" />
+        <arg name="enable_pointcloud" value="$(arg enable_pointcloud)" />
     </include>
     
     <include file="$(find recognition)/launch/tvm_detection_node.launch" output="screen">
