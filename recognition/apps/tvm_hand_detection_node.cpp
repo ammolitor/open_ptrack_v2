@@ -96,7 +96,7 @@ class TVMHandDetectionNode {
     // TF listener
     tf::TransformListener tf_listener;
     // only need this if I need to debug
-    //image_transport::ImageTransport image_transport;
+    //image_transport::ImageTransport it;
     
     // ROS
     dynamic_reconfigure::Server<recognition::HandDetectionConfig> cfg_server;
@@ -105,6 +105,7 @@ class TVMHandDetectionNode {
     // Publishers
     ros::Publisher detections_pub;
     //ros::Publisher image_pub;
+    image_transport::Publisher image_pub;
 
     // Subscribers
     ros::Subscriber rgb_sub;
@@ -141,13 +142,14 @@ class TVMHandDetectionNode {
     double _cy;
     double _constant_x;
     double _constant_y;
+    image_transport::ImageTransport it;
 
     /**
      * @brief constructor
      * @param nh node handler
      */
     TVMHandDetectionNode(ros::NodeHandle& nh, std::string sensor_string):
-      node_(nh)
+      node_(nh), it(node_)
       {
         // Publish Messages
         detections_pub = node_.advertise<opt_msgs::DetectionArray>("/hand_detector/detections", 3);
@@ -156,6 +158,8 @@ class TVMHandDetectionNode {
         rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
         depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
         
+        image_pub = it.advertise("/hand_detector/image", 1);
+
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMHandDetectionNode::camera_info_callback, this);
 
@@ -235,6 +239,7 @@ class TVMHandDetectionNode {
       image_size = cv_image.size();
       height =  static_cast<float>(image_size.height);
       width =  static_cast<float>(image_size.width);
+      cv::Mat cv_image_clone;
 
       // forward inference of object detector
       begin = ros::Time::now();
@@ -319,11 +324,19 @@ class TVMHandDetectionNode {
             
             detection_msg.object_name=object_name;            
             detection_array_msg->detections.push_back(detection_msg);
+
+            // sensor_msgs::ImagePtr image_msg_aligned = cv_bridge::CvImage(std_msgs::Header(), "bgr8", aligned_clone).toImageMsg();
+            cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
+            cv::putText(cv_image_clone, "hand", cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
+            // cv::imwrite("/home/nvidia/OUTPUTIMAGE.JPG", cv_image);
+
           }
         }
       }
     // this will publish empty detections if nothing is found
+    sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
     detections_pub.publish(detection_array_msg);
+    image_pub.publish(imagemsg);
     free(output->boxes);
     free(output);
     }
