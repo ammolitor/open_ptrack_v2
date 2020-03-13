@@ -295,8 +295,8 @@ class TVMDetectionNode {
         
             // defaults to sending the message
             bool send_message = true;
-            if people_only {
-              if label != 1.0 {
+            if (people_only) {
+              if (label != 1.0) {
                 send_message = false;
               }
             }
