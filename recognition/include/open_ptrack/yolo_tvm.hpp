@@ -791,9 +791,9 @@ class YoloTVMGPU{
                 ymax = ndarray_bboxes_a[0][i][3];
 
                 results->boxes[i].xmin = xmin * (img_width/512.0); // move down to 480 space  ()
-                results->boxes[i].ymin = ymin / (512.0/img_); // move up to 640
+                results->boxes[i].ymin = ymin / (512.0/img_height); // move up to 640
                 results->boxes[i].xmax = xmax * (img_width/512.0);
-                results->boxes[i].ymax = ymax / (512.0/img_);                
+                results->boxes[i].ymax = ymax / (512.0/img_height);                
 
                 //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space  ()
                 //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
