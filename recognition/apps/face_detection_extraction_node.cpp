@@ -270,7 +270,7 @@ class FaceDetectionNode {
       detector_pub_local = node_.advertise<opt_msgs::DetectionArray>("/face_detector/detections", 10);
       embedder_pub = node_.advertise<opt_msgs::FeatureVectorArray>("/face_feature_extractor/features", 10);
       embedder_pub_local = node_.advertise<opt_msgs::FeatureVectorArray>("/face_feature_extractor/features", 10);     
-      image_pub = it.advertise("/face_detector/image", 1);
+      image_pub = it.advertise(sensor_string + "/face_detector/image", 1);
       
       // not sure how to do this...
       //image_transport::ImageTransport it(nh);
