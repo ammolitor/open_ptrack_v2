@@ -297,7 +297,7 @@ class TVMDetectionNode {
             // defaults to sending the message
             bool send_message = true;
             if (people_only) {
-              if (label != 1.0) {
+              if (label > 0) { // above 0 == not-hawtdog.
                 send_message = false;
               }
             }
