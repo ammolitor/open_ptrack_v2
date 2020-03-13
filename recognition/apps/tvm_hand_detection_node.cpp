@@ -158,7 +158,7 @@ class TVMHandDetectionNode {
         rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
         depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
         
-        image_pub = it.advertise("/hand_detector/image", 1);
+        image_pub = it.advertise(sensor_string + "/hand_detector/image", 1);
 
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMHandDetectionNode::camera_info_callback, this);
