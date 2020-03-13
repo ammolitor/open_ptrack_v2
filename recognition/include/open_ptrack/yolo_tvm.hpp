@@ -308,10 +308,10 @@ class YoloTVMGPU256{
                 ymax = ndarray_bboxes_a[0][i][3];
 
 
-                results->boxes[i].xmin = xmin * (img_height/256.0); // move down to 480 space  ()
-                results->boxes[i].ymin = ymin / (256.0/img_width); // move up to 640
-                results->boxes[i].xmax = xmax * (img_height/256.0);
-                results->boxes[i].ymax = ymax / (256.0/img_width);  
+                results->boxes[i].xmin = xmin * (img_width/256.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (256.0/img_height); // move up to 640
+                results->boxes[i].xmax = xmax * (img_width/256.0);
+                results->boxes[i].ymax = ymax / (256.0/img_height);  
 
                 //results->boxes[i].xmin = xmin * (640.0/256.0); // move down to 480 space
                 //results->boxes[i].ymin = ymin / (256.0/480.0); // move up to 640
@@ -570,10 +570,10 @@ class YoloTVMGPU320{
                 ymax = ndarray_bboxes_a[0][i][3];
 
 
-                results->boxes[i].xmin = xmin * (img_height/320.0); // move down to 480 space  ()
-                results->boxes[i].ymin = ymin / (320.0/img_width); // move up to 640
-                results->boxes[i].xmax = xmax * (img_height/320.0);
-                results->boxes[i].ymax = ymax / (320.0/img_width);  
+                results->boxes[i].xmin = xmin * (img_width/320.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (320.0/img_height); // move up to 640
+                results->boxes[i].xmax = xmax * (img_width/320.0);
+                results->boxes[i].ymax = ymax / (320.0/img_height);  
 
                 //results->boxes[i].xmin = xmin * (640.0/320.0); // move down to 480 space
                 //results->boxes[i].ymin = ymin / (320.0/480.0); // move up to 640
@@ -790,10 +790,10 @@ class YoloTVMGPU{
                 xmax = ndarray_bboxes_a[0][i][2];
                 ymax = ndarray_bboxes_a[0][i][3];
 
-                results->boxes[i].xmin = xmin * (img_height/512.0); // move down to 480 space  ()
-                results->boxes[i].ymin = ymin / (512.0/img_width); // move up to 640
-                results->boxes[i].xmax = xmax * (img_height/512.0);
-                results->boxes[i].ymax = ymax / (512.0/img_width);                
+                results->boxes[i].xmin = xmin * (img_width/512.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (512.0/img_); // move up to 640
+                results->boxes[i].xmax = xmax * (img_width/512.0);
+                results->boxes[i].ymax = ymax / (512.0/img_);                
 
                 //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space  ()
                 //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
@@ -1001,10 +1001,10 @@ class YoloTVMCPU{
                 ymax = ndarray_bboxes_a[0][i][3];
 
 
-                results->boxes[i].xmin = xmin * (img_height/512.0); // move down to 480 space  ()
-                results->boxes[i].ymin = ymin / (512.0/img_width); // move up to 640
-                results->boxes[i].xmax = xmax * (img_height/512.0);
-                results->boxes[i].ymax = ymax / (512.0/img_width);  
+                results->boxes[i].xmin = xmin * (img_width/512.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (512.0/img_height); // move up to 640
+                results->boxes[i].xmax = xmax * (img_width/512.0);
+                results->boxes[i].ymax = ymax / (512.0/img_height);  
 
                 // int in_c = 3, in_h = 480, in_w = 640;
                 //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space
@@ -1216,10 +1216,10 @@ class YoloTVMCPUNoTorch{
                 ymax = ndarray_bboxes_a[0][i][3];
 
 
-                results->boxes[i].xmin = xmin * (img_height/512.0); // move down to 480 space  ()
-                results->boxes[i].ymin = ymin / (512.0/img_width); // move up to 640
-                results->boxes[i].xmax = xmax * (img_height/512.0);
-                results->boxes[i].ymax = ymax / (512.0/img_width);  
+                results->boxes[i].xmin = xmin * (img_width/512.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (512.0/img_height); // move up to 640
+                results->boxes[i].xmax = xmax * (img_width/512.0);
+                results->boxes[i].ymax = ymax / (512.0/img_height);  
 
                 // int in_c = 3, in_h = 480, in_w = 640;
                 //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space
