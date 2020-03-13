@@ -168,7 +168,7 @@ class YoloTVMGPU256{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            image_size = frame.size()
+            cv::Size image_size = frame.size();
             float img_height = static_cast<float>(image_size.height);
             float img_width = static_cast<float>(image_size.width);
 
@@ -430,7 +430,7 @@ class YoloTVMGPU320{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            image_size = frame.size()
+            cv::Size image_size = frame.size();
             float img_height = static_cast<float>(image_size.height);
             float img_width = static_cast<float>(image_size.width);
 
@@ -692,7 +692,7 @@ class YoloTVMGPU{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            image_size = frame.size()
+            cv::Size image_size = frame.size();
             float img_height = static_cast<float>(image_size.height);
             float img_width = static_cast<float>(image_size.width);
 
@@ -902,7 +902,7 @@ class YoloTVMCPU{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            image_size = frame.size()
+            cv::Size image_size = frame.size();
             float img_height = static_cast<float>(image_size.height);
             float img_width = static_cast<float>(image_size.width);
 
@@ -1115,7 +1115,7 @@ class YoloTVMCPUNoTorch{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            image_size = frame.size()
+            cv::Size image_size = frame.size();
             float img_height = static_cast<float>(image_size.height);
             float img_width = static_cast<float>(image_size.width);
 
