@@ -22,4 +22,4 @@ sudo apt purge -y snapd
 # delete the snap folder
 rm -rf snap
 
-sudo apt autoremove
+sudo apt -y autoremove
