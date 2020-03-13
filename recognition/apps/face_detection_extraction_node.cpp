@@ -196,7 +196,7 @@ class FaceDetectionNode {
     
     //image specific
     tf::TransformListener tf_listener;
-    image_transport::ImageTransport it;
+    //image_transport::ImageTransport it;
     
     // ROS SERVERS
     dynamic_reconfigure::Server<recognition::FaceDetectionConfig> detector_cfg_server;
@@ -255,6 +255,7 @@ class FaceDetectionNode {
     bool visualization; // viz or not to viz
 
   public:
+    image_transport::ImageTransport it;
     /**
      * @brief constructor
      * @param nh node handler

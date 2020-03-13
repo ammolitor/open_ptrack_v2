@@ -96,7 +96,7 @@ class TVMDetectionNode {
     // TF listener
     tf::TransformListener tf_listener;
     // only need this if I need to debug
-    image_transport::ImageTransport it;
+    //image_transport::ImageTransport it;
     
     // ROS
     dynamic_reconfigure::Server<recognition::GenDetectionConfig> cfg_server;
@@ -143,6 +143,7 @@ class TVMDetectionNode {
     double _constant_x;
     double _constant_y;
     bool people_only = true;
+    image_transport::ImageTransport it;
 
     /**
      * @brief constructor
