@@ -196,7 +196,7 @@ class FaceDetectionNode {
     
     //image specific
     tf::TransformListener tf_listener;
-    // image_transport::ImageTransport image_transport;
+    image_transport::ImageTransport it;
     
     // ROS SERVERS
     dynamic_reconfigure::Server<recognition::FaceDetectionConfig> detector_cfg_server;
@@ -261,14 +261,15 @@ class FaceDetectionNode {
      * @param detections_topic the name of the detections topic to subscribe to
      */
     FaceDetectionNode(ros::NodeHandle& nh, std::string sensor_string, std::string detections_topic):
-        node_(nh)
+        node_(nh), it(node_)
     {
       // Published Messages
       detector_pub = node_.advertise<opt_msgs::DetectionArray>("/face_detector/detections", 10);
       detector_pub_local = node_.advertise<opt_msgs::DetectionArray>("/face_detector/detections", 10);
       embedder_pub = node_.advertise<opt_msgs::FeatureVectorArray>("/face_feature_extractor/features", 10);
       embedder_pub_local = node_.advertise<opt_msgs::FeatureVectorArray>("/face_feature_extractor/features", 10);     
-
+      image_pub = it.advertise("/face_detector/image", 1);
+      
       // not sure how to do this...
       //image_transport::ImageTransport it(nh);
       //pub = it.advertise("yolo_object_detector/image", 1);
@@ -407,6 +408,7 @@ class FaceDetectionNode {
       // set image-message specific variables
       cv_bridge::CvImagePtr cv_ptr_rgb;
       cv::Mat cv_image;
+      cv::Mat cv_image_clone;
 
       // set detections variables
       int ratio_x;
@@ -424,6 +426,7 @@ class FaceDetectionNode {
       // convert image to opencv standard -> bgr (rgb swap happens inside network graph)
       cv_ptr_rgb = cv_bridge::toCvCopy(rgb_image,sensor_msgs::image_encodings::BGR8);
       cv_image = cv_ptr_rgb->image;
+      cv_image_clone = cv_image.clone();
 
       // calculate the regions of interest based on the initial ROI algorithm from
       // openptrack.
@@ -570,8 +573,8 @@ class FaceDetectionNode {
             //    }
             //}
             // sensor_msgs::ImagePtr image_msg_aligned = cv_bridge::CvImage(std_msgs::Header(), "bgr8", aligned_clone).toImageMsg();
-            //cv::rectangle(cv_image, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
-            //cv::putText(cv_image, ss.str(), cv::Point(boxes->boxes[i].x+10,boxes->boxes[i].y+20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
+            cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
+            cv::putText(cv_image_clone, "face", cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
             // cv::imwrite("/home/nvidia/OUTPUTIMAGE.JPG", cv_image);
           }
         }
@@ -599,6 +602,8 @@ class FaceDetectionNode {
     //    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
     //    pub.publish(msg);
     //}
+    sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
+    image_pub.publish(imagemsg);
     embedder_pub.publish(feature_vector_array_msg);
     embedder_pub_local.publish(feature_vector_array_msg);
     detector_pub.publish(detection_array_msg);

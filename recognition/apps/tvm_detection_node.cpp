@@ -96,7 +96,7 @@ class TVMDetectionNode {
     // TF listener
     tf::TransformListener tf_listener;
     // only need this if I need to debug
-    //image_transport::ImageTransport image_transport;
+    image_transport::ImageTransport it;
     
     // ROS
     dynamic_reconfigure::Server<recognition::GenDetectionConfig> cfg_server;
@@ -105,6 +105,7 @@ class TVMDetectionNode {
     // Publishers
     ros::Publisher detections_pub;
     //ros::Publisher image_pub;
+    image_transport::Publisher image_pub;
 
     // Subscribers
     ros::Subscriber rgb_sub;
@@ -141,13 +142,14 @@ class TVMDetectionNode {
     double _cy;
     double _constant_x;
     double _constant_y;
+    bool people_only = true;
 
     /**
      * @brief constructor
      * @param nh node handler
      */
     TVMDetectionNode(ros::NodeHandle& nh, std::string sensor_string):
-      node_(nh)
+      node_(nh), it(node_)
       {
         // Publish Messages
         detections_pub = node_.advertise<opt_msgs::DetectionArray>("/objects_detector/detections", 3);
@@ -156,6 +158,8 @@ class TVMDetectionNode {
         rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
         depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
         
+        image_pub = it.advertise("/objects_detector/image", 1);
+
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMDetectionNode::camera_info_callback, this);
 
@@ -198,8 +202,8 @@ class TVMDetectionNode {
       cv_bridge::CvImage::Ptr  cv_ptr_depth;
       cv::Mat cv_image;
       cv::Mat cv_depth_image;
+      cv::Mat cv_image_clone;
       
-
       // set detection variables here
       yoloresults* output;
       cv::Size image_size;
@@ -235,6 +239,7 @@ class TVMDetectionNode {
       image_size = cv_image.size();
       height =  static_cast<float>(image_size.height);
       width =  static_cast<float>(image_size.width);
+      cv_image_clone = cv_image.clone();
 
       // forward inference of object detector
       begin = ros::Time::now();
@@ -288,42 +293,58 @@ class TVMDetectionNode {
           // publish the messages
           if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
         
-            opt_msgs::Detection detection_msg;
-            detection_msg.box_3D.p1.x = mx;
-            detection_msg.box_3D.p1.y = my;
-            detection_msg.box_3D.p1.z = median_depth;
+            // defaults to sending the message
+            bool send_message = true;
+            if people_only {
+              if label != 1.0 {
+                send_message = false;
+              }
+            }
+
+            if send_message {
+              opt_msgs::Detection detection_msg;
+              detection_msg.box_3D.p1.x = mx;
+              detection_msg.box_3D.p1.y = my;
+              detection_msg.box_3D.p1.z = median_depth;
+              
+              detection_msg.box_3D.p2.x = mx;
+              detection_msg.box_3D.p2.y = my;
+              detection_msg.box_3D.p2.z = median_depth;
+              
+              detection_msg.box_2D.x = median_x;
+              detection_msg.box_2D.y = median_y;
+              detection_msg.box_2D.width = 0;
+              detection_msg.box_2D.height = 0;
+              detection_msg.height = 0;
+              detection_msg.confidence = 10;
+              detection_msg.distance = median_depth;
+              
+              detection_msg.centroid.x = mx;
+              detection_msg.centroid.y = my;
+              detection_msg.centroid.z = median_depth;
+              
+              detection_msg.top.x = 0;
+              detection_msg.top.y = 0;
+              detection_msg.top.z = 0;
+              
+              detection_msg.bottom.x = 0;
+              detection_msg.bottom.y = 0;
+              detection_msg.bottom.z = 0;
+              
+              detection_msg.object_name=object_name;            
+              detection_array_msg->detections.push_back(detection_msg);
             
-            detection_msg.box_3D.p2.x = mx;
-            detection_msg.box_3D.p2.y = my;
-            detection_msg.box_3D.p2.z = median_depth;
-            
-            detection_msg.box_2D.x = median_x;
-            detection_msg.box_2D.y = median_y;
-            detection_msg.box_2D.width = 0;
-            detection_msg.box_2D.height = 0;
-            detection_msg.height = 0;
-            detection_msg.confidence = 10;
-            detection_msg.distance = median_depth;
-            
-            detection_msg.centroid.x = mx;
-            detection_msg.centroid.y = my;
-            detection_msg.centroid.z = median_depth;
-            
-            detection_msg.top.x = 0;
-            detection_msg.top.y = 0;
-            detection_msg.top.z = 0;
-            
-            detection_msg.bottom.x = 0;
-            detection_msg.bottom.y = 0;
-            detection_msg.bottom.z = 0;
-            
-            detection_msg.object_name=object_name;            
-            detection_array_msg->detections.push_back(detection_msg);
+              cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
+              cv::putText(cv_image_clone, object_name, cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
+              // cv::imwrite("/home/nvidia/OUTPUTIMAGE.JPG", cv_image);
+            }
           }
         }
       }
     // this will publish empty detections if nothing is found
+    sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
     detections_pub.publish(detection_array_msg);
+    image_pub.publish(imagemsg)
     free(output->boxes);
     free(output);
     }
