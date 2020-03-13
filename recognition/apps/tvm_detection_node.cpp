@@ -301,7 +301,7 @@ class TVMDetectionNode {
               }
             }
 
-            if send_message {
+            if (send_message) {
               opt_msgs::Detection detection_msg;
               detection_msg.box_3D.p1.x = mx;
               detection_msg.box_3D.p1.y = my;
