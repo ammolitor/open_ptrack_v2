@@ -167,6 +167,9 @@ class YoloTVMGPU256{
 
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
+            // get height/width dynamically
+            float img_height = static_cast<float>(frame.height);
+            float img_width = static_cast<float>(frame.width);
 
             using Clock = std::chrono::high_resolution_clock;
             using Timepoint = Clock::time_point;
@@ -303,10 +306,17 @@ class YoloTVMGPU256{
                 xmax = ndarray_bboxes_a[0][i][2];
                 ymax = ndarray_bboxes_a[0][i][3];
 
-                results->boxes[i].xmin = xmin * (640.0/256.0); // move down to 480 space
-                results->boxes[i].ymin = ymin / (256.0/480.0); // move up to 640
-                results->boxes[i].xmax = xmax * (640.0/256.0);
-                results->boxes[i].ymax = ymax / (256.0/480.0);
+
+                results->boxes[i].xmin = xmin * (img_height/256.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (256.0/img_width); // move up to 640
+                results->boxes[i].xmax = xmax * (img_height/256.0);
+                results->boxes[i].ymax = ymax / (256.0/img_width);  
+
+                //results->boxes[i].xmin = xmin * (640.0/256.0); // move down to 480 space
+                //results->boxes[i].ymin = ymin / (256.0/480.0); // move up to 640
+                //results->boxes[i].xmax = xmax * (640.0/256.0);
+                //results->boxes[i].ymax = ymax / (256.0/480.0);
+
                 results->boxes[i].id = cls_id;
                 results->boxes[i].score = score;
                 new_num+=1;
@@ -418,6 +428,9 @@ class YoloTVMGPU320{
 
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
+            // get height/width dynamically
+            float img_height = static_cast<float>(frame.height);
+            float img_width = static_cast<float>(frame.width);
 
             using Clock = std::chrono::high_resolution_clock;
             using Timepoint = Clock::time_point;
@@ -554,10 +567,16 @@ class YoloTVMGPU320{
                 xmax = ndarray_bboxes_a[0][i][2];
                 ymax = ndarray_bboxes_a[0][i][3];
 
-                results->boxes[i].xmin = xmin * (640.0/320.0); // move down to 480 space
-                results->boxes[i].ymin = ymin / (320.0/480.0); // move up to 640
-                results->boxes[i].xmax = xmax * (640.0/320.0);
-                results->boxes[i].ymax = ymax / (320.0/480.0);
+
+                results->boxes[i].xmin = xmin * (img_height/320.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (320.0/img_width); // move up to 640
+                results->boxes[i].xmax = xmax * (img_height/320.0);
+                results->boxes[i].ymax = ymax / (320.0/img_width);  
+
+                //results->boxes[i].xmin = xmin * (640.0/320.0); // move down to 480 space
+                //results->boxes[i].ymin = ymin / (320.0/480.0); // move up to 640
+                //results->boxes[i].xmax = xmax * (640.0/320.0);
+                //results->boxes[i].ymax = ymax / (320.0/480.0);
                 results->boxes[i].id = cls_id;
                 results->boxes[i].score = score;
                 new_num+=1;
@@ -670,7 +689,10 @@ class YoloTVMGPU{
 
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
-            
+            // get height/width dynamically
+            float img_height = static_cast<float>(frame.height);
+            float img_width = static_cast<float>(frame.width);
+
             //Set constants and variables
             constexpr int dtype_code = kDLFloat;
             constexpr int dtype_bits = 32;
@@ -765,10 +787,15 @@ class YoloTVMGPU{
                 xmax = ndarray_bboxes_a[0][i][2];
                 ymax = ndarray_bboxes_a[0][i][3];
 
-                results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space
-                results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
-                results->boxes[i].xmax = xmax * (640.0/512.0);
-                results->boxes[i].ymax = ymax / (512.0/480.0);
+                results->boxes[i].xmin = xmin * (img_height/512.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (512.0/img_width); // move up to 640
+                results->boxes[i].xmax = xmax * (img_height/512.0);
+                results->boxes[i].ymax = ymax / (512.0/img_width);                
+
+                //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space  ()
+                //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
+                //results->boxes[i].xmax = xmax * (640.0/512.0);
+                //results->boxes[i].ymax = ymax / (512.0/480.0);
                 results->boxes[i].id = cls_id;
                 results->boxes[i].score = score;
                 new_num+=1;
@@ -869,9 +896,12 @@ class YoloTVMCPU{
             return normalized_image; 
         }
 
-        yoloresults* forward_full(cv::Mat frame, float img_height, float img_width, float thresh)
+        yoloresults* forward_full(cv::Mat frame, float thresh)
         {
-            
+            // get height/width dynamically
+            float img_height = static_cast<float>(frame.height);
+            float img_width = static_cast<float>(frame.width);
+
             //Set constants and variables
             constexpr int dtype_code = kDLFloat;
             constexpr int dtype_bits = 32;
@@ -966,11 +996,17 @@ class YoloTVMCPU{
                 xmax = ndarray_bboxes_a[0][i][2];
                 ymax = ndarray_bboxes_a[0][i][3];
 
+
+                results->boxes[i].xmin = xmin * (img_height/512.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (512.0/img_width); // move up to 640
+                results->boxes[i].xmax = xmax * (img_height/512.0);
+                results->boxes[i].ymax = ymax / (512.0/img_width);  
+
                 // int in_c = 3, in_h = 480, in_w = 640;
-                results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space
-                results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
-                results->boxes[i].xmax = xmax * (640.0/512.0);
-                results->boxes[i].ymax = ymax / (512.0/480.0);
+                //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space
+                //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
+                //results->boxes[i].xmax = xmax * (640.0/512.0);
+                //results->boxes[i].ymax = ymax / (512.0/480.0);
                 results->boxes[i].id = cls_id;
                 results->boxes[i].score = score;
                 new_num+=1;
@@ -1072,9 +1108,12 @@ class YoloTVMCPUNoTorch{
             return normalized_image; 
         }
 
-        yoloresults* forward_full(cv::Mat frame, float img_height, float img_width, float thresh)
+        yoloresults* forward_full(cv::Mat frame, float thresh)
         {
-            
+            // get height/width dynamically
+            float img_height = static_cast<float>(frame.height);
+            float img_width = static_cast<float>(frame.width);
+
             //Set constants and variables
             constexpr int dtype_code = kDLFloat;
             constexpr int dtype_bits = 32;
@@ -1171,11 +1210,17 @@ class YoloTVMCPUNoTorch{
                 xmax = ndarray_bboxes_a[0][i][2];
                 ymax = ndarray_bboxes_a[0][i][3];
 
+
+                results->boxes[i].xmin = xmin * (img_height/512.0); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (512.0/img_width); // move up to 640
+                results->boxes[i].xmax = xmax * (img_height/512.0);
+                results->boxes[i].ymax = ymax / (512.0/img_width);  
+
                 // int in_c = 3, in_h = 480, in_w = 640;
-                results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space
-                results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
-                results->boxes[i].xmax = xmax * (640.0/512.0);
-                results->boxes[i].ymax = ymax / (512.0/480.0);
+                //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space
+                //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
+                //results->boxes[i].xmax = xmax * (640.0/512.0);
+                //results->boxes[i].ymax = ymax / (512.0/480.0);
                 results->boxes[i].id = cls_id;
                 results->boxes[i].score = score;
                 new_num+=1;
