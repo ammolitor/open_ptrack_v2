@@ -208,6 +208,7 @@ class FaceDetectionNode {
     ros::Publisher embedder_pub;
     ros::Publisher embedder_pub_local;
     //ros::Publisher image_pub;
+    image_transport::Publisher image_pub;
 
     // Subscribers
     ros::Subscriber rgb_sub;
