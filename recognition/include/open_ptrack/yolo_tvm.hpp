@@ -168,8 +168,9 @@ class YoloTVMGPU256{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            float img_height = static_cast<float>(frame.height);
-            float img_width = static_cast<float>(frame.width);
+            image_size = frame.size()
+            float img_height = static_cast<float>(image_size.height);
+            float img_width = static_cast<float>(image_size.width);
 
             using Clock = std::chrono::high_resolution_clock;
             using Timepoint = Clock::time_point;
@@ -429,8 +430,9 @@ class YoloTVMGPU320{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            float img_height = static_cast<float>(frame.height);
-            float img_width = static_cast<float>(frame.width);
+            image_size = frame.size()
+            float img_height = static_cast<float>(image_size.height);
+            float img_width = static_cast<float>(image_size.width);
 
             using Clock = std::chrono::high_resolution_clock;
             using Timepoint = Clock::time_point;
@@ -690,8 +692,9 @@ class YoloTVMGPU{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            float img_height = static_cast<float>(frame.height);
-            float img_width = static_cast<float>(frame.width);
+            image_size = frame.size()
+            float img_height = static_cast<float>(image_size.height);
+            float img_width = static_cast<float>(image_size.width);
 
             //Set constants and variables
             constexpr int dtype_code = kDLFloat;
@@ -899,8 +902,9 @@ class YoloTVMCPU{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            float img_height = static_cast<float>(frame.height);
-            float img_width = static_cast<float>(frame.width);
+            image_size = frame.size()
+            float img_height = static_cast<float>(image_size.height);
+            float img_width = static_cast<float>(image_size.width);
 
             //Set constants and variables
             constexpr int dtype_code = kDLFloat;
@@ -1111,8 +1115,9 @@ class YoloTVMCPUNoTorch{
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             // get height/width dynamically
-            float img_height = static_cast<float>(frame.height);
-            float img_width = static_cast<float>(frame.width);
+            image_size = frame.size()
+            float img_height = static_cast<float>(image_size.height);
+            float img_width = static_cast<float>(image_size.width);
 
             //Set constants and variables
             constexpr int dtype_code = kDLFloat;
