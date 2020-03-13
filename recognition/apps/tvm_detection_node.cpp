@@ -344,7 +344,7 @@ class TVMDetectionNode {
     // this will publish empty detections if nothing is found
     sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
     detections_pub.publish(detection_array_msg);
-    image_pub.publish(imagemsg)
+    image_pub.publish(imagemsg);
     free(output->boxes);
     free(output);
     }
