@@ -105,7 +105,7 @@ on the Jetson node
     ```
 
 ### remove unnecessary packages
-* `https://raw.githubusercontent.com/ammolitor/open_ptrack_v2/master/scripts/make-ubuntu-faster.sh | bash`
+* `sudo apt -y install curl && curl https://raw.githubusercontent.com/ammolitor/open_ptrack_v2/master/scripts/make-ubuntu-faster.sh | bash`
 
 ### install OS updates
 ```
