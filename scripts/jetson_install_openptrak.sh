@@ -150,7 +150,7 @@ ${APT_CMD} install \
   libatlas-base-dev
 
 ${APT_CMD} purge libeigen3-dev || true
-
+sudo curl -o /usr/include/nlohmann/json.hpp https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
 pick_your_blaster "openblas"
 
 echo "#########################################################################"
@@ -164,6 +164,7 @@ mkdir -p build
 pushd build || pushd_fail
 cmake ..
 sudo make install -j"${NPROC}"
+sudo cp -r /usr/local/include/eigen3 /usr/include/eigen3
 popd || popd_fail
 popd || popd_fail
 
@@ -281,19 +282,6 @@ USE_NCCL=0 USE_DISTRIBUTED=0 TORCH_CUDA_ARCH_LIST="5.3;6.2;7.2" python setup.py 
 popd || popd_fail
 
 echo "#########################################################################"
-echo "# openptrack deps and clone necessary deps                               #"
-echo "#########################################################################"
-mkdir -p ${CATKIN_SRC}/open_ptrack
-pushd ${CATKIN_SRC}/open_ptrack || pushd_fail
-git clone https://github.com/ammolitor/open_ptrack_v2 .
-curl -kL https://pjreddie.com/media/files/yolo.weights -o ${CATKIN_SRC}/open_ptrack/yolo_detector/darknet_opt/coco.weights
-pushd ${CATKIN_SRC}/open_ptrack/rtpose_wrapper || pushd_fail
-make all -j"${NPROC}"
-popd || popd_fail
-sudo cp -r /usr/local/include/eigen3 /usr/include/eigen3
-popd || popd_fail
-
-echo "#########################################################################"
 echo "# install ROS using jetsonhacks XAVIER as a guide                       #"
 echo "#########################################################################"
 # https://github.com/jetsonhacks/installROS/blob/master/installROS.sh
@@ -308,7 +296,10 @@ ${APT_CMD} install python-rosdep \
   ros-melodic-driver-base \
   ros-melodic-rgbd-launch \
   ros-melodic-rqt-common-plugins \
-  ros-melodic-rviz
+  ros-melodic-rviz \
+  ros-melodic-rqt-common-plugins \
+  ros-melodic-camera-calibration \
+  libcanberra-gtk-module
 sudo rosdep init
 rosdep update
 grep -q -F 'source /opt/ros/melodic/setup.bash' "${HOME}"/.bashrc || \
@@ -321,12 +312,20 @@ ${APT_CMD} install \
   python-wstool
 
 echo "#########################################################################"
-echo "# update deps for rosdep                                                #"
+echo "# openptrack deps and clone necessary deps                               #"
 echo "#########################################################################"
-${APT_CMD} install ros-melodic-rqt-common-plugins \
-  ros-melodic-camera-calibration \
-  libcanberra-gtk-module
+mkdir -p ${CATKIN_SRC}/open_ptrack
+pushd ${CATKIN_SRC}/open_ptrack || pushd_fail
+git clone https://github.com/ammolitor/open_ptrack_v2 .
+curl -kL https://pjreddie.com/media/files/yolo.weights -o ${CATKIN_SRC}/open_ptrack/yolo_detector/darknet_opt/coco.weights
+pushd ${CATKIN_SRC}/open_ptrack/rtpose_wrapper || pushd_fail
+make all -j"${NPROC}"
+popd || popd_fail
+popd || popd_fail
 
+echo "#########################################################################"
+echo "# use catkin_make to build open_ptrack                                  #"
+echo "#########################################################################"
 pushd ${CATKIN_WS} || pushd_fail
 . /opt/ros/melodic/setup.bash
 rosdep install -y -r --from-paths .
