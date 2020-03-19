@@ -75,8 +75,10 @@ sudo chown -R "${USER}:${USER}" "${CATKIN_WS}"
 pushd ${INSTALL_ROOT} || pushd_fail
 
 echo "#########################################################################"
-echo " install opencv and as many apt/ python installs as possible            #"
+echo " remove and install packages                                            #"
 echo "#########################################################################"
+${APT_CMD} purge libopencv* || true
+${APT_CMD} purge opencv*    || true
 ${APT_CMD} autoremove || true
 
 ${APT_CMD} install \
@@ -143,13 +145,13 @@ ${APT_CMD} install \
   libblas3 \
   libblas-dev \
   libopenblas-base \
-  libopenblas-dev
-  # libatlas3-base \
-  # libatlas-base-dev
+  libopenblas-dev \
+  libatlas3-base \
+  libatlas-base-dev
 
 ${APT_CMD} purge libeigen3-dev || true
-
-# pick_your_blaster "openblas"
+sudo curl -o /usr/include/nlohmann/json.hpp https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
+pick_your_blaster "openblas"
 
 echo "#########################################################################"
 echo "# install eigen to most updated version                                 #"
@@ -162,10 +164,11 @@ mkdir -p build
 pushd build || pushd_fail
 cmake ..
 sudo make install -j"${NPROC}"
+sudo cp -r /usr/local/include/eigen3 /usr/include/eigen3
 popd || popd_fail
 popd || popd_fail
 
-pip install requests numpy pyyaml
+pip install requests numpy pyyaml typing
 pip3 install cython  # this is by itself on purpose (numpy needs it and I
                      # dont trust pip to install them in the right order)
 pip3 install numpy decorator attrs pyyaml
@@ -236,6 +239,11 @@ popd || popd_fail
 popd || popd_fail
 
 echo "#########################################################################"
+echo "# install LLVM                                                          #"
+echo "#########################################################################"
+sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+
+echo "#########################################################################"
 echo "# install TVM and TVM deps                                              #"
 echo "#########################################################################"
 # https://docs.tvm.ai/install/from_source.html
@@ -245,11 +253,11 @@ git clone --recursive https://github.com/apache/incubator-tvm .
 mkdir -p build
 cp cmake/config.cmake build/config.cmake
 pushd build || pushd_fail
-cmake -GNinja \
- -DUSE_CUDA=ON \
- -DUSE_CUDNN=ON \
- -DUSE_CUBLAS=ON \
- -DUSE_SORT=ON ..
+sed -i 's/set(USE_CUDA OFF)/set(USE_CUDA ON)/' config.cmake
+sed -i 's/set(USE_CUDNN OFF)/set(USE_CUDNN ON)/' config.cmake
+sed -i 's/set(USE_CUBLAS OFF)/set(USE_CUBLAS ON)/' config.cmake
+sed -i 's/set(USE_LLVM OFF)/set(USE_LLVM ON)/' config.cmake
+cmake -GNinja ..
 ninja -v
 # install the python libraries -- it only works in py3
 # and we won't use tvm to ever compile device side, only run side
@@ -269,20 +277,8 @@ pushd ${INSTALL_SRC}/pytorch || pushd_fail
 git clone --branch v1.4.0 --recursive https://github.com/pytorch/pytorch .
 git submodule sync
 git submodule update --init --recursive
-# USE_NCCL=0 USE_DISTRIBUTED=0 TORCH_CUDA_ARCH_LIST="5.3;6.2;7.2" python setup.py install
-USE_NCCL=0 USE_DISTRIBUTED=0 TORCH_CUDA_ARCH_LIST="5.3;6.2;7.2" python3 setup.py install
-popd || popd_fail
-
-
-
-echo "#########################################################################"
-echo "# openptrack deps and clone necessary deps                               #"
-echo "#########################################################################"
-mkdir -p ${CATKIN_SRC}/open_ptrack
-pushd ${CATKIN_SRC}/open_ptrack || pushd_fail
-git clone https://github.com/ammolitor/open_ptrack_v2 .
-curl -kL https://pjreddie.com/media/files/yolo.weights -o ${CATKIN_SRC}/open_ptrack/yolo_detector/darknet_opt/coco.weights
-sudo cp -r /usr/local/include/eigen3 /usr/include/eigen3
+USE_NCCL=0 USE_DISTRIBUTED=0 TORCH_CUDA_ARCH_LIST="5.3;6.2;7.2" python setup.py install --user
+# USE_NCCL=0 USE_DISTRIBUTED=0 TORCH_CUDA_ARCH_LIST="5.3;6.2;7.2" python3 setup.py install --user
 popd || popd_fail
 
 echo "#########################################################################"
@@ -300,7 +296,10 @@ ${APT_CMD} install python-rosdep \
   ros-melodic-driver-base \
   ros-melodic-rgbd-launch \
   ros-melodic-rqt-common-plugins \
-  ros-melodic-rviz
+  ros-melodic-rviz \
+  ros-melodic-rqt-common-plugins \
+  ros-melodic-camera-calibration \
+  libcanberra-gtk-module
 sudo rosdep init
 rosdep update
 grep -q -F 'source /opt/ros/melodic/setup.bash' "${HOME}"/.bashrc || \
@@ -313,16 +312,24 @@ ${APT_CMD} install \
   python-wstool
 
 echo "#########################################################################"
-echo "# update deps for rosdep                                                #"
+echo "# openptrack deps and clone necessary deps                               #"
 echo "#########################################################################"
-${APT_CMD} install ros-melodic-rqt-common-plugins \
-  ros-melodic-camera-calibration \
-  libcanberra-gtk-module
+mkdir -p ${CATKIN_SRC}/open_ptrack
+pushd ${CATKIN_SRC}/open_ptrack || pushd_fail
+git clone https://github.com/ammolitor/open_ptrack_v2 .
+curl -kL https://pjreddie.com/media/files/yolo.weights -o ${CATKIN_SRC}/open_ptrack/yolo_detector/darknet_opt/coco.weights
+pushd ${CATKIN_SRC}/open_ptrack/rtpose_wrapper || pushd_fail
+make all -j"${NPROC}"
+popd || popd_fail
+popd || popd_fail
 
+echo "#########################################################################"
+echo "# use catkin_make to build open_ptrack                                  #"
+echo "#########################################################################"
 pushd ${CATKIN_WS} || pushd_fail
 . /opt/ros/melodic/setup.bash
 rosdep install -y -r --from-paths .
-# export ROS_PARALLEL_JOBS="-j1 -l1"  # for debugging catkin_make errors
+export ROS_PARALLEL_JOBS="-j1 -l1"  # for debugging catkin_make errors
 catkin_make
 popd || popd_fail
 

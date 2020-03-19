@@ -20,8 +20,8 @@ input the ip address, username, and password into the SDK manager and allow the 
  half of the flashing process to complete. 
  
  ## Configure the device. 
- There are many things that need to be done to the Jetson device to make it usable in this
- context. A walk-through of each of them follows:
+ There are many things that need to be done to the Jetson device to make it 
+ usable in this context. A walk-through of each of them follows:
  
 ### Install ssh keys, and other config
 From the nuc, for each Jetson node
@@ -56,60 +56,66 @@ on the Jetson node
     AutomaticLogin=nvidia
     ```
  
-### Setup an VNC server
+### Setup a VNC server
 * `sudo vim /usr/share/glib-2.0/schemas/org.gnome.Vino.gschema.xml`
-```$xml
-    <key name='enabled' type='b'>
-      <summary>Enable remote access to the desktop</summary>
-      <description>
-        If true, allows remote access to the desktop via the RFB
-        protocol. Users on remote machines may then connect to the
-        desktop using a VNC viewer.
-      </description>
-      <default>false</default>
-    </key>
-```
-* `sudo glib-compile-schemas /usr/share/glib-2.0/schemas`
-* `gsettings set org.gnome.Vino require-encryption false`
-* `gsettings set org.gnome.Vino prompt-enabled false`
-* `gsettings set org.gnome.desktop.screensaver lock-enabled false`
-* `gsettings set org.gnome.desktop.session idle-delay 0`
+    ```$xml
+        <key name='enabled' type='b'>
+          <summary>Enable remote access to the desktop</summary>
+          <description>
+            If true, allows remote access to the desktop via the RFB
+            protocol. Users on remote machines may then connect to the
+            desktop using a VNC viewer.
+          </description>
+          <default>false</default>
+        </key>
+    ```
+* re-compile schemas: `sudo glib-compile-schemas /usr/share/glib-2.0/schemas`
+* set some gnome settings to make vnc connections easier:
+    ```
+    gsettings set org.gnome.Vino require-encryption false
+    gsettings set org.gnome.Vino prompt-enabled false
+    gsettings set org.gnome.desktop.screensaver lock-enabled false
+    gsettings set org.gnome.desktop.session idle-delay 0
+    ```
 
-* `export DISPLAY=:0`
-* `/usr/lib/vino/vino-server`
+* start the vmc server manually:
+    ```
+    export DISPLAY=:0
+    /usr/lib/vino/vino-server
+    ```
 * connect with a vnc viewer
-* `sudo xrandr --fb 1920x1080`
+* reset the resolution: `sudo xrandr --fb 1920x1080`
 * create gnome autostart for Vino (via desktop, startup applications)
 
 ### configure NTP
-sudo apt -y install ntp
-```
-# /etc/ntp.conf, configuration for ntpd; see ntp.conf(5) for help
-driftfile /var/lib/ntp/ntp.drift
-# Enable this if you want statistics to be logged.
-#statsdir /var/log/ntpstats/
-statistics loopstats peerstats clockstats
-filegen loopstats file loopstats type day enable
-filegen peerstats file peerstats type day enable
-filegen clockstats file clockstats type day enable
-# Specify one or more NTP servers.
-server 192.168.100.101 iburst
-disable auth
-broadcastclient
-```
-
-### cleanup home dir
-run this until it no longer outputs anything
-* `find . -type d -empty -exec rmdir '{}' \;`
+* install ntp: `sudo apt -y install ntp`
+    ```
+    # /etc/ntp.conf, configuration for ntpd; see ntp.conf(5) for help
+    driftfile /var/lib/ntp/ntp.drift
+    # Enable this if you want statistics to be logged.
+    #statsdir /var/log/ntpstats/
+    statistics loopstats peerstats clockstats
+    filegen loopstats file loopstats type day enable
+    filegen peerstats file peerstats type day enable
+    filegen clockstats file clockstats type day enable
+    # Specify one or more NTP servers.
+    server 192.168.1.200 iburst
+    disable auth
+    broadcastclient
+    ```
 
 ### remove unnecessary packages
-* `make-ubuntu-faster.sh`
+* `sudo apt -y install curl && curl https://raw.githubusercontent.com/ammolitor/open_ptrack_v2/master/scripts/make-ubuntu-faster.sh | bash`
 
 ### install OS updates
-* `sudo apt -y update &&  sudo apt -y upgrade`
-* `sudo apt -y clean`
-* `sudo apt -y autoremove`
+```
+sudo apt -y update
+sudo apt -y upgrade
+sudo apt -y clean
+sudo apt -y autoremove
+```
 
 ### Install OpenPTrack and dependencies
+* `curl -O https://raw.githubusercontent.com/ammolitor/open_ptrack_v2/master/scripts/jetson_install_openptrak.sh`
+* `chmod 755 jetson_install_openptrak.sh`
 * `./jetson_install_openptrack.sh`
-
