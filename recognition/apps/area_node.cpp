@@ -133,13 +133,13 @@ tf::Transform read_poses_from_json(std::string camera_name)
   //<node pkg="tf" type="static_transform_publisher" name="d415_broadcaster"
   //      args="2.18334 0.46989 1.28112 0.522227 0.598362 -0.456386 -0.401191 /world /d415 100" />
   //              tx       ty      tz      rx        ry       rz        rw      
-  double translation_x = pose_config[camera_name]["pose"]["translation"]["x"]
-  double translation_y = pose_config[camera_name]["pose"]["translation"]["y"]
-  double translation_z = pose_config[camera_name]["pose"]["translation"]["z"]
-  double rotation_x = pose_config[camera_name]["pose"]["rotation"]["x"]
-  double rotation_y = pose_config[camera_name]["pose"]["rotation"]["y"]
-  double rotation_z = pose_config[camera_name]["pose"]["rotation"]["z"]
-  double rotation_w = pose_config[camera_name]["pose"]["rotation"]["w"]
+  double translation_x = pose_config[camera_name]["pose"]["translation"]["x"];
+  double translation_y = pose_config[camera_name]["pose"]["translation"]["y"];
+  double translation_z = pose_config[camera_name]["pose"]["translation"]["z"];
+  double rotation_x = pose_config[camera_name]["pose"]["rotation"]["x"];
+  double rotation_y = pose_config[camera_name]["pose"]["rotation"]["y"];
+  double rotation_z = pose_config[camera_name]["pose"]["rotation"]["z"];
+  double rotation_w = pose_config[camera_name]["pose"]["rotation"]["w"];
   
   worldToCamTransform.setOrigin(tf::Vector3(translation_x, translation_y, translation_z));
   worldToCamTransform.setRotation(tf::Quaternion(rotation_x, rotation_y, rotation_z, rotation_w));
@@ -539,7 +539,7 @@ class AreaDefinitionNode {
 
     sensor_msgs::PointCloud2 msg_pointcloud;
     // transform to eigen
-    tf::transformTFToEigen(world2rgb_transform, world2rgb);
+    //tf::transformTFToEigen(world2rgb_transform, world2rgb);
     // open_ptrack::opt_utils::Conversions converter;
 
     cv::Rect area_of_interest(0, 0, 0, 0);
