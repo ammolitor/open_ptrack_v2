@@ -38,6 +38,7 @@
 #
 ######################################################################
 import os
+import json
 import roslib
 roslib.load_manifest('opt_calibration')
 import rospy
