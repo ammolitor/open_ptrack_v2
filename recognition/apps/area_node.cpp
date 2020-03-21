@@ -116,6 +116,36 @@ tf::Transform readTFFromFile(std::string filename, std::string camera_name)
   return worldToCamTransform;
 }
 
+tf::Transform read_poses_from_json(std::string camera_name)
+{
+  tf::Transform worldToCamTransform;
+
+  json pose_config;
+  std::string hard_coded_path = "/cfg/poses.json";
+  std::cout << "--- detector cfg_callback ---" << std::endl;
+  std::string package_path = ros::package::getPath("recognition");
+  std::string full_path = package_path + hard_coded_path;
+  std::ifstream json_read(full_path);
+  json_read >> pose_config;
+
+  //<!-- pc: Jetson-TX2-Ubuntu-18-CUDA-10-NEW -->
+  //<!-- sensor: d415 -->
+  //<node pkg="tf" type="static_transform_publisher" name="d415_broadcaster"
+  //      args="2.18334 0.46989 1.28112 0.522227 0.598362 -0.456386 -0.401191 /world /d415 100" />
+  //              tx       ty      tz      rx        ry       rz        rw      
+  double translation_x = pose_config[camera_name]["pose"]["translation"]["x"]
+  double translation_y = pose_config[camera_name]["pose"]["translation"]["y"]
+  double translation_z = pose_config[camera_name]["pose"]["translation"]["z"]
+  double rotation_x = pose_config[camera_name]["pose"]["rotation"]["x"]
+  double rotation_y = pose_config[camera_name]["pose"]["rotation"]["y"]
+  double rotation_z = pose_config[camera_name]["pose"]["rotation"]["z"]
+  double rotation_w = pose_config[camera_name]["pose"]["rotation"]["w"]
+  
+  worldToCamTransform.setOrigin(tf::Vector3(translation_x, translation_y, translation_z));
+  worldToCamTransform.setRotation(tf::Quaternion(rotation_x, rotation_y, rotation_z, rotation_w));
+
+  return worldToCamTransform;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -313,13 +343,14 @@ class AreaDefinitionNode {
       //area_thres_["car"] = pair<double, double>(2.7, 1.8);
 
     // Read worldToCam transform from file:
-    std::string filename = ros::package::getPath("detection") + "/launch/camera_poses.txt";
-    worldToCamTransform = readTFFromFile (filename, sensor_name);
+    //std::string filename = ros::package::getPath("detection") + "/launch/camera_poses.txt";
+    //worldToCamTransform = readTFFromFile (filename, sensor_name);
+    worldToCamTransform = read_poses_from_json(sensor_name);
 
     }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
-	//printf("running camera_info_callback\n");
+    //printf("running camera_info_callback\n");
         intrinsics_matrix << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
         cam_intrins_ << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1; 
         _cx = msg->K[2];
@@ -475,12 +506,34 @@ class AreaDefinitionNode {
 
   void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                      const sensor_msgs::Image::ConstPtr& depth_image,
-		             const PointCloudT::ConstPtr& cloud_) {
+                     const PointCloudT::ConstPtr& cloud_) {
     printf("running algorithm callback");
+    // If extrinsic calibration is not available:
+    //if (!extrinsic_calibration)
+    //{ // Set fixed transformation from rgb frame and base_link
+    //  tf::Vector3 fixed_translation(0, 0, 0);                  // camera_rgb_optical_frame -> world
+    //  tf::Quaternion fixed_rotation(-0.5, 0.5, -0.5, -0.5);	// camera_rgb_optical_frame -> world
+    //  tf::Vector3 inv_fixed_translation(0.0, 0.0, 0);			// world -> camera_rgb_optical_frame
+    //  tf::Quaternion inv_fixed_rotation(-0.5, 0.5, -0.5, 0.5);	// world -> camera_rgb_optical_frame
+    //sensor_msg.transform = sensor_msg.transform + [Transform(Vector3(t['x'], t['y'], t['z']), Quaternion(r['x'], r['y'], r['z'], r['w']))]
+        
+    //  world_to_camera_frame_transform = tf::Transform(fixed_rotation, fixed_translation);
+    //  camera_frame_to_world_transform = tf::Transform(inv_fixed_rotation, inv_fixed_translation);
+    //}
+
+    //int num_cameras = 0;
+    //XmlRpc::XmlRpcValue network;
+    //nh.getParam("network", network);
+    //std::map<std::string, XmlRpc::XmlRpcValue>::iterator i;
+    //for (unsigned i = 0; i < network.size(); i++)
+    //{
+    //  num_cameras += network[i]["sensors"].size();
+    //}
+
     //tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
     //tf_listener.lookupTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ir2rgb_transform);
-    tf_listener.waitForTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
-    tf_listener.lookupTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), world2rgb_transform);
+    //tf_listener.waitForTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
+    //tf_listener.lookupTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), world2rgb_transform);
 
     //std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud->header);
 
@@ -665,7 +718,7 @@ class AreaDefinitionNode {
             tmp.y = points_3d_in_cam(1, i);
             tmp.z = points_3d_in_cam(2, i);
 
-	    world_to_temp.x =  static_cast<float>(tmp.x);
+            world_to_temp.x =  static_cast<float>(tmp.x);
             world_to_temp.y =  static_cast<float>(tmp.y);
             world_to_temp.z =  static_cast<float>(tmp.z);
 
