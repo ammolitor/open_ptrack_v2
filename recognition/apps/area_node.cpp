@@ -571,7 +571,7 @@
     void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                       const sensor_msgs::Image::ConstPtr& depth_image,
                       const PointCloudT::ConstPtr& cloud_) {
-      printf("running algorithm callback\n");
+      std::cout << "running algorithm callback\n" << std::endl;
       // If extrinsic calibration is not available:
       //if (!extrinsic_calibration)
       //{ // Set fixed transformation from rgb frame and base_link
@@ -670,9 +670,9 @@
           }
       }
 
-      printf("Click and drag for Selection\n");
-      printf("\n");
-      printf("------> Press 'shift+enter' to save\n");
+      std::cout << "Click and drag for Selection\n" << std::endl;
+      std::cout << "\n" << std::endl;
+      std::cout << "------> Press 'shift+enter' to save\n" << std::endl;
 
       // Add point picking callback to viewer:
       cv::Mat curr_image_clone;
@@ -727,7 +727,7 @@
           cv::imshow("Draw a box around the area of interest", curr_image_clone);
           cv::waitKey(1);
       }
-      printf("DEBUG: box finished");
+      std::cout << "DEBUG: box finished" << std::endl;
       //cv::waitKey(1);
       //}
 
@@ -748,11 +748,11 @@
           points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
           points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
       }
-      printf("DEBUG: points set");
+      std::cout << "DEBUG: points set" << std::endl;
       // define cam_intrins and camera_img
       pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud(new pcl::PointCloud<pcl::PointXYZ>);
       // cv_bridge::CvImagePtr img_ptr = cv_bridge::toCvCopy(camera_img);
-      printf("DEBUG: out_cloud set");
+      std::cout <<"DEBUG: out_cloud set" << std::endl;
       // get the points w.r.t. 3d cloud
       vector<Point3f> points;
       //vector<Point3f> worldpoints;
@@ -784,7 +784,7 @@
               worldpoints.push_back(current_point);
           }
       }
-      printf("DEBUG:  finished");
+      std::cout << "DEBUG:  finished" << std::endl;
       vector<Point3f> points_fg = clusterPoints(points);
       // vector<Point3f> points_fg = points;
       Point3d min_xyz(10000, 10000, 10000), max_xyz(-10000, -10000, -10000);
