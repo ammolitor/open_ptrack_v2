@@ -460,7 +460,7 @@
       vector<Point3f> clusterPoints(vector<Point3f>& points)
       {
           Mat labels;
-          cv::kmeans(points, 2,  labels,TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0), 3, KMEANS_PP_CENTERS);
+          cv::kmeans(points, 2,  labels, TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0), 3, KMEANS_PP_CENTERS);
 
           vector<Point3f> points_class[2];
           double z[2];
@@ -725,9 +725,8 @@
           cv::rectangle(curr_image_clone, drect, Scalar(0, 255, 0), 1, 8, 0);
           cv::imshow("Draw a box around the area of interest", curr_image_clone);
           cv::waitKey(1);
-
       }
-
+      printf("DEBUG: box finished")
       //cv::waitKey(1);
       //}
 
@@ -739,7 +738,7 @@
 
       // define this, but maybe do like the camera transform here????
       Eigen::MatrixXd points_2d_homo = cam_intrins_ * points_3d_in_cam;
-
+  
       // lets assume that points_2d_homo == world transform...
 
       Eigen::MatrixXd points_2d(2, pcl_cloud->size());
@@ -748,11 +747,11 @@
           points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
           points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
       }
-
+      printf("DEBUG: points set")
       // define cam_intrins and camera_img
       pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud(new pcl::PointCloud<pcl::PointXYZ>);
       // cv_bridge::CvImagePtr img_ptr = cv_bridge::toCvCopy(camera_img);
-
+      printf("DEBUG: out_cloud set")
       // get the points w.r.t. 3d cloud
       vector<Point3f> points;
       //vector<Point3f> worldpoints;
@@ -766,9 +765,9 @@
           {
               // transform the point here?
               //current_point = worldToCamTransform(points_3d_in_cam(0, i));
-              tmp.x = points_3d_in_cam(0, i);
-              tmp.y = points_3d_in_cam(1, i);
-              tmp.z = points_3d_in_cam(2, i);
+              tmp.x = static_cast<float>(points_3d_in_cam(0, i));
+              tmp.y = static_cast<float>(points_3d_in_cam(1, i));
+              tmp.z = static_cast<float>(points_3d_in_cam(2, i));
 
               world_to_temp.x =  static_cast<float>(tmp.x);
               world_to_temp.y =  static_cast<float>(tmp.y);
@@ -784,7 +783,7 @@
               worldpoints.push_back(current_point);
           }
       }
-
+      printf("DEBUG:  finished")
       vector<Point3f> points_fg = clusterPoints(points);
       // vector<Point3f> points_fg = points;
       Point3d min_xyz(10000, 10000, 10000), max_xyz(-10000, -10000, -10000);
