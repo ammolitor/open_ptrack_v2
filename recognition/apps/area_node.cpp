@@ -684,7 +684,7 @@
       cvcallback_args_image cb_args;
       cb_args.clicked_points_2d = clicked_points_2d;
       cb_args.selection_finished = selection_finished;
-      cb_args.isDrawing = False;
+      cb_args.isDrawing = false;
       cb_args.box = cv::Rect(0, 0, 0, 0);
       cb_args.P1 = P1;
       cb_args.P2 = P2;
