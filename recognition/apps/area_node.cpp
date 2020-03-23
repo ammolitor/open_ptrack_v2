@@ -674,6 +674,7 @@
       std::cout<<"------> Press 'shift+enter' to save"<<std::endl<<std::endl;
 
       // Add point picking callback to viewer:
+      cv::Mat curr_image_clone;
       std::vector<cv::Point> clicked_points_2d;
       bool selection_finished = false;
       bool clicked = false;
@@ -690,15 +691,17 @@
       cb_args.P2 = P2;
       cb_args.cropRect = cropRect;
       cb_args.clicked = clicked;
+      curr_image_clone = curr_image.clone();
       cv::namedWindow("Draw a box around the area of interest");
       cv::setMouseCallback("Draw a box around the area of interest", opencv_mouse_callback, (void*)&cb_args);
-      cv::imshow("Draw a box around the area of interest", curr_image);
+      cv::imshow("Draw a box around the area of interest", curr_image_clone);
       cv::waitKey(1);
 
       // Select the box from the image:
       while(!cb_args.selection_finished)
       {
           //char c=waitKey();
+          curr_image_clone = curr_image.clone();
           cv::Rect drect = cb_args.box;
 
           //if(c=='6') drect.x++;
@@ -719,8 +722,8 @@
           //if(c==27) break;
           //if(c=='r') {drect.x=0;drect.y=0;drect.width=0;drect.height=0;}
           
-          cv::rectangle(curr_image, drect, Scalar(0, 255, 0), 1, 8, 0);
-          cv::imshow("Draw a box around the area of interest", curr_image);
+          cv::rectangle(curr_image_clone, drect, Scalar(0, 255, 0), 1, 8, 0);
+          cv::imshow("Draw a box around the area of interest", curr_image_clone);
           cv::waitKey(1);
 
       }
