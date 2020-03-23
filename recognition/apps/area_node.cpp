@@ -726,7 +726,7 @@
           cv::imshow("Draw a box around the area of interest", curr_image_clone);
           cv::waitKey(1);
       }
-      printf("DEBUG: box finished")
+      printf("DEBUG: box finished");
       //cv::waitKey(1);
       //}
 
@@ -747,11 +747,11 @@
           points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
           points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
       }
-      printf("DEBUG: points set")
+      printf("DEBUG: points set");
       // define cam_intrins and camera_img
       pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud(new pcl::PointCloud<pcl::PointXYZ>);
       // cv_bridge::CvImagePtr img_ptr = cv_bridge::toCvCopy(camera_img);
-      printf("DEBUG: out_cloud set")
+      printf("DEBUG: out_cloud set");
       // get the points w.r.t. 3d cloud
       vector<Point3f> points;
       //vector<Point3f> worldpoints;
