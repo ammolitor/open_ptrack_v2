@@ -571,7 +571,7 @@
     void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                       const sensor_msgs::Image::ConstPtr& depth_image,
                       const PointCloudT::ConstPtr& cloud_) {
-      printf("running algorithm callback");
+      printf("running algorithm callback\n");
       // If extrinsic calibration is not available:
       //if (!extrinsic_calibration)
       //{ // Set fixed transformation from rgb frame and base_link
@@ -670,8 +670,9 @@
           }
       }
 
-      std::cout<<"Click and drag for Selection"<<std::endl<<std::endl;
-      std::cout<<"------> Press 'shift+enter' to save"<<std::endl<<std::endl;
+      printf("Click and drag for Selection\n");
+      printf("\n");
+      printf("------> Press 'shift+enter' to save\n");
 
       // Add point picking callback to viewer:
       cv::Mat curr_image_clone;
