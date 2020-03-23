@@ -691,7 +691,7 @@
       cb_args.cropRect = cropRect;
       cb_args.clicked = clicked;
       cv::namedWindow("Draw a box around the area of interest");
-      cv::setMouseCallback("Draw a box around the area of interest", box_cb, (void*)&cb_args);
+      cv::setMouseCallback("Draw a box around the area of interest", opencv_mouse_callback, (void*)&cb_args);
 
       // Select the box from the image:
       while(!cb_args.selection_finished)
