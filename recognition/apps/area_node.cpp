@@ -783,7 +783,7 @@
               worldpoints.push_back(current_point);
           }
       }
-      printf("DEBUG:  finished")
+      printf("DEBUG:  finished");
       vector<Point3f> points_fg = clusterPoints(points);
       // vector<Point3f> points_fg = points;
       Point3d min_xyz(10000, 10000, 10000), max_xyz(-10000, -10000, -10000);
