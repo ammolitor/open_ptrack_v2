@@ -233,7 +233,7 @@
     std::vector<cv::Point> clicked_points_2d;
   };
 
-  void opencv_mouse_callback( int event, int x, int y, int , void* args){
+  void opencv_mouse_callback(int event, int x, int y,  int flags, void* args){
     //handlerT * data = (handlerT*)param;
     cvcallback_args_image* data = (cvcallback_args_image *)args;
     switch( event ){
