@@ -286,6 +286,12 @@ void opencv_mouse_callback(int event, int x, int y,  int flags, void* args){
   }
 }
 
+std::string environment_var_to_string( std::string const & key ) const
+{
+    char * val = getenv( key.c_str() );
+    return val == NULL ? std::string("") : std::string(val);
+}
+
 /**
  * @brief The AreaDefinitionNode
  */
@@ -897,15 +903,11 @@ class AreaDefinitionNode {
     cv::imshow("disp", src_img);
     
     // saving image
-    char *filename = "/area.jpg";
-    char *home_dir = getenv("HOME");
-    char *filepath = malloc(strlen(home_dir) + strlen(filename) + 1);
-    strncpy(filepath, home_dir, strlen(home_dir) + 1);
-    strncat(filepath, filename, strlen(filename) + 1);
-    //printf("%s\n", filepath);
+    std::string filename = "/area.jpg";
+    std::string home_dir = environment_var_to_string("HOME");
+    std::string filepath = home_dir + filename;
     std::cout << "DEBUG: saving image to: " << filepath << std::endl;
     cv::imwrite(filepath, src_img);
-    free(filepath);
 
     cv::waitKey(1);
     std::cout << "DEBUG: src finished" << std::endl;
