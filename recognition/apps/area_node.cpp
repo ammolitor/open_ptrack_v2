@@ -909,7 +909,7 @@ class AreaDefinitionNode {
     image_pub.publish(msg);
     //return rect; 
     // shut down ros node
-    ros::shutdown()
+    ros::shutdown();
     }
 };
 
