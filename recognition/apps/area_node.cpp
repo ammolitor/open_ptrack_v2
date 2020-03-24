@@ -573,7 +573,7 @@ class AreaDefinitionNode {
   void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                       const sensor_msgs::Image::ConstPtr& depth_image,
                       const PointCloudT::ConstPtr& cloud_) {
-    ros::spinOnce();
+    //ros::spinOnce();
     std::cout << "running algorithm callback\n" << std::endl;
     // If extrinsic calibration is not available:
     //if (!extrinsic_calibration)
@@ -907,8 +907,9 @@ class AreaDefinitionNode {
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", src_img).toImageMsg();
     msg->header.stamp = cv_ptr_rgb->header.stamp;
     image_pub.publish(msg);
-
     //return rect; 
+    // shut down ros node
+    ros::shutdown()
     }
 };
 
