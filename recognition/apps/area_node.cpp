@@ -895,6 +895,18 @@ class AreaDefinitionNode {
         }
     std::cout << "DEBUG: about to show image" << std::endl;
     cv::imshow("disp", src_img);
+    
+    // saving image
+    char *filename = "/area.jpg";
+    char *home_dir = getenv("HOME");
+    char *filepath = malloc(strlen(home_dir) + strlen(filename) + 1);
+    strncpy(filepath, home_dir, strlen(home_dir) + 1);
+    strncat(filepath, filename, strlen(filename) + 1);
+    //printf("%s\n", filepath);
+    std::cout << "DEBUG: saving image to: " << filepath << std::endl
+    cv::imwrite(filepath, src_img);
+    free(filepath);
+
     cv::waitKey(1);
     std::cout << "DEBUG: src finished" << std::endl;
 
