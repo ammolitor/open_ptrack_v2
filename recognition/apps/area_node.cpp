@@ -869,11 +869,12 @@ class AreaDefinitionNode {
         if(max_xyz.z < tmp_pt.z)
             max_xyz.z = tmp_pt.z;
     }
-        
+    std::cout << "DEBUG: clustering finished" << std::endl;
     if(! filterBboxByArea(rect, (min_xyz.z + max_xyz.z) / 2))
     {
         cv::rectangle(src_img, cv:: Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), cv::Scalar(30,07,197), 3);
         cv::putText(src_img, "fake", cv::Point(rect.x + 5, rect.y + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
+        std::cout << "DEBUG: filterBboxByArea finished" << std::endl;
     }
     else
         {
@@ -888,10 +889,12 @@ class AreaDefinitionNode {
         char loc_str[30];
         sprintf(loc_str, "%.2f, %.2f, %.2f", ave_x, ave_y, ave_z);
         cv::putText(src_img, loc_str, cv::Point(rect.x + 15, rect.y - 25), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+        std::cout << "DEBUG: else filterBboxByArea finished" << std::endl;
         }
-
+    std::cout << "DEBUG: about to show image" << std::endl;
     cv::imshow("disp", src_img);
-    cv::waitKey(5);
+    cv::waitKey(1);
+    std::cout << "DEBUG: src finished" << std::endl;
 
     sensor_msgs::PointCloud2 out_cloud_ros;
     pcl::toROSMsg(*out_cloud, out_cloud_ros);
