@@ -662,6 +662,7 @@ class AreaDefinitionNode {
         cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
         }
     }
+
     int cloud_xyzrgb_is_empty = cloud_xyzrgb->size();
     std::cout << "DEBUG: cloud_xyzrgb_is_empty: " << cloud_xyzrgb_is_empty << std::endl;
 
@@ -931,6 +932,6 @@ int main(int argc, char** argv) {
   std::cout << "nodehandle init " << std::endl; 
   AreaDefinitionNode node(nh, sensor_name, detections_topic);
   std::cout << "detection node init " << std::endl;
-  ros::spin();
+  ros::spinOnce();
   return 0;
 }
