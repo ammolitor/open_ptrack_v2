@@ -617,7 +617,7 @@ class AreaDefinitionNode {
     cv_bridge::CvImage::Ptr  cv_ptr_depth;
     cv::Mat cv_image;
     cv::Mat cv_depth_image;
-    cv::Mat src_img  = cv_image.clone();
+    cv::Mat
 
     // set detection variables here
     cv::Size image_size;
@@ -626,6 +626,7 @@ class AreaDefinitionNode {
 
     cv_ptr_rgb = cv_bridge::toCvCopy(rgb_image, sensor_msgs::image_encodings::BGR8);
     cv_image = cv_ptr_rgb->image;
+    src_img  = cv_image.clone();
     cv_ptr_depth = cv_bridge::toCvCopy(depth_image, sensor_msgs::image_encodings::TYPE_32FC1);
     cv_depth_image = cv_ptr_depth->image;
     image_size = cv_image.size();
@@ -882,7 +883,6 @@ class AreaDefinitionNode {
         double ave_y = (max_xyz.y + min_xyz.y) / 2;
         double ave_z = (max_xyz.z + min_xyz.z) / 2;
         
-
         drawCube(src_img, min_xyz, max_xyz);
         cv::putText(src_img, "area", cv::Point(rect.x + 5, rect.y + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
 
