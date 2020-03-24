@@ -573,6 +573,7 @@ class AreaDefinitionNode {
   void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                       const sensor_msgs::Image::ConstPtr& depth_image,
                       const PointCloudT::ConstPtr& cloud_) {
+    ros::spinOnce();
     std::cout << "running algorithm callback\n" << std::endl;
     // If extrinsic calibration is not available:
     //if (!extrinsic_calibration)
@@ -932,6 +933,6 @@ int main(int argc, char** argv) {
   std::cout << "nodehandle init " << std::endl; 
   AreaDefinitionNode node(nh, sensor_name, detections_topic);
   std::cout << "detection node init " << std::endl;
-  ros::spinOnce();
+  ros::spin();
   return 0;
 }
