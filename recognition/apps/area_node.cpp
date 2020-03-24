@@ -784,7 +784,7 @@
               worldpoints.push_back(current_point);
           }
       }
-      std::cout << "DEBUG:  finished" << std::endl;
+      std::cout << "DEBUG:  finished - points size" << points.size() << std::endl;
       vector<Point3f> points_fg = clusterPoints(points);
       // vector<Point3f> points_fg = points;
       Point3d min_xyz(10000, 10000, 10000), max_xyz(-10000, -10000, -10000);
