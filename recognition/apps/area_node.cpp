@@ -638,6 +638,14 @@
       cloud_xyzrgb->width = cloud_->width;
       cloud_xyzrgb->height = cloud_->height;
       cloud_xyzrgb->is_dense = false;
+
+      bool cloud__is_empty = cloud_->size();
+      std::cout << "DEBUG: cloud__is_empty: " << cloud__is_empty << std::endl;
+      int cloud_width = cloud_->width;
+      std::cout << "DEBUG: cloud_width: " << cloud_width << std::endl;
+      bool cloud_height = cloud_->height;
+      std::cout << "DEBUG: cloud_height: " << cloud_height << std::endl;
+
       for (int i=0;i<cloud_->height;i++)
       {
           for (int j=0;j<cloud_->width;j++)
