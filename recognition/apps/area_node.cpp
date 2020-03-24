@@ -569,8 +569,8 @@
       }
 
     void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
-                      const sensor_msgs::Image::ConstPtr& depth_image,
-                      const PointCloudT::ConstPtr& cloud_) {
+                       const sensor_msgs::Image::ConstPtr& depth_image,
+                       const PointCloudT::ConstPtr& cloud_) {
       std::cout << "running algorithm callback\n" << std::endl;
       // If extrinsic calibration is not available:
       //if (!extrinsic_calibration)
@@ -652,7 +652,8 @@
       //thus it seems like we could just use cloud xyrgb to fill points_3d_in_cam instead
       // of using pcl_cloud 
 
-
+      bool cloud_xyzrgb_is_empty = cloud_xyzrgb.isZero(0);
+      std::cout << "DEBUG: cloud_xyzrgb_is_empty: " << cloud_xyzrgb_is_empty << std::endl;
 
       // I think this part is failing, bc pcl_cloud hasn't been filled with anything
 
@@ -753,12 +754,12 @@
       cv::Point p1 = cb_args.P1;
       cv::Point p2 = cb_args.P2;
       cv::Rect rect = cb_args.box;
-      std::cout << "DEBUG:  rect x: " << rect.x << std::endl;
-      std::cout << "DEBUG:  rect y: " << rect.y << std::endl;
-      std::cout << "DEBUG:  rect width: " << rect.width << std::endl;
-      std::cout << "DEBUG:  rect height: " << rect.height << std::endl;
+      std::cout << "DEBUG: rect x: " << rect.x << std::endl;
+      std::cout << "DEBUG: rect y: " << rect.y << std::endl;
+      std::cout << "DEBUG: rect width: " << rect.width << std::endl;
+      std::cout << "DEBUG: rect height: " << rect.height << std::endl;
       bool points_3d_in_cam_is_empty = points_3d_in_cam.isZero(0);
-      std::cout << "DEBUG:  points_3d_in_cam_is_empty: " << points_3d_in_cam_is_empty << std::endl;
+      std::cout << "DEBUG: points_3d_in_cam_is_empty: " << points_3d_in_cam_is_empty << std::endl;
       // get the bounding box of the area,
 
       // define this, but maybe do like the camera transform here????
