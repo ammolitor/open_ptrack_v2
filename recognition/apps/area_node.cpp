@@ -636,8 +636,8 @@ class AreaDefinitionNode {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_xyzrgb(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
     // fails?
-    pcl::fromROSMsg(*cloud_, *pcl_cloud);
-
+    //pcl::fromROSMsg(*cloud_, *pcl_cloud);
+    //https://answers.ros.org/question/9515/how-to-convert-between-different-point-cloud-types-using-pcl/
     pcl::PointXYZRGB xyzrgb_point;
     cloud_xyzrgb->points.resize(cloud_->width * cloud_->height, xyzrgb_point);
     cloud_xyzrgb->width = cloud_->width;
@@ -651,6 +651,7 @@ class AreaDefinitionNode {
     int cloud_height = cloud_->height;
     std::cout << "DEBUG: cloud_height: " << cloud_height << std::endl;
 
+    // fill xyzrgb
     for (int i=0;i<cloud_->height;i++)
     {
         for (int j=0;j<cloud_->width;j++)
@@ -660,13 +661,31 @@ class AreaDefinitionNode {
         cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
         }
     }
-    // YOU are here.
-    //cloud_xyzrgb is not empty, but we haven't figured out yet if pcl_cloud is empty
-    //thus it seems like we could just use cloud xyrgb to fill points_3d_in_cam instead
-    // of using pcl_cloud 
-
     int cloud_xyzrgb_is_empty = cloud_xyzrgb->size();
     std::cout << "DEBUG: cloud_xyzrgb_is_empty: " << cloud_xyzrgb_is_empty << std::endl;
+
+    pcl::PointXYZ xyz_point;
+    pcl_cloud->points.resize(cloud_->width * cloud_->height, xyz_point);
+    pcl_cloud->width = cloud_->width;
+    pcl_cloud->height = cloud_->height;
+    pcl_cloud->is_dense = false;
+
+    for (size_t i = 0; i < cloud_.points->size(); i++) {
+        pcl_cloud->points[i].x = cloud_->points[i].x;
+        pcl_cloud->points[i].y = cloud_->points[i].y;
+        pcl_cloud->points[i].z = cloud_->points[i].z;
+    }
+
+    //substitute for above??
+    //for (int i=0;i<cloud_->height;i++)
+    //{
+    //    for (int j=0;j<cloud_->width;j++)
+    //    {
+    //    pcl_cloud->at(j,i).x = cloud_->at(j,i).x;
+    //    pcl_cloud->at(j,i).y = cloud_->at(j,i).y;
+    //    pcl_cloud->at(j,i).z = cloud_->at(j,i).z;
+    //    }
+    //}
 
     // I think this part is failing, bc pcl_cloud hasn't been filled with anything
 
