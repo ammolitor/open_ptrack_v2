@@ -670,7 +670,7 @@ class AreaDefinitionNode {
     pcl_cloud->height = cloud_->height;
     pcl_cloud->is_dense = false;
 
-    for (size_t i = 0; i < cloud_->points->size(); i++) {
+    for (size_t i = 0; i < cloud_->points.size(); i++) {
         pcl_cloud->points[i].x = cloud_->points[i].x;
         pcl_cloud->points[i].y = cloud_->points[i].y;
         pcl_cloud->points[i].z = cloud_->points[i].z;
