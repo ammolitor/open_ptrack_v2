@@ -757,6 +757,8 @@
       std::cout << "DEBUG:  rect y: " << rect.y << std::endl;
       std::cout << "DEBUG:  rect width: " << rect.width << std::endl;
       std::cout << "DEBUG:  rect height: " << rect.height << std::endl;
+      bool points_3d_in_cam_is_empty = points_3d_in_cam.isZero(0);
+      std::cout << "DEBUG:  points_3d_in_cam_is_empty: " << points_3d_in_cam_is_empty << std::endl;
       // get the bounding box of the area,
 
       // define this, but maybe do like the camera transform here????
@@ -770,6 +772,9 @@
           points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
           points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
       }
+
+
+
       std::cout << "DEBUG: points set" << std::endl;
       // define cam_intrins and camera_img
       pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud(new pcl::PointCloud<pcl::PointXYZ>);
