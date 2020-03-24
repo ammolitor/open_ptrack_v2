@@ -903,7 +903,7 @@ class AreaDefinitionNode {
     strncpy(filepath, home_dir, strlen(home_dir) + 1);
     strncat(filepath, filename, strlen(filename) + 1);
     //printf("%s\n", filepath);
-    std::cout << "DEBUG: saving image to: " << filepath << std::endl
+    std::cout << "DEBUG: saving image to: " << filepath << std::endl;
     cv::imwrite(filepath, src_img);
     free(filepath);
 
