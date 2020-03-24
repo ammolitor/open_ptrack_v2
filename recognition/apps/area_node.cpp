@@ -652,7 +652,7 @@
       //thus it seems like we could just use cloud xyrgb to fill points_3d_in_cam instead
       // of using pcl_cloud 
 
-      bool cloud_xyzrgb_is_empty = cloud_xyzrgb.isZero(0);
+      bool cloud_xyzrgb_is_empty = cloud_xyzrgb->size();
       std::cout << "DEBUG: cloud_xyzrgb_is_empty: " << cloud_xyzrgb_is_empty << std::endl;
 
       // I think this part is failing, bc pcl_cloud hasn't been filled with anything
