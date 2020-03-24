@@ -735,6 +735,10 @@
       cv::Point p1 = cb_args.P1;
       cv::Point p2 = cb_args.P2;
       cv::Rect rect = cb_args.box;
+      std::cout << "DEBUG:  rect x: " << rect.x << std::endl;
+      std::cout << "DEBUG:  rect y: " << rect.y << std::endl;
+      std::cout << "DEBUG:  rect width: " << rect.width << std::endl;
+      std::cout << "DEBUG:  rect height: " << rect.height << std::endl;
       // get the bounding box of the area,
 
       // define this, but maybe do like the camera transform here????
@@ -784,7 +788,7 @@
               worldpoints.push_back(current_point);
           }
       }
-      std::cout << "DEBUG:  finished - points size" << points.size() << std::endl;
+      std::cout << "DEBUG:  finished - points size: " << points.size() << std::endl;
       vector<Point3f> points_fg = clusterPoints(points);
       // vector<Point3f> points_fg = points;
       Point3d min_xyz(10000, 10000, 10000), max_xyz(-10000, -10000, -10000);
