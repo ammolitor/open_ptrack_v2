@@ -647,15 +647,33 @@
           cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
           }
       }
+      // YOU are here.
+      //cloud_xyzrgb is not empty, but we haven't figured out yet if pcl_cloud is empty
+      //thus it seems like we could just use cloud xyrgb to fill points_3d_in_cam instead
+      // of using pcl_cloud 
+
+
+
+      // I think this part is failing, bc pcl_cloud hasn't been filled with anything
+
+      // define xyz 3d points in cloud
+      //Eigen::MatrixXd points_3d_in_cam(3, pcl_cloud->size());
+      //for(int i = 0; i < pcl_cloud->size(); i++)
+      //{
+      //    points_3d_in_cam(0, i) = (*pcl_cloud)[i].x;
+      //    points_3d_in_cam(1, i) = (*pcl_cloud)[i].y;
+      //    points_3d_in_cam(2, i) = (*pcl_cloud)[i].z;
+      //}    
 
       // define xyz 3d points in cloud
       Eigen::MatrixXd points_3d_in_cam(3, pcl_cloud->size());
       for(int i = 0; i < pcl_cloud->size(); i++)
       {
-          points_3d_in_cam(0, i) = (*pcl_cloud)[i].x;
-          points_3d_in_cam(1, i) = (*pcl_cloud)[i].y;
-          points_3d_in_cam(2, i) = (*pcl_cloud)[i].z;
+          points_3d_in_cam(0, i) = cloud_xyzrgb->points[i].x;
+          points_3d_in_cam(1, i) = cloud_xyzrgb->points[i].y;
+          points_3d_in_cam(2, i) = cloud_xyzrgb->points[i].z;
       }    
+
 
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
 
@@ -780,7 +798,6 @@
 
               tf::Vector3 current_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
               current_point = worldToCamTransform(current_point);
-
 
               // transform point here
 
