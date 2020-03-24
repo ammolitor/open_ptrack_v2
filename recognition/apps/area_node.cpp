@@ -639,11 +639,11 @@
       cloud_xyzrgb->height = cloud_->height;
       cloud_xyzrgb->is_dense = false;
 
-      bool cloud__is_empty = cloud_->size();
+      int cloud__is_empty = cloud_->size();
       std::cout << "DEBUG: cloud__is_empty: " << cloud__is_empty << std::endl;
       int cloud_width = cloud_->width;
       std::cout << "DEBUG: cloud_width: " << cloud_width << std::endl;
-      bool cloud_height = cloud_->height;
+      int cloud_height = cloud_->height;
       std::cout << "DEBUG: cloud_height: " << cloud_height << std::endl;
 
       for (int i=0;i<cloud_->height;i++)
@@ -660,7 +660,7 @@
       //thus it seems like we could just use cloud xyrgb to fill points_3d_in_cam instead
       // of using pcl_cloud 
 
-      bool cloud_xyzrgb_is_empty = cloud_xyzrgb->size();
+      int cloud_xyzrgb_is_empty = cloud_xyzrgb->size();
       std::cout << "DEBUG: cloud_xyzrgb_is_empty: " << cloud_xyzrgb_is_empty << std::endl;
 
       // I think this part is failing, bc pcl_cloud hasn't been filled with anything
