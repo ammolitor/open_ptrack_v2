@@ -687,7 +687,7 @@ class AreaDefinitionNode {
     //    points_3d_in_cam(0, i) = cloud_xyzrgb->points[i].x;
     //    points_3d_in_cam(1, i) = cloud_xyzrgb->points[i].y;
     //    points_3d_in_cam(2, i) = cloud_xyzrgb->points[i].z;
-    }//    
+    //}    
 
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
