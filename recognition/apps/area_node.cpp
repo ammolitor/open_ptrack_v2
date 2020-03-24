@@ -617,7 +617,7 @@ class AreaDefinitionNode {
     cv_bridge::CvImage::Ptr  cv_ptr_depth;
     cv::Mat cv_image;
     cv::Mat cv_depth_image;
-    cv::Mat
+    cv::Mat src_img;
 
     // set detection variables here
     cv::Size image_size;
