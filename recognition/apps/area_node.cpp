@@ -842,15 +842,18 @@ class AreaDefinitionNode {
             tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
             current_world_point = worldToCamTransform(current_world_point);
 
+            // get x, y, z of current point
+
             // transform point here
             points.push_back(tmp);
             worldpoints.push_back(current_world_point);
             // push all points into a json file to define the area.
-            area_json[sensor_name]["world"][cube_count]["x"] = current_world_point.x;
+            // error: invalid use of non-static member function ‘const tfScalar& tf::Vector3::x() const’
+            area_json[sensor_name]["world"][cube_count]["x"] = current_world_point.getX();
             area_json[sensor_name][sensor_name][cube_count]["x"] = tmp.x;
-            area_json[sensor_name]["world"][cube_count]["y"] = current_world_point.y;
+            area_json[sensor_name]["world"][cube_count]["y"] = current_world_point.getY();
             area_json[sensor_name][sensor_name][cube_count]["y"] = tmp.y;
-            area_json[sensor_name]["world"][cube_count]["z"] = current_world_point.z;
+            area_json[sensor_name]["world"][cube_count]["z"] = current_world_point.getZ();
             area_json[sensor_name][sensor_name][cube_count]["z"] = tmp.z;            
             cube_count++;
         }
