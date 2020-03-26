@@ -1,0 +1,22 @@
+{
+  "__comment__": "network var follows the pattern: master, node0, node1, node2, etc. ",
+  "enable_people_tracking": true,
+  "enable_pose": false,
+  "enable_object": true,
+  "network": {
+    "master": { 
+      "pc": "Jetson-TX2-Ubuntu-18-CUDA-10-NEW",
+      "sensors": {
+        "type": "realsense",
+        "id": "d415",
+        "people_detector": "yolo"
+      }
+    }
+  },
+  "checkerboard": {
+    "rows": 6,
+    "cols": 5,
+    "cell_width": 0.07,
+    "cell_height": 0.07
+  }
+}

@@ -586,6 +586,10 @@ class AreaDefinitionNode {
         cv::line(img, corners_2d[6], corners_2d[7], cv::Scalar(197,75,30), thickness);
     }
 
+  //json export_cube(blah blah){
+  // do stuff here  
+  //} end
+
   void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                       const sensor_msgs::Image::ConstPtr& depth_image,
                       const PointCloudT::ConstPtr& cloud_) {
@@ -774,26 +778,7 @@ class AreaDefinitionNode {
     {
         //char c=waitKey();
         curr_image_clone = curr_image.clone();
-        cv::Rect drect = cb_args.box;
-
-        //if(c=='6') drect.x++;
-        //if(c=='4') drect.x--;
-        //if(c=='8') drect.y--;
-        //if(c=='2') drect.y++;
-
-        //if(c=='w') { drect.y--; drect.height++;}
-        //if(c=='d') drect.width++;
-        //if(c=='x') drect.height++;
-        //if(c=='a') { drect.x--; drect.width++;}
-
-        //if(c=='t') { drect.y++; drect.height--;}
-        //if(c=='h') drect.width--;
-        //if(c=='b') drect.height--;
-        //if(c=='f') { drect.x++; drect.width--;}
-
-        //if(c==27) break;
-        //if(c=='r') {drect.x=0;drect.y=0;drect.width=0;drect.height=0;}
-        
+        cv::Rect drect = cb_args.box;        
         cv::rectangle(curr_image_clone, drect, Scalar(0, 255, 0), 1, 8, 0);
         cv::imshow("Draw a box around the area of interest", curr_image_clone);
         cv::waitKey(1);
@@ -826,7 +811,6 @@ class AreaDefinitionNode {
         points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
     }
 
-
     std::cout << "DEBUG: points set" << std::endl;
     // define cam_intrins and camera_img
     pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -838,9 +822,11 @@ class AreaDefinitionNode {
     vector<tf::Vector3> worldpoints;
     Point3f tmp;
     Point3f world_to_temp;
+    json area_json;
+    int cube_count = 0;
     for(int i = 0; i < pcl_cloud->size(); i++)
     { 
-        if(points_2d(0, i) < rect.x + rect.width && points_2d(0, i) > rect.x 
+      if(points_2d(0, i) < rect.x + rect.width && points_2d(0, i) > rect.x 
         && points_2d(1, i) < rect.y + rect.height && points_2d(1, i) > rect.y)
         {
             // transform the point here?
@@ -853,15 +839,29 @@ class AreaDefinitionNode {
             world_to_temp.y =  static_cast<float>(tmp.y);
             world_to_temp.z =  static_cast<float>(tmp.z);
 
-            tf::Vector3 current_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
-            current_point = worldToCamTransform(current_point);
+            tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
+            current_world_point = worldToCamTransform(current_world_point);
 
             // transform point here
-
             points.push_back(tmp);
-            worldpoints.push_back(current_point);
+            worldpoints.push_back(current_world_point);
+            // push all points into a json file to define the area.
+            area_json[sensor_name]["world"][cube_count]["x"] = current_world_point.x;
+            area_json[sensor_name][sensor_name][cube_count]["x"] = tmp.x;
+            area_json[sensor_name]["world"][cube_count]["y"] = current_world_point.y;
+            area_json[sensor_name][sensor_name][cube_count]["y"] = tmp.y;
+            area_json[sensor_name]["world"][cube_count]["z"] = current_world_point.z;
+            area_json[sensor_name][sensor_name][cube_count]["z"] = tmp.z;            
+            cube_count++;
         }
     }
+
+    // TODO
+    // transform rect to world rect here
+    // save either worldpoints
+    // save points
+    // https://stackoverflow.com/questions/19074380/how-to-save-stdvectorkeypoint-to-a-text-file-in-c
+
     std::cout << "DEBUG:  finished - points size: " << points.size() << std::endl;
     vector<Point3f> points_fg = clusterPoints(points);
     // vector<Point3f> points_fg = points;
@@ -923,6 +923,13 @@ class AreaDefinitionNode {
     cv::waitKey(1);
     std::cout << "DEBUG: src finished" << std::endl;
 
+    // save area cube to file
+    std::string package_path = ros::package::getPath("recognition");
+    std::string area_json_path = package_path + "/cfg/area.json";
+    std::ofstream areafile(area_json_path);
+    areafile << std::setw(4) << area_json << std::endl;
+
+    // output cloud to file
     sensor_msgs::PointCloud2 out_cloud_ros;
     pcl::toROSMsg(*out_cloud, out_cloud_ros);
     out_cloud_ros.header.frame_id = "world";
