@@ -987,19 +987,19 @@ class AreaDefinitionNode {
     tf::Vector3 min_xyz_world_point(min_xyz.x, min_xyz.y, min_xyz.z);
     min_xyz_world_point = worldToCamTransform(min_xyz_world_point);
 
-    area_json[sensor_name]["world"]["min"]["x"] = min_xyz_world_point.getX();
-    area_json[sensor_name][sensor_name]["min"]["x"] = min_xyz.x;
-    area_json[sensor_name]["world"]["min"]["y"] = min_xyz_world_point.getY();
-    area_json[sensor_name][sensor_name]["min"]["y"] = min_xyz.y;
-    area_json[sensor_name]["world"]["min"]["z"] = min_xyz_world_point.getZ();
-    area_json[sensor_name][sensor_name]["min"]["z"] = min_xyz.z;     
+    area_json[sensor_name]["min"]["world"]["x"] = min_xyz_world_point.getX();
+    area_json[sensor_name]["min"][sensor_name]["x"] = min_xyz.x;
+    area_json[sensor_name]["min"]["world"]["y"] = min_xyz_world_point.getY();
+    area_json[sensor_name]["min"][sensor_name]["y"] = min_xyz.y;
+    area_json[sensor_name]["min"]["world"]["z"] = min_xyz_world_point.getZ();
+    area_json[sensor_name]["min"][sensor_name]["z"] = min_xyz.z;     
 
-    area_json[sensor_name]["world"]["max"]["x"] = max_xyz_world_point.getX();
-    area_json[sensor_name][sensor_name]["max"]["x"] = max_xyz.x;
-    area_json[sensor_name]["world"]["max"]["y"] = max_xyz_world_point.getY();
-    area_json[sensor_name][sensor_name]["max"]["y"] = max_xyz.y;
-    area_json[sensor_name]["world"]["max"]["z"] = max_xyz_world_point.getZ();
-    area_json[sensor_name][sensor_name]["max"]["z"] = max_xyz.z;   
+    area_json[sensor_name]["max"]["world"]["x"] = max_xyz_world_point.getX();
+    area_json[sensor_name]["max"][sensor_name]["x"] = max_xyz.x;
+    area_json[sensor_name]["max"]["world"]["y"] = max_xyz_world_point.getY();
+    area_json[sensor_name]["max"][sensor_name]["y"] = max_xyz.y;
+    area_json[sensor_name]["max"]["world"]["z"] = max_xyz_world_point.getZ();
+    area_json[sensor_name]["max"][sensor_name]["z"] = max_xyz.z;   
 
     std::cout << "DEBUG: about to show image" << std::endl;
     cv::imshow("disp", src_img);
