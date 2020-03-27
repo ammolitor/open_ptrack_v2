@@ -634,14 +634,12 @@ class AreaDefinitionNode {
   //json export_cube(blah blah){
   // do stuff here  
   //} end
-
     void extract_cube_boundries(vector<Point3f> points_fg, Point3d min_xyz, Point3d max_xyz) {
       for(int i = 0; i < points_fg.size(); i++) {
         pcl::PointXYZ tmp_pt;
         tmp_pt.x = points_fg[i].x;
         tmp_pt.y = points_fg[i].y;
         tmp_pt.z = points_fg[i].z;
-        out_cloud->push_back(tmp_pt);
         
         if(min_xyz.x > tmp_pt.x)
             min_xyz.x = tmp_pt.x;
