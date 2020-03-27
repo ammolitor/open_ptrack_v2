@@ -586,9 +586,78 @@ class AreaDefinitionNode {
         cv::line(img, corners_2d[6], corners_2d[7], cv::Scalar(197,75,30), thickness);
     }
 
+    void extract_cube(Mat& img, Point3d min_xyz, Point3d max_xyz)
+    {
+        // CREATE FUNCTION HERE
+        Eigen::MatrixXd corners(3,8);
+        double min_max_x[2] = {min_xyz.x, max_xyz.x};
+        double min_max_y[2] = {min_xyz.y, max_xyz.y};
+        double min_max_z[2] = {min_xyz.z, max_xyz.z};
+        int corner_index = 0;
+        for(int i = 0; i < 2; i++)
+        {
+            for(int j = 0; j < 2; j++)
+            {
+                for(int k = 0; k < 2; k++)
+                {
+                    corners(0, corner_index) = min_max_x[i]; 
+                    corners(1, corner_index) = min_max_y[j];
+                    corners(2, corner_index) = min_max_z[k];    
+                    corner_index ++;      
+                }
+            }
+        }
+        Eigen::MatrixXd corners_2d_homo = cam_intrins_ * corners;
+        vector<Point2d> corners_2d;
+        for(int i = 0; i < 8; i++)
+        {
+            Point2d tmp;
+            tmp.x = corners_2d_homo(0, i) / corners_2d_homo(2, i);
+            tmp.y = corners_2d_homo(1, i) / corners_2d_homo(2, i);
+            corners_2d.push_back(tmp);
+        }
+        int thickness = 2;
+        cv::line(img, corners_2d[0], corners_2d[1], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[0], corners_2d[2], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[0], corners_2d[4], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[1], corners_2d[3], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[1], corners_2d[5], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[2], corners_2d[3], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[2], corners_2d[6], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[3], corners_2d[7], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[4], corners_2d[5], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[4], corners_2d[6], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[5], corners_2d[7], cv::Scalar(197,75,30), thickness);
+        cv::line(img, corners_2d[6], corners_2d[7], cv::Scalar(197,75,30), thickness);
+    }
+
   //json export_cube(blah blah){
   // do stuff here  
   //} end
+
+    void extract_cube_boundries(vector<Point3f> points_fg, Point3d min_xyz, Point3d max_xyz) {
+      for(int i = 0; i < points_fg.size(); i++) {
+        pcl::PointXYZ tmp_pt;
+        tmp_pt.x = points_fg[i].x;
+        tmp_pt.y = points_fg[i].y;
+        tmp_pt.z = points_fg[i].z;
+        out_cloud->push_back(tmp_pt);
+        
+        if(min_xyz.x > tmp_pt.x)
+            min_xyz.x = tmp_pt.x;
+        if(min_xyz.y > tmp_pt.y)
+            min_xyz.y = tmp_pt.y;
+        if(min_xyz.z > tmp_pt.z)
+            min_xyz.z = tmp_pt.z;
+
+        if(max_xyz.x < tmp_pt.x)
+            max_xyz.x = tmp_pt.x;
+        if(max_xyz.y < tmp_pt.y)
+            max_xyz.y = tmp_pt.y;
+        if(max_xyz.z < tmp_pt.z)
+            max_xyz.z = tmp_pt.z;
+        }
+      }
 
   void area_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                       const sensor_msgs::Image::ConstPtr& depth_image,
@@ -912,6 +981,28 @@ class AreaDefinitionNode {
         cv::putText(src_img, loc_str, cv::Point(rect.x + 15, rect.y - 25), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
         std::cout << "DEBUG: else filterBboxByArea finished" << std::endl;
         }
+    
+
+    // take max/min and convert to world view
+    tf::Vector3 max_xyz_world_point(max_xyz.x, max_xyz.y, max_xyz.z);
+    max_xyz_world_point = worldToCamTransform(max_xyz_world_point);
+    tf::Vector3 min_xyz_world_point(min_xyz.x, min_xyz.y, min_xyz.z);
+    min_xyz_world_point = worldToCamTransform(min_xyz_world_point);
+
+    area_json[sensor_name]["world"]["min"]["x"] = min_xyz_world_point.getX();
+    area_json[sensor_name][sensor_name]["min"]["x"] = min_xyz.x;
+    area_json[sensor_name]["world"]["min"]["y"] = min_xyz_world_point.getY();
+    area_json[sensor_name][sensor_name]["min"]["y"] = min_xyz.y;
+    area_json[sensor_name]["world"]["min"]["z"] = min_xyz_world_point.getZ();
+    area_json[sensor_name][sensor_name]["min"]["z"] = min_xyz.z;     
+
+    area_json[sensor_name]["world"]["max"]["x"] = max_xyz_world_point.getX();
+    area_json[sensor_name][sensor_name]["max"]["x"] = max_xyz.x;
+    area_json[sensor_name]["world"]["max"]["y"] = max_xyz_world_point.getY();
+    area_json[sensor_name][sensor_name]["max"]["y"] = max_xyz.y;
+    area_json[sensor_name]["world"]["max"]["z"] = max_xyz_world_point.getZ();
+    area_json[sensor_name][sensor_name]["max"]["z"] = max_xyz.z;   
+
     std::cout << "DEBUG: about to show image" << std::endl;
     cv::imshow("disp", src_img);
     
