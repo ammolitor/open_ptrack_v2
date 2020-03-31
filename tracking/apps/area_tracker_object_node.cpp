@@ -437,7 +437,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
           t.filter_->getState(_x, _y);
           z = t._z;
           bool inside_area_cube = false;
-
+          int zone_id;
           for (zone_id = 0; zone_id < n_zones; zone_id++)
           {
             // need a world view here bc each detection was transformed

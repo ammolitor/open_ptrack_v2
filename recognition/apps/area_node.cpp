@@ -123,8 +123,8 @@ tf::Transform read_poses_from_json(std::string camera_name)
   json pose_config;
   std::string hard_coded_path = "/cfg/poses.json";
   std::cout << "--- detector cfg_callback ---" << std::endl;
-  std::string std::string package_path = ros::package::getPath("recognition");
-  std::string full_path = std::string package_path + hard_coded_path;
+  std::string package_path = ros::package::getPath("recognition");
+  std::string full_path = package_path + hard_coded_path;
   std::ifstream json_read(full_path);
   json_read >> pose_config;
 
@@ -1075,8 +1075,8 @@ int main(int argc, char** argv) {
   std::string detections_topic;
   json master_config;
   int n_zones;
-  std::string std::string package_path = ros::package::getPath("recognition");
-  std::string master_hard_coded_path = std::string package_path + "/cfg/master.json";
+  std::string package_path = ros::package::getPath("recognition");
+  std::string master_hard_coded_path = package_path + "/cfg/master.json";
   std::ifstream json_read(master_hard_coded_path);
   json_read >> master_config;
   sensor_name = master_config["sensor_name"]; //the path to the detector model file

@@ -75,7 +75,6 @@ add_executable(zone_tracker_object apps/area_tracker_object_node.cpp)
 target_link_libraries(zone_tracker_object ${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(zone_tracker_object ${PROJECT_NAME}_gencfg)
 
-
 add_executable(tracker3d apps/tracker_node_3d.cpp)
 target_link_libraries(tracker3d ${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(tracker3d ${PROJECT_NAME}_gencfg)
@@ -87,3 +86,7 @@ add_dependencies(${PROJECT_NAME}_skeleton_tracker_node ${PROJECT_NAME}_gencfg)
 add_executable(moving_average_filter apps/moving_average_filter_node.cpp)
 target_link_libraries(moving_average_filter ${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(moving_average_filter ${PROJECT_NAME}_gencfg)
+
+
+
+# test edit

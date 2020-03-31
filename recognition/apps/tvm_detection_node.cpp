@@ -375,8 +375,9 @@ class TVMDetectionNode {
               
               // adding this so scan which zone the given detection is in 
               if (json_found){
-                bool inside_area_cube = false; 
-                for (int zone_id = 0; zone_id < n_zones; zone_id++)
+                bool inside_area_cube = false;
+                int zone_id;
+                for (zone_id = 0; zone_id < n_zones; zone_id++)
                 {
                   // need a world view here bc each detection was transformed
                   // this will work for a singular cam, but would mean each cam would have to tune
