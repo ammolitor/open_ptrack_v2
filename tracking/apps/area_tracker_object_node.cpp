@@ -138,7 +138,6 @@ std::vector <int> association_for_initialize_objectnames;
 //read zone_json coordinate file
 json zone_json;
 std::string hard_coded_path = "/cfg/area.json";
-std::cout << "--- detector cfg_callback ---" << std::endl;
 //TODO fix this path
 std::string package_path = ros::package::getPath("recognition");
 std::string full_path = package_path + hard_coded_path;
