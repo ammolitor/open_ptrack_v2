@@ -123,8 +123,8 @@ tf::Transform read_poses_from_json(std::string camera_name)
   json pose_config;
   std::string hard_coded_path = "/cfg/poses.json";
   std::cout << "--- detector cfg_callback ---" << std::endl;
-  std::string package_path = ros::package::getPath("recognition");
-  std::string full_path = package_path + hard_coded_path;
+  std::string std::string package_path = ros::package::getPath("recognition");
+  std::string full_path = std::string package_path + hard_coded_path;
   std::ifstream json_read(full_path);
   json_read >> pose_config;
 
@@ -898,8 +898,8 @@ class AreaDefinitionNode {
 
       // will this even work????
       //try {
-      //  std::string package_path = ros::package::getPath("recognition");
-      //  std::string master_hard_coded_path = package_path + "/cfg/area.json";
+      //  std::string std::string package_path = ros::package::getPath("recognition");
+      //  std::string master_hard_coded_path = std::string package_path + "/cfg/area.json";
       //  std::ifstream json_read(master_hard_coded_path);
       //  json_read >> zone_json;
       //  try {
@@ -1046,17 +1046,17 @@ class AreaDefinitionNode {
     std::cout << "DEBUG: src finished" << std::endl;
 
     // save area cube to file
-    package_path = ros::package::getPath("recognition");
-    std::string zone_json_path = package_path + "/cfg/area.json";
+    std::string area_path = ros::package::getPath("recognition");
+    std::string zone_json_path = area_path + "/cfg/area.json";
     std::ofstream areafile(zone_json_path);
     areafile << std::setw(4) << zone_json << std::endl;
 
     // output cloud to file
-    sensor_msgs::PointCloud2 out_cloud_ros;
-    pcl::toROSMsg(*out_cloud, out_cloud_ros);
-    out_cloud_ros.header.frame_id = "world";
-    out_cloud_ros.header.stamp = cv_ptr_rgb->header.stamp;
-    point_cloud_publish.publish(out_cloud_ros);
+    //sensor_msgs::PointCloud2 out_cloud_ros;
+    //pcl::toROSMsg(*out_cloud, out_cloud_ros);
+    //out_cloud_ros.header.frame_id = "world";
+    //out_cloud_ros.header.stamp = cv_ptr_rgb->header.stamp;
+    //point_cloud_publish.publish(out_cloud_ros);
 
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", src_img).toImageMsg();
     msg->header.stamp = cv_ptr_rgb->header.stamp;
@@ -1075,8 +1075,8 @@ int main(int argc, char** argv) {
   std::string detections_topic;
   json master_config;
   int n_zones;
-  std::string package_path = ros::package::getPath("recognition");
-  std::string master_hard_coded_path = package_path + "/cfg/master.json";
+  std::string std::string package_path = ros::package::getPath("recognition");
+  std::string master_hard_coded_path = std::string package_path + "/cfg/master.json";
   std::ifstream json_read(master_hard_coded_path);
   json_read >> master_config;
   sensor_name = master_config["sensor_name"]; //the path to the detector model file
