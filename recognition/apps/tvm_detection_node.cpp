@@ -188,7 +188,6 @@ class TVMDetectionNode {
           std::string master_hard_coded_path = package_path + "/cfg/area.json";
           std::ifstream json_read(master_hard_coded_path);
           json_read >> zone_json;
-          json_found = true;
           
           // get the number of zones to scan.
           json master_config;
@@ -197,11 +196,11 @@ class TVMDetectionNode {
           std::ifstream json_read(master_hard_coded_path);
           json_read >> master_config;
           n_zones = master_config["n_zones"]; //the path to the detector model file
-
+          json_found = true;
         }
         catch(const std::exception& e)
         {
-          std::cerr << e.what() << '\n';
+          std::cerr << "json master/area not found: "<< e.what() << '\n';
         }
          
 
@@ -385,21 +384,24 @@ class TVMDetectionNode {
                   // to test to be sure
                   // a given detection can be in only one place at one time, thus it can't be in
                   // multiple zones
-                  double x_min = zone_json[zone_id][sensor_name]["min"]["world"]["x"]
-                  double y_min = zone_json[zone_id][sensor_name]["min"]["world"]["y"]
-                  double z_min = zone_json[zone_id][sensor_name]["min"]["world"]["z"]
-                  double x_max = zone_json[zone_id][sensor_name]["max"]["world"]["x"]
-                  double y_max = zone_json[zone_id][sensor_name]["max"]["world"]["y"]
-                  double z_max = zone_json[zone_id][sensor_name]["max"]["world"]["z"]
+                  double x_min = zone_json[zone_id][sensor_name]["min"]["world"]["x"];
+                  double y_min = zone_json[zone_id][sensor_name]["min"]["world"]["y"];
+                  double z_min = zone_json[zone_id][sensor_name]["min"]["world"]["z"];
+                  double x_max = zone_json[zone_id][sensor_name]["max"]["world"]["x"];
+                  double y_max = zone_json[zone_id][sensor_name]["max"]["world"]["y"];
+                  double z_max = zone_json[zone_id][sensor_name]["max"]["world"]["z"];
                   inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
                   // I think this works. 
                   if (inside_area_cube) {
-                    break
+                    break;
                   }
                 }
-              if (inside_area_cube) {
+                if (inside_area_cube) {
                   detection_msg->zone_id = zone_id;
-              }
+                } else {
+                  // meaning they're in transit
+                  detection_msg->zone_id = 1000;
+                } 
               }
               
               detection_msg.object_name=object_name;            

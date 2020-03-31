@@ -441,16 +441,16 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
           for (zone_id = 0; zone_id < n_zones; zone_id++)
           {
             // need a world view here bc each detection was transformed
-            double x_min = zone_json[zone_id][t.frame_id_]["min"]["world"]["x"]
-            double y_min = zone_json[zone_id][t.frame_id_]["min"]["world"]["y"]
-            double z_min = zone_json[zone_id][t.frame_id_]["min"]["world"]["z"]
-            double x_max = zone_json[zone_id][t.frame_id_]["max"]["world"]["x"]
-            double y_max = zone_json[zone_id][t.frame_id_]["max"]["world"]["y"]
-            double z_max = zone_json[zone_id][t.frame_id_]["max"]["world"]["z"]
+            double x_min = zone_json[zone_id][t.frame_id_]["min"]["world"]["x"];
+            double y_min = zone_json[zone_id][t.frame_id_]["min"]["world"]["y"];
+            double z_min = zone_json[zone_id][t.frame_id_]["min"]["world"]["z"];
+            double x_max = zone_json[zone_id][t.frame_id_]["max"]["world"]["x"];
+            double y_max = zone_json[zone_id][t.frame_id_]["max"]["world"]["y"];
+            double z_max = zone_json[zone_id][t.frame_id_]["max"]["world"]["z"];
             inside_area_cube = (x <= x_max && x >= x_min) && (y <= y_max && y >= y_min) && (z <= z_max && z >= z_min);
             // I think this works. 
             if (inside_area_cube) {
-              break
+              break;
             }
           }
           opt_msgs::Track track;
@@ -464,6 +464,9 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
           // add which zone the track is currently in...
           if (inside_area_cube) {
               track->zone_id = zone_id;
+          } else {
+            // they're in transit
+            track->zone_id = 1000;
           }
           tracking_results_msg->tracks.push_back(track);
 
@@ -476,9 +479,6 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
       object_names_msg->header.frame_id=frame_id;
       tracker_object->to_object_name_Msg(object_names_msg);
       object_names_pub.publish(object_names_msg);
-
-
-
 
 //      //Show the tracking process' results as an image
 //      if(output_image_rgb)
