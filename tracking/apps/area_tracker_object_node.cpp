@@ -137,21 +137,19 @@ std::vector <int> association_for_initialize_objectnames;
 
 //read zone_json coordinate file
 json zone_json;
-std::string hard_coded_path = "/cfg/area.json";
+std::string area_hard_coded_path = "/cfg/area.json";
 //TODO fix this path
 std::string package_path = ros::package::getPath("recognition");
-std::string full_path = package_path + hard_coded_path;
-std::ifstream json_read(full_path);
-json_read >> zone_json;
+std::string area_full_path = package_path + area_hard_coded_path;
+std::ifstream area_json_read(area_full_path);
+area_json_read >> zone_json;
 
 json master_json;
-std::string hard_coded_path = "/cfg/master.json";
-std::cout << "--- detector cfg_callback ---" << std::endl;
+std::string master_hard_coded_path = "/cfg/master.json";
 //TODO fix this path
-std::string package_path = ros::package::getPath("recognition");
-std::string full_path = package_path + hard_coded_path;
-std::ifstream json_read(full_path);
-json_read >> master_json;
+std::string master_full_path = package_path + master_hard_coded_path;
+std::ifstream master_json_read(master_full_path);
+master_json_read >> master_json;
 int n_zones = master_json["n_zones"];
 
 //sensor_name: 
