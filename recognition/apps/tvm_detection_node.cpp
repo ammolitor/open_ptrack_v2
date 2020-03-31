@@ -186,15 +186,15 @@ class TVMDetectionNode {
           json zone_json;
           std::string area_package_path = ros::package::getPath("recognition");
           std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
-          std::ifstream json_read(area_hard_coded_path);
-          json_read >> zone_json;
+          std::ifstream area_json_read(area_hard_coded_path);
+          area_json_read >> zone_json;
           
           // get the number of zones to scan.
           json master_config;
           std::string master_package_path = ros::package::getPath("recognition");
           std::string master_hard_coded_path = master_package_path + "/cfg/master.json";
-          json_read(master_hard_coded_path);
-          std::ifstream json_read >> master_config;
+          std::ifstream master_json_read(master_hard_coded_path);
+          master_json_read >> master_config;
           n_zones = master_config["n_zones"]; //the path to the detector model file
           json_found = true;
         }
