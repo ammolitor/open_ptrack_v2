@@ -71,6 +71,11 @@ add_executable(tracker_object apps/tracker_object_node.cpp)
 target_link_libraries(tracker_object ${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(tracker_object ${PROJECT_NAME}_gencfg)
 
+add_executable(zone_tracker_object apps/area_tracker_object_node.cpp)
+target_link_libraries(zone_tracker_object ${PROJECT_NAME} ${catkin_LIBRARIES})
+add_dependencies(zone_tracker_object ${PROJECT_NAME}_gencfg)
+
+
 add_executable(tracker3d apps/tracker_node_3d.cpp)
 target_link_libraries(tracker3d ${PROJECT_NAME} ${catkin_LIBRARIES})
 add_dependencies(tracker3d ${PROJECT_NAME}_gencfg)
