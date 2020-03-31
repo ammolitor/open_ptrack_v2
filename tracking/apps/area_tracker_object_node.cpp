@@ -238,10 +238,10 @@ readMatrixFromFile (std::string filename)
   return matrix;
 }
 
-bool PointIsInCube( Point3d p, float x_max, float x_min, float y_max, float y_min, float z_max, float z_min)
-  {
-        return (p.x <= x_max && p.x >= x_min) && (p.y <= y_max && p.y >= y_min) && (p.z <= z_max && p.z >= z_min);
-  }
+//bool PointIsInCube( Point3d p, float x_max, float x_min, float y_max, float y_min, float z_max, float z_min)
+//  {
+//        return (p.x <= x_max && p.x >= x_min) && (p.y <= y_max && p.y >= y_min) && (p.z <= z_max && p.z >= z_min);
+//  }
 
 /**
  * \brief Read the DetectionArray message and use the detections for creating/updating/deleting tracks
@@ -431,8 +431,8 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
         {
           open_ptrack::tracking::TrackObject* t = *it;
           double x, y, z;
-          t.filter_->getState(_x, _y);
-          z = t._z;
+          t->filter_->getState(_x, _y);
+          z = t->_z;
           bool inside_area_cube = false;
           int zone_id;
           for (zone_id = 0; zone_id < n_zones; zone_id++)
