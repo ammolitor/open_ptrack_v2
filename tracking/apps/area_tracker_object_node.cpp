@@ -72,10 +72,11 @@
 #include <tracking/TrackerConfig.h>
 
 #include <nlohmann/json.hpp>
-using json = nlohmann::json;
 
 typedef tracking::TrackerConfig Config;
 typedef dynamic_reconfigure::Server<Config> ReconfigureServer;
+using json = nlohmann::json;
+
 
 // Global variables:
 std::map<std::string, open_ptrack::detection::DetectionSource*> detection_sources_map;
@@ -142,13 +143,14 @@ std::string area_hard_coded_path = "/cfg/area.json";
 std::string package_path = ros::package::getPath("recognition");
 std::string area_full_path = package_path + area_hard_coded_path;
 std::ifstream area_json_read(area_full_path);
-area_json_read >> zone_json;
 
 json master_json;
 std::string master_hard_coded_path = "/cfg/master.json";
 //TODO fix this path
 std::string master_full_path = package_path + master_hard_coded_path;
 std::ifstream master_json_read(master_full_path);
+
+area_json_read >> zone_json;
 master_json_read >> master_json;
 int n_zones = master_json["n_zones"];
 
