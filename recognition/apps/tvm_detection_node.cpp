@@ -184,17 +184,17 @@ class TVMDetectionNode {
         try
         {
           json zone_json;
-          std::string package_path = ros::package::getPath("recognition");
-          std::string master_hard_coded_path = package_path + "/cfg/area.json";
-          std::ifstream json_read(master_hard_coded_path);
+          std::string area_package_path = ros::package::getPath("recognition");
+          std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
+          std::ifstream json_read(area_hard_coded_path);
           json_read >> zone_json;
           
           // get the number of zones to scan.
           json master_config;
-          package_path = ros::package::getPath("recognition");
-          master_hard_coded_path = package_path + "/cfg/master.json";
+          std::string master_package_path = ros::package::getPath("recognition");
+          std::string master_hard_coded_path = master_package_path + "/cfg/master.json";
           json_read(master_hard_coded_path);
-          json_read >> master_config;
+          std::ifstream json_read >> master_config;
           n_zones = master_config["n_zones"]; //the path to the detector model file
           json_found = true;
         }
@@ -397,10 +397,10 @@ class TVMDetectionNode {
                   }
                 }
                 if (inside_area_cube) {
-                  detection_msg->zone_id = zone_id;
+                  detection_msg.zone_id = zone_id;
                 } else {
                   // meaning they're in transit
-                  detection_msg->zone_id = 1000;
+                  detection_msg.zone_id = 1000;
                 } 
               }
               
