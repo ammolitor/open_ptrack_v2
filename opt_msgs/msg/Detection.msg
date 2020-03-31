@@ -11,3 +11,4 @@ float64 distance
 bool occluded
 
 string object_name
+int32 zone_id

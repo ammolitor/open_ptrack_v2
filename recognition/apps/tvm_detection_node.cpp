@@ -144,6 +144,11 @@ class TVMDetectionNode {
     double _constant_y;
     bool people_only = true;
     image_transport::ImageTransport it;
+    json zone_json;
+    json master_json;
+    int n_zones;
+    // use this for tests
+    bool json_found = false;
 
     /**
      * @brief constructor
@@ -175,6 +180,31 @@ class TVMDetectionNode {
         //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
         tvm_object_detector.reset(new YoloTVMGPU(model_folder_path));
         sensor_name = sensor_string;
+
+        try
+        {
+          json zone_json;
+          std::string package_path = ros::package::getPath("recognition");
+          std::string master_hard_coded_path = package_path + "/cfg/area.json";
+          std::ifstream json_read(master_hard_coded_path);
+          json_read >> zone_json;
+          json_found = true;
+          
+          // get the number of zones to scan.
+          json master_config;
+          std::string package_path = ros::package::getPath("recognition");
+          std::string master_hard_coded_path = package_path + "/cfg/master.json";
+          std::ifstream json_read(master_hard_coded_path);
+          json_read >> master_config;
+          n_zones = master_config["n_zones"]; //the path to the detector model file
+
+        }
+        catch(const std::exception& e)
+        {
+          std::cerr << e.what() << '\n';
+        }
+         
+
       }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
@@ -198,6 +228,18 @@ class TVMDetectionNode {
         
       std::cout << "running algorithm callback" << std::endl;
     
+      //tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
+      //tf_listener.lookupTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ir2rgb_transform);
+      //tf_listener.waitForTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
+      //tf_listener.lookupTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), world2rgb_transform);
+
+      // transform to eigen
+      //tf::transformTFToEigen(world2rgb_transform, world2rgb);
+      //tf::transformTFToEigen(ir2rgb_transform, ir2rgb);
+
+
+
+
       // set message vars here
       cv_bridge::CvImagePtr cv_ptr_rgb;
       cv_bridge::CvImage::Ptr  cv_ptr_depth;
@@ -331,6 +373,34 @@ class TVMDetectionNode {
               detection_msg.bottom.x = 0;
               detection_msg.bottom.y = 0;
               detection_msg.bottom.z = 0;
+              
+              // adding this so scan which zone the given detection is in 
+              if (json_found){
+                bool inside_area_cube = false; 
+                for (zone_id = 0; zone_id < n_zones; zone_id++)
+                {
+                  // need a world view here bc each detection was transformed
+                  // this will work for a singular cam, but would mean each cam would have to tune
+                  // to the specific area; which I think would be fine. // but will need
+                  // to test to be sure
+                  // a given detection can be in only one place at one time, thus it can't be in
+                  // multiple zones
+                  double x_min = zone_json[zone_id][sensor_name]["min"]["world"]["x"]
+                  double y_min = zone_json[zone_id][sensor_name]["min"]["world"]["y"]
+                  double z_min = zone_json[zone_id][sensor_name]["min"]["world"]["z"]
+                  double x_max = zone_json[zone_id][sensor_name]["max"]["world"]["x"]
+                  double y_max = zone_json[zone_id][sensor_name]["max"]["world"]["y"]
+                  double z_max = zone_json[zone_id][sensor_name]["max"]["world"]["z"]
+                  inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
+                  // I think this works. 
+                  if (inside_area_cube) {
+                    break
+                  }
+                }
+              if (inside_area_cube) {
+                  detection_msg->zone_id = zone_id;
+              }
+              }
               
               detection_msg.object_name=object_name;            
               detection_array_msg->detections.push_back(detection_msg);

@@ -7,6 +7,7 @@
     "hand_detector_path" :        "/data/hand_detector",
     "embedder_path" :             "/data/face_embedder",
     "face_detector_path" :        "/data/face_detector",
-    "detector_path" :             "/data/tvm_detector"
-
+    "detector_path" :             "/data/tvm_detector",
+    "n_zones":                    3,
+    "__n_zones__comment__":       "door, sink, cutting station"
 }

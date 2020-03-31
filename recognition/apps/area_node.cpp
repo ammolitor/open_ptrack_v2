@@ -375,6 +375,8 @@ class AreaDefinitionNode {
     double _constant_y;
     vector<tf::Vector3> worldpoints;
     PointCloudT::Ptr cloud_;
+    int n_zones;
+    int zone_id;
     //PointCloudT::Ptr cloud_(new PointCloudT);
     //pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_(new pcl::PointCloud<pcl::PointXYZRGB>);
     /**
@@ -383,7 +385,7 @@ class AreaDefinitionNode {
      * @param sensor_string converts to the sensor_name variable
      * @param detections_topic the name of the detections topic to subscribe to
      */
-    AreaDefinitionNode(ros::NodeHandle& nh, std::string sensor_string, std::string detections_topic):
+    AreaDefinitionNode(ros::NodeHandle& nh, std::string sensor_string, std::string detections_topic, int N_zones):
         node_(nh)
     {
       //PointCloudT::Ptr cloud_(new PointCloudT);
@@ -422,11 +424,12 @@ class AreaDefinitionNode {
       area_thres_["person"] = pair<double, double>(1.8, 0.5);
       //area_thres_["car"] = pair<double, double>(2.7, 1.8);
 
-    // Read worldToCam transform from file:
-    //std::string filename = ros::package::getPath("detection") + "/launch/camera_poses.txt";
-    //worldToCamTransform = readTFFromFile (filename, sensor_name);
-    worldToCamTransform = read_poses_from_json(sensor_name);
-
+      // Read worldToCam transform from file:
+      //std::string filename = ros::package::getPath("detection") + "/launch/camera_poses.txt";
+      //worldToCamTransform = readTFFromFile (filename, sensor_name);
+      worldToCamTransform = read_poses_from_json(sensor_name);
+      n_zones = N_zones;
+      int zone_id = 0;
     }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
@@ -690,7 +693,7 @@ class AreaDefinitionNode {
     //tf_listener.lookupTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), world2rgb_transform);
 
     //std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud->header);
-
+    json zone_json;
     sensor_msgs::PointCloud2 msg_pointcloud;
     // transform to eigen
     //tf::transformTFToEigen(world2rgb_transform, world2rgb);
@@ -799,7 +802,7 @@ class AreaDefinitionNode {
     //}    
 
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
+    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
 
     cv::Mat curr_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_8UC3);
     for (int i=0;i<cloud_->height;i++)
@@ -812,198 +815,225 @@ class AreaDefinitionNode {
         }
     }
 
-    std::cout << "Click and drag for Selection\n" << std::endl;
-    std::cout << "\n" << std::endl;
-    std::cout << "------> Press 'shift+enter' to save\n" << std::endl;
+    for (int zone_id = 0; zone_id < n_zones; zone_id++) {
+      //zone_zone_idd = zone_id;
+      std::cout << "Click and drag for Selection\n" << std::endl;
+      std::cout << "\n" << std::endl;
+      std::cout << "------> Press 'shift+enter' to save\n" << std::endl;
 
-    // Add point picking callback to viewer:
-    cv::Mat curr_image_clone;
-    std::vector<cv::Point> clicked_points_2d;
-    bool selection_finished = false;
-    bool clicked = false;
-    cv::Rect cropRect(0, 0, 0, 0);
-    cv::Point P1(0, 0);
-    cv::Point P2(0, 0);
-    //struct callback_args_image cb_args;
-    cvcallback_args_image cb_args;
-    cb_args.clicked_points_2d = clicked_points_2d;
-    cb_args.selection_finished = selection_finished;
-    cb_args.isDrawing = false;
-    cb_args.box = cv::Rect(0, 0, 0, 0);
-    cb_args.P1 = P1;
-    cb_args.P2 = P2;
-    cb_args.cropRect = cropRect;
-    cb_args.clicked = clicked;
-    curr_image_clone = curr_image.clone();
-    cv::namedWindow("Draw a box around the area of interest");
-    cv::setMouseCallback("Draw a box around the area of interest", opencv_mouse_callback, (void*)&cb_args);
-    cv::imshow("Draw a box around the area of interest", curr_image_clone);
-    cv::waitKey(1);
+      // Add point picking callback to viewer:
+      cv::Mat curr_image_clone;
+      std::vector<cv::Point> clicked_points_2d;
+      bool selection_finished = false;
+      bool clicked = false;
+      cv::Rect cropRect(0, 0, 0, 0);
+      cv::Point P1(0, 0);
+      cv::Point P2(0, 0);
+      //struct callback_args_image cb_args;
+      cvcallback_args_image cb_args;
+      cb_args.clicked_points_2d = clicked_points_2d;
+      cb_args.selection_finished = selection_finished;
+      cb_args.isDrawing = false;
+      cb_args.box = cv::Rect(0, 0, 0, 0);
+      cb_args.P1 = P1;
+      cb_args.P2 = P2;
+      cb_args.cropRect = cropRect;
+      cb_args.clicked = clicked;
+      curr_image_clone = curr_image.clone();
+      cv::namedWindow("Draw a box around the area of interest");
+      cv::setMouseCallback("Draw a box around the area of interest", opencv_mouse_callback, (void*)&cb_args);
+      cv::imshow("Draw a box around the area of interest", curr_image_clone);
+      cv::waitKey(1);
 
-    // Select the box from the image:
-    while(!cb_args.selection_finished)
-    {
-        //char c=waitKey();
-        curr_image_clone = curr_image.clone();
-        cv::Rect drect = cb_args.box;        
-        cv::rectangle(curr_image_clone, drect, Scalar(0, 255, 0), 1, 8, 0);
-        cv::imshow("Draw a box around the area of interest", curr_image_clone);
-        cv::waitKey(1);
-    }
-    std::cout << "DEBUG: box finished" << std::endl;
-    //cv::waitKey(1);
-    //}
+      // Select the box from the image:
+      while(!cb_args.selection_finished)
+      {
+          //char c=waitKey();
+          curr_image_clone = curr_image.clone();
+          cv::Rect drect = cb_args.box;        
+          cv::rectangle(curr_image_clone, drect, Scalar(0, 255, 0), 1, 8, 0);
+          cv::imshow("Draw a box around the area of interest", curr_image_clone);
+          cv::waitKey(1);
+      }
+      std::cout << "DEBUG: box finished" << std::endl;
+      //cv::waitKey(1);
+      //}
 
-    // Select the corresponding 3D points from the point cloud:
-    cv::Point p1 = cb_args.P1;
-    cv::Point p2 = cb_args.P2;
-    cv::Rect rect = cb_args.box;
-    std::cout << "DEBUG: rect x: " << rect.x << std::endl;
-    std::cout << "DEBUG: rect y: " << rect.y << std::endl;
-    std::cout << "DEBUG: rect width: " << rect.width << std::endl;
-    std::cout << "DEBUG: rect height: " << rect.height << std::endl;
-    bool points_3d_in_cam_is_empty = points_3d_in_cam.isZero(0);
-    std::cout << "DEBUG: points_3d_in_cam_is_empty: " << points_3d_in_cam_is_empty << std::endl;
-    // get the bounding box of the area,
+      // Select the corresponding 3D points from the point cloud:
+      cv::Point p1 = cb_args.P1;
+      cv::Point p2 = cb_args.P2;
+      cv::Rect rect = cb_args.box;
+      std::cout << "DEBUG: rect x: " << rect.x << std::endl;
+      std::cout << "DEBUG: rect y: " << rect.y << std::endl;
+      std::cout << "DEBUG: rect width: " << rect.width << std::endl;
+      std::cout << "DEBUG: rect height: " << rect.height << std::endl;
+      bool points_3d_in_cam_is_empty = points_3d_in_cam.isZero(0);
+      std::cout << "DEBUG: points_3d_in_cam_is_empty: " << points_3d_in_cam_is_empty << std::endl;
+      // get the bounding box of the area,
 
-    // define this, but maybe do like the camera transform here????
-    Eigen::MatrixXd points_2d_homo = cam_intrins_ * points_3d_in_cam;
+      // define this, but maybe do like the camera transform here????
+      Eigen::MatrixXd points_2d_homo = cam_intrins_ * points_3d_in_cam;
 
-    // lets assume that points_2d_homo == world transform...
+      // lets assume that points_2d_homo == world transform...
 
-    Eigen::MatrixXd points_2d(2, pcl_cloud->size());
-    for(int i = 0; i < pcl_cloud->size(); i++)
-    {
-        points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
-        points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
-    }
+      Eigen::MatrixXd points_2d(2, pcl_cloud->size());
+      for(int i = 0; i < pcl_cloud->size(); i++)
+      {
+          points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
+          points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
+      }
 
-    std::cout << "DEBUG: points set" << std::endl;
-    // define cam_intrins and camera_img
-    pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    // cv_bridge::CvImagePtr img_ptr = cv_bridge::toCvCopy(camera_img);
-    std::cout <<"DEBUG: out_cloud set" << std::endl;
-    // get the points w.r.t. 3d cloud
-    vector<Point3f> points;
-    //vector<Point3f> worldpoints;
-    vector<tf::Vector3> worldpoints;
-    Point3f tmp;
-    Point3f world_to_temp;
-    json area_json;
-    int cube_count = 0;
-    for(int i = 0; i < pcl_cloud->size(); i++)
-    { 
-      if(points_2d(0, i) < rect.x + rect.width && points_2d(0, i) > rect.x 
-        && points_2d(1, i) < rect.y + rect.height && points_2d(1, i) > rect.y)
-        {
-            // transform the point here?
-            //current_point = worldToCamTransform(points_3d_in_cam(0, i));
-            tmp.x = static_cast<float>(points_3d_in_cam(0, i));
-            tmp.y = static_cast<float>(points_3d_in_cam(1, i));
-            tmp.z = static_cast<float>(points_3d_in_cam(2, i));
+      std::cout << "DEBUG: points set" << std::endl;
+      // define cam_intrins and camera_img
+      pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      // cv_bridge::CvImagePtr img_ptr = cv_bridge::toCvCopy(camera_img);
+      std::cout <<"DEBUG: out_cloud set" << std::endl;
+      // get the points w.r.t. 3d cloud
+      vector<Point3f> points;
+      //vector<Point3f> worldpoints;
+      vector<tf::Vector3> worldpoints;
+      Point3f tmp;
+      Point3f world_to_temp;
+      //json zone_json;
 
-            world_to_temp.x =  static_cast<float>(tmp.x);
-            world_to_temp.y =  static_cast<float>(tmp.y);
-            world_to_temp.z =  static_cast<float>(tmp.z);
+      // will this even work????
+      //try {
+      //  std::string package_path = ros::package::getPath("recognition");
+      //  std::string master_hard_coded_path = package_path + "/cfg/area.json";
+      //  std::ifstream json_read(master_hard_coded_path);
+      //  json_read >> zone_json;
+      //  try {
+      //    int zoneid = 0;
+      //    for(int i = 0; i < zoneid; i++)
+      //    {
+      //      auto s2 = zone_json[zoneid];
+      //    }
+      //  } catch {
+      //      //     json zone_json;
+      //      std::cout << "starting at zone id: " << zoneid << std:endl;
+      //  }
+      //} catch {
+      //  int zoneid = 0;
+      //  json zone_json;
+      //};
 
-            tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
-            current_world_point = worldToCamTransform(current_world_point);
 
-            // get x, y, z of current point
-
-            // transform point here
-            points.push_back(tmp);
-            worldpoints.push_back(current_world_point);
-            // push all points into a json file to define the area.
-            // error: invalid use of non-static member function ‘const tfScalar& tf::Vector3::x() const’
-            area_json[sensor_name]["world"][cube_count]["x"] = current_world_point.getX();
-            area_json[sensor_name][sensor_name][cube_count]["x"] = tmp.x;
-            area_json[sensor_name]["world"][cube_count]["y"] = current_world_point.getY();
-            area_json[sensor_name][sensor_name][cube_count]["y"] = tmp.y;
-            area_json[sensor_name]["world"][cube_count]["z"] = current_world_point.getZ();
-            area_json[sensor_name][sensor_name][cube_count]["z"] = tmp.z;            
-            cube_count++;
-        }
-    }
-
-    // TODO
-    // transform rect to world rect here
-    // save either worldpoints
-    // save points
-    // https://stackoverflow.com/questions/19074380/how-to-save-stdvectorkeypoint-to-a-text-file-in-c
-
-    std::cout << "DEBUG:  finished - points size: " << points.size() << std::endl;
-    vector<Point3f> points_fg = clusterPoints(points);
-    // vector<Point3f> points_fg = points;
-    Point3d min_xyz(10000, 10000, 10000), max_xyz(-10000, -10000, -10000);
-    for(int i = 0; i < points_fg.size(); i++)
-    {
-        pcl::PointXYZ tmp_pt;
-        tmp_pt.x = points_fg[i].x;
-        tmp_pt.y = points_fg[i].y;
-        tmp_pt.z = points_fg[i].z;
-        out_cloud->push_back(tmp_pt);
-        
-        if(min_xyz.x > tmp_pt.x)
-            min_xyz.x = tmp_pt.x;
-        if(min_xyz.y > tmp_pt.y)
-            min_xyz.y = tmp_pt.y;
-        if(min_xyz.z > tmp_pt.z)
-            min_xyz.z = tmp_pt.z;
-
-        if(max_xyz.x < tmp_pt.x)
-            max_xyz.x = tmp_pt.x;
-        if(max_xyz.y < tmp_pt.y)
-            max_xyz.y = tmp_pt.y;
-        if(max_xyz.z < tmp_pt.z)
-            max_xyz.z = tmp_pt.z;
-    }
-    std::cout << "DEBUG: clustering finished" << std::endl;
-    if(! filterBboxByArea(rect, (min_xyz.z + max_xyz.z) / 2))
-    {
-        cv::rectangle(src_img, cv:: Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), cv::Scalar(30,07,197), 3);
-        cv::putText(src_img, "fake", cv::Point(rect.x + 5, rect.y + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
-        std::cout << "DEBUG: filterBboxByArea finished" << std::endl;
-    }
-    else
-        {
-        double ave_x = (max_xyz.x + min_xyz.x) / 2;
-        double ave_y = (max_xyz.y + min_xyz.y) / 2;
-        double ave_z = (max_xyz.z + min_xyz.z) / 2;
-        
-        drawCube(src_img, min_xyz, max_xyz);
-        cv::putText(src_img, "area", cv::Point(rect.x + 5, rect.y + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
-
-        char loc_str[30];
-        sprintf(loc_str, "%.2f, %.2f, %.2f", ave_x, ave_y, ave_z);
-        cv::putText(src_img, loc_str, cv::Point(rect.x + 15, rect.y - 25), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
-        std::cout << "DEBUG: else filterBboxByArea finished" << std::endl;
-        }
     
+      int cube_count = 0;
+      for(int i = 0; i < pcl_cloud->size(); i++)
+      { 
+        if(points_2d(0, i) < rect.x + rect.width && points_2d(0, i) > rect.x 
+          && points_2d(1, i) < rect.y + rect.height && points_2d(1, i) > rect.y)
+          {
+              // transform the point here?
+              //current_point = worldToCamTransform(points_3d_in_cam(0, i));
+              tmp.x = static_cast<float>(points_3d_in_cam(0, i));
+              tmp.y = static_cast<float>(points_3d_in_cam(1, i));
+              tmp.z = static_cast<float>(points_3d_in_cam(2, i));
 
-    // take max/min and convert to world view
-    tf::Vector3 max_xyz_world_point(max_xyz.x, max_xyz.y, max_xyz.z);
-    max_xyz_world_point = worldToCamTransform(max_xyz_world_point);
-    tf::Vector3 min_xyz_world_point(min_xyz.x, min_xyz.y, min_xyz.z);
-    min_xyz_world_point = worldToCamTransform(min_xyz_world_point);
+              world_to_temp.x =  static_cast<float>(tmp.x);
+              world_to_temp.y =  static_cast<float>(tmp.y);
+              world_to_temp.z =  static_cast<float>(tmp.z);
 
-    area_json[sensor_name]["min"]["world"]["x"] = min_xyz_world_point.getX();
-    area_json[sensor_name]["min"][sensor_name]["x"] = min_xyz.x;
-    area_json[sensor_name]["min"]["world"]["y"] = min_xyz_world_point.getY();
-    area_json[sensor_name]["min"][sensor_name]["y"] = min_xyz.y;
-    area_json[sensor_name]["min"]["world"]["z"] = min_xyz_world_point.getZ();
-    area_json[sensor_name]["min"][sensor_name]["z"] = min_xyz.z;     
+              tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
+              current_world_point = worldToCamTransform(current_world_point);
 
-    area_json[sensor_name]["max"]["world"]["x"] = max_xyz_world_point.getX();
-    area_json[sensor_name]["max"][sensor_name]["x"] = max_xyz.x;
-    area_json[sensor_name]["max"]["world"]["y"] = max_xyz_world_point.getY();
-    area_json[sensor_name]["max"][sensor_name]["y"] = max_xyz.y;
-    area_json[sensor_name]["max"]["world"]["z"] = max_xyz_world_point.getZ();
-    area_json[sensor_name]["max"][sensor_name]["z"] = max_xyz.z;   
+              // get x, y, z of current point
+
+              // transform point here
+              points.push_back(tmp);
+              worldpoints.push_back(current_world_point);
+              // push all points into a json file to define the area.
+              // error: invalid use of non-static member function ‘const tfScalar& tf::Vector3::x() const’
+              zone_json[zone_id][sensor_name]["world"][cube_count]["x"] = current_world_point.getX();
+              zone_json[zone_id][sensor_name][sensor_name][cube_count]["x"] = tmp.x;
+              zone_json[zone_id][sensor_name]["world"][cube_count]["y"] = current_world_point.getY();
+              zone_json[zone_id][sensor_name][sensor_name][cube_count]["y"] = tmp.y;
+              zone_json[zone_id][sensor_name]["world"][cube_count]["z"] = current_world_point.getZ();
+              zone_json[zone_id][sensor_name][sensor_name][cube_count]["z"] = tmp.z;            
+              cube_count++;
+          }
+      }
+
+      // TODO
+      // transform rect to world rect here
+      // save either worldpoints
+      // save points
+      // https://stackoverflow.com/questions/19074380/how-to-save-stdvectorkeypoint-to-a-text-file-in-c
+
+      std::cout << "DEBUG:  finished - points size: " << points.size() << std::endl;
+      vector<Point3f> points_fg = clusterPoints(points);
+      // vector<Point3f> points_fg = points;
+      Point3d min_xyz(10000, 10000, 10000), max_xyz(-10000, -10000, -10000);
+      for(int i = 0; i < points_fg.size(); i++)
+      {
+          pcl::PointXYZ tmp_pt;
+          tmp_pt.x = points_fg[i].x;
+          tmp_pt.y = points_fg[i].y;
+          tmp_pt.z = points_fg[i].z;
+          out_cloud->push_back(tmp_pt);
+          
+          if(min_xyz.x > tmp_pt.x)
+              min_xyz.x = tmp_pt.x;
+          if(min_xyz.y > tmp_pt.y)
+              min_xyz.y = tmp_pt.y;
+          if(min_xyz.z > tmp_pt.z)
+              min_xyz.z = tmp_pt.z;
+
+          if(max_xyz.x < tmp_pt.x)
+              max_xyz.x = tmp_pt.x;
+          if(max_xyz.y < tmp_pt.y)
+              max_xyz.y = tmp_pt.y;
+          if(max_xyz.z < tmp_pt.z)
+              max_xyz.z = tmp_pt.z;
+      }
+      std::cout << "DEBUG: clustering finished" << std::endl;
+      if(! filterBboxByArea(rect, (min_xyz.z + max_xyz.z) / 2))
+      {
+          cv::rectangle(src_img, cv:: Point(rect.x, rect.y), cv::Point(rect.x + rect.width, rect.y + rect.height), cv::Scalar(30,07,197), 3);
+          cv::putText(src_img, "fake", cv::Point(rect.x + 5, rect.y + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
+          std::cout << "DEBUG: filterBboxByArea finished" << std::endl;
+      }
+      else
+          {
+          double ave_x = (max_xyz.x + min_xyz.x) / 2;
+          double ave_y = (max_xyz.y + min_xyz.y) / 2;
+          double ave_z = (max_xyz.z + min_xyz.z) / 2;
+          
+          drawCube(src_img, min_xyz, max_xyz);
+          cv::putText(src_img, "area", cv::Point(rect.x + 5, rect.y + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
+
+          char loc_str[30];
+          sprintf(loc_str, "%.2f, %.2f, %.2f", ave_x, ave_y, ave_z);
+          cv::putText(src_img, loc_str, cv::Point(rect.x + 15, rect.y - 25), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+          std::cout << "DEBUG: else filterBboxByArea finished" << std::endl;
+          }
+      
+
+      // take max/min and convert to world view
+      tf::Vector3 max_xyz_world_point(max_xyz.x, max_xyz.y, max_xyz.z);
+      max_xyz_world_point = worldToCamTransform(max_xyz_world_point);
+      tf::Vector3 min_xyz_world_point(min_xyz.x, min_xyz.y, min_xyz.z);
+      min_xyz_world_point = worldToCamTransform(min_xyz_world_point);
+
+      zone_json[zone_id][sensor_name]["min"]["world"]["x"] = min_xyz_world_point.getX();
+      zone_json[zone_id][sensor_name]["min"][sensor_name]["x"] = min_xyz.x;
+      zone_json[zone_id][sensor_name]["min"]["world"]["y"] = min_xyz_world_point.getY();
+      zone_json[zone_id][sensor_name]["min"][sensor_name]["y"] = min_xyz.y;
+      zone_json[zone_id][sensor_name]["min"]["world"]["z"] = min_xyz_world_point.getZ();
+      zone_json[zone_id][sensor_name]["min"][sensor_name]["z"] = min_xyz.z;     
+
+      zone_json[zone_id][sensor_name]["max"]["world"]["x"] = max_xyz_world_point.getX();
+      zone_json[zone_id][sensor_name]["max"][sensor_name]["x"] = max_xyz.x;
+      zone_json[zone_id][sensor_name]["max"]["world"]["y"] = max_xyz_world_point.getY();
+      zone_json[zone_id][sensor_name]["max"][sensor_name]["y"] = max_xyz.y;
+      zone_json[zone_id][sensor_name]["max"]["world"]["z"] = max_xyz_world_point.getZ();
+      zone_json[zone_id][sensor_name]["max"][sensor_name]["z"] = max_xyz.z;   
+    }
 
     std::cout << "DEBUG: about to show image" << std::endl;
     cv::imshow("disp", src_img);
-    
+      
     // saving image
     std::string filename = "/area.jpg";
     std::string home_dir = getEnvVar("HOME");
@@ -1017,9 +1047,9 @@ class AreaDefinitionNode {
 
     // save area cube to file
     std::string package_path = ros::package::getPath("recognition");
-    std::string area_json_path = package_path + "/cfg/area.json";
-    std::ofstream areafile(area_json_path);
-    areafile << std::setw(4) << area_json << std::endl;
+    std::string zone_json_path = package_path + "/cfg/area.json";
+    std::ofstream areafile(zone_json_path);
+    areafile << std::setw(4) << zone_json << std::endl;
 
     // output cloud to file
     sensor_msgs::PointCloud2 out_cloud_ros;
@@ -1033,6 +1063,8 @@ class AreaDefinitionNode {
     image_pub.publish(msg);
     //return rect; 
     // shut down ros node
+    
+
     ros::shutdown();
     }
 };
@@ -1042,12 +1074,14 @@ int main(int argc, char** argv) {
   std::string sensor_name;
   std::string detections_topic;
   json master_config;
+  int n_zones;
   std::string package_path = ros::package::getPath("recognition");
   std::string master_hard_coded_path = package_path + "/cfg/master.json";
   std::ifstream json_read(master_hard_coded_path);
   json_read >> master_config;
   sensor_name = master_config["sensor_name"]; //the path to the detector model file
   detections_topic = master_config["main_detections_topic"];
+  n_zones = master_config["n_zones"];
 
   std::cout << "--- area_node ---" << std::endl;
   ros::init(argc, argv, "area_node");
@@ -1056,7 +1090,7 @@ int main(int argc, char** argv) {
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "detections_topic: " << detections_topic << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  AreaDefinitionNode node(nh, sensor_name, detections_topic);
+  AreaDefinitionNode node(nh, sensor_name, detections_topic, n_zones);
   std::cout << "detection node init " << std::endl;
   ros::spin();
   return 0;

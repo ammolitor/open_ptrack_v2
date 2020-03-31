@@ -19,3 +19,4 @@ opt_msgs/BoundingBox2D box_2D
 
 string object_name
 string face_name
+int32 zone_id
