@@ -191,9 +191,9 @@ class TVMDetectionNode {
           
           // get the number of zones to scan.
           json master_config;
-          std::string package_path = ros::package::getPath("recognition");
-          std::string master_hard_coded_path = package_path + "/cfg/master.json";
-          std::ifstream json_read(master_hard_coded_path);
+          package_path = ros::package::getPath("recognition");
+          master_hard_coded_path = package_path + "/cfg/master.json";
+          json_read(master_hard_coded_path);
           json_read >> master_config;
           n_zones = master_config["n_zones"]; //the path to the detector model file
           json_found = true;
@@ -376,7 +376,7 @@ class TVMDetectionNode {
               // adding this so scan which zone the given detection is in 
               if (json_found){
                 bool inside_area_cube = false; 
-                for (zone_id = 0; zone_id < n_zones; zone_id++)
+                for (int zone_id = 0; zone_id < n_zones; zone_id++)
                 {
                   // need a world view here bc each detection was transformed
                   // this will work for a singular cam, but would mean each cam would have to tune

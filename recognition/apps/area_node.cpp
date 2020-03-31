@@ -1046,7 +1046,7 @@ class AreaDefinitionNode {
     std::cout << "DEBUG: src finished" << std::endl;
 
     // save area cube to file
-    std::string package_path = ros::package::getPath("recognition");
+    package_path = ros::package::getPath("recognition");
     std::string zone_json_path = package_path + "/cfg/area.json";
     std::ofstream areafile(zone_json_path);
     areafile << std::setw(4) << zone_json << std::endl;
@@ -1061,7 +1061,7 @@ class AreaDefinitionNode {
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", src_img).toImageMsg();
     msg->header.stamp = cv_ptr_rgb->header.stamp;
     image_pub.publish(msg);
-    //return rect; 
+    //return rect;    
     // shut down ros node
     
 
