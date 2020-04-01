@@ -51,6 +51,8 @@
 #include <open_ptrack/bayes/bayesFlt.hpp>
 #include <open_ptrack/detection/detection_source.h>
 #include <opt_msgs/Track.h>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 namespace open_ptrack
 {
@@ -368,6 +370,17 @@ namespace open_ptrack
          */
         void
         toMsg(opt_msgs::Track &track_msg, bool vertical);
+
+        /**
+         * \brief Create track ROS message.
+         *
+         * \param[in] zone_json the json structure containing the zone information.
+         * \param[in] n_zones the number of zones to iter through
+         * \param[in/out] track_msg Track ROS message.
+         * \param[in] vertical States if the camera is vertically oriented (true) or not (false).
+         */
+        void
+        zone_msg(json zone_json, int n_zones, opt_msgs::Track &track_msg, bool vertical);
 
         /**
          * \brief Get the DetectionSource corresponding to the last associated detection.

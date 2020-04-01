@@ -218,6 +218,16 @@ public:
     toMsg(opt_msgs::TrackArray::Ptr& msg);
 
     /**
+         * \brief Writes the state of each track into a TrackArray message.
+         * decides which zone the given track currently is in
+         * \param[in] zone_json the json structure containing the zone information.
+         * \param[in] n_zones the number of zones to iter through
+         * \param[in] msg The TrackArray message to fill.
+         */
+    void
+    zone_msg(json zone_json, int n_zones, opt_msgs::TrackArray::Ptr& msg);
+
+    /**
          * \brief Writes the state of tracks with a given frame id into a TrackArray message.
          *
          * \param[in] msg The TrackArray message to fill.
