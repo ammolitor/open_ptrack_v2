@@ -1028,8 +1028,12 @@ class AreaDefinitionNode {
       zone_json[zone_id][sensor_name]["max"]["world"]["y"] = max_xyz_world_point.getY();
       zone_json[zone_id][sensor_name]["max"][sensor_name]["y"] = max_xyz.y;
       zone_json[zone_id][sensor_name]["max"]["world"]["z"] = max_xyz_world_point.getZ();
-      zone_json[zone_id][sensor_name]["max"][sensor_name]["z"] = max_xyz.z;   
+      zone_json[zone_id][sensor_name]["max"][sensor_name]["z"] = max_xyz.z;  
+
+      // destroy the named window
+      cv::destroyAllWindows(); 
     }
+    
 
     std::cout << "DEBUG: about to show image" << std::endl;
     cv::imshow("disp", src_img);
