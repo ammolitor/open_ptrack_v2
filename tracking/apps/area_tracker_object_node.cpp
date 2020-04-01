@@ -138,21 +138,16 @@ std::vector <int> association_for_initialize_objectnames;
 
 //read zone_json coordinate file
 json zone_json;
+json master_json;
+int n_zones;
 std::string area_hard_coded_path = "/cfg/area.json";
-//TODO fix this path
+std::string master_hard_coded_path = "/cfg/master.json";
 std::string package_path = ros::package::getPath("recognition");
 std::string area_full_path = package_path + area_hard_coded_path;
-std::ifstream area_json_read(area_full_path);
-
-json master_json;
-std::string master_hard_coded_path = "/cfg/master.json";
-//TODO fix this path
 std::string master_full_path = package_path + master_hard_coded_path;
-std::ifstream master_json_read(master_full_path);
 
-area_json_read >> zone_json;
-master_json_read >> master_json;
-int n_zones = master_json["n_zones"];
+//TODO fix this path
+
 
 //sensor_name: 
 //  sensor
@@ -433,19 +428,19 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
         {
           open_ptrack::tracking::TrackObject* t = *it;
           double x, y, z;
-          t->filter_->getState(_x, _y);
+          t->filter_->getState(x, y);
           z = t->_z;
           bool inside_area_cube = false;
           int zone_id;
           for (zone_id = 0; zone_id < n_zones; zone_id++)
           {
             // need a world view here bc each detection was transformed
-            double x_min = zone_json[zone_id][t.frame_id_]["min"]["world"]["x"];
-            double y_min = zone_json[zone_id][t.frame_id_]["min"]["world"]["y"];
-            double z_min = zone_json[zone_id][t.frame_id_]["min"]["world"]["z"];
-            double x_max = zone_json[zone_id][t.frame_id_]["max"]["world"]["x"];
-            double y_max = zone_json[zone_id][t.frame_id_]["max"]["world"]["y"];
-            double z_max = zone_json[zone_id][t.frame_id_]["max"]["world"]["z"];
+            double x_min = zone_json[zone_id][t->frame_id_]["min"]["world"]["x"];
+            double y_min = zone_json[zone_id][t->frame_id_]["min"]["world"]["y"];
+            double z_min = zone_json[zone_id][t->frame_id_]["min"]["world"]["z"];
+            double x_max = zone_json[zone_id][t->frame_id_]["max"]["world"]["x"];
+            double y_max = zone_json[zone_id][t->frame_id_]["max"]["world"]["y"];
+            double z_max = zone_json[zone_id][t->frame_id_]["max"]["world"]["z"];
             inside_area_cube = (x <= x_max && x >= x_min) && (y <= y_max && y >= y_min) && (z <= z_max && z >= z_min);
             // I think this works. 
             if (inside_area_cube) {
@@ -701,6 +696,12 @@ configCb(Config &config, uint32_t level)
 int
 main(int argc, char** argv)
 {
+  std::ifstream area_json_read(area_full_path);
+  std::ifstream master_json_read(master_full_path);
+
+  area_json_read >> zone_json;
+  master_json_read >> master_json;
+  n_zones = master_json["n_zones"];
 
   ros::init(argc, argv, "tracker");
   ros::NodeHandle nh("~");
