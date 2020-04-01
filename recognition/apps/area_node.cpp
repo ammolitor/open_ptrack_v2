@@ -814,8 +814,9 @@ class AreaDefinitionNode {
         curr_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
         }
     }
-
-    for (int zone_id = 0; zone_id < n_zones; zone_id++) {
+    std::cout << "N Zones: "<< n_zones << std::endl;
+    for (int zone_id = 0; zone_id < n_zones; zone_id++) 
+    {
       //zone_zone_idd = zone_id;
       std::cout << "Click and drag for Selection\n" << std::endl;
       std::cout << "\n" << std::endl;
@@ -1034,7 +1035,7 @@ class AreaDefinitionNode {
       cv::destroyAllWindows(); 
     }
     
-
+    cv::destroyAllWindows(); 
     std::cout << "DEBUG: about to show image" << std::endl;
     cv::imshow("disp", src_img);
       
@@ -1068,7 +1069,7 @@ class AreaDefinitionNode {
     //return rect;    
     // shut down ros node
     
-
+    cv::destroyAllWindows();
     ros::shutdown();
     }
 };
