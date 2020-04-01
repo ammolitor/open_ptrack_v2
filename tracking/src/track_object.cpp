@@ -41,6 +41,9 @@
 
 #include <open_ptrack/tracking/track_object.h>
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 namespace open_ptrack
 {
 namespace tracking
@@ -610,6 +613,68 @@ TrackObject::toMsg(opt_msgs::Track &track_msg, bool vertical)
     track_msg.box_2D.y = int(top(1)) - track_msg.box_2D.width / 4;
   }
 }
+
+void
+TrackObject::zone_msg(json zone_json, int n_zones, opt_msgs::Track &track_msg, bool vertical)
+{
+  double _x, _y;
+  filter_->getState(_x, _y);
+  bool inside_area_cube = false;
+  int zone_id;
+  for (zone_id = 0; zone_id < n_zones; zone_id++)
+  {
+    // need a world view here bc each detection was transformed
+    double x_min = zone_json[zone_id][frame_id_]["min"]["world"]["x"];
+    double y_min = zone_json[zone_id][frame_id_]["min"]["world"]["y"];
+    double z_min = zone_json[zone_id][frame_id_]["min"]["world"]["z"];
+    double x_max = zone_json[zone_id][frame_id_]["max"]["world"]["x"];
+    double y_max = zone_json[zone_id][frame_id_]["max"]["world"]["y"];
+    double z_max = zone_json[zone_id][frame_id_]["max"]["world"]["z"];
+    inside_area_cube = (_x <= x_max && _x >= x_min) && (_y <= y_max && _y >= y_min) && (z_ <= z_max && z_ >= z_min);
+    // I think this works. 
+    if (inside_area_cube) {
+      break;
+    }
+  }
+
+  track_msg.id = id_;
+  track_msg.x = _x;
+  track_msg.y = _y;
+  track_msg.height = height_;
+  track_msg.distance = distance_;
+  track_msg.object_name=object_name_;
+  track_msg.age = age_;
+  track_msg.confidence = - data_association_score_;   // minus for transforming distance into a sort of confidence
+  track_msg.visibility = visibility_;
+
+  Eigen::Vector3d top(_x, _y, z_ + (height_/2));
+  Eigen::Vector3d bottom(_x, _y, z_ - (height_/2));
+  top = detection_source_->transformToCam(top);
+  bottom = detection_source_->transformToCam(bottom);
+  if (not vertical)
+  {
+    track_msg.box_2D.height = int(std::abs((top - bottom)(1)));
+    track_msg.box_2D.width = track_msg.box_2D.height / 2;
+    track_msg.box_2D.x = int(top(0)) - track_msg.box_2D.height / 4;
+    track_msg.box_2D.y = int(top(1));
+  }
+  else
+  {
+    track_msg.box_2D.width = int(std::abs((top - bottom)(0)));
+    track_msg.box_2D.height = track_msg.box_2D.width / 2;
+    track_msg.box_2D.x = int(top(0)) - track_msg.box_2D.width;
+    track_msg.box_2D.y = int(top(1)) - track_msg.box_2D.width / 4;
+  }
+  
+  if (inside_area_cube) {
+    track_msg.zone_id = zone_id;
+  } else {
+    // they're in transit
+    track_msg.zone_id = 1000;
+  }
+
+}
+
 
 open_ptrack::detection::DetectionSource*
 TrackObject::getDetectionSource()

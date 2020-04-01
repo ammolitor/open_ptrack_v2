@@ -420,49 +420,47 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
         tracking_results_msg->header.frame_id = world_frame_id;
         // create the messages
         
-        //tracker_object->toMsg(tracking_results_msg);
+        tracker_object->zone_msg(zone_json, n_zones, tracking_results_msg);
         // manually write the messages if we want to do the tests
 
+        // so I can't actually do this here and it needs to be part of tracker object...
+
         // for the tracked items, instead of detections
-        for(std::list<open_ptrack::tracking::TrackObject*>::iterator it = tracker_object->tracks_.begin(); it != tracker_object->tracks_.end(); it++)
-        {
-          open_ptrack::tracking::TrackObject* t = *it;
-          double x, y, z;
-          t->filter_->getState(x, y);
-          z = t->_z;
-          bool inside_area_cube = false;
-          int zone_id;
-          for (zone_id = 0; zone_id < n_zones; zone_id++)
-          {
-            // need a world view here bc each detection was transformed
-            double x_min = zone_json[zone_id][t->frame_id_]["min"]["world"]["x"];
-            double y_min = zone_json[zone_id][t->frame_id_]["min"]["world"]["y"];
-            double z_min = zone_json[zone_id][t->frame_id_]["min"]["world"]["z"];
-            double x_max = zone_json[zone_id][t->frame_id_]["max"]["world"]["x"];
-            double y_max = zone_json[zone_id][t->frame_id_]["max"]["world"]["y"];
-            double z_max = zone_json[zone_id][t->frame_id_]["max"]["world"]["z"];
-            inside_area_cube = (x <= x_max && x >= x_min) && (y <= y_max && y >= y_min) && (z <= z_max && z >= z_min);
-            // I think this works. 
-            if (inside_area_cube) {
-              break;
-            }
-          }
-          opt_msgs::Track track;
-          t->toMsg(track, tracker_object->vertical_);
-
-          //          // For publishing only not occluded tracks:
-          //          if (track.visibility < 2)
-          //            msg->tracks.push_back(track);
-
-          // For publishing all tracks:
-          // add which zone the track is currently in...
-          if (inside_area_cube) {
-              track->zone_id = zone_id;
-          } else {
-            // they're in transit
-            track->zone_id = 1000;
-          }
-          tracking_results_msg->tracks.push_back(track);
+        //for(std::list<open_ptrack::tracking::TrackObject*>::iterator it = tracker_object->tracks_.begin(); it != tracker_object->tracks_.end(); it++)
+        //{
+        //  open_ptrack::tracking::TrackObject* t = *it;
+        //  double x, y, z;
+        //  t->filter_->getState(x, y);
+        //  z = t->_z;
+        //  bool inside_area_cube = false;
+        //  int zone_id;
+        //  for (zone_id = 0; zone_id < n_zones; zone_id++)
+        //  {
+        //    // need a world view here bc each detection was transformed
+        //    double x_min = zone_json[zone_id][t->frame_id_]["min"]["world"]["x"];
+        //    double y_min = zone_json[zone_id][t->frame_id_]["min"]["world"]["y"];
+        //    double z_min = zone_json[zone_id][t->frame_id_]["min"]["world"]["z"];
+        //    double x_max = zone_json[zone_id][t->frame_id_]["max"]["world"]["x"];
+        //    double y_max = zone_json[zone_id][t->frame_id_]["max"]["world"]["y"];
+        //    double z_max = zone_json[zone_id][t->frame_id_]["max"]["world"]["z"];
+        //    inside_area_cube = (x <= x_max && x >= x_min) && (y <= y_max && y >= y_min) && (z <= z_max && z >= z_min);
+        //    // I think this works. 
+        //    if (inside_area_cube) {
+        //      break;
+        //    }
+        //  }
+        //  opt_msgs::Track track;
+        //  t->toMsg(track, tracker_object->vertical_);
+        //
+        //  // For publishing all tracks:
+        //  // add which zone the track is currently in...
+        //  if (inside_area_cube) {
+        //      track->zone_id = zone_id;
+        //  } else {
+        //    // they're in transit
+        //    track->zone_id = 1000;
+        //  }
+        //  tracking_results_msg->tracks.push_back(track);
 
         // Publish tracking message:
         results_pub.publish(tracking_results_msg);

@@ -41,6 +41,9 @@
 
 #include <open_ptrack/tracking/tracker_object.h>
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
 namespace open_ptrack
 {
 namespace tracking
@@ -184,6 +187,21 @@ TrackerObject::toMsg(opt_msgs::TrackArray::Ptr& msg)
     msg->tracks.push_back(track);
   }
 }
+
+void
+TrackerObject::zone_msg(json zone_json, int n_zones, opt_msgs::TrackArray::Ptr& msg)
+{
+  for(std::list<open_ptrack::tracking::TrackObject*>::iterator it =
+      tracks_.begin(); it != tracks_.end(); it++)
+  {
+    open_ptrack::tracking::TrackObject* t = *it;
+
+    opt_msgs::Track track;
+    t->zone_msg(zone_json, n_zones, track, vertical_);
+    msg->tracks.push_back(track);
+  }
+}
+
 
 void
 TrackerObject::toMsg(opt_msgs::TrackArray::Ptr& msg,
