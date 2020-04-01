@@ -424,7 +424,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
         // manually write the messages if we want to do the tests
 
         // for the tracked items, instead of detections
-        for(std::list<open_ptrack::tracking::TrackObject*>::iterator it = tracker_object.tracks_.begin(); it != tracker_object.tracks_.end(); it++)
+        for(std::list<open_ptrack::tracking::TrackObject*>::iterator it = tracker_object->tracks_.begin(); it != tracker_object->tracks_.end(); it++)
         {
           open_ptrack::tracking::TrackObject* t = *it;
           double x, y, z;
@@ -448,7 +448,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
             }
           }
           opt_msgs::Track track;
-          t->toMsg(track, tracker_object.vertical_);
+          t->toMsg(track, tracker_object->vertical_);
 
           //          // For publishing only not occluded tracks:
           //          if (track.visibility < 2)
