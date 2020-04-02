@@ -385,12 +385,12 @@ class TVMDetectionNode {
                   // to test to be sure
                   // a given detection can be in only one place at one time, thus it can't be in
                   // multiple zones
-                  double x_min = zone_json[zone_id][sensor_name]["min"]["world"]["x"];
-                  double y_min = zone_json[zone_id][sensor_name]["min"]["world"]["y"];
-                  double z_min = zone_json[zone_id][sensor_name]["min"]["world"]["z"];
-                  double x_max = zone_json[zone_id][sensor_name]["max"]["world"]["x"];
-                  double y_max = zone_json[zone_id][sensor_name]["max"]["world"]["y"];
-                  double z_max = zone_json[zone_id][sensor_name]["max"]["world"]["z"];
+                  double x_min = zone_json[zone_id][sensor_name]["min"][sensor_name]["x"];
+                  double y_min = zone_json[zone_id][sensor_name]["min"][sensor_name]["y"];
+                  double z_min = zone_json[zone_id][sensor_name]["min"][sensor_name]["z"];
+                  double x_max = zone_json[zone_id][sensor_name]["max"][sensor_name]["x"];
+                  double y_max = zone_json[zone_id][sensor_name]["max"][sensor_name]["y"];
+                  double z_max = zone_json[zone_id][sensor_name]["max"][sensor_name]["z"];
                   inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
                   // I think this works. 
                   if (inside_area_cube) {
