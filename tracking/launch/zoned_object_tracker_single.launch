@@ -4,7 +4,7 @@
   
     
  <!-- Launch the object tracking node -->
-  <node pkg="tracking" type="area_tracker_object" name="zoned_object_tracker_node" output="screen">
+  <node pkg="tracking" type="zone_tracker_object" name="zoned_object_tracker_node" output="screen">
 
     <remap from="~input" to="$(arg object_input_topic)" />
     <remap from="/tracker/markers" to="/tracker/object_markers" />
