@@ -194,6 +194,7 @@ tf::Transform read_poses_from_json(std::string camera_name)
       }
     }
   }
+  std::cout << "translation x: " << translation_x << std::endl;
   worldToCamTransform.setOrigin(tf::Vector3(translation_x, translation_y, translation_z));
   worldToCamTransform.setRotation(tf::Quaternion(rotation_x, rotation_y, rotation_z, rotation_w));
 
@@ -1152,7 +1153,7 @@ int main(int argc, char** argv) {
   std::cout << "detections_topic: " << detections_topic << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   AreaDefinitionNode node(nh, sensor_name, detections_topic, n_zones);
-  std::cout << "detection node init " << std::endl;
+  std::cout << "area node init " << std::endl;
   ros::spin();
   return 0;
 }
