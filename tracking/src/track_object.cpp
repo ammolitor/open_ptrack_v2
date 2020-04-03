@@ -645,9 +645,17 @@ TrackObject::zone_msg(json zone_json, int n_zones, opt_msgs::Track &track_msg, b
                 for (auto& min_boundary : boundary.value().items()){
                   //x, y, z
                   if (min_boundary.key() == "world"){
-                    x_min = min_boundary["x"];
-                    y_min = min_boundary["y"];
-                    z_min = min_boundary["z"];
+                    for (auto& min_value : min_boundary.value().items()){
+                      if (min_value.key() == "x"){
+                        x_min = min_value.value();
+                      }
+                      if (min_value.key() == "y"){
+                        y_min = min_value.value();
+                      }
+                      if (min_value.key() == "z"){
+                        z_min = min_value.value();
+                      }
+                    }
                   }
                 }
               }
@@ -657,9 +665,17 @@ TrackObject::zone_msg(json zone_json, int n_zones, opt_msgs::Track &track_msg, b
                   // sensor_name, world
                   if (max_boundary.key() == "world"){
                     //x, y, z
-                    x_max = max_boundary["x"];
-                    y_max = max_boundary["y"];
-                    z_max = max_boundary["z"];
+                    for (auto& max_value : max_boundary.value().items()){
+                      if (max_value.key() == "x"){
+                        x_max = max_value.value();
+                      }
+                      if (max_value.key() == "y"){
+                        y_max = max_value.value();
+                      }
+                      if (max_value.key() == "z"){
+                        z_max = max_value.value();
+                      }
+                    }
                   }
                 }
               }
