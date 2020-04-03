@@ -409,9 +409,9 @@ class TVMDetectionNode {
                               for (auto& min_boundary : boundary.value().items()){
                                 //x, y, z
                                 if (min_boundary.key() == sensor_name){
-                                  x_min = min_boundary.at("x");
-                                  y_min = min_boundary.at("y");
-                                  z_min = min_boundary.at("z");
+                                  x_min = min_boundary["x"];
+                                  y_min = min_boundary["y"];
+                                  z_min = min_boundary["z"];
                                 }
                               }
                             }
@@ -421,9 +421,9 @@ class TVMDetectionNode {
                                 // sensor_name, world
                                 if (max_boundary.key() == sensor_name){
                                   //x, y, z
-                                  x_max = max_boundary.at("x");
-                                  y_max = max_boundary.at("y");
-                                  z_max = max_boundary.at("z");
+                                  x_max = max_boundary["x"];
+                                  y_max = max_boundary["y"];
+                                  z_max = max_boundary["z"];
                                 }
                               }
                             }
