@@ -636,7 +636,7 @@ TrackObject::zone_msg(json zone_json, int n_zones, opt_msgs::Track &track_msg, b
     for (auto& zone : zone_json.items()){
       if (zone.key() == zone_string) {
         //sensor: name0, name1, etc. 
-        for (auto& sensor : zone.value().items()) {
+        for (auto& reference : zone.value().items()) {
           if (reference.key() == frame_id_) {
             //boundary: min/max
             for (auto& boundary : reference.value().items()){
