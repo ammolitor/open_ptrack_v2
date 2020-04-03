@@ -621,15 +621,17 @@ TrackObject::zone_msg(json zone_json, int n_zones, opt_msgs::Track &track_msg, b
   filter_->getState(_x, _y);
   bool inside_area_cube = false;
   int zone_id;
+  std::string zone_string;
   for (zone_id = 0; zone_id < n_zones; zone_id++)
   {
+    zone_string = std::to_string(zone_id);
     // need a world view here bc each detection was transformed
-    double x_min = zone_json[zone_id][frame_id_]["min"]["world"]["x"];
-    double y_min = zone_json[zone_id][frame_id_]["min"]["world"]["y"];
-    double z_min = zone_json[zone_id][frame_id_]["min"]["world"]["z"];
-    double x_max = zone_json[zone_id][frame_id_]["max"]["world"]["x"];
-    double y_max = zone_json[zone_id][frame_id_]["max"]["world"]["y"];
-    double z_max = zone_json[zone_id][frame_id_]["max"]["world"]["z"];
+    double x_min = zone_json[zone_string][frame_id_]["min"]["world"]["x"];
+    double y_min = zone_json[zone_string][frame_id_]["min"]["world"]["y"];
+    double z_min = zone_json[zone_string][frame_id_]["min"]["world"]["z"];
+    double x_max = zone_json[zone_string][frame_id_]["max"]["world"]["x"];
+    double y_max = zone_json[zone_string][frame_id_]["max"]["world"]["y"];
+    double z_max = zone_json[zone_string][frame_id_]["max"]["world"]["z"];
     inside_area_cube = (_x <= x_max && _x >= x_min) && (_y <= y_max && _y >= y_min) && (z_ <= z_max && z_ >= z_min);
     // I think this works. 
     if (inside_area_cube) {

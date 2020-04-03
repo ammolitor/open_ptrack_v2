@@ -377,6 +377,7 @@ class TVMDetectionNode {
               if (json_found){
                 bool inside_area_cube = false;
                 int zone_id;
+                std::string zone_string;
                 for (zone_id = 0; zone_id < n_zones; zone_id++)
                 {
                   // need a world view here bc each detection was transformed
@@ -385,12 +386,13 @@ class TVMDetectionNode {
                   // to test to be sure
                   // a given detection can be in only one place at one time, thus it can't be in
                   // multiple zones
-                  double x_min = zone_json[zone_id][sensor_name]["min"][sensor_name]["x"];
-                  double y_min = zone_json[zone_id][sensor_name]["min"][sensor_name]["y"];
-                  double z_min = zone_json[zone_id][sensor_name]["min"][sensor_name]["z"];
-                  double x_max = zone_json[zone_id][sensor_name]["max"][sensor_name]["x"];
-                  double y_max = zone_json[zone_id][sensor_name]["max"][sensor_name]["y"];
-                  double z_max = zone_json[zone_id][sensor_name]["max"][sensor_name]["z"];
+                  zone_string = std::to_string(zone_id);
+                  double x_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["x"];
+                  double y_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["y"];
+                  double z_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["z"];
+                  double x_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["x"];
+                  double y_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["y"];
+                  double z_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["z"];
                   inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
                   // I think this works. 
                   if (inside_area_cube) {

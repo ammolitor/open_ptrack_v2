@@ -815,9 +815,12 @@ class AreaDefinitionNode {
         }
     }
     std::cout << "N Zones: "<< n_zones << std::endl;
+    std::string zone_string;
+
     for (int zone_id = 0; zone_id < n_zones; zone_id++) 
     {
       //zone_zone_idd = zone_id;
+      zone_string = std::to_string(zone_id);
       std::cout << "Click and drag for Selection\n" << std::endl;
       std::cout << "\n" << std::endl;
       std::cout << "------> Press 'shift+enter' to save\n" << std::endl;
@@ -946,12 +949,12 @@ class AreaDefinitionNode {
               worldpoints.push_back(current_world_point);
               // push all points into a json file to define the area.
               // error: invalid use of non-static member function ‘const tfScalar& tf::Vector3::x() const’
-              zone_json[zone_id][sensor_name]["world"][cube_count]["x"] = current_world_point.getX();
-              zone_json[zone_id][sensor_name][sensor_name][cube_count]["x"] = tmp.x;
-              zone_json[zone_id][sensor_name]["world"][cube_count]["y"] = current_world_point.getY();
-              zone_json[zone_id][sensor_name][sensor_name][cube_count]["y"] = tmp.y;
-              zone_json[zone_id][sensor_name]["world"][cube_count]["z"] = current_world_point.getZ();
-              zone_json[zone_id][sensor_name][sensor_name][cube_count]["z"] = tmp.z;            
+              zone_json[zone_string][sensor_name]["world"][cube_count]["x"] = current_world_point.getX();
+              zone_json[zone_string][sensor_name][sensor_name][cube_count]["x"] = tmp.x;
+              zone_json[zone_string][sensor_name]["world"][cube_count]["y"] = current_world_point.getY();
+              zone_json[zone_string][sensor_name][sensor_name][cube_count]["y"] = tmp.y;
+              zone_json[zone_string][sensor_name]["world"][cube_count]["z"] = current_world_point.getZ();
+              zone_json[zone_string][sensor_name][sensor_name][cube_count]["z"] = tmp.z;            
               cube_count++;
           }
       }
@@ -1017,19 +1020,19 @@ class AreaDefinitionNode {
       tf::Vector3 min_xyz_world_point(min_xyz.x, min_xyz.y, min_xyz.z);
       min_xyz_world_point = worldToCamTransform(min_xyz_world_point);
 
-      zone_json[zone_id][sensor_name]["min"]["world"]["x"] = min_xyz_world_point.getX();
-      zone_json[zone_id][sensor_name]["min"][sensor_name]["x"] = min_xyz.x;
-      zone_json[zone_id][sensor_name]["min"]["world"]["y"] = min_xyz_world_point.getY();
-      zone_json[zone_id][sensor_name]["min"][sensor_name]["y"] = min_xyz.y;
-      zone_json[zone_id][sensor_name]["min"]["world"]["z"] = min_xyz_world_point.getZ();
-      zone_json[zone_id][sensor_name]["min"][sensor_name]["z"] = min_xyz.z;     
+      zone_json[zone_string][sensor_name]["min"]["world"]["x"] = min_xyz_world_point.getX();
+      zone_json[zone_string][sensor_name]["min"][sensor_name]["x"] = min_xyz.x;
+      zone_json[zone_string][sensor_name]["min"]["world"]["y"] = min_xyz_world_point.getY();
+      zone_json[zone_string][sensor_name]["min"][sensor_name]["y"] = min_xyz.y;
+      zone_json[zone_string][sensor_name]["min"]["world"]["z"] = min_xyz_world_point.getZ();
+      zone_json[zone_string][sensor_name]["min"][sensor_name]["z"] = min_xyz.z;     
 
-      zone_json[zone_id][sensor_name]["max"]["world"]["x"] = max_xyz_world_point.getX();
-      zone_json[zone_id][sensor_name]["max"][sensor_name]["x"] = max_xyz.x;
-      zone_json[zone_id][sensor_name]["max"]["world"]["y"] = max_xyz_world_point.getY();
-      zone_json[zone_id][sensor_name]["max"][sensor_name]["y"] = max_xyz.y;
-      zone_json[zone_id][sensor_name]["max"]["world"]["z"] = max_xyz_world_point.getZ();
-      zone_json[zone_id][sensor_name]["max"][sensor_name]["z"] = max_xyz.z;  
+      zone_json[zone_string][sensor_name]["max"]["world"]["x"] = max_xyz_world_point.getX();
+      zone_json[zone_string][sensor_name]["max"][sensor_name]["x"] = max_xyz.x;
+      zone_json[zone_string][sensor_name]["max"]["world"]["y"] = max_xyz_world_point.getY();
+      zone_json[zone_string][sensor_name]["max"][sensor_name]["y"] = max_xyz.y;
+      zone_json[zone_string][sensor_name]["max"]["world"]["z"] = max_xyz_world_point.getZ();
+      zone_json[zone_string][sensor_name]["max"][sensor_name]["z"] = max_xyz.z;  
 
       // destroy the named window
       cv::destroyAllWindows(); 
