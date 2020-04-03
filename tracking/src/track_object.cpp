@@ -622,16 +622,60 @@ TrackObject::zone_msg(json zone_json, int n_zones, opt_msgs::Track &track_msg, b
   bool inside_area_cube = false;
   int zone_id;
   std::string zone_string;
+  
+  double x_min;
+  double y_min;
+  double z_min;
+  double x_max;
+  double y_max;
+  double z_max;
   for (zone_id = 0; zone_id < n_zones; zone_id++)
   {
     zone_string = std::to_string(zone_id);
+    /// zone: 0, 1, 2
+    for (auto& zone : zone_json.items()){
+      if (zone.key() == zone_string) {
+        //sensor: name0, name1, etc. 
+        for (auto& sensor : zone.value().items()) {
+          if (reference.key() == frame_id_) {
+            //boundary: min/max
+            for (auto& boundary : reference.value().items()){
+              if (boundary.key() == "min"){
+                // min_boundary: sensor_name, world
+                for (auto& min_boundary : boundary.value().items()){
+                  //x, y, z
+                  if (min_boundary.key() == "world"){
+                    x_min = min_boundary.at("x");
+                    y_min = min_boundary.at("y");
+                    z_min = min_boundary.at("z");
+                  }
+                }
+              }
+              if (boundary.key() == "max"){
+                // max_boundary: sensor_name, world
+                for (auto& max_boundary : boundary.value().items()){
+                  // sensor_name, world
+                  if (max_boundary.key() == "world"){
+                    //x, y, z
+                    x_max = max_boundary.at("x");
+                    y_max = max_boundary.at("y");
+                    z_max = max_boundary.at("z");
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    // python representation here
     // need a world view here bc each detection was transformed
-    double x_min = zone_json[zone_string][frame_id_]["min"]["world"]["x"];
-    double y_min = zone_json[zone_string][frame_id_]["min"]["world"]["y"];
-    double z_min = zone_json[zone_string][frame_id_]["min"]["world"]["z"];
-    double x_max = zone_json[zone_string][frame_id_]["max"]["world"]["x"];
-    double y_max = zone_json[zone_string][frame_id_]["max"]["world"]["y"];
-    double z_max = zone_json[zone_string][frame_id_]["max"]["world"]["z"];
+    //double x_min = zone_json[zone_string][frame_id_]["min"]["world"]["x"];
+    //double y_min = zone_json[zone_string][frame_id_]["min"]["world"]["y"];
+    //double z_min = zone_json[zone_string][frame_id_]["min"]["world"]["z"];
+    //double x_max = zone_json[zone_string][frame_id_]["max"]["world"]["x"];
+    //double y_max = zone_json[zone_string][frame_id_]["max"]["world"]["y"];
+    //double z_max = zone_json[zone_string][frame_id_]["max"]["world"]["z"];
     inside_area_cube = (_x <= x_max && _x >= x_min) && (_y <= y_max && _y >= y_min) && (z_ <= z_max && z_ >= z_min);
     // I think this works. 
     if (inside_area_cube) {
