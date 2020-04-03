@@ -18,7 +18,9 @@
             <param name="set_object_names" value="true" />
     </node>
     <include file="$(find tracking)/launch/object_tracker_single.launch" />
-   
+    
+    <!-- Load calibration results -->   
+    <include file="$(find opt_calibration)/launch/opt_calibration_results.launch"/>
 
     <!-- UDP messaging -->
     <include file="$(find opt_utils)/launch/ros2udp_converter.launch" />
