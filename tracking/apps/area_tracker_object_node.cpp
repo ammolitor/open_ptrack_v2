@@ -159,6 +159,90 @@ std::string master_full_path = package_path + master_hard_coded_path;
 //    sensor
 //    world
 //repeat
+tf::Transform read_poses_from_json(std::string camera_name)
+{
+  tf::Transform worldToCamTransform;
+  double translation_x;
+  double translation_y;
+  double translation_z;
+  double rotation_x;
+  double rotation_y;
+  double rotation_z;
+  double rotation_w;
+
+  json pose_config;
+  std::string hard_coded_path = "/cfg/poses.json";
+  std::cout << "--- detector cfg_callback ---" << std::endl;
+  std::string package_path = ros::package::getPath("recognition");
+  std::string full_path = package_path + hard_coded_path;
+  std::ifstream json_read(full_path);
+  json_read >> pose_config;
+
+  //<!-- pc: Jetson-TX2-Ubuntu-18-CUDA-10-NEW -->
+  //<!-- sensor: d415 -->
+  //<node pkg="tf" type="static_transform_publisher" name="d415_broadcaster"
+  //      args="2.18334 0.46989 1.28112 0.522227 0.598362 -0.456386 -0.401191 /world /d415 100" />
+  //              tx       ty      tz      rx        ry       rz        rw      
+  //double translation_x = pose_config[camera_name]["pose"]["translation"]["x"];
+  //double translation_y = pose_config[camera_name]["pose"]["translation"]["y"];
+  //double translation_z = pose_config[camera_name]["pose"]["translation"]["z"];
+  //double rotation_x = pose_config[camera_name]["pose"]["rotation"]["x"];
+  //double rotation_y = pose_config[camera_name]["pose"]["rotation"]["y"];
+  //double rotation_z = pose_config[camera_name]["pose"]["rotation"]["z"];
+  //double rotation_w = pose_config[camera_name]["pose"]["rotation"]["w"];
+
+  /// cameras: cam0, cam1, cam2
+  for (auto& cameras : pose_config.items()){
+    if (cameras.key() == camera_name) {
+      //pose: pose, other thing, etc. 
+      for (auto& pose : cameras.value().items()) {
+        if (pose.key() == "pose") {
+          //pose_type: translation, rotation
+          for (auto& pose_type : pose.value().items()){
+            if (pose_type.key() == "translation"){
+              // x, y, z 
+              for (auto& translations : pose_type.value().items()){
+                //x, y, z
+                if (translations.key() == "x"){
+                  translation_x = translations.value();
+                }
+                if (translations.key() == "y"){
+                  translation_y = translations.value();
+                }
+                if (translations.key() == "z"){
+                  translation_z = translations.value();
+                }
+              }
+            }
+            if (pose_type.key() == "rotation"){
+              // x, y, z 
+              for (auto& rotations : pose_type.value().items()){
+                //x, y, z
+                if (rotations.key() == "x"){
+                  rotation_x = rotations.value();
+                }
+                if (rotations.key() == "y"){
+                  rotation_y = rotations.value();
+                }
+                if (rotations.key() == "z"){
+                  rotation_z = rotations.value();
+                }
+                if (rotations.key() == "w"){
+                  rotation_w = rotations.value();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  worldToCamTransform.setOrigin(tf::Vector3(translation_x, translation_y, translation_z));
+  worldToCamTransform.setRotation(tf::Quaternion(rotation_x, rotation_y, rotation_z, rotation_w));
+
+  return worldToCamTransform;
+}
+
 
 /**
  * \brief Create marker to be visualized in RViz
