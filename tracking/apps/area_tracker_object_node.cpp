@@ -336,13 +336,29 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
   std::string frame_id = msg->header.frame_id;
   ros::Time frame_time = msg->header.stamp;
 
+  /**
+   * 
+   * note this weirdness - by appending "_rgb_optical_frame", you run into errors when your
+   * transforms don't match - meaning there could be an argument against appending altogether...
+   * 
+   * [ERROR] [1586013681.783174562]: transform exception: Could not find a connection between
+   * 'world' and 'd415_color_optical_frame' because they are not part of the same tree.
+   * Tf has two or more unconnected trees.
+   * 
+   * that's very odd. try without to ensure correctness???
+  */
+  // 
+  // 
+  //
   std::string frame_id_tmp = frame_id;
+  std::cout << "frame_id_tmp pre: " << frame_id_tmp << std::endl;
   int pos = frame_id_tmp.find("_rgb_optical_frame");
   if (pos != std::string::npos)
     frame_id_tmp.replace(pos, std::string("_rgb_optical_frame").size(), "");
+  std::cout << "frame_id_tmp post: " << frame_id_tmp << std::endl;
   pos = frame_id_tmp.find("_depth_optical_frame");
   if (pos != std::string::npos)
-  frame_id_tmp.replace(pos, std::string("_depth_optical_frame").size(), "");
+    frame_id_tmp.replace(pos, std::string("_depth_optical_frame").size(), "");
   last_received_detection_[frame_id_tmp] = frame_time;
 
   // Compute delay of detection message, if any:
