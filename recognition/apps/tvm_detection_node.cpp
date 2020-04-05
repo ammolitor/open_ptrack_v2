@@ -448,7 +448,16 @@ class TVMDetectionNode {
                       }
                     }
                   }
-                    
+                  std::cout << "x_min: " << x_min << std::endl;
+                  std::cout << "y_min: " << y_min << std::endl;
+                  std::cout << "z_min: " << z_min << std::endl;
+                  std::cout << "x_max: " << x_max << std::endl;
+                  std::cout << "y_max: " << y_max << std::endl;
+                  std::cout << "z_max: " << z_max << std::endl;
+                  std::cout << "mx: " << mx << std::endl;
+                  std::cout << "my: " << my << std::endl;
+                  std::cout << "median_depth: " << median_depth << std::endl;
+
                   // pythonic representation of above
                   //double x_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["x"];
                   //double y_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["y"];
@@ -457,11 +466,13 @@ class TVMDetectionNode {
                   //double y_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["y"];
                   //double z_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["z"];
                   inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
+                  std::cout << "inside_cube: " << inside_cube_area << std::endl;
                   // I think this works. 
                   if (inside_area_cube) {
                     break;
                   }
                 }
+
                 if (inside_area_cube) {
                   detection_msg.zone_id = zone_id;
                   std::cout << "DEBUG -- INSIDE ZONE: " << zone_id << std::endl;
