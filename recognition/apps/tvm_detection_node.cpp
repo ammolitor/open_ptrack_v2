@@ -411,13 +411,13 @@ class TVMDetectionNode {
                                 if (min_boundary.key() == sensor_name){
                                   for (auto& min_value : min_boundary.value().items()){
                                     if (min_value.key() == "x"){
-                                      x_min = min_value.value();
+                                      x_min = static_cast<float>(min_value.value());
                                     }
                                     if (min_value.key() == "y"){
-                                      y_min = min_value.value();
+                                      y_min = static_cast<float>(min_value.value());
                                     }
                                     if (min_value.key() == "z"){
-                                      z_min = min_value.value();
+                                      z_min = static_cast<float>(min_value.value());
                                     }
                                   }
                                 }
@@ -431,13 +431,13 @@ class TVMDetectionNode {
                                   //x, y, z
                                   for (auto& max_value : max_boundary.value().items()){
                                     if (max_value.key() == "x"){
-                                      x_max = max_value.value();
+                                      x_max = static_cast<float>(max_value.value());
                                     }
                                     if (max_value.key() == "y"){
-                                      y_max = max_value.value();
+                                      y_max = static_cast<float>(max_value.value());
                                     }
                                     if (max_value.key() == "z"){
-                                      z_max = max_value.value();
+                                      z_max = static_cast<float>(max_value.value());
                                     }
                                   }  
                                 }
