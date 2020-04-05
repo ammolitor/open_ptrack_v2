@@ -378,12 +378,12 @@ class TVMDetectionNode {
                 bool inside_area_cube = false;
                 int zone_id;
                 std::string zone_string;                  
-                double x_min;
-                double y_min;
-                double z_min;
-                double x_max;
-                double y_max;
-                double z_max;
+                float x_min;
+                float y_min;
+                float z_min;
+                float x_max;
+                float y_max;
+                float z_max;
                 for (zone_id = 0; zone_id < n_zones; zone_id++)
                 {
                   // need a world view here bc each detection was transformed
