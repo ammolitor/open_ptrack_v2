@@ -466,7 +466,7 @@ class TVMDetectionNode {
                   //double y_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["y"];
                   //double z_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["z"];
                   inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
-                  std::cout << "inside_cube: " << inside_cube_area << std::endl;
+                  std::cout << "inside_cube: " << inside_area_cube << std::endl;
                   // I think this works. 
                   if (inside_area_cube) {
                     break;
