@@ -464,6 +464,7 @@ class TVMDetectionNode {
                 }
                 if (inside_area_cube) {
                   detection_msg.zone_id = zone_id;
+                  std::cout << "DEBUG -- INSIDE ZONE: " << zone_id << std::endl;
                 } else {
                   // meaning they're in transit
                   detection_msg.zone_id = 1000;
