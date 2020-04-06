@@ -196,6 +196,7 @@ class TVMDetectionNode {
           std::ifstream master_json_read(master_hard_coded_path);
           master_json_read >> master_config;
           n_zones = master_config["n_zones"]; //the path to the detector model file
+          std::cout << "n_zones: " << n_zones << std::endl;
           json_found = true;
         }
         catch(const std::exception& e)
