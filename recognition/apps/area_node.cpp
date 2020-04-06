@@ -1003,12 +1003,12 @@ class AreaDefinitionNode {
               worldpoints.push_back(current_world_point);
               // push all points into a json file to define the area.
               // error: invalid use of non-static member function ‘const tfScalar& tf::Vector3::x() const’
-              zone_json[zone_string][sensor_name]["world"][cube_count]["x"] = current_world_point.getX();
-              zone_json[zone_string][sensor_name][sensor_name][cube_count]["x"] = tmp.x;
-              zone_json[zone_string][sensor_name]["world"][cube_count]["y"] = current_world_point.getY();
-              zone_json[zone_string][sensor_name][sensor_name][cube_count]["y"] = tmp.y;
-              zone_json[zone_string][sensor_name]["world"][cube_count]["z"] = current_world_point.getZ();
-              zone_json[zone_string][sensor_name][sensor_name][cube_count]["z"] = tmp.z;            
+              //zone_json[zone_string][sensor_name]["world"][cube_count]["x"] = current_world_point.getX();
+              //zone_json[zone_string][sensor_name][sensor_name][cube_count]["x"] = tmp.x;
+              //zone_json[zone_string][sensor_name]["world"][cube_count]["y"] = current_world_point.getY();
+              //zone_json[zone_string][sensor_name][sensor_name][cube_count]["y"] = tmp.y;
+              //zone_json[zone_string][sensor_name]["world"][cube_count]["z"] = current_world_point.getZ();
+              //zone_json[zone_string][sensor_name][sensor_name][cube_count]["z"] = tmp.z;            
               cube_count++;
           }
       }
@@ -1074,19 +1074,20 @@ class AreaDefinitionNode {
       tf::Vector3 min_xyz_world_point(min_xyz.x, min_xyz.y, min_xyz.z);
       min_xyz_world_point = worldToCamTransform(min_xyz_world_point);
 
-      zone_json[zone_string][sensor_name]["min"]["world"]["x"] = min_xyz_world_point.getX();
-      zone_json[zone_string][sensor_name]["min"][sensor_name]["x"] = min_xyz.x;
-      zone_json[zone_string][sensor_name]["min"]["world"]["y"] = min_xyz_world_point.getY();
-      zone_json[zone_string][sensor_name]["min"][sensor_name]["y"] = min_xyz.y;
-      zone_json[zone_string][sensor_name]["min"]["world"]["z"] = min_xyz_world_point.getZ();
-      zone_json[zone_string][sensor_name]["min"][sensor_name]["z"] = min_xyz.z;     
+      // add float info
+      zone_json[zone_string][sensor_name]["min"]["world"]["x"] = static_cast<float>(min_xyz_world_point.getX());
+      zone_json[zone_string][sensor_name]["min"][sensor_name]["x"] = static_cast<float>(min_xyz.x);
+      zone_json[zone_string][sensor_name]["min"]["world"]["y"] = static_cast<float>(min_xyz_world_point.getY(0);
+      zone_json[zone_string][sensor_name]["min"][sensor_name]["y"] = static_cast<float>(min_xyz.y);
+      zone_json[zone_string][sensor_name]["min"]["world"]["z"] = static_cast<float>(min_xyz_world_point.getZ());
+      zone_json[zone_string][sensor_name]["min"][sensor_name]["z"] = static_cast<float>(min_xyz.z);     
 
-      zone_json[zone_string][sensor_name]["max"]["world"]["x"] = max_xyz_world_point.getX();
-      zone_json[zone_string][sensor_name]["max"][sensor_name]["x"] = max_xyz.x;
-      zone_json[zone_string][sensor_name]["max"]["world"]["y"] = max_xyz_world_point.getY();
-      zone_json[zone_string][sensor_name]["max"][sensor_name]["y"] = max_xyz.y;
-      zone_json[zone_string][sensor_name]["max"]["world"]["z"] = max_xyz_world_point.getZ();
-      zone_json[zone_string][sensor_name]["max"][sensor_name]["z"] = max_xyz.z;  
+      zone_json[zone_string][sensor_name]["max"]["world"]["x"] = static_cast<float>(max_xyz_world_point.getX());
+      zone_json[zone_string][sensor_name]["max"][sensor_name]["x"] = static_cast<float>(max_xyz.x);
+      zone_json[zone_string][sensor_name]["max"]["world"]["y"] = static_cast<float>(max_xyz_world_point.getY());
+      zone_json[zone_string][sensor_name]["max"][sensor_name]["y"] = static_cast<float>(max_xyz.y);
+      zone_json[zone_string][sensor_name]["max"]["world"]["z"] = static_cast<float>(max_xyz_world_point.getZ());
+      zone_json[zone_string][sensor_name]["max"][sensor_name]["z"] = static_cast<float>(max_xyz.z);  
 
       // destroy the named window
       cv::destroyAllWindows(); 

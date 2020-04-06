@@ -378,12 +378,12 @@ class TVMDetectionNode {
                 bool inside_area_cube = false;
                 int zone_id;
                 std::string zone_string;                  
-                float x_min;
-                float y_min;
-                float z_min;
-                float x_max;
-                float y_max;
-                float z_max;
+                double x_min;
+                double y_min;
+                double z_min;
+                double x_max;
+                double y_max;
+                double z_max;
                 for (zone_id = 0; zone_id < n_zones; zone_id++)
                 {
                   // need a world view here bc each detection was transformed
@@ -411,13 +411,13 @@ class TVMDetectionNode {
                                 if (min_boundary.key() == sensor_name){
                                   for (auto& min_value : min_boundary.value().items()){
                                     if (min_value.key() == "x"){
-                                      x_min = static_cast<float>(min_value.value());
+                                      x_min = min_value.value();
                                     }
                                     if (min_value.key() == "y"){
-                                      y_min = static_cast<float>(min_value.value());
+                                      y_min = min_value.value();
                                     }
                                     if (min_value.key() == "z"){
-                                      z_min = static_cast<float>(min_value.value());
+                                      z_min = min_value.value();
                                     }
                                   }
                                 }
@@ -431,13 +431,13 @@ class TVMDetectionNode {
                                   //x, y, z
                                   for (auto& max_value : max_boundary.value().items()){
                                     if (max_value.key() == "x"){
-                                      x_max = static_cast<float>(max_value.value());
+                                      x_max = max_value.value();
                                     }
                                     if (max_value.key() == "y"){
-                                      y_max = static_cast<float>(max_value.value());
+                                      y_max = max_value.value();
                                     }
                                     if (max_value.key() == "z"){
-                                      z_max = static_cast<float>(max_value.value());
+                                      z_max = max_value.value();
                                     }
                                   }  
                                 }
