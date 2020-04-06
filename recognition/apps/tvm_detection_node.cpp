@@ -188,6 +188,8 @@ class TVMDetectionNode {
           std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
           std::ifstream area_json_read(area_hard_coded_path);
           area_json_read >> zone_json;
+          //double test;
+          std::cout << "zone_json test: " << zone_json["0"]["d415"]["min"]["d415"]["x"] << std::endl;
           
           // get the number of zones to scan.
           json master_config;
