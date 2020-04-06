@@ -398,18 +398,23 @@ class TVMDetectionNode {
 
                   /// zone: 0, 1, 2
                   for (auto& zone : zone_json.items()){
+                    std::cout << "zone.key(): " << zone.key() << std::endl;
                     if (zone.key() == zone_string) {
                       //sensor: name0, name1, etc. 
                       for (auto& sensor : zone.value().items()) {
+                        std::cout << "sensor.key(): " << sensor.key() << std::endl;
                         if (sensor.key() == sensor_name) {
                           //boundary: min/max
                           for (auto& boundary : sensor.value().items()){
+                            std::cout << "boundary.key(): " << boundary.key() << std::endl;
                             if (boundary.key() == "min"){
                               // min_boundary: sensor_name, world
                               for (auto& min_boundary : boundary.value().items()){
+                                std::cout << "min_boundary.key(): " << min_boundary.key() << std::endl;
                                 //x, y, z
                                 if (min_boundary.key() == sensor_name){
                                   for (auto& min_value : min_boundary.value().items()){
+                                    std::cout << "min_value.key(): " << min_value.key() << std::endl;
                                     if (min_value.key() == "x"){
                                       x_min = min_value.value();
                                     }
