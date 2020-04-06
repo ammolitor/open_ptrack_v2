@@ -396,6 +396,7 @@ class TVMDetectionNode {
                   // type must be number but is null...
                   //https://github.com/nlohmann/json/issues/1593
 
+                  std::cout << "starting iterator!" << std::endl;
                   /// zone: 0, 1, 2
                   for (auto& zone : zone_json.items()){
                     std::cout << "zone.key(): " << zone.key() << std::endl;
@@ -453,6 +454,8 @@ class TVMDetectionNode {
                       }
                     }
                   }
+                  std::cout << "end iterator!" << std::endl;
+
                   std::cout << "x_min: " << x_min << std::endl;
                   std::cout << "y_min: " << y_min << std::endl;
                   std::cout << "z_min: " << z_min << std::endl;
