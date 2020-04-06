@@ -399,66 +399,13 @@ class TVMDetectionNode {
                   // type must be number but is null...
                   //https://github.com/nlohmann/json/issues/1593
 
-                  std::cout << "starting iterator!" << std::endl;
-                  /// zone: 0, 1, 2
-                  for (auto& zone : zone_json.items()){
-                    std::cout << "zone.key(): " << zone.key() << std::endl;
-                    if (zone.key() == zone_string) {
-                      //sensor: name0, name1, etc. 
-                      for (auto& sensor : zone.value().items()) {
-                        std::cout << "sensor.key(): " << sensor.key() << std::endl;
-                        if (sensor.key() == sensor_name) {
-                          //boundary: min/max
-                          for (auto& boundary : sensor.value().items()){
-                            std::cout << "boundary.key(): " << boundary.key() << std::endl;
-                            if (boundary.key() == "min"){
-                              // min_boundary: sensor_name, world
-                              for (auto& min_boundary : boundary.value().items()){
-                                std::cout << "min_boundary.key(): " << min_boundary.key() << std::endl;
-                                //x, y, z
-                                if (min_boundary.key() == sensor_name){
-                                  for (auto& min_value : min_boundary.value().items()){
-                                    std::cout << "min_value.key(): " << min_value.key() << std::endl;
-                                    if (min_value.key() == "x"){
-                                      x_min = min_value.value();
-                                    }
-                                    if (min_value.key() == "y"){
-                                      y_min = min_value.value();
-                                    }
-                                    if (min_value.key() == "z"){
-                                      z_min = min_value.value();
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                            if (boundary.key() == "max"){
-                              // max_boundary: sensor_name, world
-                              for (auto& max_boundary : boundary.value().items()){
-                                // sensor_name, world
-                                if (max_boundary.key() == sensor_name){
-                                  //x, y, z
-                                  for (auto& max_value : max_boundary.value().items()){
-                                    if (max_value.key() == "x"){
-                                      x_max = max_value.value();
-                                    }
-                                    if (max_value.key() == "y"){
-                                      y_max = max_value.value();
-                                    }
-                                    if (max_value.key() == "z"){
-                                      z_max = max_value.value();
-                                    }
-                                  }  
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                  std::cout << "end iterator!" << std::endl;
-
+                  x_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["x"];
+                  y_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["y"];
+                  z_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["z"];
+                  x_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["x"];
+                  y_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["y"];
+                  z_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["z"];
+                  
                   std::cout << "x_min: " << x_min << std::endl;
                   std::cout << "y_min: " << y_min << std::endl;
                   std::cout << "z_min: " << z_min << std::endl;
