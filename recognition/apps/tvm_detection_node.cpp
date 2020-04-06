@@ -240,6 +240,12 @@ class TVMDetectionNode {
       //tf::transformTFToEigen(ir2rgb_transform, ir2rgb);
 
 
+      // find a better way to do this...
+      // json call back...
+      std::string area_package_path = ros::package::getPath("recognition");
+      std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
+      std::ifstream area_json_read(area_hard_coded_path);
+      area_json_read >> zone_json;
 
 
       // set message vars here
