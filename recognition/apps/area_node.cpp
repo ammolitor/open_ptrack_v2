@@ -1077,7 +1077,7 @@ class AreaDefinitionNode {
       // add float info
       zone_json[zone_string][sensor_name]["min"]["world"]["x"] = static_cast<float>(min_xyz_world_point.getX());
       zone_json[zone_string][sensor_name]["min"][sensor_name]["x"] = static_cast<float>(min_xyz.x);
-      zone_json[zone_string][sensor_name]["min"]["world"]["y"] = static_cast<float>(min_xyz_world_point.getY(0);
+      zone_json[zone_string][sensor_name]["min"]["world"]["y"] = static_cast<float>(min_xyz_world_point.getY());
       zone_json[zone_string][sensor_name]["min"][sensor_name]["y"] = static_cast<float>(min_xyz.y);
       zone_json[zone_string][sensor_name]["min"]["world"]["z"] = static_cast<float>(min_xyz_world_point.getZ());
       zone_json[zone_string][sensor_name]["min"][sensor_name]["z"] = static_cast<float>(min_xyz.z);     
