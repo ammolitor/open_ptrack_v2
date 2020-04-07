@@ -154,17 +154,17 @@ class TVMDetectionNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMDetectionNode(ros::NodeHandle& nh, std::string sensor_string):
+    TVMDetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json):
       node_(nh), it(node_)
       {
         
         try
         {
-          json zone_json;
-          std::string area_package_path = ros::package::getPath("recognition");
-          std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
-          std::ifstream area_json_read(area_hard_coded_path);
-          area_json_read >> zone_json;
+          //json zone_json;
+          //std::string area_package_path = ros::package::getPath("recognition");
+          //std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
+          //std::ifstream area_json_read(area_hard_coded_path);
+          //area_json_read >> zone_json;
           //double test;
           //std::cout << "zone_json test: " << zone_json["0"]["d415"]["min"]["d415"]["x"] << std::endl;
           
@@ -518,13 +518,19 @@ int main(int argc, char** argv) {
   json_read >> master_config;
   sensor_name = master_config["sensor_name"]; //the path to the detector model file
 
+  json zone_json;
+  std::string area_package_path = ros::package::getPath("recognition");
+  std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
+  std::ifstream area_json_read(area_hard_coded_path);
+  area_json_read >> zone_json;
+
   std::cout << "--- tvm_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_detection_node");
   // something is off here... with the private namespace
   ros::NodeHandle nh;
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMDetectionNode node(nh, sensor_name);
+  TVMDetectionNode node(nh, sensor_name, zone_json);
   std::cout << "detection node init " << std::endl;
   ros::spin();
   return 0;
