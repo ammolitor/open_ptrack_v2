@@ -157,30 +157,7 @@ class TVMDetectionNode {
     TVMDetectionNode(ros::NodeHandle& nh, std::string sensor_string):
       node_(nh), it(node_)
       {
-        // Publish Messages
-        detections_pub = node_.advertise<opt_msgs::DetectionArray>("/objects_detector/detections", 3);
-
-        // Subscribe to Messages
-        rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
-        depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
         
-        image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
-
-        // Camera callback for intrinsics matrix update
-        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMDetectionNode::camera_info_callback, this);
-
-        //Time sync policies for the subscribers
-        approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(10), rgb_image_sub, depth_image_sub));
-        approximate_sync_->registerCallback(boost::bind(&TVMDetectionNode::callback, this, _1, _2));
-
-        // create callback config 
-        cfg_server.setCallback(boost::bind(&TVMDetectionNode::cfg_callback, this, _1, _2));      
-
-        // create object-detector pointer
-        //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
-        tvm_object_detector.reset(new YoloTVMGPU(model_folder_path));
-        sensor_name = sensor_string;
-
         try
         {
           json zone_json;
@@ -189,7 +166,7 @@ class TVMDetectionNode {
           std::ifstream area_json_read(area_hard_coded_path);
           area_json_read >> zone_json;
           //double test;
-          std::cout << "zone_json test: " << zone_json["0"]["d415"]["min"]["d415"]["x"] << std::endl;
+          //std::cout << "zone_json test: " << zone_json["0"]["d415"]["min"]["d415"]["x"] << std::endl;
           
           // get the number of zones to scan.
           json master_config;
@@ -205,8 +182,33 @@ class TVMDetectionNode {
         {
           std::cerr << "json master/area not found: "<< e.what() << '\n';
         }
-         
+        
+        // Publish Messages
+        detections_pub = node_.advertise<opt_msgs::DetectionArray>("/objects_detector/detections", 3);
 
+        // Subscribe to Messages
+        rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
+        depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
+        
+        image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
+
+        // Camera callback for intrinsics matrix update
+        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMDetectionNode::camera_info_callback, this);
+
+        //Time sync policies for the subscribers
+        approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(10), rgb_image_sub, depth_image_sub));
+        // _1 = rgb_image_sub
+        // _2 = depth_image_sub
+        // _3 = zone_json or zone_json
+        approximate_sync_->registerCallback(boost::bind(&TVMDetectionNode::callback, this, _1, _2, zone_json));
+
+        // create callback config 
+        cfg_server.setCallback(boost::bind(&TVMDetectionNode::cfg_callback, this, _1, _2));      
+
+        // create object-detector pointer
+        //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
+        tvm_object_detector.reset(new YoloTVMGPU(model_folder_path));
+        sensor_name = sensor_string;
       }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
@@ -224,9 +226,11 @@ class TVMDetectionNode {
      *  and publishes the detections to specific topics
      * @param rgb_image  the rgb image message
      * @param depth_image  the depth/stereo image message
+     * @param zone_json the json that contains the zone information
      */
     void callback(const sensor_msgs::Image::ConstPtr& rgb_image,
-                  const sensor_msgs::Image::ConstPtr& depth_image) {
+                  const sensor_msgs::Image::ConstPtr& depth_image,
+                  json zone_json) {
         
       std::cout << "running algorithm callback" << std::endl;
     
@@ -242,11 +246,12 @@ class TVMDetectionNode {
 
       // find a better way to do this...
       // json call back...
-      std::string area_package_path = ros::package::getPath("recognition");
-      std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
-      std::ifstream area_json_read(area_hard_coded_path);
-      area_json_read >> zone_json;
+      //std::string area_package_path = ros::package::getPath("recognition");
+      //std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
+      //std::ifstream area_json_read(area_hard_coded_path);
+      //area_json_read >> zone_json;
 
+      // how to persist zone_json;
 
       // set message vars here
       cv_bridge::CvImagePtr cv_ptr_rgb;
