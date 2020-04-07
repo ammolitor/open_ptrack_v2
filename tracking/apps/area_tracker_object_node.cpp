@@ -520,7 +520,8 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
         tracking_results_msg->header.frame_id = world_frame_id;
         // create the messages
         
-        tracker_object->zone_msg(zone_json, n_zones, tracking_results_msg);
+        //tracker_object->zone_msg(zone_json, n_zones, tracking_results_msg);
+        tracker_object->toMsg(tracking_results_msg);
         // manually write the messages if we want to do the tests
 
         // so I can't actually do this here and it needs to be part of tracker object...

@@ -186,6 +186,14 @@ namespace open_ptrack
         getObjectName();
 
         /**
+         * \brief The object's current zone
+         *
+         * \return the object's zone_id
+         */
+        int
+        get_zone_id();
+
+        /**
          * \brief Set the confidence of the people detector associated to the detection.
          *
          * \param[in] confidence Confidence of the people detector associated to the detection.

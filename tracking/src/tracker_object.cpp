@@ -311,12 +311,12 @@ TrackerObject::createNewTrack(open_ptrack::detection::Detection& detection)
         velocity_in_motion_term_  );
 
   t->init(detection.getWorldCentroid()(0), detection.getWorldCentroid()(1),detection.getWorldCentroid()(2),
-          detection.getHeight(), detection.getDistance(), detection.getObjectName(),detection.getSource());
+          detection.getHeight(), detection.getDistance(), detection.getObjectName(), detection.get_zone_id(), detection.getSource());
 
   bool first_update = true;
   t->update(detection.getWorldCentroid()(0), detection.getWorldCentroid()(1), detection.getWorldCentroid()(2),
             detection.getHeight(), detection.getDistance(), detection.getObjectName(),0.0,
-            detection.getConfidence(), min_confidence_, min_confidence_detections_, detection.getSource(), first_update);
+            detection.getConfidence(), min_confidence_, min_confidence_detections_, detection.get_zone_id(), detection.getSource(), first_update);
 
   ROS_INFO("Created %d", t->getId());
 
@@ -459,7 +459,7 @@ TrackerObject::updateDetectedTracks()
           associations_[measure] = t;
           t->update(d.getWorldCentroid()(0), d.getWorldCentroid()(1), d.getWorldCentroid()(2),d.getHeight(),
                       d.getDistance(),d.getObjectName(), distance_matrix_(track, measure),
-                      d.getConfidence(), min_confidence_, min_confidence_detections_,
+                      d.getConfidence(), min_confidence_, min_confidence_detections_, d.get_zone_id(),
                       d.getSource(), first_update);
 
           t->setVisibility(d.isOccluded() ? TrackObject::OCCLUDED : TrackObject::VISIBLE);

@@ -164,6 +164,9 @@ namespace open_ptrack
         /** \brief Count the number of consecutive updates with low confidence detections */
         int low_confidence_consecutive_frames_;
 
+         /** \brief the current zone of the track */
+        int zone_id_;
+
 
 
       public:
@@ -202,6 +205,7 @@ namespace open_ptrack
             double height,
             double distance,
             std::string object_name,
+            int zone_id,
             open_ptrack::detection::DetectionSource* detection_source);
 
         /**
@@ -229,6 +233,7 @@ namespace open_ptrack
             double confidence,
             double min_confidence,
             double min_confidence_detections,
+            int zone_id,
             open_ptrack::detection::DetectionSource* detection_source,
             bool first_update = false);
 

@@ -136,6 +136,12 @@ namespace open_ptrack
       return detection_msg_.object_name;
     }
 
+    int
+    Detection::get_zone_id()
+    {
+      return detection_msg_.zone_id;
+    }
+
     void
     Detection::setConfidence(double confidence)
     {

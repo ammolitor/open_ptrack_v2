@@ -125,7 +125,7 @@ TrackObject::init(const TrackObject& old_track)
 
 
 void
-TrackObject::init(double x, double y, double z, double height, double distance,std::string object_name,
+TrackObject::init(double x, double y, double z, double height, double distance, std::string object_name, int zone_id,
                    open_ptrack::detection::DetectionSource* detection_source)
 {
   //Init Kalman filter
@@ -144,6 +144,7 @@ TrackObject::init(double x, double y, double z, double height, double distance,s
   last_time_predicted_ = last_time_detected_ = last_time_detected_with_high_confidence_ = detection_source->getTime();
   last_time_predicted_index_ = 0;
   age_ = 0.0;
+  zone_id_ = zone_id;
 }
 
 void
@@ -158,6 +159,7 @@ TrackObject::update(
     double confidence,
     double min_confidence,
     double min_confidence_detections,
+    int zone_id,
     open_ptrack::detection::DetectionSource* detection_source,
     bool first_update)
 {
@@ -246,6 +248,7 @@ TrackObject::update(
   age_ = (detection_source->getTime() - first_time_detected_).toSec();
 
   detection_source_ = detection_source;
+  zone_id_ = zone_id;
 }
 
 void
@@ -593,6 +596,7 @@ TrackObject::toMsg(opt_msgs::Track &track_msg, bool vertical)
   track_msg.age = age_;
   track_msg.confidence = - data_association_score_;   // minus for transforming distance into a sort of confidence
   track_msg.visibility = visibility_;
+  track_msg.zone_id = zone_id_;
 
   Eigen::Vector3d top(_x, _y, z_ + (height_/2));
   Eigen::Vector3d bottom(_x, _y, z_ - (height_/2));
@@ -633,65 +637,15 @@ TrackObject::zone_msg(json zone_json, int n_zones, opt_msgs::Track &track_msg, b
   {
     zone_string = std::to_string(zone_id);
     /// zone: 0, 1, 2
-    for (auto& zone : zone_json.items()){
-      if (zone.key() == zone_string) {
-        //sensor: name0, name1, etc. 
-        for (auto& reference : zone.value().items()) {
-          if (reference.key() == frame_id_) {
-            //boundary: min/max
-            for (auto& boundary : reference.value().items()){
-              if (boundary.key() == "min"){
-                // min_boundary: sensor_name, world
-                for (auto& min_boundary : boundary.value().items()){
-                  //x, y, z
-                  if (min_boundary.key() == "world"){
-                    for (auto& min_value : min_boundary.value().items()){
-                      if (min_value.key() == "x"){
-                        x_min = min_value.value();
-                      }
-                      if (min_value.key() == "y"){
-                        y_min = min_value.value();
-                      }
-                      if (min_value.key() == "z"){
-                        z_min = min_value.value();
-                      }
-                    }
-                  }
-                }
-              }
-              if (boundary.key() == "max"){
-                // max_boundary: sensor_name, world
-                for (auto& max_boundary : boundary.value().items()){
-                  // sensor_name, world
-                  if (max_boundary.key() == "world"){
-                    //x, y, z
-                    for (auto& max_value : max_boundary.value().items()){
-                      if (max_value.key() == "x"){
-                        x_max = max_value.value();
-                      }
-                      if (max_value.key() == "y"){
-                        y_max = max_value.value();
-                      }
-                      if (max_value.key() == "z"){
-                        z_max = max_value.value();
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+
     // python representation here
     // need a world view here bc each detection was transformed
-    //double x_min = zone_json[zone_string][frame_id_]["min"]["world"]["x"];
-    //double y_min = zone_json[zone_string][frame_id_]["min"]["world"]["y"];
-    //double z_min = zone_json[zone_string][frame_id_]["min"]["world"]["z"];
-    //double x_max = zone_json[zone_string][frame_id_]["max"]["world"]["x"];
-    //double y_max = zone_json[zone_string][frame_id_]["max"]["world"]["y"];
-    //double z_max = zone_json[zone_string][frame_id_]["max"]["world"]["z"];
+    double x_min = zone_json[zone_string][frame_id_]["min"]["world"]["x"];
+    double y_min = zone_json[zone_string][frame_id_]["min"]["world"]["y"];
+    double z_min = zone_json[zone_string][frame_id_]["min"]["world"]["z"];
+    double x_max = zone_json[zone_string][frame_id_]["max"]["world"]["x"];
+    double y_max = zone_json[zone_string][frame_id_]["max"]["world"]["y"];
+    double z_max = zone_json[zone_string][frame_id_]["max"]["world"]["z"];
     inside_area_cube = (_x <= x_max && _x >= x_min) && (_y <= y_max && _y >= y_min) && (z_ <= z_max && z_ >= z_min);
     // I think this works. 
     if (inside_area_cube) {
