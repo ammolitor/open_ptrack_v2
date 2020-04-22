@@ -112,7 +112,33 @@ class DetectionInitializer :
     
   def fileName(self) :
     return self.file_name
+
+  def to_json(self, by_sensor_name=True):
+      package_path = rospkg.RosPack().get_path('recognition')
+      file_name = os.path.join(package_path, "cfg", "poses.json")
+
+      new_sensor_map = self.sensor_map
+      if by_sensor_name:
+          sensors = set()
+          sensor_count = 0
+          new_sensor_map = {}
+          for cpu_name in self.sensor_map:
+              for sensor_name, pose_dict in self.sensor_map[cpu_name].items():
+                  sensors.add(sensor_name)
+                  sensor_count+=1
+                  new_sensor_map[sensor_name] = pose_dict
+        
+          if len(sensors) != sensor_count:
+              raise Exception("non unique sensor-names found")
     
+      # lame
+      import sys
+      write = "w"
+      if sys.version_info.major < 3:
+          write = "wb"
+      with open(file_name, write) as f:
+          json.dump(new_sensor_map, f)
+
   def createCameraPoses(self) :
     
     # For each pc
@@ -134,6 +160,8 @@ class DetectionInitializer :
         sensor_msg.child_id = sensor_msg.child_id + [sensor]
         t = self.sensor_map[pc][sensor]['inv_pose']['translation']
         r = self.sensor_map[pc][sensor]['inv_pose']['rotation']
+
+
         sensor_msg.transform = sensor_msg.transform + [Transform(Vector3(t['x'], t['y'], t['z']), Quaternion(r['x'], r['y'], r['z'], r['w']))]
       
       # Invoke service
@@ -160,6 +188,8 @@ if __name__ == '__main__' :
     rospy.loginfo(initializer.fileName() + ' created!');
     
     initializer.createCameraPoses()
+    # this helps for the json dump for the area initializer
+    initializer.to_json(True)
     
     rospy.loginfo('Initialization completed. Press [ctrl+c] to exit.')
     

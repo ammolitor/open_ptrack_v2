@@ -510,6 +510,8 @@ int main(int argc, char** argv) {
   // perhaps even simply read from the config in the begining instead of 
   // constantly polling the dynamic reconfigure? or do both?
   // I dunno
+  // NOTE: using json in main() is the way to persist across callbacks...
+
   std::string sensor_name;
   json master_config;
   std::string package_path = ros::package::getPath("recognition");
