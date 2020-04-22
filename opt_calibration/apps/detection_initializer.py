@@ -138,6 +138,7 @@ class DetectionInitializer :
           write = "wb"
       with open(file_name, write) as f:
           json.dump(new_sensor_map, f)
+      print("poses.json saved at {}".format(file_name))
 
   def createCameraPoses(self) :
     
