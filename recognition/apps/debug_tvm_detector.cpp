@@ -963,6 +963,7 @@ class YoloTVMFromConfig{
         int total_input = 3 * width * height;
         int in_ndim = 4;
         int out_ndim = 3;
+        int max_yolo_boxes = 100;
         int64_t tvm_id_and_score_size[3] = {1, 100, 1};
         int64_t tvm_box_size[3] = {1, 100, 4};
 
@@ -982,7 +983,7 @@ class YoloTVMFromConfig{
             height = model_config["height"];
             gpu = model_config["gpu"];
             //int64_t in_shape[4] = {1, 3, height, width};
-            in_shape = {1, 3, height, width};
+            in_shape[4] = {1, 3, height, width};
             // set device type
             if (gpu){
                 device_type = kDLGPU;
