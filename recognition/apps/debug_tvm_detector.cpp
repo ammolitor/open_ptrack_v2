@@ -957,7 +957,7 @@ class YoloTVMFromConfig{
         // set default here???
         int width;// = 512;
         int height;// = 512;
-        int64_t in_shape[4];// = {1, 3, height, width};
+        int64_t in_shape;// = {1, 3, height, width};
         //int64_t tvm_id_and_score_size[3] = {1, 100, 1};
         //int64_t tvm_box_size[3];// = {1, 100, 4};
         int total_input = 3 * width * height;
@@ -983,7 +983,7 @@ class YoloTVMFromConfig{
             height = model_config["height"];
             gpu = model_config["gpu"];
             //int64_t in_shape[4] = {1, 3, height, width};
-            in_shape[4] = {1, 3, height, width};
+            int64_t in_shape[4] = {1, 3, height, width};
             // set device type
             if (gpu){
                 device_type = kDLGPU;
@@ -1304,7 +1304,7 @@ public:
       cfg_server.setCallback(boost::bind(&TVMDetectionNode::cfg_callback, this, _1, _2));
 
       // create object-detector pointer
-      tvm_object_detector.reset(new YoloTVMFromConfig("cfg/model.json", "recognition"))
+      tvm_object_detector.reset(new YoloTVMFromConfig("cfg/model.json", "recognition"));
       //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
       sensor_name = sensor_string;
    }
