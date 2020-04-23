@@ -1049,6 +1049,7 @@ class YoloTVMFromConfig{
 
         yoloresults* forward_full(cv::Mat frame, float thresh)
         {
+            std::cout << "starting function" << std::endl;
             // get height/width dynamically
             cv::Size image_size = frame.size();
             float img_height = static_cast<float>(image_size.height);
@@ -1075,6 +1076,7 @@ class YoloTVMFromConfig{
             results->num = 100;
             results->boxes = (bbox_result*)calloc(100, sizeof(bbox_result));
 
+            std::cout << "about to allocate info" << std::endl;
             // allocate DLTensor memory on device for all the vars needed
             TVMArrayAlloc(in_shape, in_ndim, dtype_code, dtype_bits, dtype_lanes, device_type, device_id, &input);
             TVMArrayAlloc(tvm_id_and_score_size, out_ndim, dtype_code, dtype_bits, dtype_lanes, device_type, device_id, &output_tensor_ids);
