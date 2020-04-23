@@ -961,7 +961,7 @@ class YoloTVMFromConfig{
         //int64_t in_shape;// = {1, 3, height, width};
         //int64_t tvm_id_and_score_size[3] = {1, 100, 1};
         //int64_t tvm_box_size[3];// = {1, 100, 4};
-        int total_input = 3 * width * height;
+        int total_input;// = 3 * width * height;
         int in_ndim = 4;
         int out_ndim = 3;
         int max_yolo_boxes = 100;
@@ -990,6 +990,7 @@ class YoloTVMFromConfig{
             width = model_config["width"];
             height = model_config["height"];
             gpu = model_config["gpu"];
+            total_input = 3 * width * height;
             //int64_t in_shape[4] = {1, 3, height, width};
             //int64_t in_shape[4] = {1, 3, height, width};
             // set device type
@@ -1064,6 +1065,7 @@ class YoloTVMFromConfig{
             //constexpr int const_device_id = device_id;
             //int64_t in_shape[4] = {1, in_c, in_h, in_w};
             int64_t in_shape[4] = {1, 3, height, width};
+            total_input = 3 * width * height;
 
             DLTensor *output_tensor_ids;
             DLTensor *output_tensor_scores;
@@ -1085,7 +1087,9 @@ class YoloTVMFromConfig{
             std::cout << "allocate info finished" << std::endl;
 
             //copy processed image to DLTensor
+            std::cout << "about to preprocess" << std::endl;
             cv::Mat processed_image = preprocess_image(frame);
+            std::cout << "preprocess finished" << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
             memcpy(data_x, split_mat[2].ptr<float>(), processed_image.cols * processed_image.rows * sizeof(float));
