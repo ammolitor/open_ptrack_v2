@@ -992,15 +992,15 @@ class YoloTVMFromConfig{
             gpu = model_config["gpu"];
             total_input = 3 * width * height;
 
-
             //int64_t in_shape[4] = {1, 3, height, width};
             //int64_t in_shape[4] = {1, 3, height, width};
-            // set device type
+            // set device type -- I think this has to be set here...
             if (gpu){
                 device_type = kDLGPU;
             } else {
                 device_type = kDLCPU;
             }
+
             // read deploy lib
             tvm::runtime::Module mod_syslib = tvm::runtime::Module::LoadFromFile(deploy_lib_path);
             // read deplpy json

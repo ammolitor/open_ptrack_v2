@@ -149,6 +149,8 @@ class TVMDetectionNode {
     int n_zones;
     // use this for tests
     bool json_found = false;
+    // default to 10.0
+    float max_capable_depth = 10.0; // 6.25 is what the default is;
 
     /**
      * @brief constructor
@@ -175,6 +177,7 @@ class TVMDetectionNode {
           std::ifstream master_json_read(master_hard_coded_path);
           master_json_read >> master_config;
           n_zones = master_config["n_zones"]; //the path to the detector model file
+          max_capable_depth = master_config["max_capable_depth"];
           std::cout << "n_zones: " << n_zones << std::endl;
           json_found = true;
         }
@@ -337,7 +340,14 @@ class TVMDetectionNode {
           //float median_depth = cv_depth_image.at<float>(median_y, median_x) / 1000.0f;
           float median_depth = cv_depth_image.at<float>(new_y, median_x) / mm_factor;
 
-          if (median_depth <= 0 || median_depth > 6.25) {
+          // 6.25 meters is where kinects must start to be good or bad...
+          //if (median_depth <= 0 || median_depth > 6.25) {
+          //  std::cout << "median_depth " << median_depth << " rejecting" << std::endl;
+          //  continue;
+          //  }
+
+          // with realsense, the max distance is 10
+          if (median_depth <= 0 || median_depth > max_capable_depth) {
             std::cout << "median_depth " << median_depth << " rejecting" << std::endl;
             continue;
             }			
