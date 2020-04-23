@@ -227,8 +227,8 @@ target_compile_definitions(area_node PUBLIC TVM_CUDA_RUNTIME=1)
 target_compile_definitions(area_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 ###############################################################################
-add_executable(debug_tvm_detection_node apps/debug_tvm_detection_node.cpp include/open_ptrack/yolo_tvm.hpp)
-target_link_libraries(debug_tvm_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
+add_executable(debug_tvm_detector apps/debug_tvm_detector.cpp include/open_ptrack/yolo_tvm.hpp)
+target_link_libraries(debug_tvm_detector PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES} 
                                           ${LINKER_LIBS}
                                           ${CUDA_CUDA_LIBRARY}
@@ -238,9 +238,9 @@ target_link_libraries(debug_tvm_detection_node PUBLIC Threads::Threads ${OpenCV_
                                           ${TVM_RUNTIME_LINKER_LIBS}
                                           ${TORCH_LIBRARIES})
 
-add_dependencies(debug_tvm_detection_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-target_include_directories(debug_tvm_detection_node PUBLIC ${CUDA_INCLUDE_DIRS})
-target_compile_definitions(debug_tvm_detection_node PUBLIC TVM_CUDA_RUNTIME=1)
-target_compile_definitions(debug_tvm_detection_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+add_dependencies(debug_tvm_detector ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+target_include_directories(debug_tvm_detector PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(debug_tvm_detector PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(debug_tvm_detector PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
