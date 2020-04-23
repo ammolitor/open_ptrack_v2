@@ -975,6 +975,7 @@ class YoloTVMFromConfig{
             std::string full_path = package_path + config_path;
             std::ifstream json_read(full_path);
             json_read >> model_config;
+            std::cout << "model_config read into memory" << std::endl;
             // read variables
             std::string lib_path = model_config["deploy_lib_path"];
             std::string graph_path = model_config["deploy_graph_path"];
