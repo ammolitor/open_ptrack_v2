@@ -974,13 +974,13 @@ class YoloTVMFromConfig{
             std::ifstream json_read(full_path);
             json_read >> model_config;
             // read variables
-            deploy_lib_path = config["deploy_lib_path"];
-            deploy_graph_path = config["deploy_graph_path"];
-            deploy_param_path = config["deploy_param_path"];
-            device_id = config["device_id"];
-            width = config["width"];
-            height = config["height"];
-            gpu = config["gpu"];
+            deploy_lib_path = model_config["deploy_lib_path"];
+            deploy_graph_path = model_config["deploy_graph_path"];
+            deploy_param_path = model_config["deploy_param_path"];
+            device_id = model_config["device_id"];
+            width = model_config["width"];
+            height = model_config["height"];
+            gpu = model_config["gpu"];
             //int64_t in_shape[4] = {1, 3, height, width};
             in_shape = {1, 3, height, width};
             // set device type
