@@ -63,6 +63,7 @@
 // TODO change to proper config
 //#include <recognition/GenDetectionConfig.h>
 #include <recognition/FaceDetectionConfig.h>
+#include <recognition/GenDetectionConfig.h>
 
 // not sure if this is the correct json reading code
 // but will be easier than continually recompiling t
