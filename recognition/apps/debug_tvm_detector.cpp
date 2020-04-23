@@ -1082,6 +1082,7 @@ class YoloTVMFromConfig{
             TVMArrayAlloc(tvm_id_and_score_size, out_ndim, dtype_code, dtype_bits, dtype_lanes, device_type, device_id, &output_tensor_ids);
             TVMArrayAlloc(tvm_id_and_score_size, out_ndim, dtype_code, dtype_bits, dtype_lanes, device_type, device_id, &output_tensor_scores);
             TVMArrayAlloc(tvm_box_size, out_ndim, dtype_code, dtype_bits, dtype_lanes, device_type, device_id, &output_tensor_bboxes);
+            std::cout << "allocate info finished" << std::endl;
 
             //copy processed image to DLTensor
             cv::Mat processed_image = preprocess_image(frame);
@@ -1093,7 +1094,8 @@ class YoloTVMFromConfig{
             memcpy(data_x + processed_image.cols * processed_image.rows * 2, split_mat[0].ptr<float>(),
                    processed_image.cols * processed_image.rows * sizeof(float));
             TVMArrayCopyFromBytes(input, data_x, total_input * sizeof(float));
-
+            std::cout << "TVMArrayCopyFromBytes finished" << std::endl;           
+ 
             // standard tvm module run
             // get the module, set the module-input, and run the function
             // this is symbolic it ISNT run until TVMSync is performed
@@ -1103,7 +1105,8 @@ class YoloTVMFromConfig{
             tvm::runtime::PackedFunc run = mod->GetFunction("run");
             run();
             tvm::runtime::PackedFunc get_output = mod->GetFunction("get_output");
-
+            std::cout << "run/getoutput/setinput finished" << std::endl;
+  
             // https://github.com/apache/incubator-tvm/issues/979?from=timeline
             //"This may give you some ideas to start with.
             //In general you want to use pinned memory and you want
@@ -1114,6 +1117,7 @@ class YoloTVMFromConfig{
             get_output(0, output_tensor_ids);
             get_output(1, output_tensor_scores);
             get_output(2, output_tensor_bboxes);
+            std::cout << "TVMSynchronize finished" << std::endl;  
 
             // dynamically set?
             torch::Tensor ndarray_ids = torch::zeros({1, 100, 1}, at::kFloat);
@@ -1127,6 +1131,7 @@ class YoloTVMFromConfig{
             auto ndarray_scores_a = ndarray_scores.accessor<float,3>();
             auto ndarray_ids_a = ndarray_ids.accessor<float,3>();
             auto ndarray_bboxes_a = ndarray_bboxes.accessor<float,3>();
+            std::cout << "torch part finished" << std::endl; 
 
             int new_num = 0;
             //int num = 100;
@@ -1161,7 +1166,8 @@ class YoloTVMFromConfig{
                 new_num+=1;
             };
             results->num = new_num;
-           
+            std::cout << "torch array iter finished" << std::endl;            
+
             // free outputs
             TVMArrayFree(input);
             TVMArrayFree(output_tensor_ids);
@@ -1173,6 +1179,7 @@ class YoloTVMFromConfig{
             output_tensor_bboxes = nullptr;
             free(data_x);
             data_x = nullptr;
+            std::cout << "freeing finished" << std::endl
             return results;
         }  
 };    
