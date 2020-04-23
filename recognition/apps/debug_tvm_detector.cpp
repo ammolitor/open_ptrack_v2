@@ -1179,7 +1179,7 @@ class YoloTVMFromConfig{
             output_tensor_bboxes = nullptr;
             free(data_x);
             data_x = nullptr;
-            std::cout << "freeing finished" << std::endl
+            std::cout << "freeing finished" << std::endl;
             return results;
         }  
 };    
