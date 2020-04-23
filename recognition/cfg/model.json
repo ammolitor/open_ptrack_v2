@@ -1,0 +1,9 @@
+{
+  "deploy_lib_path":        "/data/object_detector/mnet1.0_yolo_aarch64_cuda_lib.so",
+  "deploy_graph_path":      "/data/object_detector/mnet1.0_yolo_aarch64_cuda_graph.json",
+  "deploy_param_path":      "/data/object_detector/mnet1.0_yolo_aarch64_cuda_param.params",
+  "device_id":              0,
+  "width" :                 512,
+  "height" :                512,
+  "gpu" :                   0
+}
