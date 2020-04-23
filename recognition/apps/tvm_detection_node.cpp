@@ -333,12 +333,16 @@ class TVMDetectionNode {
           int new_width = static_cast<int>(2 * (median_factor * (median_x - xmin)));
           int new_height = static_cast<int>(2 * (median_factor * (median_y - ymin)));
         
+          float median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
+
           // TODO we'll have to vet this strategy but for now, we're trying it
           // this will get the median depth of the object at the center of the object,
           // however, we're moving towards the median depth as where the box hits the ground/
           // where the feet are..
-          //float median_depth = cv_depth_image.at<float>(median_y, median_x) / 1000.0f;
-          float median_depth = cv_depth_image.at<float>(new_y, median_x) / mm_factor;
+
+          //this is median_depth, but at the very bottom of the bounding box rather
+          // than the center
+          //float median_depth = cv_depth_image.at<float>(new_y, median_x) / mm_factor;
 
           // 6.25 meters is where kinects must start to be good or bad...
           //if (median_depth <= 0 || median_depth > 6.25) {
