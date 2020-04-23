@@ -991,6 +991,8 @@ class YoloTVMFromConfig{
             height = model_config["height"];
             gpu = model_config["gpu"];
             total_input = 3 * width * height;
+
+
             //int64_t in_shape[4] = {1, 3, height, width};
             //int64_t in_shape[4] = {1, 3, height, width};
             // set device type
@@ -1066,6 +1068,14 @@ class YoloTVMFromConfig{
             //int64_t in_shape[4] = {1, in_c, in_h, in_w};
             int64_t in_shape[4] = {1, 3, height, width};
             total_input = 3 * width * height;
+            std::cout << "width: " << width << std::endl;
+            std::cout << "height: " << height << std::endl;
+            std::cout << "total_input: " << total_input << std::endl;
+            std::cout << "device_id: " << device_id << std::endl;
+            std::cout << "dtype_code: " << dtype_code << std::endl;
+            std::cout << "dtype_bits: " << dtype_bits << std::endl;
+            std::cout << "dtype_lanes: " << dtype_lanes << std::endl;
+            std::cout << "device_type: " << device_type << std::endl;
 
             DLTensor *output_tensor_ids;
             DLTensor *output_tensor_scores;
