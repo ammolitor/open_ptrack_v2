@@ -970,6 +970,7 @@ class YoloTVMFromConfig{
 
         YoloTVMFromConfig(std::string config_path, std::string ros_package_string) {
             // read config with nlohmann-json
+            std::cout << "start model_config reading" << std::endl;
             json model_config;
             std::string package_path = ros::package::getPath(ros_package_string);
             std::string full_path = package_path + config_path;
@@ -1299,7 +1300,9 @@ class TVMDetectionNode {
         //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
         //tvm_object_detector.reset(new YoloTVMGPU(model_folder_path));
         // maybe have this in
-        tvm_object_detector.reset(new YoloTVMFromConfig("cfg/model.json", "recognition"));
+        // arg one HAS to have / in front of path
+        // TODO add that to debugger
+        tvm_object_detector.reset(new YoloTVMFromConfig("/cfg/model.json", "recognition"));
         sensor_name = sensor_string;
       }
 
