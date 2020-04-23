@@ -951,10 +951,10 @@ class YoloTVMFromConfig{
         std::string deploy_param_path;
         bool gpu = true;
         int device_id;// = 0;
-        int dtype_code;// = kDLFloat;
-        int dtype_bits;// = 32;
-        int dtype_lanes;// = 1;
-        int device_type;// = kDLGPU;
+        int dtype_code = kDLFloat;
+        int dtype_bits = 32;
+        int dtype_lanes = 1;
+        int device_type = kDLGPU;
         // set default here???
         int width;// = 512;
         int height;// = 512;
