@@ -5,5 +5,5 @@
   "device_id":              0,
   "width" :                 512,
   "height" :                512,
-  "gpu" :                   0
+  "gpu" :                   true
 }

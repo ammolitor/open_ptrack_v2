@@ -976,9 +976,9 @@ class YoloTVMFromConfig{
             std::ifstream json_read(full_path);
             json_read >> model_config;
             // read variables
-            deploy_lib_path = model_config["deploy_lib_path"];
-            deploy_graph_path = model_config["deploy_graph_path"];
-            deploy_param_path = model_config["deploy_param_path"];
+            deploy_lib_path = package_path + model_config["deploy_lib_path"];
+            deploy_graph_path = package_path + model_config["deploy_graph_path"];
+            deploy_param_path = package_path + model_config["deploy_param_path"];
             device_id = model_config["device_id"];
             width = model_config["width"];
             height = model_config["height"];
