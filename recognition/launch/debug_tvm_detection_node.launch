@@ -15,8 +15,8 @@
 
 
   <!-- Launch object detection node -->
-  <node pkg="recognition" type="debug_tvm_detection_node"
-        name="$(arg sensor_name)_debug_tvm_detection_node" output="screen" respawn="false">
+  <node pkg="recognition" type="debug_tvm_detector"
+        name="$(arg sensor_name)_debug_tvm_detector" output="screen" respawn="false">
 
     <param name="sensor_name"               value="$(arg sensor_name)" />
     <param name="world_frame_id"            value="/world"/>
