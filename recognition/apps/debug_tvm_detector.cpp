@@ -1392,6 +1392,7 @@ class TVMDetectionNode {
       width =  static_cast<float>(image_size.width);
       cv_image_clone = cv_image.clone();
 
+      std::cout << "running yolo" << std::endl;
       // forward inference of object detector
       begin = ros::Time::now();
       output = tvm_object_detector->forward_full(cv_image, .3);
