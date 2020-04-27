@@ -652,7 +652,7 @@ class PoseFromConfig{
             // creat empty pred container
             torch::Tensor preds = torch::zeros({17, 2}, at::kFloat);
             // create accessors
-            auto idx_accessor = idx.accessor<float,2>(); // 1, 17 -> batch_size, 17
+            auto idx_accessor = idx.accessor<long,2>(); // 1, 17 -> batch_size, 17
             auto heat_map_accessor = ndarray_heat_map.accessor<float,3>(); // 1, 17, 1
             
             // vars to preset
