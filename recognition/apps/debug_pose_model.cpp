@@ -538,11 +538,12 @@ class PoseFromConfig{
                 float upscaled_xmin = std::max(upminx, 0.0f);
                 float upscaled_ymin = std::max(upminy, 0.0f);
                 float upscaled_xmax = std::min(upmaxx, fheight);
-                float upscaled_ymax = std::min(upmaxy,fwidth);
+                float upscaled_ymax = std::min(upmaxy, fwidth);
                 std::cout << "upscaled_xmin: " << upscaled_xmin << std::endl;
                 std::cout << "upscaled_ymin: " << upscaled_ymin << std::endl;
                 std::cout << "upscaled_xmax: " << upscaled_xmax << std::endl;
                 std::cout << "upscaled_ymax: " << upscaled_ymax << std::endl;
+
                 //float upscaled_xmin = std::max(center_x - w * scale, 0.0f);
                 //float upscaled_ymin = std::max(center_y - h * scale, 0.0f);
                 //float upscaled_xmax = std::min(center_x + w * scale, static_cast<float>(img_height));
@@ -556,9 +557,24 @@ class PoseFromConfig{
                 std::cout << "int_upscaled_ymin: " << int_upscaled_ymin << std::endl;
                 std::cout << "int_upscaled_xmax: " << int_upscaled_xmax << std::endl;
                 std::cout << "int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
+                
+                //0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= m.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows
+                if (0 <= int_upscaled_xmin){
+                  int_upscaled_xmin = 1;
+                }
+                if (int_upscaled_xmax >= img_width){
+                  int_upscaled_xmax = img_width - 1;
+                }
+                if (0 <= int_upscaled_ymin){
+                  int_upscaled_ymin = 1;
+                }
+                if (int_upscaled_ymax >= img_height){
+                  int_upscaled_ymax = img_height - 1;
+                }
 
                 // get upscaled bounding box and extract image-patch/mask
                 cv::Rect roi(int_upscaled_xmin, int_upscaled_ymin, int_upscaled_xmax-int_upscaled_xmin, int_upscaled_ymax-int_upscaled_ymin);
+                std::cout << "created rect created" << std::endl;
                 cv::Mat image_roi = frame(roi);
                 std::cout << "image_roi created" << std::endl;
 
