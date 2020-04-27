@@ -631,13 +631,15 @@ class PoseFromConfig{
             get_output(0, output_tensor_heatmap);
             std::cout << "TVMSynchronize finished" << std::endl;  
 
-            torch::Tensor ndarray_heat_map = torch::zeros({1, 17, 64, 48}, at::kFloat);
+            torch::Tensor ndarray_heat_map_full = torch::zeros({1, 17, 64, 48}, at::kFloat);
 
-            TVMArrayCopyToBytes(output_tensor_heatmap, ndarray_heat_map.data_ptr(), 1*17*64*48 * sizeof(float));
+            TVMArrayCopyToBytes(output_tensor_heatmap, ndarray_heat_map_full.data_ptr(), 1*17*64*48 * sizeof(float));
 
             //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L172
             //heatmaps_reshaped = batch_heatmaps.reshape((batch_size, num_joints, -1))
-            ndarray_heat_map.reshape({1, 17, 3072});
+            // 
+            // pytorch view vs. reshape; use of auto?
+            auto ndaarry_heat_map = ndarray_heat_map_full.view({1, 17, 3072});
             //std::vector<int64_t> heatsize = ndarray_heat_map.sizes();
             std::cout << "ndarray_heat_map reshape finished: " << ndarray_heat_map.sizes().size() << std::endl;
             
