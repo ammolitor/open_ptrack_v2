@@ -673,7 +673,7 @@ class PoseFromConfig{
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L181
               // float modulo_pred = ((index % heatmap_width) + heatmap_width) % heatmap_width;
               // float floor_pred = std::floor(index / heatmap_width);
-              int modulo_int = index % heatmap_width;
+              int modulo_int = static_cast<int>(index) % static_cast<int>(heatmap_width);
               float modulo_pred = static_cast<float>(modulo_int);
               float floor = index / heatmap_width;
               float floor_pred = std::floor(floor);
