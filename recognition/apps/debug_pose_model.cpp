@@ -746,8 +746,8 @@ class PoseFromConfig{
               //scale = np.array([w, h])
               //preds[i][:, 0] = scale[0] * 2 * w_ratio + center[0] - scale[0]
               //center = np.array([x0 + w, y0 + h])
-              point.x = w * 2 * w_ratio + center_x - w;
-              point.y = h * 2 * h_ratio + center_y - h;
+              point.x = w * 2.0f * w_ratio + center_x - w;
+              point.y = h * 2.0f * h_ratio + center_y - h;
               point.z = probability;
               points.push_back(point);
             }
@@ -1180,7 +1180,7 @@ class TVMPoseNode {
               joint3D_chest.max_width = DISPLAY_RESOLUTION_WIDTH; 
               // CHEST == joint location 15, index 14
               skeleton.joints[14] = joint3D_chest;
-              cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,255,0));
+              cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,0,255));
               
               //index == gluon
               //value == rtpose
