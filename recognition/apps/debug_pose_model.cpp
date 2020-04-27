@@ -1082,7 +1082,7 @@ class TVMPoseNode {
                   joint3D.header = rgb_image->header;
                   skeleton.joints[rtpose_part_index] = joint3D;
                   // debug this 
-                  cv::rectangle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,255,0));
+                  cv::circle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,255,0));
                 }
               }
               float confidence = 0.9f;
@@ -1108,7 +1108,7 @@ class TVMPoseNode {
               joint3D_neck.max_width = DISPLAY_RESOLUTION_WIDTH;              
               // NECK == joint location 1
               skeleton.joints[1] = joint3D_neck;
-              cv::rectangle(cv_image_clone, cv::Point(cast_point_x, cast_point_y), 3, (0,255,0));
+              cv::circle(cv_image_clone, cv::Point(cast_point_x, cast_point_y), 3, (0,255,0));
               
               // ******** CHEST
               opt_msgs::Joint3DMsg joint3D_chest;
@@ -1128,7 +1128,7 @@ class TVMPoseNode {
               joint3D_chest.max_width = DISPLAY_RESOLUTION_WIDTH; 
               // CHEST == joint location 15, index 14
               skeleton.joints[14] = joint3D_chest;
-              cv::rectangle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,255,0));
+              cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,255,0));
               
               //index == gluon
               //value == rtpose
