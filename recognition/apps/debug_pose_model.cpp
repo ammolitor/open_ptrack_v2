@@ -382,10 +382,10 @@ class PoseFromConfig{
             //constexpr int const_device_type = device_type;
             //constexpr int const_device_id = device_id;
             //int64_t in_shape[4] = {1, in_c, in_h, in_w};
-            int64_t in_shape[4] = {1, 3, height, width};
-            total_input = 3 * width * height;
-            std::cout << "width: " << width << std::endl;
-            std::cout << "height: " << height << std::endl;
+            int64_t in_shape[4] = {1, 3, detector_height, detector_width};
+            int total_input = 3 * detector_width * detector_height;
+            std::cout << "width: " << detector_width << std::endl;
+            std::cout << "height: " << detector_height << std::endl;
             std::cout << "total_input: " << total_input << std::endl;
             std::cout << "device_id: " << device_id << std::endl;
             std::cout << "dtype_code: " << dtype_code << std::endl;
@@ -584,7 +584,7 @@ class PoseFromConfig{
             float img_height = static_cast<float>(image_size.height);
             float img_width = static_cast<float>(image_size.width);
             int64_t in_shape[4] = {1, 3, pose_height, pose_width};
-            total_input = 3 * pose_width * pose_height;
+            int total_input = 3 * pose_width * pose_height;
             
             DLTensor *output_tensor_heatmap;
             DLTensor *input;
@@ -704,6 +704,7 @@ class PoseFromConfig{
             data_x = nullptr;
             std::cout << "freeing finished" << std::endl;
             return points;
+        }
 };    
 
 
