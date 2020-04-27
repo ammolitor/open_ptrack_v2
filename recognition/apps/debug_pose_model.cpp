@@ -639,7 +639,7 @@ class PoseFromConfig{
             //heatmaps_reshaped = batch_heatmaps.reshape((batch_size, num_joints, -1))
             // 
             // pytorch view vs. reshape; use of auto?
-            auto ndaarry_heat_map = ndarray_heat_map_full.view({1, 17, 3072});
+            auto ndarray_heat_map = ndarray_heat_map_full.view({1, 17, 3072});
             //std::vector<int64_t> heatsize = ndarray_heat_map.sizes();
             std::cout << "ndarray_heat_map reshape finished: " << ndarray_heat_map.sizes().size() << std::endl;
             
