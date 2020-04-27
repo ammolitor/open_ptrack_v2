@@ -671,8 +671,12 @@ class PoseFromConfig{
               //preds = nd.tile(idx, (1, 1, 2)).astype(np.float32)
               //preds[:, :, 0] = (preds[:, :, 0]) % width
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L181
-              float modulo_pred = ((index % heatmap_width) + heatmap_width) % heatmap_width;
-              float floor_pred = std::floor(index / heatmap_width);
+              // float modulo_pred = ((index % heatmap_width) + heatmap_width) % heatmap_width;
+              // float floor_pred = std::floor(index / heatmap_width);
+              int modulo_int = index % heatmap_width;
+              float modulo_pred = static_cast<float>(modulo_int);
+              float floor = index / heatmap_width;
+              float floor_pred = std::floor(floor);
               if (probability <= 0.0) {
                 // zero out the pred if the prob is bad...
                 //pred_mask = nd.tile(nd.greater(maxvals, 0.0), (1, 1, 2))
