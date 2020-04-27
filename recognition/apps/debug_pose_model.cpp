@@ -1094,8 +1094,8 @@ class TVMPoseNode {
               // ******* NECK == joint location 1
               opt_msgs::Joint3DMsg joint3D_neck;
               // center of each shoulder == chest
-              float x = (point_left_shoulder.x + point_right_sholder.x) / 2;
-              float y = (point_left_shoulder.y + point_right_sholder.y) / 2;
+              float x = (point_left_shoulder.x + point_right_shoulder.x) / 2;
+              float y = (point_left_shoulder.y + point_right_shoulder.y) / 2;
               int cast_point_x = static_cast<int>(x);
               int cast_point_y = static_cast<int>(y);              
               float z = cv_depth_image.at<float>(cast_point_y, cast_point_x) / mm_factor;
@@ -1118,7 +1118,7 @@ class TVMPoseNode {
               float cy = (point_left_hip.y + point_right_hip.y) * 0.4 + (point_left_shoulder.y + point_right_shoulder.y) * 0.1;
               int cast_cx = static_cast<int>(cx);
               int cast_cy = static_cast<int>(cy);
-              float cz = cv_depth_image.at<float>(cast_y, cast_x) / mm_factor;
+              float cz = cv_depth_image.at<float>(cast_cy, cast_cx) / mm_factor;
               joint3D_chest.x = cx;
               joint3D_chest.y = cy;
               joint3D_chest.z = cz;
