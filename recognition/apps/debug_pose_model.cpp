@@ -1066,11 +1066,13 @@ class TVMPoseNode {
           
                 // IGNORE eyes/ears
                 if (rtpose_part_index == -1){
-                  continue
+                  continue;
                 } else {
                   cv::Point3f point = points[i];
                   float confidence = point.z;
-                  float z = cv_depth_image.at<float>(point.y, point.x) / mm_factor;
+                  int cast_x = static_cast<int>(point.x);
+                  int cast_y = static_cast<int>(point.y);
+                  float z = cv_depth_image.at<float>(cast_y, cast_x) / mm_factor;
                   joint3D.x = point.x;
                   joint3D.y = point.y;
                   joint3D.z = z;
@@ -1080,7 +1082,7 @@ class TVMPoseNode {
                   joint3D.header = rgb_image->header;
                   skeleton.joints[rtpose_part_index] = joint3D;
                   // debug this 
-                  cv::rectangle(cv_image_clone, cv::Point(x, y), 3, (0,255,0));
+                  cv::rectangle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,255,0));
                 }
               }
               float confidence = 0.9f;
@@ -1094,7 +1096,9 @@ class TVMPoseNode {
               // center of each shoulder == chest
               float x = (point_left_shoulder.x + point_right_sholder.x) / 2;
               float y = (point_left_shoulder.y + point_right_sholder.y) / 2;
-              float z = cv_depth_image.at<float>(y, x) / mm_factor;
+              int cast_point_x = static_cast<int>(x);
+              int cast_point_y = static_cast<int>(y);              
+              float z = cv_depth_image.at<float>(cast_point_y, cast_point_x) / mm_factor;
               joint3D_neck.x = x;
               joint3D_neck.y = y;
               joint3D_neck.z = z;
@@ -1104,15 +1108,17 @@ class TVMPoseNode {
               joint3D_neck.max_width = DISPLAY_RESOLUTION_WIDTH;              
               // NECK == joint location 1
               skeleton.joints[1] = joint3D_neck;
-              cv::rectangle(cv_image_clone, cv::Point(x, y), 3, (0,255,0));
+              cv::rectangle(cv_image_clone, cv::Point(cast_point_x, cast_point_y), 3, (0,255,0));
               
               // ******** CHEST
-              tpose_wrapper::Joint3DMsg joint3D_chest;
+              opt_msgs::Joint3DMsg joint3D_chest;
               // weighted mean from rtpose
               // TODO if this looks ugly, we'll just use the neck
               float cx = (point_left_hip.x + point_right_hip.x) * 0.4 + (point_left_shoulder.x + point_right_shoulder.x) * 0.1;
               float cy = (point_left_hip.y + point_right_hip.y) * 0.4 + (point_left_shoulder.y + point_right_shoulder.y) * 0.1;
-              float cz = cv_depth_image.at<float>(y, x) / mm_factor;
+              int cast_cx = static_cast<int>(cx);
+              int cast_cy = static_cast<int>(cy);
+              float cz = cv_depth_image.at<float>(cast_y, cast_x) / mm_factor;
               joint3D_chest.x = cx;
               joint3D_chest.y = cy;
               joint3D_chest.z = cz;
@@ -1122,7 +1128,7 @@ class TVMPoseNode {
               joint3D_chest.max_width = DISPLAY_RESOLUTION_WIDTH; 
               // CHEST == joint location 15, index 14
               skeleton.joints[14] = joint3D_chest;
-              cv::rectangle(cv_image_clone, cv::Point(cx, cy), 3, (0,255,0));
+              cv::rectangle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,255,0));
               
               //index == gluon
               //value == rtpose
