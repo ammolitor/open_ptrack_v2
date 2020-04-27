@@ -35,6 +35,10 @@ add_message_files(FILES
   FeatureVectorArray.msg 
   Association.msg 
   NameArray.msg
+  SkeletonArrayMsg.msg
+  SkeletonMsg.msg
+  Joint2DMsg.msg
+  Joint3DMsg.msg
   )
 
 add_service_files(FILES OPTSensor.srv OPTTransform.srv)
