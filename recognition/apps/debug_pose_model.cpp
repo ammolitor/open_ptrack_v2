@@ -141,7 +141,7 @@ struct pose_result{
     float xmax;
     float ymax;
     // actually point2d, with z being the confidence
-    cv::Point3f points;
+    std::vector<cv::Point3f> points;
 };
 // boxInfo
 struct pose_results{
@@ -653,8 +653,8 @@ class PoseFromConfig{
             // pred_coords, confidence = heatmap_to_coord(predicted_heatmap, upscale_bbox)
             // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L273
             // use z as container for probability
-            int heatmap_width = 48;
-            int heatmap_height = 64;
+            float heatmap_width = 48.0f;
+            float heatmap_height = 64.0f;
             std::vector<cv::Point3f> points;
             float w = (xmax - xmin) / 2.0;
             float h = (ymax - ymin) / 2.0;
@@ -671,15 +671,15 @@ class PoseFromConfig{
               //preds = nd.tile(idx, (1, 1, 2)).astype(np.float32)
               //preds[:, :, 0] = (preds[:, :, 0]) % width
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L181
-              int modulo_pred = ((index % heatmap_width) + heatmap_width) % heatmap_width;
-              int floor_pred = std::floor(index / heatmap_width);
+              float modulo_pred = ((index % heatmap_width) + heatmap_width) % heatmap_width;
+              float floor_pred = std::floor(index / heatmap_width);
               if (probability <= 0.0) {
                 // zero out the pred if the prob is bad...
                 //pred_mask = nd.tile(nd.greater(maxvals, 0.0), (1, 1, 2))
                 //pred_mask = pred_mask.astype(np.float32)
                 //preds *= pred_mask
-                modulo_pred = 0.0;
-                floor_pred = 0.0;
+                modulo_pred = 0.0f;
+                floor_pred = 0.0f;
               }
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L289-L290
               float w_ratio = modulo_pred / heatmap_width;
@@ -945,8 +945,8 @@ class TVMPoseNode {
       cv_image_clone = cv_image.clone();
 
       // necessary? or can we just use height/width of cv_image
-      DISPLAY_RESOLUTION_HEIGHT = cv_ptr_rgb.height;
-      DISPLAY_RESOLUTION_WIDTH = cv_ptr_rgb.width;
+      int DISPLAY_RESOLUTION_HEIGHT = image_size.height;
+      int DISPLAY_RESOLUTION_WIDTH = image_size.width;
 
       std::cout << "running yolo" << std::endl;
       // forward inference of object detector
