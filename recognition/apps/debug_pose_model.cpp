@@ -1082,6 +1082,7 @@ class TVMPoseNode {
                   // debug this 
                   cv::rectangle(cv_image_clone, cv::Point(x, y), 3, (0,255,0));
                 }
+              }
               float confidence = 0.9f;
               cv::Point3f point_left_shoulder = points[5];
               cv::Point3f point_right_shoulder = points[6];
