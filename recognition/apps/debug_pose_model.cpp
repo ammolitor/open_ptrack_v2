@@ -247,7 +247,7 @@ class PoseFromConfig{
         // maybe we can dynamically set all of these
         int64_t tvm_id_and_score_size[3] = {1, 100, 1};
         int64_t tvm_box_size[3] = {1, 100, 4};
-        int64_t tvm_heatmap_size[3] = {1, 17, 64, 48};
+        int64_t tvm_heatmap_size[4] = {1, 17, 64, 48};
 
         /**
          * function that reads both the yolo detector and the pose detector
@@ -414,7 +414,7 @@ class PoseFromConfig{
 
             //copy processed image to DLTensor
             std::cout << "about to preprocess" << std::endl;
-            cv::Mat processed_image = preprocess_image(frame detector_width, detector_height);
+            cv::Mat processed_image = preprocess_image(frame, detector_width, detector_height);
             std::cout << "preprocess finished" << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
@@ -522,13 +522,13 @@ class PoseFromConfig{
                 //    return new_bbox
 
                 float scale = 1.26;
-                float w = (xmax - xmin) / 2f;
-                float h = (ymax - ymin) / 2f;
+                float w = (xmax - xmin) / 2.0f;
+                float h = (ymax - ymin) / 2.0f;
                 float center_x = xmin + w; 
                 float center_y = ymin + h;
-                float upscaled_xmin = std::max(center_x - w * scale, 0.0);
-                float upscaled_ymin = std::max(center_y - h * scale, 0.0);
-                float upscaled_xmax = std::min(center_x + w * scale, static_cast<float>(img_heith));
+                float upscaled_xmin = std::max(center_x - w * scale, 0.0f);
+                float upscaled_ymin = std::max(center_y - h * scale, 0.0f);
+                float upscaled_xmax = std::min(center_x + w * scale, static_cast<float>(img_height));
                 float upscaled_ymax = std::min(center_y + h * scale, static_cast<float>(img_width));
                 // convert to int for roi-transform
                 int int_upscaled_xmin = static_cast<int>(upscaled_xmin);
@@ -543,13 +543,13 @@ class PoseFromConfig{
                 //preprocessing happens inside forward function
                 // why point3f and not 2f? 
                 // we're using z as the confidence
-                std::vector<cv::Point3f> results = pose_forward(image_roi, upscaled_xmin, upscaled_ymin, upscaled_xmax, upscaled_ymax);
+                std::vector<cv::Point3f> pose_coords = pose_forward(image_roi, upscaled_xmin, upscaled_ymin, upscaled_xmax, upscaled_ymax);
 
-                results->boxes[i].xmin = xmin * (img_width/height); // move down to 480 space  ()
-                results->boxes[i].ymin = ymin / (width/img_height); // move up to 640
-                results->boxes[i].xmax = xmax * (img_width/height);
-                results->boxes[i].ymax = ymax / (width/img_height);                
-                results->boxes[i].points = results;
+                results->boxes[i].xmin = xmin * (img_width/detector_height); // move down to 480 space  ()
+                results->boxes[i].ymin = ymin / (detector_width/img_height); // move up to 640
+                results->boxes[i].xmax = xmax * (img_width/detector_height);
+                results->boxes[i].ymax = ymax / (detector_width/img_height);                
+                results->boxes[i].points = pose_coords;
                 //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space  ()
                 //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
                 //results->boxes[i].xmax = xmax * (640.0/512.0);
@@ -655,9 +655,9 @@ class PoseFromConfig{
             // use z as container for probability
             int heatmap_width = 48;
             int heatmap_height = 64;
-            std::vector<Point3f> points;
-            float w = (xmax - xmin) / 2f;
-            float h = (ymax - ymin) / 2f;
+            std::vector<cv::Point3f> points;
+            float w = (xmax - xmin) / 2.0;
+            float h = (ymax - ymin) / 2.0;
             float center_x = xmin + w; 
             float center_y = ymin + h;
 
@@ -724,6 +724,7 @@ class TVMPoseNode {
 
     // Publishers
     ros::Publisher detections_pub;
+    ros::Publisher skeleton_pub;
     //ros::Publisher image_pub;
     image_transport::Publisher image_pub;
 
