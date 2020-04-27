@@ -7,7 +7,7 @@ uint8 MPI = 0
 uint8 COCO = 1
 
 Header header
-rtpose_wrapper/Joint3DMsg[] joints
+opt_msgs Joint3DMsg[] joints
 string info
 uint8 skeleton_type
 float64 height
