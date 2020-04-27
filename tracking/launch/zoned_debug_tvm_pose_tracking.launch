@@ -10,7 +10,7 @@
         <arg name="enable_pointcloud" value="$(arg enable_pointcloud)" />
     </include>
     
-    <include file="$(find recognition)/launch/debug_tvm_node_node.launch" output="screen">
+    <include file="$(find recognition)/launch/debug_tvm_node.launch" output="screen">
             <arg name="sensor_name" value="$(arg sensor_name)" />
     </include>
     <node name="multiple_objects_detection" output="screen" pkg="detection" required="true" type="multiple_objects_detection_node">
