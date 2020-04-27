@@ -847,7 +847,7 @@ class TVMPoseNode {
         // maybe have this in
         // arg one HAS to have / in front of path
         // TODO add that to debugger
-        tvm_pose_detector.reset(new YoloTVMFromConfig("/cfg/pose_model.json", "recognition"));
+        tvm_pose_detector.reset(new PoseFromConfig("/cfg/pose_model.json", "recognition"));
         sensor_name = sensor_string;
       }
 
@@ -965,7 +965,7 @@ class TVMPoseNode {
       //value == rtpose's index
       // 1 == neck, thus not in gluon
       // 14 == chest, thus not in gluon
-      std::array gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
+      int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
       if (output->num >= 1) {
         for (int i = 0; i < output->num; i++) {
           // get the label and the object name
@@ -978,7 +978,7 @@ class TVMPoseNode {
           float ymin = output->boxes[i].ymin;
           float xmax = output->boxes[i].xmax;
           float ymax = output->boxes[i].ymax;
-          std::vector<Point3f> points = output->boxes[i].points;
+          std::vector<cv::Point3f> points = output->boxes[i].points;
           int num_parts = points.size();
 
           // set the median of the bounding box
