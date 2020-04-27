@@ -483,7 +483,8 @@ class PoseFromConfig{
             // we're just going to run the pose detector
             // in the forloop of the item
             // ***************************
-
+            float fheight = static_cast<float>(img_height);
+            float fwidth = static_cast<float>(img_width);
             int new_num = 0;
             for (int i = 0; i < max_yolo_boxes; ++i) {
                 float xmin;
@@ -495,6 +496,8 @@ class PoseFromConfig{
                 float label = ndarray_ids_a[0][i][0];
                 if (score < thresh) continue;
                 if (label < 0) continue;
+                // people only
+                if (label > 0) continue;
 
                 int cls_id = static_cast<int>(label);
                 xmin = ndarray_bboxes_a[0][i][0];
@@ -526,15 +529,33 @@ class PoseFromConfig{
                 float h = (ymax - ymin) / 2.0f;
                 float center_x = xmin + w; 
                 float center_y = ymin + h;
-                float upscaled_xmin = std::max(center_x - w * scale, 0.0f);
-                float upscaled_ymin = std::max(center_y - h * scale, 0.0f);
-                float upscaled_xmax = std::min(center_x + w * scale, static_cast<float>(img_height));
-                float upscaled_ymax = std::min(center_y + h * scale, static_cast<float>(img_width));
+                float upminx = center_x - w * scale;
+                float upminy = center_y - h * scale;
+                float upmaxx = center_x + w * scale;
+                float upmaxy = center_y + h * scale;
+
+
+                float upscaled_xmin = std::max(upminx, 0.0f);
+                float upscaled_ymin = std::max(upminy, 0.0f);
+                float upscaled_xmax = std::min(upmaxx, fheight);
+                float upscaled_ymax = std::min(upmaxy,fwidth);
+                std::cout << "upscaled_xmin: " << upscaled_xmin << std::endl;
+                std::cout << "upscaled_ymin: " << upscaled_ymin << std::endl;
+                std::cout << "upscaled_xmax: " << upscaled_xmax << std::endl;
+                std::cout << "upscaled_ymax: " << upscaled_ymax << std::endl;
+                //float upscaled_xmin = std::max(center_x - w * scale, 0.0f);
+                //float upscaled_ymin = std::max(center_y - h * scale, 0.0f);
+                //float upscaled_xmax = std::min(center_x + w * scale, static_cast<float>(img_height));
+                //float upscaled_ymax = std::min(center_y + h * scale, static_cast<float>(img_width));
                 // convert to int for roi-transform
                 int int_upscaled_xmin = static_cast<int>(upscaled_xmin);
                 int int_upscaled_ymin = static_cast<int>(upscaled_ymin);
                 int int_upscaled_xmax = static_cast<int>(upscaled_xmax);
                 int int_upscaled_ymax = static_cast<int>(upscaled_ymax);
+                std::cout << "int_upscaled_xmin: " << int_upscaled_xmin << std::endl;
+                std::cout << "int_upscaled_ymin: " << int_upscaled_ymin << std::endl;
+                std::cout << "int_upscaled_xmax: " << int_upscaled_xmax << std::endl;
+                std::cout << "int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
 
                 // get upscaled bounding box and extract image-patch/mask
                 cv::Rect roi(int_upscaled_xmin, int_upscaled_ymin, int_upscaled_xmax-int_upscaled_xmin, int_upscaled_ymax-int_upscaled_ymin);
@@ -652,6 +673,14 @@ class PoseFromConfig{
             // creat empty pred container
             torch::Tensor preds = torch::zeros({17, 2}, at::kFloat);
             // create accessors
+
+
+            //terminate called after throwing an instance of 'c10::Error'
+            //what():  expected scalar type Float but found Long (data_ptr<float> at /opt/src/pytorch/torch/include/ATen/core/TensorMethods.h:6321)
+            //frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) + 0x78 (0x7f6b1a6258 in /opt/src/pytorch/torch/lib/libc10.so)
+            //frame #1: float* at::Tensor::data_ptr<float>() const + 0x1bc (0x558d0fd914 in /opt/catkin_ws/devel/lib/recognition/debug_pose_model)
+            //frame #2: at::TensorAccessor<float, 2ul, at::DefaultPtrTraits, long> at::Tensor::accessor<float, 2ul>() const & + 0x58 (0x558d107240 in /opt/catkin_ws/devel/lib/recognition/debug_pose_model)
+            // changed to long 
             auto idx_accessor = idx.accessor<long,2>(); // 1, 17 -> batch_size, 17
             auto heat_map_accessor = ndarray_heat_map.accessor<float,3>(); // 1, 17, 1
             
