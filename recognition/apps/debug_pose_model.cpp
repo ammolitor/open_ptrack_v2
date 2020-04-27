@@ -639,13 +639,13 @@ class PoseFromConfig{
             //heatmaps_reshaped = batch_heatmaps.reshape((batch_size, num_joints, -1))
             ndarray_heat_map.reshape({1, 17, 3072});
             //std::vector<int64_t> heatsize = ndarray_heat_map.sizes();
-            std::cout << "ndarray_heat_map reshape finished: " << heatsize.sizes().size() << std::endl;
+            std::cout << "ndarray_heat_map reshape finished: " << ndarray_heat_map.sizes().size() << std::endl;
             
             // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L173
             // idx = nd.argmax(heatmaps_reshaped, 2)
             torch::Tensor idx = torch::argmax(ndarray_heat_map, 2);
             //std::vector<int64_t> idxsize = idx.sizes().size();
-            std::cout << "argmax finished: " << idxsize.sizes().size() << std::endl;
+            std::cout << "argmax finished: " << idx.sizes().size() << std::endl;
             
             // creat empty pred container
             torch::Tensor preds = torch::zeros({17, 2}, at::kFloat);
