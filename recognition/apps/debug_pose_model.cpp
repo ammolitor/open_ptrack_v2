@@ -560,6 +560,7 @@ class PoseFromConfig{
                 // get upscaled bounding box and extract image-patch/mask
                 cv::Rect roi(int_upscaled_xmin, int_upscaled_ymin, int_upscaled_xmax-int_upscaled_xmin, int_upscaled_ymax-int_upscaled_ymin);
                 cv::Mat image_roi = frame(roi);
+                std::cout << "image_roi created" << std::endl;
 
                 //preprocessing happens inside forward function
                 // why point3f and not 2f? 
