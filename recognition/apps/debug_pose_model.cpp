@@ -757,7 +757,7 @@ class PoseFromConfig{
               float w_ratio = modulo_pred / heatmap_width;
               float h_ratio = floor_pred / heatmap_height;
               std::cout << "w_ratio: " << w_ratio << std::endl;
-              std::cout << "h_ratio: " << floor_pred << std::endl;              
+              std::cout << "h_ratio: " << h_ratio << std::endl;              
               cv::Point3f point;
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L291-L292
               //scale = np.array([w, h])
