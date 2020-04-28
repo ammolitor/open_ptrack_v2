@@ -712,8 +712,8 @@ class PoseFromConfig{
             float heatmap_width = 48.0f;
             float heatmap_height = 64.0f;
             std::vector<cv::Point3f> points;
-            float w = (xmax - xmin) / 2.0;
-            float h = (ymax - ymin) / 2.0;
+            float w = (xmax - xmin) / 2.0f;
+            float h = (ymax - ymin) / 2.0f;
             float center_x = xmin + w; 
             float center_y = ymin + h;
             std::cout << "pose_forward w: " << w << std::endl;
@@ -1153,7 +1153,7 @@ class TVMPoseNode {
                   joint3D.header = rgb_image->header;
                   skeleton.joints[rtpose_part_index] = joint3D;
                   // debug this 
-                  cv::circle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,255,0));
+                  cv::circle(cv_image_clone, cv::Point(cast_y, cast_x), 3, (0,255,0));
                 }
               }
               float confidence = 0.9f;
@@ -1179,7 +1179,7 @@ class TVMPoseNode {
               joint3D_neck.max_width = DISPLAY_RESOLUTION_WIDTH;              
               // NECK == joint location 1
               skeleton.joints[1] = joint3D_neck;
-              cv::circle(cv_image_clone, cv::Point(cast_point_x, cast_point_y), 3, (0,255,0));
+              cv::circle(cv_image_clone, cv::Point(cast_point_y, cast_point_x), 3, (0,255,0));
               
               // ******** CHEST
               opt_msgs::Joint3DMsg joint3D_chest;
@@ -1199,7 +1199,7 @@ class TVMPoseNode {
               joint3D_chest.max_width = DISPLAY_RESOLUTION_WIDTH; 
               // CHEST == joint location 15, index 14
               skeleton.joints[14] = joint3D_chest;
-              cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,0,255));
+              cv::circle(cv_image_clone, cv::Point(cast_cy, cast_cx), 3, (0,0,255));
               
               //index == gluon
               //value == rtpose
