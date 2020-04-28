@@ -534,6 +534,10 @@ class PoseFromConfig{
                 float upmaxx = center_x + w * scale;
                 float upmaxy = center_y + h * scale;
 
+                std::cout << "yolo_forward w: " << w << std::endl;
+                std::cout << "yolo_forward h: " << h << std::endl;
+                std::cout << "yolo_forward: center_x" << center_x << std::endl;
+                std::cout << "yolo_forward: center_y" << center_y << std::endl;
 
                 float upscaled_xmin = std::max(upminx, 0.0f);
                 float upscaled_ymin = std::max(upminy, 0.0f);
@@ -712,12 +716,18 @@ class PoseFromConfig{
             float h = (ymax - ymin) / 2.0;
             float center_x = xmin + w; 
             float center_y = ymin + h;
-
+            std::cout << "pose_forward w: " << w << std::endl;
+            std::cout << "pose_forward h: " << h << std::endl;
+            std::cout << "pose_forward center_x: " << center_x << std::endl;
+            std::cout << "pose_forward center_y: " << center_y << std::endl;
             // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L168
             // might have to use a diff var name
             for (size_t i = 0; i < 17; i++){
               float index = idx_accessor[0][i];
+              std::cout << "index: " << index << std::endl;
               float probability = heat_map_accessor[0][i][static_cast<int>(index)];
+              std::cout << "probability: " << probability << std::endl;
+              
               //// python modulo vs c++ is dfff
               ////https://stackoverflow.com/questions/1907565/c-and-python-different-behaviour-of-the-modulo-operation
               //preds = nd.tile(idx, (1, 1, 2)).astype(np.float32)
@@ -726,9 +736,13 @@ class PoseFromConfig{
               // float modulo_pred = ((index % heatmap_width) + heatmap_width) % heatmap_width;
               // float floor_pred = std::floor(index / heatmap_width);
               int modulo_int = static_cast<int>(index) % static_cast<int>(heatmap_width);
+              std::cout << "modulo_int: " << modulo_int << std::endl;
               float modulo_pred = static_cast<float>(modulo_int);
+              std::cout << "modulo_pred: " << modulo_pred << std::endl;
               float floor = index / heatmap_width;
+              std::cout << "floor: " << floor << std::endl;
               float floor_pred = std::floor(floor);
+              std::cout << "floor_pred: " << floor_pred << std::endl;
               if (probability <= 0.0) {
                 // zero out the pred if the prob is bad...
                 //pred_mask = nd.tile(nd.greater(maxvals, 0.0), (1, 1, 2))
@@ -737,6 +751,8 @@ class PoseFromConfig{
                 modulo_pred = 0.0f;
                 floor_pred = 0.0f;
               }
+              std::cout << "modulo_pred_end: " << modulo_pred << std::endl;
+              std::cout << "floor_pred_end: " << floor_pred << std::endl;
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L289-L290
               float w_ratio = modulo_pred / heatmap_width;
               float h_ratio = floor_pred / heatmap_height;
@@ -748,7 +764,9 @@ class PoseFromConfig{
               //center = np.array([x0 + w, y0 + h])
               point.x = w * 2.0f * w_ratio + center_x - w;
               point.y = h * 2.0f * h_ratio + center_y - h;
-              point.z = probability;
+              point.z = probability
+              std::cout << "point.x: " << point.x << std::endl;
+              std::cout << "point.y: " << point.y << std::endl;
               points.push_back(point);
             }
             // free outputs
