@@ -506,7 +506,7 @@ class PoseFromConfig{
                 xmin = xmin * (img_width/detector_height); // move down to 480 space  ()
                 ymin = ymin / (detector_width/img_height); // move up to 640
                 xmax = xmax * (img_width/detector_height);
-                ymax = ymax / (detector_width/img_height);   
+                ymax = ymax / (detector_width/img_height);
 
                 // upscale bbox function from simple pose
                 // pose_input, upscale_bbox = detector_to_simple_pose(img, class_IDs, scores, bounding_boxs)
@@ -544,8 +544,8 @@ class PoseFromConfig{
 
                 float upscaled_xmin = std::max(upminx, 0.0f);
                 float upscaled_ymin = std::max(upminy, 0.0f);
-                float upscaled_xmax = std::min(upmaxx, fheight);
-                float upscaled_ymax = std::min(upmaxy, fwidth);
+                float upscaled_xmax = std::min(upmaxx, fwidth);
+                float upscaled_ymax = std::min(upmaxy, fheight);
                 std::cout << "upscaled_xmin: " << upscaled_xmin << std::endl;
                 std::cout << "upscaled_ymin: " << upscaled_ymin << std::endl;
                 std::cout << "upscaled_xmax: " << upscaled_xmax << std::endl;
@@ -569,13 +569,13 @@ class PoseFromConfig{
                 if (0 <= int_upscaled_xmin){
                   int_upscaled_xmin = 1;
                 }
-                if (int_upscaled_xmax >= img_width){
+                if (int_upscaled_xmax > img_width){
                   int_upscaled_xmax = img_width - 1;
                 }
                 if (0 <= int_upscaled_ymin){
                   int_upscaled_ymin = 1;
                 }
-                if (int_upscaled_ymax >= img_height){
+                if (int_upscaled_ymax > img_height){
                   int_upscaled_ymax = img_height - 1;
                 }
 
