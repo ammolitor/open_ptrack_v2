@@ -255,7 +255,7 @@ class PoseFromConfig{
             // read config with nlohmann-json
             std::cout << "start model_config reading" << std::endl;
             json model_config;
-            std::string package_path = "/opt/catkin_ws/src/open_ptrack/recognition"
+            std::string package_path = "/opt/catkin_ws/src/open_ptrack/recognition";
             std::string full_path = package_path + config_path;
             std::ifstream json_read(full_path);
             json_read >> model_config;
@@ -791,7 +791,7 @@ int main()
     bool ignore = true;
     cv_image = cv::imread(image_name);
     cv_image_clone = cv_image.clone();
-    PoseFromConfig tvm_pose_detector("/cfg/pose_model.json", "recognition")
+    PoseFromConfig tvm_pose_detector("/cfg/pose_model.json", "recognition");
     output = tvm_pose_detector.forward_full(cv_image, .3);
     int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
     if (output->num >= 1) {
@@ -849,10 +849,8 @@ int main()
         cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
         cv::putText(cv_image_clone, object_name, cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
         // cv::imwrite("/home/nvidia/OUTPUTIMAGE.JPG", cv_image);
-          }
         }
       }
-    }
 
     // display drawn image
     // output image
