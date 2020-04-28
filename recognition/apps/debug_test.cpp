@@ -810,6 +810,7 @@ int main()
         int num_parts = points.size();
 
         for (size_t i = 0; i < num_parts; i++){
+          int rtpose_part_index = gluon_to_rtpose[i];
           /* code */
           // IGNORE eyes/ears
           if (rtpose_part_index == -1){
