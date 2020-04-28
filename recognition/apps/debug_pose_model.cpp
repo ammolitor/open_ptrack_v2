@@ -764,7 +764,7 @@ class PoseFromConfig{
               //center = np.array([x0 + w, y0 + h])
               point.x = w * 2.0f * w_ratio + center_x - w;
               point.y = h * 2.0f * h_ratio + center_y - h;
-              point.z = probability
+              point.z = probability;
               std::cout << "point.x: " << point.x << std::endl;
               std::cout << "point.y: " << point.y << std::endl;
               points.push_back(point);
