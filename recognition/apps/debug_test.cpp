@@ -589,10 +589,10 @@ class PoseFromConfig{
                 // why point3f and not 2f? 
                 // we're using z as the confidence
                 std::vector<cv::Point3f> pose_coords = pose_forward(image_roi, upscaled_xmin, upscaled_ymin, upscaled_xmax, upscaled_ymax);
-                results->boxes[i].xmin = xmin
-                results->boxes[i].ymin = ymin
-                results->boxes[i].xmax = xmax
-                results->boxes[i].ymax = ymax                  
+                results->boxes[i].xmin = xmin;
+                results->boxes[i].ymin = ymin;
+                results->boxes[i].xmax = xmax;
+                results->boxes[i].ymax = ymax;                 
                 results->boxes[i].points = pose_coords;
                 //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space  ()
                 //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
