@@ -579,16 +579,16 @@ class PoseFromConfig{
                   upscaled_xmin = 1.0;
                 }
                 if (int_upscaled_xmax > img_width){
-                  int_upscaled_xmax = img_width - 1;
-                  upscaled_xmax = img_width - 1.0;
+                  int_upscaled_xmax = img_width;
+                  upscaled_xmax = fwidth;
                 }
                 if (0 >= int_upscaled_ymin){
-                  int_upscaled_ymin = 1;
-                  upscaled_ymin = 1.0;
+                  int_upscaled_ymin = 0;
+                  upscaled_ymin = 0.0;
                 }
                 if (int_upscaled_ymax > img_height){
-                  int_upscaled_ymax = img_height - 1;
-                  upscaled_ymax = img_height - 1.0;
+                  int_upscaled_ymax = img_height;
+                  upscaled_ymax = fheight;
                 }
                 std::cout << "post_upscaled_xmin: " << upscaled_xmin << std::endl;
                 std::cout << "post_upscaled_ymin: " << upscaled_ymin << std::endl;
