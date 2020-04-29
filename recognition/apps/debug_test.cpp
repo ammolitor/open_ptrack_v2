@@ -568,19 +568,19 @@ class PoseFromConfig{
                 //0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= m.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows
                 if (0 <= int_upscaled_xmin){
                   int_upscaled_xmin = 1;
-                  //upscaled_xmin = 1.0;
+                  upscaled_xmin = 1.0;
                 }
                 if (int_upscaled_xmax > img_width){
                   int_upscaled_xmax = img_width - 1;
-                  //upscaled_xmax = img_width - 1.0;
+                  upscaled_xmax = img_width - 1.0;
                 }
                 if (0 <= int_upscaled_ymin){
                   int_upscaled_ymin = 1;
-                  //upscaled_ymin = 1.0;
+                  upscaled_ymin = 1.0;
                 }
                 if (int_upscaled_ymax > img_height){
                   int_upscaled_ymax = img_height - 1;
-                  //upscaled_ymax = img_height - 1.0;
+                  upscaled_ymax = img_height - 1.0;
                 }
 
                 // get upscaled bounding box and extract image-patch/mask
