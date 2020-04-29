@@ -665,9 +665,10 @@ class PoseFromConfig{
             //copy processed image to DLTensor
             std::cout << "about to preprocess" << std::endl;
             cv::Mat processed_image = preprocess_image(bbox_mask, pose_width, pose_height, true);
+            cv::Size processed_image_size = processed_image.size();
             std::cout << "preprocess finished: " << std::endl;
-            std::cout << "preprocess height: " << processed_image.height << std::endl;
-            std::cout << "preprocess width: " << processed_image.width << std::endl;
+            std::cout << "preprocess height: " << processed_image_size.height << std::endl;
+            std::cout << "preprocess width: " << processed_image_size.width << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
             memcpy(data_x, split_mat[2].ptr<float>(), processed_image.cols * processed_image.rows * sizeof(float));
