@@ -566,7 +566,7 @@ class PoseFromConfig{
                 std::cout << "int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
                 
                 //0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= m.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows
-                if (0 <= int_upscaled_xmin){
+                if (0 >= int_upscaled_xmin){
                   int_upscaled_xmin = 1;
                   upscaled_xmin = 1.0;
                 }
@@ -574,7 +574,7 @@ class PoseFromConfig{
                   int_upscaled_xmax = img_width - 1;
                   upscaled_xmax = img_width - 1.0;
                 }
-                if (0 <= int_upscaled_ymin){
+                if (0 >= int_upscaled_ymin){
                   int_upscaled_ymin = 1;
                   upscaled_ymin = 1.0;
                 }
