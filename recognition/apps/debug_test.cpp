@@ -603,7 +603,9 @@ class PoseFromConfig{
                 cv::Rect roi(int_upscaled_xmin, int_upscaled_ymin, int_upscaled_xmax-int_upscaled_xmin, int_upscaled_ymax-int_upscaled_ymin);
                 std::cout << "created rect created" << std::endl;
                 cv::Mat image_roi = frame(roi);
-                std::cout << "image_roi created" << std::endl;
+                cv::Size image_roi_image_size = frame.size();
+                std::cout << "image_roi_image_size created" << image_roi_image_size.height << std::endl;
+                std::cout << "image_roi_image_size created" << image_roi_image_size.width << std::endl;
 
                 //preprocessing happens inside forward function
                 // why point3f and not 2f? 
