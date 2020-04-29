@@ -606,7 +606,7 @@ class PoseFromConfig{
                 cv::Size image_roi_image_size = image_roi.size();
                 std::cout << "image_roi_image_size created: " << image_roi_image_size.height << std::endl;
                 std::cout << "image_roi_image_size created: " << image_roi_image_size.width << std::endl;
-
+                cv::imwrite("/home/nvidia/pose_image_roi.jpg", image_roi);
                 //preprocessing happens inside forward function
                 // why point3f and not 2f? 
                 // we're using z as the confidence
