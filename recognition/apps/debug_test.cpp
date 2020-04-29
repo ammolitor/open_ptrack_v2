@@ -1045,7 +1045,7 @@ int main()
         //cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,0,255));
         
         // iter through the line creating process
-        draw_skelaton(cv_image_clone, points)
+        draw_skelaton(cv_image_clone, points);
 
 
 
