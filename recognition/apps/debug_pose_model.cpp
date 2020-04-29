@@ -370,6 +370,7 @@ class PoseFromConfig{
         {
             std::cout << "starting function" << std::endl;
             // get height/width dynamically
+            cv::Mat frame_copy = frame.clone();
             cv::Size image_size = frame.size();
             float img_height = static_cast<float>(image_size.height);
             float img_width = static_cast<float>(image_size.width);
@@ -529,6 +530,11 @@ class PoseFromConfig{
                 xmax = xmax * (img_width/detector_height);
                 ymax = ymax / (detector_width/img_height);           
 
+                std::cout << "xmin: " << xmin << std::endl;
+                std::cout << "ymin: " << ymin << std::endl;
+                std::cout << "xmax: " << xmax << std::endl;
+                std::cout << "ymax: " << ymax << std::endl;
+
                 float scale = 1.26;
                 float w = (xmax - xmin) / 2.0f;
                 float h = (ymax - ymin) / 2.0f;
@@ -585,7 +591,7 @@ class PoseFromConfig{
                 // get upscaled bounding box and extract image-patch/mask
                 cv::Rect roi(int_upscaled_xmin, int_upscaled_ymin, int_upscaled_xmax-int_upscaled_xmin, int_upscaled_ymax-int_upscaled_ymin);
                 std::cout << "created rect created" << std::endl;
-                cv::Mat image_roi = frame(roi);
+                cv::Mat image_roi = frame_copy(roi);
                 std::cout << "image_roi created" << std::endl;
 
                 //preprocessing happens inside forward function

@@ -507,7 +507,11 @@ class PoseFromConfig{
                 ymin = ymin / (detector_width/img_height); // move up to 640
                 xmax = xmax * (img_width/detector_height);
                 ymax = ymax / (detector_width/img_height);
-
+                
+                std::cout << "xmin: " << xmin << std::endl;
+                std::cout << "ymin: " << ymin << std::endl;
+                std::cout << "xmax: " << xmax << std::endl;
+                std::cout << "ymax: " << ymax << std::endl;
                 // upscale bbox function from simple pose
                 // pose_input, upscale_bbox = detector_to_simple_pose(img, class_IDs, scores, bounding_boxs)
                 // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L218
@@ -695,13 +699,13 @@ class PoseFromConfig{
             //heatmaps_reshaped = batch_heatmaps.reshape((batch_size, num_joints, -1))
             // 
             // pytorch view vs. reshape; use of auto?
-            auto ndarray_heat_map = ndarray_heat_map_full.view({1, 17, 3072});
+            auto ndarray_heat_map = ndarray_heat_map_full.view({17, 3072});
             //std::vector<int64_t> heatsize = ndarray_heat_map.sizes();
             std::cout << "ndarray_heat_map reshape finished: " << ndarray_heat_map.sizes().size() << std::endl;
             
             // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L173
             // idx = nd.argmax(heatmaps_reshaped, 2)
-            torch::Tensor idx = torch::argmax(ndarray_heat_map, 2);
+            torch::Tensor idx = torch::argmax(ndarray_heat_map, 1);
             //std::vector<int64_t> idxsize = idx.sizes().size();
             std::cout << "argmax finished: " << idx.sizes().size() << std::endl;
             
@@ -710,14 +714,8 @@ class PoseFromConfig{
             // create accessors
 
 
-            //terminate called after throwing an instance of 'c10::Error'
-            //what():  expected scalar type Float but found Long (data_ptr<float> at /opt/src/pytorch/torch/include/ATen/core/TensorMethods.h:6321)
-            //frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) + 0x78 (0x7f6b1a6258 in /opt/src/pytorch/torch/lib/libc10.so)
-            //frame #1: float* at::Tensor::data_ptr<float>() const + 0x1bc (0x558d0fd914 in /opt/catkin_ws/devel/lib/recognition/debug_pose_model)
-            //frame #2: at::TensorAccessor<float, 2ul, at::DefaultPtrTraits, long> at::Tensor::accessor<float, 2ul>() const & + 0x58 (0x558d107240 in /opt/catkin_ws/devel/lib/recognition/debug_pose_model)
-            // changed to long 
-            auto idx_accessor = idx.accessor<long,2>(); // 1, 17 -> batch_size, 17
-            auto heat_map_accessor = ndarray_heat_map.accessor<float,3>(); // 1, 17, 1
+            auto idx_accessor = idx.accessor<long,1>(); // 1, 17 -> batch_size, 17
+            auto heat_map_accessor = ndarray_heat_map.accessor<float,2>(); // 1, 17, 1
             
             // vars to preset
             // pred_coords, confidence = heatmap_to_coord(predicted_heatmap, upscale_bbox)
@@ -737,9 +735,9 @@ class PoseFromConfig{
             // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L168
             // might have to use a diff var name
             for (size_t i = 0; i < 17; i++){
-              float index = idx_accessor[0][i];
+              float index = idx_accessor[i];
               std::cout << "index: " << index << std::endl;
-              float probability = heat_map_accessor[0][i][static_cast<int>(index)];
+              float probability = heat_map_accessor[i][static_cast<int>(index)];
               std::cout << "probability: " << probability << std::endl;
               
               //// python modulo vs c++ is dfff
