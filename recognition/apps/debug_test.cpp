@@ -342,14 +342,18 @@ class PoseFromConfig{
          * \param[in] the raw cv::mat image
          * \return the normalized version of the iamge.
          */  
-        cv::Mat preprocess_image(cv::Mat frame, int width, int height){
+        cv::Mat preprocess_image(cv::Mat frame, int width, int height, bool convert){
             cv::Size new_size = cv::Size(width, height); // or is it height width????
             cv::Mat resized_image;
-            cv::Mat rgb;
-            // bgr to rgb
-            cv::cvtColor(frame, rgb,  cv::COLOR_BGR2RGB);
+            if (convert){
+              cv::Mat rgb;
+              // bgr to rgb
+              cv::cvtColor(frame, rgb,  cv::COLOR_BGR2RGB);
+              cv::resize(rgb, resized_image, new_size);
+            } else {
+              cv::resize(frame, resized_image, new_size);
+            }
             // resize to 512x512
-            cv::resize(rgb, resized_image, new_size);
             cv::Mat resized_image_floats(new_size, CV_32FC3);
             // convert resized image to floats and normalize
             resized_image.convertTo(resized_image_floats, CV_32FC3, 1.0f/255.0f);
@@ -412,7 +416,7 @@ class PoseFromConfig{
 
             //copy processed image to DLTensor
             std::cout << "about to preprocess" << std::endl;
-            cv::Mat processed_image = preprocess_image(frame, detector_width, detector_height);
+            cv::Mat processed_image = preprocess_image(frame, detector_width, detector_height, true);
             std::cout << "preprocess finished" << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
@@ -658,7 +662,7 @@ class PoseFromConfig{
 
             //copy processed image to DLTensor
             std::cout << "about to preprocess" << std::endl;
-            cv::Mat processed_image = preprocess_image(bbox_mask, pose_width, pose_height);
+            cv::Mat processed_image = preprocess_image(bbox_mask, pose_width, pose_height, false);
             std::cout << "preprocess finished" << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
