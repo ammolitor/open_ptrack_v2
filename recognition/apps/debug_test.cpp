@@ -800,7 +800,7 @@ class PoseFromConfig{
 int main()
 {
 
-    std::string image_name = "/home/nvidia/soccer.png";
+    std::string image_name = "/home/nvidia/soccer-resized.jpg"; //soccer.png";
     cv::Mat cv_image;
     cv::Mat cv_image_clone;
     pose_results* output;
