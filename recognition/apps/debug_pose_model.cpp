@@ -215,7 +215,6 @@ enum SkeletonJoints
   SIZE
 };
 
-
 class PoseFromConfig{
     private:
         //working: void * handle;
