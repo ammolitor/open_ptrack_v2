@@ -811,6 +811,82 @@ class PoseFromConfig{
 };
 
 
+
+void draw_skelaton(cv::Mat cv_image_clone, std::vector<cv::Point3f> points){
+  int num_parts = points.size();
+  int gluon_to_rtpose_map[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
+  cv::Point3f nose_head = points[0];
+  cv::Point3f left_shoulder = points[5];
+  cv::Point3f right_shoulder = points[6];
+  cv::Point3f left_elbow = points[7];
+  cv::Point3f right_elbow = points[8];
+  cv::Point3f left_wrist = points[9];
+  cv::Point3f right_wrist = points[10];
+  cv::Point3f left_hip = points[11];
+  cv::Point3f right_hip = points[12];
+  cv::Point3f left_knee = points[13];
+  cv::Point3f right_knee = points[14];
+  cv::Point3f left_ankle = points[15];
+  cv::Point3f right_ankle = points[16];
+  for (size_t i = 0; i < num_parts; i++){
+    int rtpose_part_index = gluon_to_rtpose_map[i];
+    /* code */
+    // IGNORE eyes/ears
+    if (rtpose_part_index == -1){
+      continue;
+    } else {
+      cv::Point3f point = points[i];
+      float confidence = point.z;
+      int cast_x = static_cast<int>(point.x);
+      int cast_y = static_cast<int>(point.y);
+      // debug this 
+      cv::circle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,0,0));
+    }
+  }
+  // ******* NECK == joint location 1\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+  // center of each shoulder == chest
+  float x = (left_shoulder.x + right_shoulder.x) / 2;
+  float y = (left_shoulder.y + right_shoulder.y) / 2;
+  int cast_point_x = static_cast<int>(x);
+  int cast_point_y = static_cast<int>(y);
+  cv::circle(cv_image_clone, cv::Point(cast_point_x, cast_point_y), 3, (0,0,0));
+  
+  // ******** CHEST
+  // weighted mean from rtpose
+  // TODO if this looks ugly, we'll just use the neck
+  float cx = (left_hip.x + right_hip.x) * 0.4 + (left_shoulder.x + right_shoulder.x) * 0.1;
+  float cy = (left_hip.y + right_hip.y) * 0.4 + (left_shoulder.y + right_shoulder.y) * 0.1;
+  int cast_cx = static_cast<int>(cx);
+  int cast_cy = static_cast<int>(cy);
+  cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,0,0));
+
+  //joint_pairs = [[0, 1], [1, 3], [0, 2], [2, 4],
+  //                [5, 6], [5, 7], [7, 9], [6, 8], [8, 10],
+  //                [5, 11], [6, 12], [11, 12],
+  //                [11, 13], [12, 14], [13, 15], [14, 16]]
+  //[0.        , 0.06666667, 0.13333333, 0.2       , 0.26666667,
+  // 0.33333333, 0.4       , 0.46666667, 0.53333333, 0.6       ,
+  // 0.66666667, 0.73333333, 0.8       , 0.86666667, 0.93333333,
+  // 1.        ])
+  //cv::line(legend_image, cv::Point(0,y_coord), cv::Point(100,y_coord),
+  //       cv::Scalar(255*color(2), 255*color(1), 255*color(0)), 8)
+  float color_map[16] = {0., 0.06666667, 0.13333333, 0.2, 0.26666667, 0.33333333, 0.4, 0.46666667, 0.53333333, 0.6, 0.66666667, 0.73333333, 0.8, 0.86666667, 0.93333333, 1.};
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(nose_head.x), static_cast<int>(nose_head.y)), cv::Point(static_cast<int>(x), static_cast<int>(y)), cv::Scalar(static_cast<int>(255.0*color_map[12]), static_cast<int>(255.0*color_map[12]), static_cast<int>(255.0*color_map[12])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(left_shoulder.x), static_cast<int>(left_shoulder.y)), cv::Point(static_cast<int>(right_shoulder.x), static_cast<int>(right_shoulder.y)), cv::Scalar(static_cast<int>(255.0*color_map[0]), static_cast<int>(255.0*color_map[0]), static_cast<int>(255.0*color_map[0])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(left_shoulder.x), static_cast<int>(left_shoulder.y)), cv::Point(static_cast<int>(left_elbow.x), static_cast<int>(left_elbow.y)), cv::Scalar(static_cast<int>(255.0*color_map[1]), static_cast<int>(255.0*color_map[1]), static_cast<int>(255.0*color_map[1])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(left_elbow.x), static_cast<int>(left_elbow.y)), cv::Point(static_cast<int>(left_wrist.x), static_cast<int>(left_wrist.y)), cv::Scalar(static_cast<int>(255.0*color_map[2]), static_cast<int>(255.0*color_map[2]), static_cast<int>(255.0*color_map[2])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(right_shoulder.x), static_cast<int>(right_shoulder.y)), cv::Point(static_cast<int>(right_elbow.x), static_cast<int>(right_elbow.y)), cv::Scalar(static_cast<int>(255.0*color_map[3]), static_cast<int>(255.0*color_map[3]), static_cast<int>(255.0*color_map[3])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(right_elbow.x), static_cast<int>(right_elbow.y)), cv::Point(static_cast<int>(right_wrist.x), static_cast<int>(right_wrist.y)), cv::Scalar(static_cast<int>(255.0*color_map[4]), static_cast<int>(255.0*color_map[4]), static_cast<int>(255.0*color_map[4])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(left_shoulder.x), static_cast<int>(left_shoulder.y)), cv::Point(static_cast<int>(left_hip.x), static_cast<int>(left_hip.y)), cv::Scalar(static_cast<int>(255.0*color_map[5]), static_cast<int>(255.0*color_map[5]), static_cast<int>(255.0*color_map[5])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(right_shoulder.x), static_cast<int>(right_shoulder.y)), cv::Point(static_cast<int>(right_hip.x), static_cast<int>(right_hip.y)), cv::Scalar(static_cast<int>(255.0*color_map[6]), static_cast<int>(255.0*color_map[6]), static_cast<int>(255.0*color_map[6])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(left_hip.x), static_cast<int>(left_hip.y)), cv::Point(static_cast<int>(right_hip.x), static_cast<int>(right_hip.y)), cv::Scalar(static_cast<int>(255.0*color_map[7]), static_cast<int>(255.0*color_map[7]), static_cast<int>(255.0*color_map[7])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(left_hip.x), static_cast<int>(left_hip.y)), cv::Point(static_cast<int>(left_knee.x), static_cast<int>(left_knee.y)), cv::Scalar(static_cast<int>(255.0*color_map[8]), static_cast<int>(255.0*color_map[8]), static_cast<int>(255.0*color_map[8])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(right_hip.x), static_cast<int>(right_hip.y)), cv::Point(static_cast<int>(right_knee.x), static_cast<int>(right_knee.y)), cv::Scalar(static_cast<int>(255.0*color_map[9]), static_cast<int>(255.0*color_map[9]), static_cast<int>(255.0*color_map[9])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(left_knee.x), static_cast<int>(left_knee.y)), cv::Point(static_cast<int>(left_ankle.x), static_cast<int>(left_ankle.y)), cv::Scalar(static_cast<int>(255.0*color_map[10]), static_cast<int>(255.0*color_map[10]), static_cast<int>(255.0*color_map[10])), 8);
+  cv::line(cv_image_clone, cv::Point(static_cast<int>(right_knee.x), static_cast<int>(right_knee.y)), cv::Point(static_cast<int>(right_ankle.x), static_cast<int>(right_ankle.y)), cv::Scalar(static_cast<int>(255.0*color_map[11]), static_cast<int>(255.0*color_map[11]), static_cast<int>(255.0*color_map[11])), 8);
+  
+}
+
 /**
  * @brief The TVMPoseNode
  */
@@ -1181,7 +1257,7 @@ class TVMPoseNode {
                   joint3D.header = rgb_image->header;
                   skeleton.joints[rtpose_part_index] = joint3D;
                   // debug this 
-                  cv::circle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,255,0));
+                  //cv::circle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,255,0));
                 }
               }
               float confidence = 0.9f;
@@ -1207,7 +1283,7 @@ class TVMPoseNode {
               joint3D_neck.max_width = DISPLAY_RESOLUTION_WIDTH;              
               // NECK == joint location 1
               skeleton.joints[1] = joint3D_neck;
-              cv::circle(cv_image_clone, cv::Point(cast_point_x, cast_point_y), 3, (0,255,0));
+              //cv::circle(cv_image_clone, cv::Point(cast_point_x, cast_point_y), 3, (0,255,0));
               
               // ******** CHEST
               opt_msgs::Joint3DMsg joint3D_chest;
@@ -1227,8 +1303,8 @@ class TVMPoseNode {
               joint3D_chest.max_width = DISPLAY_RESOLUTION_WIDTH; 
               // CHEST == joint location 15, index 14
               skeleton.joints[14] = joint3D_chest;
-              cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,0,255));
-              
+              //cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,0,255));
+              draw_skelaton(cv_image_clone, points);
               //index == gluon
               //value == rtpose
               //chest == 100 == LSHOULDER / RSHOULDER == 5 / 2
