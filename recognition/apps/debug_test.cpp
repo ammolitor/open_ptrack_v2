@@ -301,7 +301,7 @@ enum SkeletonJoints
 
 
 void draw_skelaton(cv::Mat cv_image_clone, std::vector<cv::Point3f> points){
-  int num_parts = points.size():
+  int num_parts = points.size();
   int gluon_to_rtpose_map[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
   cv::Point3f nose_head = points[0];
   cv::Point3f left_shoulder = points[5];
@@ -331,10 +331,10 @@ void draw_skelaton(cv::Mat cv_image_clone, std::vector<cv::Point3f> points){
       cv::circle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,0,0));
     }
   }
-  // ******* NECK == joint location 1
+  // ******* NECK == joint location 1\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   // center of each shoulder == chest
-  float x = (point_left_shoulder.x + point_right_shoulder.x) / 2;
-  float y = (point_left_shoulder.y + point_right_shoulder.y) / 2;
+  float x = (left_shoulder.x + right_shoulder.x) / 2;
+  float y = (left_shoulder.y + right_shoulder.y) / 2;
   int cast_point_x = static_cast<int>(x);
   int cast_point_y = static_cast<int>(y);
   cv::circle(cv_image_clone, cv::Point(cast_point_x, cast_point_y), 3, (0,0,0));
@@ -342,8 +342,8 @@ void draw_skelaton(cv::Mat cv_image_clone, std::vector<cv::Point3f> points){
   // ******** CHEST
   // weighted mean from rtpose
   // TODO if this looks ugly, we'll just use the neck
-  float cx = (point_left_hip.x + point_right_hip.x) * 0.4 + (point_left_shoulder.x + point_right_shoulder.x) * 0.1;
-  float cy = (point_left_hip.y + point_right_hip.y) * 0.4 + (point_left_shoulder.y + point_right_shoulder.y) * 0.1;
+  float cx = (left_hip.x + right_hip.x) * 0.4 + (left_shoulder.x + right_shoulder.x) * 0.1;
+  float cy = (left_hip.y + right_hip.y) * 0.4 + (left_shoulder.y + right_shoulder.y) * 0.1;
   int cast_cx = static_cast<int>(cx);
   int cast_cy = static_cast<int>(cy);
   cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,0,0));
