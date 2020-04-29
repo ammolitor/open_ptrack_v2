@@ -317,7 +317,7 @@ void draw_skelaton(cv::Mat cv_image_clone, std::vector<cv::Point3f> points){
   cv::Point3f left_ankle = points[15];
   cv::Point3f right_ankle = points[16];
   for (size_t i = 0; i < num_parts; i++){
-    int rtpose_part_index = gluon_to_rtpose[i];
+    int rtpose_part_index = gluon_to_rtpose_map[i];
     /* code */
     // IGNORE eyes/ears
     if (rtpose_part_index == -1){
