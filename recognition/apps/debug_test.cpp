@@ -547,8 +547,8 @@ class PoseFromConfig{
 
                 std::cout << "yolo_forward w: " << w << std::endl;
                 std::cout << "yolo_forward h: " << h << std::endl;
-                std::cout << "yolo_forward: center_x" << center_x << std::endl;
-                std::cout << "yolo_forward: center_y" << center_y << std::endl;
+                std::cout << "yolo_forward center_x " << center_x << std::endl;
+                std::cout << "yolo_forward center_y " << center_y << std::endl;
 
                 float upscaled_xmin = std::max(upminx, 0.0f);
                 float upscaled_ymin = std::max(upminy, 0.0f);
@@ -603,9 +603,9 @@ class PoseFromConfig{
                 cv::Rect roi(int_upscaled_xmin, int_upscaled_ymin, int_upscaled_xmax-int_upscaled_xmin, int_upscaled_ymax-int_upscaled_ymin);
                 std::cout << "created rect created" << std::endl;
                 cv::Mat image_roi = frame(roi);
-                cv::Size image_roi_image_size = frame.size();
-                std::cout << "image_roi_image_size created" << image_roi_image_size.height << std::endl;
-                std::cout << "image_roi_image_size created" << image_roi_image_size.width << std::endl;
+                cv::Size image_roi_image_size = image_roi.size();
+                std::cout << "image_roi_image_size created: " << image_roi_image_size.height << std::endl;
+                std::cout << "image_roi_image_size created: " << image_roi_image_size.width << std::endl;
 
                 //preprocessing happens inside forward function
                 // why point3f and not 2f? 
