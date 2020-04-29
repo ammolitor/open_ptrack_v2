@@ -215,6 +215,7 @@ enum SkeletonJoints
   SIZE
 };
 
+
 class PoseFromConfig{
     private:
         //working: void * handle;
@@ -257,7 +258,7 @@ class PoseFromConfig{
             // read config with nlohmann-json
             std::cout << "start model_config reading" << std::endl;
             json model_config;
-            std::string package_path = ros::package::getPath(ros_package_string);
+            std::string package_path = "/opt/catkin_ws/src/open_ptrack/recognition";
             std::string full_path = package_path + config_path;
             std::ifstream json_read(full_path);
             json_read >> model_config;
@@ -344,14 +345,18 @@ class PoseFromConfig{
          * \param[in] the raw cv::mat image
          * \return the normalized version of the iamge.
          */  
-        cv::Mat preprocess_image(cv::Mat frame, int width, int height){
+        cv::Mat preprocess_image(cv::Mat frame, int width, int height, bool convert){
             cv::Size new_size = cv::Size(width, height); // or is it height width????
             cv::Mat resized_image;
-            cv::Mat rgb;
-            // bgr to rgb
-            cv::cvtColor(frame, rgb,  cv::COLOR_BGR2RGB);
+            if (convert){
+              cv::Mat rgb;
+              // bgr to rgb
+              cv::cvtColor(frame, rgb,  cv::COLOR_BGR2RGB);
+              cv::resize(rgb, resized_image, new_size);
+            } else {
+              cv::resize(frame, resized_image, new_size);
+            }
             // resize to 512x512
-            cv::resize(rgb, resized_image, new_size);
             cv::Mat resized_image_floats(new_size, CV_32FC3);
             // convert resized image to floats and normalize
             resized_image.convertTo(resized_image_floats, CV_32FC3, 1.0f/255.0f);
@@ -370,7 +375,6 @@ class PoseFromConfig{
         {
             std::cout << "starting function" << std::endl;
             // get height/width dynamically
-            cv::Mat frame_copy = frame.clone();
             cv::Size image_size = frame.size();
             float img_height = static_cast<float>(image_size.height);
             float img_width = static_cast<float>(image_size.width);
@@ -415,7 +419,7 @@ class PoseFromConfig{
 
             //copy processed image to DLTensor
             std::cout << "about to preprocess" << std::endl;
-            cv::Mat processed_image = preprocess_image(frame, detector_width, detector_height);
+            cv::Mat processed_image = preprocess_image(frame, detector_width, detector_height, true);
             std::cout << "preprocess finished" << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
@@ -505,7 +509,16 @@ class PoseFromConfig{
                 ymin = ndarray_bboxes_a[0][i][1];
                 xmax = ndarray_bboxes_a[0][i][2];
                 ymax = ndarray_bboxes_a[0][i][3];
-
+                //SCALE to frame height
+                xmin = xmin * (img_width/detector_height); // move down to 480 space  ()
+                ymin = ymin / (detector_width/img_height); // move up to 640
+                xmax = xmax * (img_width/detector_height);
+                ymax = ymax / (detector_width/img_height);
+                
+                std::cout << "xmin: " << xmin << std::endl;
+                std::cout << "ymin: " << ymin << std::endl;
+                std::cout << "xmax: " << xmax << std::endl;
+                std::cout << "ymax: " << ymax << std::endl;
                 // upscale bbox function from simple pose
                 // pose_input, upscale_bbox = detector_to_simple_pose(img, class_IDs, scores, bounding_boxs)
                 // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L218
@@ -524,16 +537,6 @@ class PoseFromConfig{
                 //    new_y1 = min(center[1] + h * scale, img.shape[0])
                 //    new_bbox = [new_x0, new_y0, new_x1, new_y1]
                 //    return new_bbox
-                // scale xmin to real size...
-                xmin = xmin * (img_width/detector_height); // move down to 480 space  ()
-                ymin = ymin / (detector_width/img_height); // move up to 640
-                xmax = xmax * (img_width/detector_height);
-                ymax = ymax / (detector_width/img_height);           
-
-                std::cout << "xmin: " << xmin << std::endl;
-                std::cout << "ymin: " << ymin << std::endl;
-                std::cout << "xmax: " << xmax << std::endl;
-                std::cout << "ymax: " << ymax << std::endl;
 
                 float scale = 1.26;
                 float w = (xmax - xmin) / 2.0f;
@@ -547,8 +550,8 @@ class PoseFromConfig{
 
                 std::cout << "yolo_forward w: " << w << std::endl;
                 std::cout << "yolo_forward h: " << h << std::endl;
-                std::cout << "yolo_forward: center_x" << center_x << std::endl;
-                std::cout << "yolo_forward: center_y" << center_y << std::endl;
+                std::cout << "yolo_forward center_x " << center_x << std::endl;
+                std::cout << "yolo_forward center_y " << center_y << std::endl;
 
                 float upscaled_xmin = std::max(upminx, 0.0f);
                 float upscaled_ymin = std::max(upminy, 0.0f);
@@ -574,35 +577,47 @@ class PoseFromConfig{
                 std::cout << "int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
                 
                 //0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= m.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows
-                if (0 <= int_upscaled_xmin){
+                if (0 >= int_upscaled_xmin){
                   int_upscaled_xmin = 1;
+                  upscaled_xmin = 1.0;
                 }
                 if (int_upscaled_xmax > img_width){
-                  int_upscaled_xmax = img_width - 1;
+                  int_upscaled_xmax = img_width;
+                  upscaled_xmax = fwidth;
                 }
-                if (0 <= int_upscaled_ymin){
-                  int_upscaled_ymin = 1;
+                if (0 >= int_upscaled_ymin){
+                  int_upscaled_ymin = 0;
+                  upscaled_ymin = 0.0;
                 }
                 if (int_upscaled_ymax > img_height){
-                  int_upscaled_ymax = img_height - 1;
+                  int_upscaled_ymax = img_height;
+                  upscaled_ymax = fheight;
                 }
-
-
+                std::cout << "post_upscaled_xmin: " << upscaled_xmin << std::endl;
+                std::cout << "post_upscaled_ymin: " << upscaled_ymin << std::endl;
+                std::cout << "post_upscaled_xmax: " << upscaled_xmax << std::endl;
+                std::cout << "post_upscaled_ymax: " << upscaled_ymax << std::endl;
+                std::cout << "post_int_upscaled_xmin: " << int_upscaled_xmin << std::endl;
+                std::cout << "post_int_upscaled_ymin: " << int_upscaled_ymin << std::endl;
+                std::cout << "post_int_upscaled_xmax: " << int_upscaled_xmax << std::endl;
+                std::cout << "post_int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
+                
                 // get upscaled bounding box and extract image-patch/mask
                 cv::Rect roi(int_upscaled_xmin, int_upscaled_ymin, int_upscaled_xmax-int_upscaled_xmin, int_upscaled_ymax-int_upscaled_ymin);
                 std::cout << "created rect created" << std::endl;
-                cv::Mat image_roi = frame_copy(roi);
-                std::cout << "image_roi created" << std::endl;
-
+                cv::Mat image_roi = frame(roi);
+                cv::Size image_roi_image_size = image_roi.size();
+                std::cout << "image_roi_image_size created: " << image_roi_image_size.height << std::endl;
+                std::cout << "image_roi_image_size created: " << image_roi_image_size.width << std::endl;
+                //debug only cv::imwrite("/home/nvidia/pose_image_roi.jpg", image_roi);
                 //preprocessing happens inside forward function
                 // why point3f and not 2f? 
                 // we're using z as the confidence
                 std::vector<cv::Point3f> pose_coords = pose_forward(image_roi, upscaled_xmin, upscaled_ymin, upscaled_xmax, upscaled_ymax);
-                // VALUES ARE ALREADY SCALED...
                 results->boxes[i].xmin = xmin;
                 results->boxes[i].ymin = ymin;
                 results->boxes[i].xmax = xmax;
-                results->boxes[i].ymax = ymax;          
+                results->boxes[i].ymax = ymax;                 
                 results->boxes[i].points = pose_coords;
                 //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space  ()
                 //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
@@ -652,8 +667,11 @@ class PoseFromConfig{
 
             //copy processed image to DLTensor
             std::cout << "about to preprocess" << std::endl;
-            cv::Mat processed_image = preprocess_image(bbox_mask, pose_width, pose_height);
-            std::cout << "preprocess finished" << std::endl;
+            cv::Mat processed_image = preprocess_image(bbox_mask, pose_width, pose_height, true);
+            cv::Size processed_image_size = processed_image.size();
+            std::cout << "preprocess finished: " << std::endl;
+            std::cout << "preprocess height: " << processed_image_size.height << std::endl;
+            std::cout << "preprocess width: " << processed_image_size.width << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
             memcpy(data_x, split_mat[2].ptr<float>(), processed_image.cols * processed_image.rows * sizeof(float));
@@ -688,10 +706,15 @@ class PoseFromConfig{
             torch::Tensor ndarray_heat_map_full = torch::zeros({1, 17, 64, 48}, at::kFloat);
 
             TVMArrayCopyToBytes(output_tensor_heatmap, ndarray_heat_map_full.data_ptr(), 1*17*64*48 * sizeof(float));
+            std::cout << "saving array output " << std::endl;
+            auto bytes = torch::pickle_save(ndarray_heat_map_full);
+            std::ofstream fout("/home/nvidia/pose.zip", std::ios::out | std::ios::binary);
+            fout.write(bytes.data(), bytes.size());
+            fout.close();
 
             //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L172
             //heatmaps_reshaped = batch_heatmaps.reshape((batch_size, num_joints, -1))
-            // 
+            //  
             // pytorch view vs. reshape; use of auto?
             auto ndarray_heat_map = ndarray_heat_map_full.view({17, 3072});
             //std::vector<int64_t> heatsize = ndarray_heat_map.sizes();
@@ -708,12 +731,6 @@ class PoseFromConfig{
             // create accessors
 
 
-            //terminate called after throwing an instance of 'c10::Error'
-            //what():  expected scalar type Float but found Long (data_ptr<float> at /opt/src/pytorch/torch/include/ATen/core/TensorMethods.h:6321)
-            //frame #0: c10::Error::Error(c10::SourceLocation, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) + 0x78 (0x7f6b1a6258 in /opt/src/pytorch/torch/lib/libc10.so)
-            //frame #1: float* at::Tensor::data_ptr<float>() const + 0x1bc (0x558d0fd914 in /opt/catkin_ws/devel/lib/recognition/debug_pose_model)
-            //frame #2: at::TensorAccessor<float, 2ul, at::DefaultPtrTraits, long> at::Tensor::accessor<float, 2ul>() const & + 0x58 (0x558d107240 in /opt/catkin_ws/devel/lib/recognition/debug_pose_model)
-            // changed to long 
             auto idx_accessor = idx.accessor<long,1>(); // 1, 17 -> batch_size, 17
             auto heat_map_accessor = ndarray_heat_map.accessor<float,2>(); // 1, 17, 1
             
@@ -792,7 +809,7 @@ class PoseFromConfig{
             std::cout << "freeing finished" << std::endl;
             return points;
         }
-};    
+};
 
 
 /**
