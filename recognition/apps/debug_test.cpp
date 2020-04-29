@@ -701,7 +701,7 @@ class PoseFromConfig{
 
             TVMArrayCopyToBytes(output_tensor_heatmap, ndarray_heat_map_full.data_ptr(), 1*17*64*48 * sizeof(float));
             std::cout << "saving array output " << std::endl;
-            auto bytes = torch::jit::pickle_save(ndarray_heat_map_full);
+            auto bytes = torch::pickle_save(ndarray_heat_map_full);
             std::ofstream fout("/home/nvidia/pose.zip", std::ios::out | std::ios::binary);
             fout.write(bytes.data(), bytes.size());
             fout.close();
