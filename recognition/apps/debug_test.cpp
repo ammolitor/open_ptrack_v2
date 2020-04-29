@@ -700,10 +700,15 @@ class PoseFromConfig{
             torch::Tensor ndarray_heat_map_full = torch::zeros({1, 17, 64, 48}, at::kFloat);
 
             TVMArrayCopyToBytes(output_tensor_heatmap, ndarray_heat_map_full.data_ptr(), 1*17*64*48 * sizeof(float));
+            std::cout << "saving array output " << std::endl;
+            auto bytes = torch::jit::pickle_save(ndarray_heat_map_full);
+            std::ofstream fout("/home/nvidia/pose.zip", std::ios::out | std::ios::binary);
+            fout.write(bytes.data(), bytes.size());
+            fout.close();
 
             //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L172
             //heatmaps_reshaped = batch_heatmaps.reshape((batch_size, num_joints, -1))
-            // 
+            //  
             // pytorch view vs. reshape; use of auto?
             auto ndarray_heat_map = ndarray_heat_map_full.view({17, 3072});
             //std::vector<int64_t> heatsize = ndarray_heat_map.sizes();
