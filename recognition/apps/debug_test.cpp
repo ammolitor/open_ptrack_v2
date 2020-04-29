@@ -582,7 +582,15 @@ class PoseFromConfig{
                   int_upscaled_ymax = img_height - 1;
                   upscaled_ymax = img_height - 1.0;
                 }
-
+                std::cout << "post_upscaled_xmin: " << upscaled_xmin << std::endl;
+                std::cout << "post_upscaled_ymin: " << upscaled_ymin << std::endl;
+                std::cout << "post_upscaled_xmax: " << upscaled_xmax << std::endl;
+                std::cout << "post_upscaled_ymax: " << upscaled_ymax << std::endl;
+                std::cout << "post_int_upscaled_xmin: " << int_upscaled_xmin << std::endl;
+                std::cout << "post_int_upscaled_ymin: " << int_upscaled_ymin << std::endl;
+                std::cout << "post_int_upscaled_xmax: " << int_upscaled_xmax << std::endl;
+                std::cout << "post_int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
+                
                 // get upscaled bounding box and extract image-patch/mask
                 cv::Rect roi(int_upscaled_xmin, int_upscaled_ymin, int_upscaled_xmax-int_upscaled_xmin, int_upscaled_ymax-int_upscaled_ymin);
                 std::cout << "created rect created" << std::endl;
