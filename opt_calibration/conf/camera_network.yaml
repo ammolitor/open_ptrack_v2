@@ -11,11 +11,14 @@ network:
         serial: 011208244647
         people_detector: hog
       - type: kinect2
+        id: "kinect_r"
+        serial: 040913433847
+        people_detector: hog
   - pc: "xps8930-01"
     sensors:
       - type: kinect2
-        id: "kinect_r"
-        serial: 040913433847
+        id: "kinect_f"
+        serial: "177336134347"
         people_detector: hog
 
 # Checkerboard parameters
