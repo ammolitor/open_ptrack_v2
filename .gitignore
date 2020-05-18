@@ -5,6 +5,10 @@
 *.mp4
 *.bag
 *.avi
+.idea/
+*.iml
+venv/
+cmake-build-debug/
 
 # Emacs temp files
 *~
