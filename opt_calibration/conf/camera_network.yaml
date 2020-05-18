@@ -4,21 +4,21 @@ enable_object: false
 
 # Camera network parameters
 network:
-  - pc: "xps8930-02"
-    sensors:
-      - type: kinect2
-        id: "kinect_l"
-        serial: 011208244647
-        people_detector: hog
-      - type: kinect2
-        id: "kinect_r"
-        serial: 040913433847
-        people_detector: hog
   - pc: "xps8930-01"
     sensors:
-      - type: kinect2
-        id: "kinect_f"
-        serial: "177336134347"
+      - type: realsense
+        id: "realsense_l"
+        serial: "919122071456"
+        people_detector: hog
+      - type: realsense
+        id: "realsense_r"
+        serial: "919122070521"
+        people_detector: hog
+  - pc: "xps8930-02"
+    sensors:
+      - type: realsense
+        id: "realsense_f"
+        serial: "919122071628"
         people_detector: hog
 
 # Checkerboard parameters
@@ -27,4 +27,3 @@ checkerboard:
   cols: 7
   cell_width: 0.10
   cell_height: 0.10
-
