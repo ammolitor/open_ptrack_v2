@@ -2,7 +2,7 @@
 ## Ground estimation ##
 #######################
 # Ground estimation mode - 0:manual, 1:semi-auto, 2:auto with user validation, 3:fully automatic (default 0) 
-ground_estimation_mode: 0
+ground_estimation_mode: 3
 # Flag enabling manual ground selection via ssh:
 remote_ground_selection: true #false
 # Flag stating if the ground should be read from file, if present:
@@ -26,13 +26,13 @@ background_seconds: 3.0
 ## Ground based people detection parameters ##
 ##############################################
 # Minimum detection confidence:
-ground_based_people_detection_min_confidence: -5.0 #-1.75
+ground_based_people_detection_min_confidence: -2.25
 # Minimum person height:
-minimum_person_height: 0.6
+minimum_person_height: 1.0
 # Maximum person height:
 maximum_person_height: 2.3
 # Max depth range:
-max_distance: 10.0 
+max_distance: 10.0
 # Point cloud downsampling factor:
 sampling_factor: 4
 # Flag stating if classifiers based on RGB image should be used or not:
@@ -42,7 +42,7 @@ minimum_luminance: 0
 # If true, sensor tilt angle wrt ground plane is compensated to improve people detection:
 sensor_tilt_compensation: true  
 # Minimum distance between two persons:
-heads_minimum_distance: 0.3
+heads_minimum_distance: 0.015
 # Voxel size used to downsample the point cloud (lower: detection slower but more precise; higher: detection faster but less precise):
 voxel_size: 0.06
 # Denoising flag. If true, a statistical filter is applied to the point cloud to remove noise:
@@ -51,3 +51,4 @@ apply_denoising: true
 mean_k_denoising: 5
 # Standard deviation for denoising (the lower it is, the stronger is the filtering):
 std_dev_denoising: 0.3
+
