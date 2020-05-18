@@ -35,7 +35,7 @@
 #
 # Author: Matteo Munaro [matteo.munaro@dei.unipd.it]
 #         Filippo Basso [filippo.basso@dei.unipd.it]
-#	  Marco Carraro [carraromarco89@gmail.com]
+#         Marco Carraro [carraromarco89@gmail.com]
 #         Chandler Brown
 #
 ######################################################################
@@ -343,12 +343,12 @@ class Listener :
       file.write('          </include>\n')
       file.write('      </group>\n')
       file.write('      <group unless="$(arg munaro_detection_enabled)" >\n')
-      file.write('  	    <include file="$(find yolo_detector)/launch/detector_yolo_kinect.launch">\n')
+      file.write('          <include file="$(find yolo_detector)/launch/detector_yolo_kinect.launch">\n')
       if request.id_num != '':
-        file.write('    	<arg name="sensor_id"               value="$(arg sensor_id)" />\n')
-      file.write('    	        <arg name="sensor_name"             value="$(arg sensor_name)" />\n')
-      file.write('    	        <arg name="standalone"              value="false" />\n')
-      file.write('  	    </include>\n')
+        file.write('        <arg name="sensor_id"               value="$(arg sensor_id)" />\n')
+      file.write('              <arg name="sensor_name"             value="$(arg sensor_name)" />\n')
+      file.write('              <arg name="standalone"              value="false" />\n')
+      file.write('          </include>\n')
       file.write('      </group>\n')
       file.write('  </group>\n\n')
 
@@ -441,8 +441,8 @@ class Listener :
       if request.serial != '':
         file.write('  <arg name="sensor_id"   default="' + request.serial + '" />\n')
       file.write('  <arg name="sensor_name" default="' + request.id + '" />\n\n')
-      file.write('  <arg name="width" default="640" />\n')
-      file.write('  <arg name="height" default="480" />\n\n')
+      file.write('  <arg name="width" default="1280" />\n')
+      file.write('  <arg name="height" default="720" />\n\n')
       file.write('  <!-- true  = Munaro Based OPT Detection -->\n')
       file.write('  <!-- false = YOLO Based Detection (Must Have YOLO installed to use)-->\n')
       if request.people_detector_type == OPTSensorRequest.PEOPLE_DETECTOR_YOLO_BASED:
@@ -478,12 +478,12 @@ class Listener :
       file.write('          </include>\n')
       file.write('      </group>\n')
       file.write('      <group unless="$(arg munaro_detection_enabled)" >\n')
-      file.write('  	    <include file="$(find yolo_detector)/launch/detect_yolo_object_realsense_network.launch">\n')
+      file.write('          <include file="$(find yolo_detector)/launch/detect_yolo_object_realsense_network.launch">\n')
       if request.id_num != '':
-        file.write('    	<arg name="serial_no"               value="$(arg sensor_id)" />\n')
-      file.write('    	        <arg name="sensor_name"             value="$(arg sensor_name)" />\n')
-      file.write('    	        <arg name="standalone"              value="false" />\n')
-      file.write('  	    </include>\n')
+        file.write('        <arg name="serial_no"               value="$(arg sensor_id)" />\n')
+      file.write('              <arg name="sensor_name"             value="$(arg sensor_name)" />\n')
+      file.write('              <arg name="standalone"              value="false" />\n')
+      file.write('          </include>\n')
       file.write('      </group>\n')
       file.write('  </group>\n\n')
 
