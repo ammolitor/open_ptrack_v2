@@ -1,5 +1,5 @@
 {
-  "deploy_lib_path":        "/data/object_detector/mnet.1.aarch64.cuda.hand.so",
+  "deploy_lib_path":        "/data/object_detector/mnet.1.aarch64.cuda.hands.so",
   "deploy_graph_path":      "/data/object_detector/mnet.1.aarch64.cuda.hands.json",
   "deploy_param_path":      "/data/object_detector/mnet.1.aarch64.cuda.hands.params",
   "device_id":              0,
