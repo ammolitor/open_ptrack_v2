@@ -17,6 +17,8 @@
 #include <random>
 #include <torch/torch.h>
 #include <cstdio>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 double sum_score, sum_fps;
 

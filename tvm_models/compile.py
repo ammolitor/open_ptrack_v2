@@ -55,6 +55,7 @@ def tune_tasks(tasks,
     #        except Exception:
     #            pass
     # create tmp log file
+    
     tmp_log_file = log_filename  + ".tmp"
     tmp_task_log_file = log_filename + '.task.tmp'
     if os.path.exists(tmp_log_file):
