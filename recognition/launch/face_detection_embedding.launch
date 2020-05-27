@@ -9,7 +9,6 @@
 
   <group if="$(arg world_transform)" >
     <include file="$(find opt_calibration)/launch/opt_calibration_results.launch"/>
-    </include>
   </group>
 
   <!-- Launch ground based people detection node -->
