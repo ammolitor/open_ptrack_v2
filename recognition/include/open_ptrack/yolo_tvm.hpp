@@ -87,6 +87,23 @@ struct yoloresults{
     int num;
 };
 
+// adjBox
+struct pose_result{
+    int id;
+    float score;
+    float xmin;
+    float ymin;
+    float xmax;
+    float ymax;
+    // actually point2d, with z being the confidence
+    std::vector<cv::Point3f> points;
+};
+// boxInfo
+struct pose_results{
+    pose_result* boxes;
+    int num;
+};
+
 
 class YoloTVMGPU256{
     private:
