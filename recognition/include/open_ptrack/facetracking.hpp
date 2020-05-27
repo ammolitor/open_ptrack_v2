@@ -45,6 +45,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 //#include <opencv2/dnn/dnn.hpp>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 using namespace std;
 using namespace cv;
 
@@ -333,7 +335,7 @@ public:
         height = model_config["height"];
         gpu = model_config["gpu"];
         total_input = 3 * width * height;
-        embedding_dim = model_config['embedding_dim'];
+        embedding_dim = model_config["embedding_dim"];
 
         //int64_t in_shape[4] = {1, 3, height, width};
         //int64_t in_shape[4] = {1, 3, height, width};

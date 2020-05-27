@@ -294,7 +294,7 @@ class FaceDetectionNode {
       ////////////////embedder_model_folder_path = "/home/nvidia/catkin_ws/src/open_ptrak/recognition/data/embedding_folder";
     
       // initialize detector and embedder
-      face_detector.reset(new RetinaFaceDeployFromConfig("/cfg/face_detector.json", "recognition")));
+      face_detector.reset(new RetinaFaceDeployFromConfig("/cfg/face_detector.json", "recognition"));
       face_embedder.reset(new FaceEmbedderGPUFromConfig("/cfg/face_embedder.json", "recognition"));
       sensor_name = sensor_string;
     }
