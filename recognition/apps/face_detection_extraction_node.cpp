@@ -611,9 +611,8 @@ class FaceDetectionNode {
     embedder_pub.publish(feature_vector_array_msg);
     embedder_pub_local.publish(feature_vector_array_msg);
     detector_pub.publish(detection_array_msg);
-    detector_pub_local.publish(detection_array_msg);
-    
-
+    detector_pub_local.publish(detection_array_msg);  
+    }
 
     // TODO - remove all callbacks
     /**
