@@ -1519,12 +1519,12 @@ int main(int argc, char** argv) {
   // NOTE: using json in main() is the way to persist across callbacks...
 
   std::string sensor_name;
-  json master_config;
-  std::string package_path = ros::package::getPath("recognition");
-  std::string master_hard_coded_path = package_path + "/cfg/master.json";
-  std::ifstream json_read(master_hard_coded_path);
-  json_read >> master_config;
-  sensor_name = master_config["sensor_name"]; //the path to the detector model file
+  //json master_config;
+  //std::string package_path = ros::package::getPath("recognition");
+  //std::string master_hard_coded_path = package_path + "/cfg/master.json";
+  //std::ifstream json_read(master_hard_coded_path);
+  //json_read >> master_config;
+  //sensor_name = master_config["sensor_name"]; //the path to the detector model file
 
   json zone_json;
   std::string area_package_path = ros::package::getPath("recognition");
@@ -1535,7 +1535,8 @@ int main(int argc, char** argv) {
   std::cout << "--- tvm_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_detection_node");
   // something is off here... with the private namespace
-  ros::NodeHandle nh;
+  ros::NodeHandle nh("~");
+  nh.param("sensor_name", sensor_name, std::string("/d435"));
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   TVMPoseNode node(nh, sensor_name, zone_json);

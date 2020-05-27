@@ -391,6 +391,8 @@ class FaceDetectionNode {
                     const CameraInfo::ConstPtr& rgb_info_msg,
                     const opt_msgs::DetectionArrayConstPtr& detections_msg) {
       printf("running algorithm callback");
+      
+      // is that needed??
       tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
       tf_listener.lookupTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ir2rgb_transform);
       tf_listener.waitForTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
