@@ -232,7 +232,7 @@ if __name__ == '__main__':
     PARSER.add_argument('--target', type=str, default='cuda', help='Deploy Target')
     PARSER.add_argument('--board', type=str, default='tx2', help='board')
     PARSER.add_argument('--dtype', type=str, default='float32', help='Data Type')
-    PARSER.add_argument('--tune', type=bool, default=False, help='whether to tune the models for the current arch')
+    PARSER.add_argument('--tune', type=int, default=0, help='whether to tune the models for the current arch')
     PARSER.add_argument('--ctx', type=int, default=0, help='TVM')
     PARSER.add_argument('--cc', type=str, default=None, help='if on x86, use "aarch64-linux-gnu-g++" to compile for aarch64 - might not work')
     PARSER.add_argument('--n_trial', type=int, default=2000, help='TVM')
@@ -242,6 +242,9 @@ if __name__ == '__main__':
 
     if ARGS.network not in AVAILABLE_MODELS:
         raise Exception("{0} not in list of acceptable models: {1}".format(ARGS.network, list(AVAILABLE_MODELS)))
+    
+    if ARGS.ctx!=0:
+        os.environ['CUDA_VISIBLE_DEVICES'] = str(ARGS.ctx)
 
     print(ARGS)
     # maybe input your own board here???
@@ -320,6 +323,7 @@ if __name__ == '__main__':
     }
 
     # compi;e model
+    #print(ARGS.tune)
     if not ARGS.tune:
         MODEL_CONFIG[ARGS.network]['compile'](True)
     else:
