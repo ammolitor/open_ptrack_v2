@@ -1,7 +1,7 @@
 import sys
 import os
 import argparse
-
+import tempfile
 
 import mxnet as mx
 from tvm import relay
@@ -13,6 +13,16 @@ from tvm.contrib import graph_runtime
 from tvm.autotvm.tuner import XGBTuner, GATuner, RandomTuner, GridSearchTuner
 from tvm import autotvm
 
+def prune_old_tasks(tasks, log_file):
+    if os.path.isfile(log_file):
+        new_tasks = []
+        history = autotvm.record.ApplyHistoryBest(log_file)
+        for task in tasks:
+            if history._query_inside(task.target, task.workload) is None:
+                new_tasks.append(task)
+        return new_tasks
+    else:
+        return tasks
 
 # You can skip the implementation of this function for this tutorial. 
 def tune_tasks(tasks,
@@ -34,25 +44,25 @@ def tune_tasks(tasks,
                                           tasks[i].target, tasks[i].target_host, 'int8')
                 tasks[i] = tsk
 
-    if try_winograd:
-        for i in range(len(tasks)):
-            try:  # try winograd template
-                tsk = autotvm.task.create(tasks[i].name, tasks[i].args,
-                                          tasks[i].target, tasks[i].target_host, 'winograd')
-                input_channel = tsk.workload[1][1]
-                if input_channel >= 64:
-                    tasks[i] = tsk
-            except Exception:
-                pass
+    #if try_winograd:
+    #    for i in range(len(tasks)):
+    #        try:  # try winograd template
+    #            tsk = autotvm.task.create(tasks[i].name, tasks[i].args,
+    #                                      tasks[i].target, tasks[i].target_host, 'winograd')
+    #            input_channel = tsk.workload[1][1]
+    #            if input_channel >= 64:
+    #                tasks[i] = tsk
+    #        except Exception:
+    #            pass
     # create tmp log file
     tmp_log_file = log_filename  + ".tmp"
+    tmp_task_log_file = log_filename + '.task.tmp'
     if os.path.exists(tmp_log_file):
         os.remove(tmp_log_file)
-    #with open(tmp_log_file,'w') as f:
-    #    f.write('')
-    #with open(log_filename, 'w') as f:
-    #    f.write('')
+
     for i, tsk in enumerate(reversed(tasks)):
+        #if i == 0:
+        #    continue
         prefix = "[Task %2d/%2d] " % (i + 1, len(tasks))
         # create tuner
         if tuner == 'xgb' or tuner == 'xgb-rank':
@@ -65,20 +75,37 @@ def tune_tasks(tasks,
             tuner_obj = GridSearchTuner(tsk)
         else:
             raise ValueError("Invalid tuner: " + tuner)
-        if use_transfer_learning:
-            if os.path.isfile(tmp_log_file):
+        if use_transfer_learning and os.path.isfile(tmp_log_file):
+            try:
+                # https://github.com/apache/incubator-tvm/blob/master/python/tvm/autotvm/tuner/xgboost_cost_model.py
+                # https://github.com/apache/incubator-tvm/blob/master/python/tvm/autotvm/tuner/xgboost_cost_model.py#L222
+                # when inp.task.name != self.task.name
+                # nothing is appended to 'data' var
+                # this errors out, so we'll just have to avoid it here
                 tuner_obj.load_history(autotvm.record.load_from_file(tmp_log_file))
-        # do tuning
-        tuner_obj.tune(n_trial=min(n_trial, len(tsk.config_space)),
-                       early_stopping=early_stopping,
-                       measure_option=measure_option,
-                       callbacks=[
-                           autotvm.callback.progress_bar(n_trial, prefix=prefix),
-                           autotvm.callback.log_to_file(tmp_log_file)])
+            except:
+                pass
+        
+
+        with tempfile.NamedTemporaryFile() as tmp_task_log_file:
+            # do tuning
+            tuner_obj.tune(n_trial=min(n_trial, len(tsk.config_space)),
+                        early_stopping=early_stopping,
+                        measure_option=measure_option,
+                        callbacks=[
+                            autotvm.callback.progress_bar(n_trial, prefix=prefix),
+                            autotvm.callback.log_to_file(tmp_task_log_file.name)])
+
+            with open(tmp_log_file, 'a') as tmp_log_f:
+                tmp_log_f.write(tmp_task_log_file.read().decode('utf8'))
+                            
     # pick best records to a cache file
     autotvm.record.pick_best(tmp_log_file, log_filename)
     os.remove(tmp_log_file)
 
+
+# https://discuss.tvm.ai/t/transfer-learning-doesnt-work-tuner-obj-load-history/5328/3
+# https://discuss.tvm.ai/t/solved-can-we-resume-an-autotuning-session/3329/6
 def tune_and_evaluate(tuning_option, target_host, cc=None):
     # extract workloads from relay program
     print("Extract tasks...")
