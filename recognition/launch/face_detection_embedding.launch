@@ -4,8 +4,14 @@
   <!-- Camera parameters -->
   <arg name="sensor_id"               default="" />
   <arg name="sensor_name"             default="d415" />
-  <arg name="detections_topic"        default="/detector/detections" />		    
- 		  
+  <arg name="detections_topic"        default="/detector/detections" />		 
+  <arg name="world_transform"         default="false" />   
+
+  <group if="$(arg world_transform)" >
+    <include file="$(find opt_calibration)/launch/opt_calibration_results.launch"/>
+    </include>
+  </group>
+
   <!-- Launch ground based people detection node -->
    <node pkg="recognition" type="face_detection_extraction_node" name="face_detection_extraction_node_$(arg sensor_name)" output="screen" required="true">
 
