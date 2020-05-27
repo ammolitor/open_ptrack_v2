@@ -8,6 +8,11 @@
 .idea/
 *.iml
 venv/
-
+*__pycach__*
+*.pkl_memoize_py3*
+*.tmp*
+*tvm_models/*.json
+*tvm_models/*.params
+*tvm_models/*.so
 # Emacs temp files
 *~

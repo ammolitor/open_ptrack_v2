@@ -92,14 +92,16 @@ class TVMHandDetectionNode {
   private:
     ros::NodeHandle node_;
     //std::unique_ptr<YoloTVMGPU256> tvm_object_detector;
-    std::unique_ptr<YoloTVMGPU320> tvm_object_detector;
+    //std::unique_ptr<YoloTVMGPU320> tvm_object_detector;
+    std::unique_ptr<YoloTVMFromConfig> tvm_object_detector;
+
     // TF listener
     tf::TransformListener tf_listener;
     // only need this if I need to debug
     //image_transport::ImageTransport it;
     
     // ROS
-    dynamic_reconfigure::Server<recognition::HandDetectionConfig> cfg_server;
+    //dynamic_reconfigure::Server<recognition::HandDetectionConfig> cfg_server;
     ros::ServiceServer camera_info_matrix_server;
 
     // Publishers
@@ -168,11 +170,11 @@ class TVMHandDetectionNode {
         approximate_sync_->registerCallback(boost::bind(&TVMHandDetectionNode::callback, this, _1, _2));
 
         // create callback config 
-        cfg_server.setCallback(boost::bind(&TVMHandDetectionNode::cfg_callback, this, _1, _2));      
+        //cfg_server.setCallback(boost::bind(&TVMHandDetectionNode::cfg_callback, this, _1, _2));      
 
         // create object-detector pointer
         //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
-        tvm_object_detector.reset(new YoloTVMGPU320(model_folder_path));
+        tvm_object_detector.reset(new YoloTVMFromConfig("/cfg/hand_detector.json", "recognition"));
         sensor_name = sensor_string;
       }
 
@@ -341,7 +343,7 @@ class TVMHandDetectionNode {
     free(output);
     }
 
-    // THIS IS INSIDE THE DETECTOR
+    // // TODO - remove all callbacks
     /**
      * @brief callback for dynamic reconfigure
      * @param config  configure parameters

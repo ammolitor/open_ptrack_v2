@@ -191,16 +191,18 @@ std_msgs::Float32MultiArray init_empty_multiarray(){
 class FaceDetectionNode {
   private:
     ros::NodeHandle node_;
-    std::unique_ptr<RetinaFaceDeploy> face_detector;
-    std::unique_ptr<FR_MFN_Deploy> face_embedder;
+    //std::unique_ptr<RetinaFaceDeploy> face_detector;
+    //std::unique_ptr<FR_MFN_Deploy> face_embedder;
+    std::unique_ptr<RetinaFaceDeployFromConfig> face_detector;
+    std::unique_ptr<FaceEmbedderGPUFromConfig> face_embedder;
     
     //image specific
     tf::TransformListener tf_listener;
     //image_transport::ImageTransport it;
     
     // ROS SERVERS
-    dynamic_reconfigure::Server<recognition::FaceDetectionConfig> detector_cfg_server;
-    dynamic_reconfigure::Server<recognition::FaceEmbeddingConfig> embedding_cfg_server;
+    //dynamic_reconfigure::Server<recognition::FaceDetectionConfig> detector_cfg_server;
+    //dynamic_reconfigure::Server<recognition::FaceEmbeddingConfig> embedding_cfg_server;
 
     // Publishers
     ros::Publisher detector_pub;
@@ -287,13 +289,13 @@ class FaceDetectionNode {
       approximate_sync_->registerCallback(boost::bind(&FaceDetectionNode::callback, this, _1, _2, _3));
 
       // face_detector and embedder callbacks
-      detector_cfg_server.setCallback(boost::bind(&FaceDetectionNode::detector_cfg_callback, this, _1, _2));
-      embedding_cfg_server.setCallback(boost::bind(&FaceDetectionNode::embedder_cfg_callback, this, _1, _2));
-      //embedder_model_folder_path = "/home/nvidia/catkin_ws/src/open_ptrak/recognition/data/embedding_folder";
+      //detector_cfg_server.setCallback(boost::bind(&FaceDetectionNode::detector_cfg_callback, this, _1, _2));
+      //embedding_cfg_server.setCallback(boost::bind(&FaceDetectionNode::embedder_cfg_callback, this, _1, _2));
+      ////////////////embedder_model_folder_path = "/home/nvidia/catkin_ws/src/open_ptrak/recognition/data/embedding_folder";
     
       // initialize detector and embedder
-      face_detector.reset(new RetinaFaceDeploy(detector_model_folder_path));
-      face_embedder.reset(new FR_MFN_Deploy(embedder_model_folder_path));
+      face_detector.reset(new RetinaFaceDeployFromConfig("/cfg/face_detector.json", "recognition")));
+      face_embedder.reset(new FaceEmbedderGPUFromConfig("/cfg/face_embedder.json", "recognition"));
       sensor_name = sensor_string;
     }
 
@@ -610,8 +612,10 @@ class FaceDetectionNode {
     embedder_pub_local.publish(feature_vector_array_msg);
     detector_pub.publish(detection_array_msg);
     detector_pub_local.publish(detection_array_msg);
-    }
+    
 
+
+    // TODO - remove all callbacks
     /**
      * @brief callback for dynamic reconfigure
      * @param config  configure parameters

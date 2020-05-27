@@ -1,0 +1,9 @@
+{
+  "deploy_lib_path":        "/data/face_detector/mnet.25.aarch64.gpu.so",
+  "deploy_graph_path":      "/data/face_detector/mnet.25.aarch64.gpu.json",
+  "deploy_param_path":      "/data/face_detector/mnet.25.aarch64.gpu.params",
+  "device_id":              0,
+  "width" :                 640,
+  "height" :                480,
+  "gpu" :                   true
+}

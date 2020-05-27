@@ -91,8 +91,7 @@ float calc_median_of_object(const cv::Mat& Input){
 class TVMDetectionNode {
   private:
     ros::NodeHandle node_;
-    //std::unique_ptr<YoloTVMGPU256> tvm_object_detector;
-    std::unique_ptr<YoloTVMGPU> tvm_object_detector;
+    std::unique_ptr<YoloTVMFromConfig> tvm_object_detector;
     // TF listener
     tf::TransformListener tf_listener;
     // only need this if I need to debug
@@ -149,8 +148,6 @@ class TVMDetectionNode {
     int n_zones;
     // use this for tests
     bool json_found = false;
-    // default to 10.0
-    float max_capable_depth = 10.0; // 6.25 is what the default is;
 
     /**
      * @brief constructor
@@ -162,14 +159,6 @@ class TVMDetectionNode {
         
         try
         {
-          //json zone_json;
-          //std::string area_package_path = ros::package::getPath("recognition");
-          //std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
-          //std::ifstream area_json_read(area_hard_coded_path);
-          //area_json_read >> zone_json;
-          //double test;
-          //std::cout << "zone_json test: " << zone_json["0"]["d415"]["min"]["d415"]["x"] << std::endl;
-          
           // get the number of zones to scan.
           json master_config;
           std::string master_package_path = ros::package::getPath("recognition");
@@ -177,7 +166,6 @@ class TVMDetectionNode {
           std::ifstream master_json_read(master_hard_coded_path);
           master_json_read >> master_config;
           n_zones = master_config["n_zones"]; //the path to the detector model file
-          max_capable_depth = master_config["max_capable_depth"];
           std::cout << "n_zones: " << n_zones << std::endl;
           json_found = true;
         }
@@ -210,7 +198,11 @@ class TVMDetectionNode {
 
         // create object-detector pointer
         //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
-        tvm_object_detector.reset(new YoloTVMGPU(model_folder_path));
+        //tvm_object_detector.reset(new YoloTVMGPU(model_folder_path));
+        // maybe have this in
+        // arg one HAS to have / in front of path
+        // TODO add that to debugger
+        tvm_object_detector.reset(new YoloTVMFromConfig("/cfg/model.json", "recognition"));
         sensor_name = sensor_string;
       }
 
@@ -300,6 +292,7 @@ class TVMDetectionNode {
       width =  static_cast<float>(image_size.width);
       cv_image_clone = cv_image.clone();
 
+      std::cout << "running yolo" << std::endl;
       // forward inference of object detector
       begin = ros::Time::now();
       output = tvm_object_detector->forward_full(cv_image, .3);
@@ -333,25 +326,14 @@ class TVMDetectionNode {
           int new_width = static_cast<int>(2 * (median_factor * (median_x - xmin)));
           int new_height = static_cast<int>(2 * (median_factor * (median_y - ymin)));
         
-          float median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
-
           // TODO we'll have to vet this strategy but for now, we're trying it
           // this will get the median depth of the object at the center of the object,
           // however, we're moving towards the median depth as where the box hits the ground/
           // where the feet are..
+          //float median_depth = cv_depth_image.at<float>(median_y, median_x) / 1000.0f;
+          float median_depth = cv_depth_image.at<float>(new_y, median_x) / mm_factor;
 
-          //this is median_depth, but at the very bottom of the bounding box rather
-          // than the center
-          //float median_depth = cv_depth_image.at<float>(new_y, median_x) / mm_factor;
-
-          // 6.25 meters is where kinects must start to be good or bad...
-          //if (median_depth <= 0 || median_depth > 6.25) {
-          //  std::cout << "median_depth " << median_depth << " rejecting" << std::endl;
-          //  continue;
-          //  }
-
-          // with realsense, the max distance is 10
-          if (median_depth <= 0 || median_depth > max_capable_depth) {
+          if (median_depth <= 0 || median_depth > 6.25) {
             std::cout << "median_depth " << median_depth << " rejecting" << std::endl;
             continue;
             }			

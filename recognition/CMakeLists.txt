@@ -282,3 +282,22 @@ target_compile_definitions(debug_test PUBLIC TVM_CUDA_RUNTIME=1)
 target_compile_definitions(debug_test PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+###############################################################################
+add_executable(tvm_pose_recognition_node apps/tvm_pose_recognition_node.cpp include/open_ptrack/yolo_tvm.hpp)
+target_link_libraries(tvm_pose_recognition_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
+                                          ${catkin_LIBRARIES} 
+                                          ${LINKER_LIBS}
+                                          ${CUDA_CUDA_LIBRARY}
+                                          ${CUDA_CUDART_LIBRARY}
+                                          ${CUDA_CURAND_LIBRARY}
+                                          ${CUDA_CUDNN_LIBRARY}
+                                          ${TVM_RUNTIME_LINKER_LIBS}
+                                          ${TORCH_LIBRARIES})
+
+add_dependencies(tvm_pose_recognition_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+target_include_directories(tvm_pose_recognition_node PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(tvm_pose_recognition_node PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(tvm_pose_recognition_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
