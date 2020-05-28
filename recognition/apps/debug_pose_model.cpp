@@ -1535,8 +1535,9 @@ int main(int argc, char** argv) {
   std::cout << "--- tvm_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_detection_node");
   // something is off here... with the private namespace
-  ros::NodeHandle nh("~");
-  nh.param("sensor_name", sensor_name, std::string("/d435"));
+  ros::NodeHandle pnh("~");
+  ros::NodeHandle nh;
+  pnh.param("sensor_name", sensor_name, std::string("d435"));
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   TVMPoseNode node(nh, sensor_name, zone_json);
