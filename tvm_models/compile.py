@@ -345,14 +345,16 @@ if __name__ == '__main__':
         TARGET_ARCH = DEVICE_CUDA_ARCH[ARGS.board]['arch']
         set_cuda_target_arch(TARGET_ARCH)
         CUDA = True
+        suffix = 'gpu'
     else:
         CUDA = False
+        suffix = 'cpu'
 
     MODEL_CONFIG = {
         'object_detector':
             {
                 'shape': (1, 3, 512, 512),
-                'output_name': 'mnet1.0_yolo_{}_cuda'.format(ARCH),
+                'output_name': 'mnet1.0.yolo.{}.{}'.format(ARCH, suffix),
                 'dtype': 'float32',
                 'cuda': CUDA,
                 'compile': compile_object_detector,
@@ -361,7 +363,7 @@ if __name__ == '__main__':
         'simple_pose':
             {
                 'shape': (1, 3, 256, 192),
-                'output_name': 'pose_{}_cuda'.format(ARCH),
+                'output_name': 'pose.{}.{}'.format(ARCH, suffix),
                 'dtype': 'float32',
                 'cuda': CUDA,
                 'compile': compile_simple_pose,
@@ -370,7 +372,7 @@ if __name__ == '__main__':
         'face_detector':
             {
                 'shape': (1, 3, 480, 640),
-                'output_name': 'mnet.25.{}.gpu'.format(ARCH),
+                'output_name': 'mnet.25.{}.{}'.format(ARCH, suffix),
                 'dtype': 'float32',
                 'cuda': CUDA,
                 'compile': compile_face_detector,
@@ -379,7 +381,7 @@ if __name__ == '__main__':
         'face_embedder':
             {
                 'shape': (1, 3, 112, 112),
-                'output_name': 'mnet.facerec.{}.gpu'.format(ARCH),
+                'output_name': 'mnet.facerec.{}.{}'.format(ARCH, suffix),
                 'dtype': 'float32',
                 'cuda': CUDA,
                 'compile': compile_face_embedder,
@@ -388,7 +390,7 @@ if __name__ == '__main__':
         'hand_detector' :
             {
                 'shape': (1, 3, 320, 320),
-                'output_name': 'mnet.1.{}.hands.cuda'.format(ARCH),
+                'output_name': 'mnet.1.{}.hands.{}'.format(ARCH, suffix),
                 'dtype': 'float32',
                 'cuda': CUDA,
                 'compile': compile_hand_detector,
