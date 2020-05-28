@@ -2,7 +2,9 @@ import sys
 import os
 import argparse
 import tempfile
+from time import time
 
+import numpy as np
 import mxnet as mx
 from tvm import relay
 from gluoncv import model_zoo, data, utils
@@ -55,7 +57,7 @@ def tune_tasks(tasks,
     #        except Exception:
     #            pass
     # create tmp log file
-    
+
     tmp_log_file = log_filename  + ".tmp"
     tmp_task_log_file = log_filename + '.task.tmp'
     if os.path.exists(tmp_log_file):
@@ -185,6 +187,8 @@ def get_basic_mxnet_network(name, input_shape, dtype):
 def compile_hand_detector(use_compiler=False):
     print("compiling hand detector")
     target = 'cuda -libs=cudnn,cublas'
+    if not CUDA:
+        target = 'llvm'
     if ARCH == 'aarch64':
         target += ' -model={}'.format(ARGS.board)
     block = model_zoo.get_model('yolo3_mobilenet1.0_custom', classes=['hands'])
@@ -198,6 +202,8 @@ def compile_hand_detector(use_compiler=False):
 def compile_object_detector(use_compiler=False):
     print("compiling object detector")
     target = 'cuda -libs=cudnn,cublas'
+    if not CUDA:
+        target = 'llvm'
     if ARCH == 'aarch64':
         target += ' -model={}'.format(ARGS.board)
     block = model_zoo.get_model('yolo3_mobilenet1.0_coco', pretrained=True)
@@ -210,6 +216,8 @@ def compile_object_detector(use_compiler=False):
 def compile_simple_pose(use_compiler=False):
     print("compiling pose detector")
     target = 'cuda -libs=cudnn,cublas'
+    if not CUDA:
+        target = 'llvm'
     if ARCH == 'aarch64':
         target += ' -model={}'.format(ARGS.board)
     block = model_zoo.get_model('simple_pose_resnet18_v1b', pretrained=True)
@@ -222,6 +230,8 @@ def compile_simple_pose(use_compiler=False):
 def compile_face_detector(use_compiler=False):
     print("compiling face detector")
     target = 'cuda -libs=cudnn,cublas'
+    if not CUDA:
+        target = 'llvm'
     if ARCH == 'aarch64':
         target += ' -model={}'.format(ARGS.board)
     sym, arg_params, aux_params = mx.model.load_checkpoint('models/mnet.25/mnet.25', 0)
@@ -239,6 +249,8 @@ def compile_face_detector(use_compiler=False):
 def compile_face_embedder(use_compiler=False):
     print("compiling face_embedder")
     target = 'cuda -libs=cudnn,cublas'
+    if not CUDA:
+        target = 'llvm'
     if ARCH == 'aarch64':
         target += ' -model={}'.format(ARGS.board)
     sym, arg_params, aux_params = mx.model.load_checkpoint('models/arcface_facerec', 0)
@@ -253,6 +265,34 @@ def compile_face_embedder(use_compiler=False):
         tvm_compiler('face_embedder', relay_sym, relay_params, target)
     return relay_sym, relay_params, target
 
+def evaluate_model(config, loaded_json, loaded_lib, loaded_params, ctx):
+    module = graph_runtime.create(loaded_json, loaded_lib, ctx)
+    module.load_params(loaded_params)
+    print('[*] Graph RunTime is Created')
+    module.set_input('data', tvm.nd.array(np.random.randn(*config['shape']).astype(config['dtype'])))
+    print('[*] Run Test')
+    avg = []
+    for i in range(100):
+        module.set_input('data', tvm.nd.array(np.random.randn(*config['shape']).astype(config['dtype'])))
+        start = time()
+        module.run()
+        ctx.sync()
+        e = time() - start
+        print('Time Cost : ', e)
+        # print('anchor sum : ', anchor_boxes.sum())
+        print('=========================')
+        avg.append(e)
+
+    print('[!] Evaluation Done')
+    print('[!] First pass time: {}'.format(avg[0]))
+    print('[!] Average time: {}'.format(np.mean(avg[1:])))
+
+def load_raw_model(path_base):
+    loaded_json = open("{}.json".format(path_base)).read()
+    loaded_lib = tvm.runtime.load_module("{}.so".format(path_base))
+    loaded_params = bytearray(open("{}.params".format(path_base), "rb").read())
+    return loaded_json, loaded_lib, loaded_params
+
 if __name__ == '__main__':
     AVAILABLE_MODELS = {'object_detector', 'simple_pose', 'face_detector', 'face_embedder', 'hand_detector'}
     PARSER = argparse.ArgumentParser(description='')
@@ -266,6 +306,8 @@ if __name__ == '__main__':
     PARSER.add_argument('--n_trial', type=int, default=2000, help='TVM')
     PARSER.add_argument('--quantization', type=bool, default=False, help='TVM')
     PARSER.add_argument('--custom_savename', type=str, default=None, help='TVM')
+    PARSER.add_argument('--profile_speed', type=int, default=0, help='TVM')
+    PARSER.add_argument('--profile_speed_name', type=str, default=None, help='TVM')
     ARGS = PARSER.parse_args()
 
     if ARGS.network not in AVAILABLE_MODELS:
@@ -299,8 +341,12 @@ if __name__ == '__main__':
     else:
         ARCH = 'aarch64'
 
-    TARGET_ARCH = DEVICE_CUDA_ARCH[ARGS.board]['arch']
-    set_cuda_target_arch(TARGET_ARCH)
+    if 'cuda' in ARGS.target:
+        TARGET_ARCH = DEVICE_CUDA_ARCH[ARGS.board]['arch']
+        set_cuda_target_arch(TARGET_ARCH)
+        CUDA = True
+    else:
+        CUDA = False
 
     MODEL_CONFIG = {
         'object_detector':
@@ -308,7 +354,7 @@ if __name__ == '__main__':
                 'shape': (1, 3, 512, 512),
                 'output_name': 'mnet1.0_yolo_{}_cuda'.format(ARCH),
                 'dtype': 'float32',
-                'cuda': True,
+                'cuda': CUDA,
                 'compile': compile_object_detector,
                 'name': 'object_detector',
             },
@@ -317,7 +363,7 @@ if __name__ == '__main__':
                 'shape': (1, 3, 256, 192),
                 'output_name': 'pose_{}_cuda'.format(ARCH),
                 'dtype': 'float32',
-                'cuda': True,
+                'cuda': CUDA,
                 'compile': compile_simple_pose,
                 'name': 'simple_pose',
             },
@@ -326,7 +372,7 @@ if __name__ == '__main__':
                 'shape': (1, 3, 480, 640),
                 'output_name': 'mnet.25.{}.gpu'.format(ARCH),
                 'dtype': 'float32',
-                'cuda': True,
+                'cuda': CUDA,
                 'compile': compile_face_detector,
                 'name': 'face_detector',
             },
@@ -335,7 +381,7 @@ if __name__ == '__main__':
                 'shape': (1, 3, 112, 112),
                 'output_name': 'mnet.facerec.{}.gpu'.format(ARCH),
                 'dtype': 'float32',
-                'cuda': True,
+                'cuda': CUDA,
                 'compile': compile_face_embedder,
                 'name': 'face_embedder',
             },
@@ -344,16 +390,33 @@ if __name__ == '__main__':
                 'shape': (1, 3, 320, 320),
                 'output_name': 'mnet.1.{}.hands.cuda'.format(ARCH),
                 'dtype': 'float32',
-                'cuda': True,
+                'cuda': CUDA,
                 'compile': compile_hand_detector,
                 'name': 'hand_detector',
             }
     }
 
+    if ARGS.profile_speed and ARGS.profile_speed_name:
+        config = MODEL_CONFIG[ARGS.network]
+        loaded_json, loaded_lib, loaded_params = load_raw_model(ARGS.profile_speed_name)
+
+        if CUDA:
+            ctx = tvm.gpu(0)
+        else:
+            ctx = tvm.cpu()
+        evaluate_model(config, loaded_json, loaded_lib, loaded_params, ctx)
+
     # compi;e model
     #print(ARGS.tune)
-    if not ARGS.tune:
+    elif not ARGS.tune:
         MODEL_CONFIG[ARGS.network]['compile'](True)
+        if CUDA:
+            ctx = tvm.gpu(0)
+        else:
+            ctx = tvm.cpu()
+        loaded_json, loaded_lib, loaded_params = load_raw_model(MODEL_CONFIG[ARGS.network]['output_name'])
+        evaluate_model(MODEL_CONFIG[ARGS.network], loaded_json, loaded_lib, loaded_params, ctx)
+
     else:
         TUNING_OPTION = {
             'log_filename': ARGS.network + '.log',

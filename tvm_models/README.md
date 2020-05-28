@@ -81,3 +81,10 @@ to
       "height" :                320,
       "gpu" :                   true
     }
+
+# profile the speed of already built models
+
+### add the filepath base for the currently processed model to the --profile_speed_name command
+### add --profile_speed 1 as well
+
+  python compile.py --network simple_pose --board 1080 --tune 0 --profile_speed 1 --profile_speed_name pose_x86_cuda
