@@ -163,7 +163,7 @@ def tune_and_evaluate(tuning_option, target_host, cc=None):
 
 def tvm_compiler(name, mod, params, target):
     print('[*] Compile To Target {}'.format(target))
-    with relay.build_config(opt_level=2):
+    with relay.build_config(opt_level=ARGS.opt_level):
         graph, lib, params = relay.build(mod, target, params=params)
     
     print(type(graph), type(lib), type(params))
@@ -308,6 +308,7 @@ if __name__ == '__main__':
     PARSER.add_argument('--custom_savename', type=str, default=None, help='TVM')
     PARSER.add_argument('--profile_speed', type=int, default=0, help='TVM')
     PARSER.add_argument('--profile_speed_name', type=str, default=None, help='TVM')
+    PARSER.add_argument('--opt_level', type=int, default=2, help='TVM')
     ARGS = PARSER.parse_args()
 
     if ARGS.network not in AVAILABLE_MODELS:
