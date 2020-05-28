@@ -382,24 +382,26 @@ class TVMHandDetectionNode {
 int main(int argc, char** argv) {
   // read json to get the master config file
   std::string sensor_name;
-  json master_config;
-  std::string package_path = ros::package::getPath("recognition");
-  std::string master_hard_coded_path = package_path + "/cfg/master.json";
-  std::ifstream json_read(master_hard_coded_path);
-  json_read >> master_config;
-  sensor_name = master_config["sensor_name"]; //the path to the detector model file
+  //json master_config;
+  //std::string package_path = ros::package::getPath("recognition");
+  //std::string master_hard_coded_path = package_path + "/cfg/master.json";
+  //std::ifstream json_read(master_hard_coded_path);
+  //json_read >> master_config;
+  //sensor_name = master_config["sensor_name"]; //the path to the detector model file
  
   std::cout << "--- tvm_hand_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_hand_detection_node");
   // something is off here... with the private namespace
+  ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
+  pnh.param("sensor_name", sensor_name, std::string("d435"));
   // odd private v. public structure. lame.
   // one config, no need for multiple config layers
   //nh.getParam("sensor_name", sensor_name);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   TVMHandDetectionNode node(nh, sensor_name);
-  std::cout << "hand detection node init " << std::endl;
+  std::cout << "TVMHandDetectionNode init " << std::endl;
   ros::spin();
   return 0;
 }

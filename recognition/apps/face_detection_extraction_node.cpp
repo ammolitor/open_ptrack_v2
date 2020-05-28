@@ -392,7 +392,6 @@ class FaceDetectionNode {
                     const opt_msgs::DetectionArrayConstPtr& detections_msg) {
       printf("running algorithm callback");
       
-      // is that needed??
       tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
       tf_listener.lookupTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ir2rgb_transform);
       tf_listener.waitForTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
@@ -701,19 +700,21 @@ int main(int argc, char** argv) {
   std::string master_hard_coded_path = package_path + "/cfg/master.json";
   std::ifstream json_read(master_hard_coded_path);
   json_read >> master_config;
-  sensor_name = master_config["sensor_name"]; //the path to the detector model file
+  //sensor_name = master_config["sensor_name"]; //the path to the detector model file
   detections_topic = master_config["main_detections_topic"];
 
 
   std::cout << "--- face_detection_extraction_recognition_node ---" << std::endl;
   ros::init(argc, argv, "face_detection_extraction_recognition_node");
   //make sure this call is correct
+  ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
+  pnh.param("sensor_name", sensor_name, std::string("d435"));
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "detections_topic: " << detections_topic << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   FaceDetectionNode node(nh, sensor_name, detections_topic);
-  std::cout << "detection node init " << std::endl;
+  std::cout << "FaceDetectionNode init " << std::endl;
   ros::spin();
   return 0;
 }
