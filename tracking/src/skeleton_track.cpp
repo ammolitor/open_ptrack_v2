@@ -204,7 +204,7 @@ SkeletonTrack::toMsg(opt_msgs::SkeletonTrack& track_msg, bool vertical)
   track_msg.id = id_;
   track_msg.x = _x;
   track_msg.y = _y;
-  track_msg.z = _z;
+  //track_msg.z = _z;
   track_msg.height = height_;
   track_msg.distance = distance_;
   track_msg.age = age_;
@@ -517,8 +517,8 @@ SkeletonTrack::createMarker(visualization_msgs::MarkerArray::Ptr& msg,
 std::ostream&
 operator<< (std::ostream& ss, const SkeletonTrack& s)
 {
-  double x, y;
-  s.filter_->getState(x, y);
+  double x, y, _z;
+  s.filter_->getState(x, y, Z);
   ss << x << "," << y;
   return ss;
 }
