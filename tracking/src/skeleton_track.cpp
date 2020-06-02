@@ -198,13 +198,14 @@ SkeletonTrack::toMsg(opt_msgs::SkeletonTrack& track_msg, bool vertical)
 {
   if(SkeletonTrack::count == 0 && debug_count_ <= 0)
     ROS_WARN_STREAM("SkeletonTrack TODO: Define the skel_track_msg");
-  double _x,_y;
-  filter_->getState(_x,_y);
+  double _x,_y, _z;
+  filter_->getState(_x,_y,_z);
 
   track_msg.id = id_;
   track_msg.x = _x;
   track_msg.y = _y;
-  track_msg.height = z_;
+  track_msg.z = _z;
+  track_msg.height = height_;
   track_msg.distance = distance_;
   track_msg.age = age_;
   track_msg.color.a = 1.0;
@@ -216,8 +217,8 @@ SkeletonTrack::toMsg(opt_msgs::SkeletonTrack& track_msg, bool vertical)
   track_msg.confidence = - data_association_score_;   // minus for transforming distance into a sort of confidence
   track_msg.visibility = visibility_;
 
-  Eigen::Vector3d top(_x, _y, z_ + (height_/2));
-  Eigen::Vector3d bottom(_x, _y, z_ - (height_/2));
+  Eigen::Vector3d top(_x, _y, _z + (height_/2));
+  Eigen::Vector3d bottom(_x, _y, _z - (height_/2));
   top = detection_source_->transformToCam(top);
   bottom = detection_source_->transformToCam(bottom);
   if (not vertical)
