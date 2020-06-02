@@ -65,7 +65,7 @@ SkeletonTrack::SkeletonTrack(int id,
                              double acceleration_variance, double period,
                              bool velocity_in_motion_term,
                              const std::vector<rtpose_wrapper::Joint3DMsg>& joints):
-  Track(id, frame_id, position_variance, acceleration_variance, period,
+  Track3D(id, frame_id, position_variance, acceleration_variance, period,
         velocity_in_motion_term), all_joint_tracks_initialized_(false)
 {
   joint_tracks_.resize(SkeletonJoints::SIZE);
@@ -145,8 +145,8 @@ SkeletonTrack::update(
     const std::vector<rtpose_wrapper::Joint3DMsg>& joints,
     bool first_update)
 {
-  Track::update(x,y,z,height,distance,data_assocation_score,
-                confidence,min_confidence,min_confidence_detections,
+  Track3D::update(x,y,z,height,distance,data_assocation_score,
+                confidence,min_confidence,min_confidence_detections,zone_id,
                 detection_source,first_update);
   if(all_joint_tracks_initialized_)
   {
