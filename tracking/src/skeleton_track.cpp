@@ -104,7 +104,7 @@ SkeletonTrack::init(double x, double y, double z, double height, double distance
                     open_ptrack::detection::DetectionSource* detection_source,
                     const std::vector<rtpose_wrapper::Joint3DMsg>& joints)
 {
-  Track3D::init(x,y,z,height,distance,detection_source);
+  Track3D::init(x,y,z,height,distance, zone_id, detection_source);
   bool any_nan = anyNaNs(joints);
   any_nan? all_joint_tracks_initialized_ = false :
       all_joint_tracks_initialized_ = true;
@@ -155,7 +155,7 @@ SkeletonTrack::update(
       const rtpose_wrapper::Joint3DMsg& bj = joints[i];
       joint_tracks_[i] -> update(bj.x, bj.y, bj.z, 10,
                                  Eigen::Vector3d(bj.x, bj.y, bj.z).norm(), bj.confidence,
-                                 bj.confidence - 1, bj.confidence + 1, 0,
+                                 bj.confidence - 1, bj.confidence + 1, 0, zone_id,
                                  detection_source, first_update
                                  );
     }
@@ -172,13 +172,14 @@ SkeletonTrack::update(
         const rtpose_wrapper::Joint3DMsg& bj = joints[i];
         joint_tracks_[i] -> init(bj.x, bj.y, bj.z, 10,
                                  Eigen::Vector3d(bj.x, bj.y, bj.z).norm(),
+                                 zone_id,
                                  detection_source
                                  );
         bool first_update = true;
         joint_tracks_[i] -> update(
               bj.x, bj.y, bj.z, 10,
               Eigen::Vector3d(bj.x, bj.y, bj.z).norm(), bj.confidence,
-              bj.confidence - 1, bj.confidence + 1, 0,
+              bj.confidence - 1, bj.confidence + 1, 0, zone_id,
               detection_source, first_update
               );
       }
