@@ -228,6 +228,7 @@ SkeletonTracker::createDistanceMatrix()
       double motion_likelihood = t->getMahalanobisDistance(
             dit->getWorldCentroid()(0),
             dit->getWorldCentroid()(1),
+            dit->getWorldCentroid()(2),
             dit->getSource()->getTime());
 
       // Compute joint likelihood and put it in the distance matrix:
