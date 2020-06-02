@@ -259,7 +259,7 @@ void callback(const Image::ConstPtr& rgb_image,
 			
 			// MADE THIS CHANGE HERE TO TEST BOTTOM OF THE BOX
 			//float medianDepth = _depth_image.at<float>(medianY, medianX) / 1000.0f;
-			float medianDepth = _depth_image.at<float>(newY, medianX) / mm_factor;
+			medianDepth = _depth_image.at<float>(newY, medianX) / mm_factor;
 
 				    
 			std::stringstream ss;
