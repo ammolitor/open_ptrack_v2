@@ -15,4 +15,5 @@ float64 confidence
 uint8 visibility
 
 opt_msgs/BoundingBox2D box_2D
+int32 zone_id
 

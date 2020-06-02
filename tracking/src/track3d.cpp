@@ -116,7 +116,7 @@ Track3D::init(const Track3D& old_track)
 }
 
 void
-Track3D::init(double x, double y, double z, double height, double distance,
+Track3D::init(double x, double y, double z, double height, double distance, int zone_id
               open_ptrack::detection::DetectionSource* detection_source)
 {
 
@@ -132,6 +132,7 @@ Track3D::init(double x, double y, double z, double height, double distance,
   last_time_predicted_ = last_time_detected_ = last_time_detected_with_high_confidence_ = detection_source->getTime();
   last_time_predicted_index_ = 0;
   age_ = 0.0;
+  zone_id_ = zone_id;
 
 
 }
@@ -147,6 +148,7 @@ Track3D::update(
     double confidence,
     double min_confidence,
     double min_confidence_detections,
+    int zone_id,
     open_ptrack::detection::DetectionSource* detection_source,
     bool first_update)
 {
@@ -251,6 +253,7 @@ Track3D::update(
   age_ = (detection_source->getTime() - first_time_detected_).toSec();
 
   detection_source_ = detection_source;
+  zone_id_ = zone_id;
 }
 
 void
@@ -599,6 +602,7 @@ Track3D::toMsg(opt_msgs::Track3D& track_msg, bool vertical)
   track_msg.age = age_;
   track_msg.confidence = - data_association_score_;   // minus for transforming distance into a sort of confidence
   track_msg.visibility = visibility_;
+  track_msg.zone_id = zone_id_;
 
   Eigen::Vector3d top(_x, _y, _z + (height_/2));
   Eigen::Vector3d bottom(_x, _y, _z - (height_/2));
@@ -619,6 +623,9 @@ Track3D::toMsg(opt_msgs::Track3D& track_msg, bool vertical)
     track_msg.box_2D.y = int(top(1)) - track_msg.box_2D.width / 4;
   }
 }
+
+
+
 
 open_ptrack::detection::DetectionSource*
 Track3D::getDetectionSource()
