@@ -114,6 +114,7 @@ SkeletonTrack::init(double x, double y, double z, double height, double distance
     const rtpose_wrapper::Joint3DMsg& bj = joints[i];
     joint_tracks_[i] -> init(bj.x, bj.y, bj.z, 10,
                              Eigen::Vector3d(bj.x, bj.y, bj.z).norm(),
+                             zone_id,
                              detection_source
                              );
   }
