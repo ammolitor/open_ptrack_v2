@@ -44,6 +44,7 @@
 #include <open_ptrack/tracking/skeleton_track.h>
 #include <open_ptrack/tracking/munkres.h>
 #include <open_ptrack/tracking/tracker.h>
+#include <open_ptrack/tracking/tracker3d.h>
 #include <opt_msgs/SkeletonTrackArray.h>
 #include <opt_msgs/SkeletonTrack.h>
 #include <opt_msgs/IDArray.h>
