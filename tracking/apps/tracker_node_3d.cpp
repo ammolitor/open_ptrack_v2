@@ -605,7 +605,7 @@ main(int argc, char** argv)
   marker_pub_tmp = nh.advertise<visualization_msgs::Marker>("/tracker3D/markers", 1);
   marker_pub = nh.advertise<visualization_msgs::MarkerArray>("/tracker3D/markers_array", 1);
   pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGBA> >("/tracker3D/history", 1);
-  results_pub = nh.advertise<opt_msgs::TrackArray>("/tracker3D/tracks", 100);
+  results_pub = nh.advertise<opt_msgs::Track3DArray>("/tracker3D/tracks", 100);
   detection_marker_pub = nh.advertise<visualization_msgs::MarkerArray>("/detector/markers_array", 1);
   detection_trajectory_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGBA> >("/detector/history", 1);
   alive_ids_pub = nh.advertise<opt_msgs::IDArray>("/tracker3D/alive_ids", 1);
