@@ -56,7 +56,7 @@ namespace tracking
 
 
 /** \brief Tracker performs tracking-by-detection */
-class SkeletonTracker : public Tracker
+class SkeletonTracker : public Tracker3D
 {
   typedef std::vector<open_ptrack::detection::SkeletonDetection>
   SkeletonDetectionVector;
@@ -121,7 +121,7 @@ public:
                   double acceleration_variance,
                   std::string world_frame_id, bool debug_mode,
                   bool vertical):
-    Tracker(gate_distance, detector_likelihood, likelihood_weights,
+    Tracker3D(gate_distance, detector_likelihood, likelihood_weights,
             velocity_in_motion_term, min_confidence,
             min_confidence_detections, sec_before_old, sec_before_fake,
             sec_remain_new, detections_to_validate, period,
