@@ -887,6 +887,27 @@ void draw_skelaton(cv::Mat cv_image_clone, std::vector<cv::Point3f> points){
   
 }
 
+
+void return_pose_segment(){
+
+    // Method: 1) Create a mask
+    Mat1b mask(image.size(), uchar(0));
+    line(mask, A, B, Scalar(255));
+
+    vector<Point> points1;
+    findNonZero(mask, points1);
+
+    // Method: 2) Use LineIterator
+    LineIterator lit(image, A, B);
+
+    vector<Point> points2;
+    points2.reserve(lit.count);
+    for (int i = 0; i < lit.count; ++i, ++lit)
+    {
+        points2.push_back(lit.pos());
+    }
+}
+
 /**
  * @brief The TVMPoseNode
  */

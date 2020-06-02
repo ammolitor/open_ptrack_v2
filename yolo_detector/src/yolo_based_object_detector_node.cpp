@@ -255,8 +255,12 @@ void callback(const Image::ConstPtr& rgb_image,
 				std::cout << "mediandepth " << medianDepth << " rejecting" << std::endl;
 				continue;
 			}			
-//float medianDepth = _depth_image.at<float>(medianY, medianX) / 1000.0f;
-			 
+		  
+			
+			// MADE THIS CHANGE HERE TO TEST BOTTOM OF THE BOX
+			//float medianDepth = _depth_image.at<float>(medianY, medianX) / 1000.0f;
+			float medianDepth = _depth_image.at<float>(newY, medianX) / mm_factor;
+
 				    
 			std::stringstream ss;
 			ss << object_name << ":" << medianDepth; //  << " " << mm_factor;
@@ -264,7 +268,9 @@ void callback(const Image::ConstPtr& rgb_image,
 			
 			if(pub.getNumSubscribers() > 0)
 			{
-				cv::rectangle(image, cv::Point( newX, newY ), cv::Point( newX+ newWidth, newY+ newHeight), cv::Scalar( 0, 255, 0 ), 4);
+				//cv::rectangle(image, cv::Point( newX, newY ), cv::Point( newX+ newWidth, newY+ newHeight), cv::Scalar( 0, 255, 0 ), 4);
+				// MADE THIS CHANGE HERE TO TEST BOTTOM OF THE BOX
+				cv::rectangle(image, cv::Point( medianX, newY ), cv::Point( medianX+ newWidth, newY+ newHeight), cv::Scalar( 0, 255, 0 ), 4);
 				cv::rectangle(image, cv::Point( boxes->boxes[i].x, boxes->boxes[i].y ), 
 									 cv::Point( boxes->boxes[i].x+ boxes->boxes[i].w, boxes->boxes[i].y+ boxes->boxes[i].h), cv::Scalar( 255, 0, 255 ), 10);
 				cv::putText(image, ss.str(), cv::Point(boxes->boxes[i].x+10,boxes->boxes[i].y+20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
@@ -272,6 +278,8 @@ void callback(const Image::ConstPtr& rgb_image,
 			
 			float mx =  (medianX - _cx) * medianDepth * _constant_x;
 			float my = (medianY - _cy) * medianDepth * _constant_y;
+
+			// bottom box
 			
 			if(std::isfinite(medianDepth) && std::isfinite(mx) && std::isfinite(my))
 			{
