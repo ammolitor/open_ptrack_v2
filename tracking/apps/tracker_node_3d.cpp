@@ -464,7 +464,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     {
       if(output_tracking_results)
       { // Publish an empty tracking message
-        opt_msgs::TrackArray::Ptr tracking_results_msg(new opt_msgs::TrackArray);
+        opt_msgs::Track3DArray::Ptr tracking_results_msg(new opt_msgs::Track3DArray);
         tracking_results_msg->header.stamp = frame_time;
         tracking_results_msg->header.frame_id = world_frame_id;
         results_pub.publish(tracking_results_msg);

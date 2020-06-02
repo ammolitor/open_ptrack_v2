@@ -57,6 +57,7 @@
         "valarray": "cpp",
         "condition_variable": "cpp",
         "string": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "core": "cpp"
     }
 }
