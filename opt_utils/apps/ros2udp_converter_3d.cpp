@@ -38,6 +38,7 @@
 
 #include <ros/ros.h>
 #include <opt_msgs/TrackArray.h>
+#include <opt_msgs/Track3DArray.h>
 #include <opt_msgs/IDArray.h>
 #include <opt_msgs/NameArray.h>
 #include <opt_msgs/SkeletonTrackArray.h>
@@ -68,7 +69,7 @@ std::map<int, std::string> namePairs;
 using namespace open_ptrack::bpe;
 
 void
-trackingCallback(const opt_msgs::TrackArray::ConstPtr& tracking_msg)
+trackingCallback(const opt_msgs::Track3DArray::ConstPtr& tracking_msg)
 {
   if (facetracksflag == 1)
   {
@@ -134,7 +135,7 @@ trackingCallback(const opt_msgs::TrackArray::ConstPtr& tracking_msg)
 }
 
 
-void peopleTracksCallback(const opt_msgs::TrackArray::ConstPtr& association_message)
+void peopleTracksCallback(const opt_msgs::Track3DArray::ConstPtr& association_message)
 {
   Jzon::Array tracks;
   if (association_message->tracks.size() != 0){
@@ -317,11 +318,11 @@ main(int argc, char **argv)
   facetracksflag = 0;
 
   // ROS subscriber:
-  ros::Subscriber tracking_sub = nh.subscribe<opt_msgs::TrackArray>
+  ros::Subscriber tracking_sub = nh.subscribe<opt_msgs::Track3DArray>
       ("input_topic", 1, trackingCallback);
   ros::Subscriber alive_ids_sub = nh.subscribe<opt_msgs::IDArray>
       ("alive_ids_topic", 1, aliveIDsCallback);
-  ros::Subscriber people_tracks_sub = nh.subscribe<opt_msgs::TrackArray>("people_tracks_topic", 1, peopleTracksCallback);
+  ros::Subscriber people_tracks_sub = nh.subscribe<opt_msgs::Track3DArray>("people_tracks_topic", 1, peopleTracksCallback);
   ros::Subscriber people_names_sub = nh.subscribe<opt_msgs::NameArray>("people_names_topic", 1, peoplenamesCallback);
 
   // Initialize UDP parameters:
