@@ -271,7 +271,7 @@ void callback(const Image::ConstPtr& rgb_image,
 			{
 				//cv::rectangle(image, cv::Point( newX, newY ), cv::Point( newX+ newWidth, newY+ newHeight), cv::Scalar( 0, 255, 0 ), 4);
 				// MADE THIS CHANGE HERE TO TEST BOTTOM OF THE BOX
-				cv::rectangle(image, cv::Point( medianX, ca ), cv::Point( medianX+ newWidth, ymax+ newHeight), cv::Scalar( 0, 255, 0 ), 4);
+				cv::rectangle(image, cv::Point( medianX, ymax ), cv::Point( medianX+ newWidth, ymax+ newHeight), cv::Scalar( 0, 255, 0 ), 4);
 				cv::rectangle(image, cv::Point( boxes->boxes[i].x, boxes->boxes[i].y ), 
 									 cv::Point( boxes->boxes[i].x+ boxes->boxes[i].w, boxes->boxes[i].y+ boxes->boxes[i].h), cv::Scalar( 255, 0, 255 ), 10);
 				cv::putText(image, ss.str(), cv::Point(boxes->boxes[i].x+10,boxes->boxes[i].y+20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
