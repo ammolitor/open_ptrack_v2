@@ -256,10 +256,11 @@ void callback(const Image::ConstPtr& rgb_image,
 				continue;
 			}			
 		  
+			int ymax = boxes->boxes[i].y + (boxes->boxes[i].h;
 			
 			// MADE THIS CHANGE HERE TO TEST BOTTOM OF THE BOX
 			//float medianDepth = _depth_image.at<float>(medianY, medianX) / 1000.0f;
-			medianDepth = _depth_image.at<float>(newY, medianX) / mm_factor;
+			medianDepth = _depth_image.at<float>(ymax, medianX) / mm_factor;
 
 				    
 			std::stringstream ss;
@@ -270,7 +271,7 @@ void callback(const Image::ConstPtr& rgb_image,
 			{
 				//cv::rectangle(image, cv::Point( newX, newY ), cv::Point( newX+ newWidth, newY+ newHeight), cv::Scalar( 0, 255, 0 ), 4);
 				// MADE THIS CHANGE HERE TO TEST BOTTOM OF THE BOX
-				cv::rectangle(image, cv::Point( medianX, newY ), cv::Point( medianX+ newWidth, newY+ newHeight), cv::Scalar( 0, 255, 0 ), 4);
+				cv::rectangle(image, cv::Point( medianX, ymax ), cv::Point( medianX+ newWidth, ymax+ newHeight), cv::Scalar( 0, 255, 0 ), 4);
 				cv::rectangle(image, cv::Point( boxes->boxes[i].x, boxes->boxes[i].y ), 
 									 cv::Point( boxes->boxes[i].x+ boxes->boxes[i].w, boxes->boxes[i].y+ boxes->boxes[i].h), cv::Scalar( 255, 0, 255 ), 10);
 				cv::putText(image, ss.str(), cv::Point(boxes->boxes[i].x+10,boxes->boxes[i].y+20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
