@@ -65,7 +65,7 @@ namespace tracking
 {
 
 /** \brief SkeletonTrack represents information about a track (or target) */
-class SkeletonTrack : public Track3D
+class SkeletonTrack : public Track
 {
 private:
   bool
