@@ -887,26 +887,25 @@ void draw_skelaton(cv::Mat cv_image_clone, std::vector<cv::Point3f> points){
   
 }
 
-
-void return_pose_segment(){
-
-    // Method: 1) Create a mask
-    Mat1b mask(image.size(), uchar(0));
-    line(mask, A, B, Scalar(255));
-
-    vector<Point> points1;
-    findNonZero(mask, points1);
-
-    // Method: 2) Use LineIterator
-    LineIterator lit(image, A, B);
-
-    vector<Point> points2;
-    points2.reserve(lit.count);
-    for (int i = 0; i < lit.count; ++i, ++lit)
-    {
-        points2.push_back(lit.pos());
-    }
-}
+//void return_pose_segment(){
+//
+//    // Method: 1) Create a mask
+//    Mat1b mask(image.size(), uchar(0));
+//    line(mask, A, B, Scalar(255));
+//
+//   vector<Point> points1;
+//    findNonZero(mask, points1);
+//
+//    // Method: 2) Use LineIterator
+//    LineIterator lit(image, A, B);
+//
+//    vector<Point> points2;
+//    points2.reserve(lit.count);
+//    for (int i = 0; i < lit.count; ++i, ++lit)
+//    {
+//        points2.push_back(lit.pos());
+//    }
+//}
 
 /**
  * @brief The TVMPoseNode
@@ -1196,7 +1195,8 @@ class TVMPoseNode {
           // however, we're moving towards the median depth as where the box hits the ground/
           // where the feet are..
           //float median_depth = cv_depth_image.at<float>(median_y, median_x) / 1000.0f;
-          float median_depth = cv_depth_image.at<float>(new_y, median_x) / mm_factor;
+          float median_depth = cv_depth_image.at<float>(ymax, median_x) / mm_factor;
+
 
           if (median_depth <= 0 || median_depth > max_capable_depth) {
             std::cout << "median_depth " << median_depth << " rejecting" << std::endl;
