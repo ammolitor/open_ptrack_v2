@@ -104,7 +104,7 @@ SkeletonTrack::init(double x, double y, double z, double height, double distance
                     open_ptrack::detection::DetectionSource* detection_source,
                     const std::vector<rtpose_wrapper::Joint3DMsg>& joints)
 {
-  Track::init(x,y,z,height,distance,detection_source);
+  Track3D::init(x,y,z,height,distance,detection_source);
   bool any_nan = anyNaNs(joints);
   any_nan? all_joint_tracks_initialized_ = false :
       all_joint_tracks_initialized_ = true;
