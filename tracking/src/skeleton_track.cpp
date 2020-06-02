@@ -517,8 +517,8 @@ SkeletonTrack::createMarker(visualization_msgs::MarkerArray::Ptr& msg,
 std::ostream&
 operator<< (std::ostream& ss, const SkeletonTrack& s)
 {
-  double x, y, _z;
-  s.filter_->getState(x, y, Z);
+  double x, y, z;
+  s.filter_->getState(x, y, z);
   ss << x << "," << y;
   return ss;
 }
