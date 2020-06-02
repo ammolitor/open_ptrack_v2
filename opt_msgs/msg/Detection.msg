@@ -12,4 +12,4 @@ bool occluded
 
 string object_name
 int32 zone_id
-opt_msgs/Joint3DMsg[] joints
+# opt_msgs/Joint3DMsg[] joints
