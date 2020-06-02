@@ -14,4 +14,4 @@ float64 height
 float64 distance
 float64 confidence
 bool occluded
-
+int32 zone_id

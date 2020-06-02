@@ -18,3 +18,5 @@ uint8 visibility
 opt_msgs/BoundingBox2D box_2D
 
 opt_msgs/Track3D[] joints
+
+int32 zone_id

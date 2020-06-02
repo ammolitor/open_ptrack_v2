@@ -278,7 +278,7 @@ SkeletonTracker::updateDetectedTracks()
                     d.getHeight(),
                     d.getDistance(), distance_matrix_(track, measure),
                     d.getConfidence(), min_confidence_,
-                    min_confidence_detections_,
+                    min_confidence_detections_, d.get_zone_id(),
                     d.getSource(), d.getSkeletonMsg().joints,
                     first_update
                     );
@@ -336,7 +336,9 @@ SkeletonTracker::createNewTrack(open_ptrack::detection::SkeletonDetection&
   t->init(detection.getWorldCentroid()(0), detection.getWorldCentroid()(1),
           detection.getWorldCentroid()(2),
           detection.getHeight(),
-          detection.getDistance(), detection.getSource(),
+          detection.getDistance(), 
+          detection.get_zone_id(),
+          detection.getSource(),
           detection.getSkeletonMsg().joints);
 
   bool first_update = true;
@@ -345,7 +347,8 @@ SkeletonTracker::createNewTrack(open_ptrack::detection::SkeletonDetection&
             detection.getWorldCentroid()(2),
             detection.getHeight(), detection.getDistance(), 0.0,
             detection.getConfidence(), min_confidence_,
-            min_confidence_detections_, detection.getSource(),
+            min_confidence_detections_, 
+            detection.get_zone_id(), detection.getSource(),
             detection.getSkeletonMsg().joints,
             first_update
             );

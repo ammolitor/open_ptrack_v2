@@ -116,7 +116,7 @@ Track3D::init(const Track3D& old_track)
 }
 
 void
-Track3D::init(double x, double y, double z, double height, double distance, int zone_id
+Track3D::init(double x, double y, double z, double height, double distance, int zone_id,
               open_ptrack::detection::DetectionSource* detection_source)
 {
 

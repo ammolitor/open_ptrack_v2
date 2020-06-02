@@ -103,6 +103,7 @@ public:
          double confidence,
          double min_confidence,
          double min_confidence_detections,
+         int zone_id,
          open_ptrack::detection::DetectionSource* detection_source,
          const std::vector<rtpose_wrapper::Joint3DMsg>& joints,
          bool first_update = false);
@@ -117,7 +118,7 @@ public:
         bool vertical);
 
   void
-  init(double x, double y, double z, double height, double distance,
+  init(double x, double y, double z, double height, double distance, int zone_id,
        open_ptrack::detection::DetectionSource* detection_source,
        const std::vector<rtpose_wrapper::Joint3DMsg>& joints);
 

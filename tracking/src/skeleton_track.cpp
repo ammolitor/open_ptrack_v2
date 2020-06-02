@@ -100,7 +100,7 @@ SkeletonTrack::anyNaNs(const std::vector<rtpose_wrapper::Joint3DMsg>& joints)
 }
 
 void
-SkeletonTrack::init(double x, double y, double z, double height, double distance,
+SkeletonTrack::init(double x, double y, double z, double height, double distance, int zone_id,
                     open_ptrack::detection::DetectionSource* detection_source,
                     const std::vector<rtpose_wrapper::Joint3DMsg>& joints)
 {
@@ -140,6 +140,7 @@ SkeletonTrack::update(
     double confidence,
     double min_confidence,
     double min_confidence_detections,
+    int zone_id,
     open_ptrack::detection::DetectionSource* detection_source,
     const std::vector<rtpose_wrapper::Joint3DMsg>& joints,
     bool first_update)
@@ -208,6 +209,7 @@ SkeletonTrack::toMsg(opt_msgs::SkeletonTrack& track_msg, bool vertical)
   track_msg.color.r = color_(2);
   track_msg.color.g = color_(1);
   track_msg.color.b = color_(0);
+  track_msg.zone_id = zone_id_;
 
   track_msg.confidence = - data_association_score_;   // minus for transforming distance into a sort of confidence
   track_msg.visibility = visibility_;
