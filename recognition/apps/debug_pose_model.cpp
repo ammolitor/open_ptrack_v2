@@ -1265,7 +1265,8 @@ class TVMPoseNode {
     int mean_k_denoising = 5;
     // Standard deviation for denoising (the lower it is, the stronger is the filtering) =
     float std_dev_denoising = 0.3;
-    open_ptrack::detection::GroundplaneEstimation ground_estimator(1, true);
+    open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator(1, true);
+    PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
 
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
@@ -1535,8 +1536,8 @@ class TVMPoseNode {
         //if (isZed_)
         //  ground_model->selectWithinDistance(ground_coeffs_, 0.2, *inliers);
         //else
-        ground_model->selectWithinDistance(ground_coeffs, voxel_size, *inliers);
-        no_ground_cloud_ = PointCloudPtr (new PointCloud);
+        ground_model->selectWithinDistanceno_ground_cloud(ground_coeffs, voxel_size, *inliers);
+        PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
         pcl::ExtractIndices<PointT> extract;
         extract.setInputCloud(cloud_filtered);
         extract.setIndices(inliers);
@@ -1938,10 +1939,11 @@ class TVMPoseNode {
               Eigen::Vector3f bottom_vec = Eigen::Vector3f(cloud_->at(median_x,new_y).x, 
                                                            cloud_->at(median_x,new_y).y,
                                                            cloud_->at(median_x,new_y).z)
-              Eigen::Vector3f centroid3d = anti_transform * top_vec;
+              
+              Eigen::Vector3f centroid3d = anti_transform * middle_vec;
               Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
 
-              Eigen::Vector3f top3d = anti_transform * top;
+              Eigen::Vector3f top3d = anti_transform * top_vec;
               Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
               // theoretical person bottom point:
               Eigen::Vector3f bottom3d = anti_transform * bottom_vec;
