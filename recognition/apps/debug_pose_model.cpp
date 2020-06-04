@@ -97,6 +97,117 @@
 #include <open_ptrack/opt_utils/conversions.h>
 
 
+
+
+///////////////////////////////////// all detection headers here
+#include <iostream>
+#include <string>
+
+
+#include <ros/ros.h>
+#include <ros/package.h>
+#include <tf/transform_broadcaster.h>
+
+// PCL includes:
+#include <pcl/conversions.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/common/transforms.h>
+#include <pcl_conversions/pcl_conversions.h>
+
+// Open PTrack includes:
+#include <open_ptrack/detection/ground_segmentation.h>
+#include <open_ptrack/detection/ground_based_people_detection_app.h>
+#include <open_ptrack/opt_utils/conversions.h>
+
+//Publish Messages
+#include <opt_msgs/RoiRect.h>
+#include <opt_msgs/Rois.h>
+#include <std_msgs/String.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <opt_msgs/Detection.h>
+#include <opt_msgs/DetectionArray.h>
+
+
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/segmentation/extract_clusters.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/people/person_cluster.h>
+#include <pcl/people/head_based_subcluster.h>
+#include <pcl/common/transforms.h>
+#include <pcl/octree/octree.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <Eigen/Eigen>
+#include <visualization_msgs/MarkerArray.h>
+#include <pcl/segmentation/organized_multi_plane_segmentation.h>
+#include <pcl/features/integral_image_normal.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/filters/extract_indices.h>
+#include <tf/transform_listener.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
+
+#include<iostream>
+#include<fstream>
+#include <Eigen/Eigen>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+#include <opt_msgs/Detection.h>
+#include <open_ptrack/detection/detection_source.h>
+#include <opencv2/opencv.hpp>
+#include <Eigen/Eigen>
+#include <open_ptrack/opt_utils/conversions.h>
+#include <tf/tf.h>
+
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/segmentation/extract_clusters.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/people/person_cluster.h>
+#include <pcl/people/head_based_subcluster.h>
+#include <pcl/common/transforms.h>
+#include <pcl/octree/octree.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+
+#include <open_ptrack/detection/person_classifier.h>
+#include <Eigen/Eigen>
+#include <visualization_msgs/MarkerArray.h>
+#include <pcl/segmentation/organized_multi_plane_segmentation.h>
+#include <pcl/features/integral_image_normal.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/filters/extract_indices.h>
+#include <tf/transform_listener.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
+
+#include<iostream>
+#include<fstream>
+
+///////////////////////////////////// all detection headers here end
+
+
+
+
+
 // not sure if this is the correct json reading code
 // but will be easier than continually recompiling t
 // import header files
