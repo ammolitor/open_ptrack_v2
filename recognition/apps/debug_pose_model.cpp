@@ -1200,6 +1200,7 @@ class TVMPoseNode {
 
   public:
     // Set camera matrix transforms
+    Eigen::Matrix3d cam_intrins_;
     Eigen::Matrix3f intrinsics_matrix;
     bool camera_info_available_flag = false;
     double _cx;
@@ -1362,6 +1363,7 @@ class TVMPoseNode {
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
       intrinsics_matrix << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
+      cam_intrins_ << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
       _cx = msg->K[2];
       _cy = msg->K[5];
       _constant_x =  1.0f / msg->K[0];
@@ -1844,7 +1846,7 @@ class TVMPoseNode {
       }
     
       // define this, but maybe do like the camera transform here????
-      Eigen::MatrixXd points_2d_homo = intrinsics_matrix * points_3d_in_cam;
+      Eigen::MatrixXd points_2d_homo = cam_intrins_ * points_3d_in_cam;
 
       // lets assume that points_2d_homo == world transform...
 
