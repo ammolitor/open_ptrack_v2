@@ -1212,8 +1212,8 @@ class TVMPoseNode {
     /** \brief transforms used for compensating sensor tilt with respect to the ground plane */
     // Initialize transforms to be used to correct sensor tilt to identity matrix:
     Eigen::Affine3f transform, transform_, anti_transform, anti_transform_;
-    transform = transform.Identity();
-    anti_transform = transform.inverse();
+    //transform = transform.Identity();
+    //anti_transform = transform.inverse();
     bool estimate_ground_plane = true;
     Eigen::VectorXf ground_coeff;
 
