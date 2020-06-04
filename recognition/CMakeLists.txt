@@ -42,9 +42,29 @@ find_package(catkin REQUIRED COMPONENTS
     dynamic_reconfigure
     image_transport
     detection
+    # adding from detection
+    cmake_modules
+    calibration_common
+    message_filters 
+    pcl_conversions 
+    pcl_ros
+    nodelet
+    rosconsole
+    opt_utils
+    std_msgs 
+    rostime
+    compressed_image_transport 
+    compressed_depth_image_transport 
+    kinect2_bridge
 )
 
 # list(APPEND LINKER_LIBS ${CMAKE_DL_LIBS})
+# adding from detection
+include_directories(${catkin_INCLUDE_DIRS})
+find_package(OpenMP REQUIRED)
+find_package(Boost REQUIRED)
+include_directories( ${BOOST_INCLUDE_DIRS} )
+
 
 
 find_package(OpenCV REQUIRED)
@@ -78,7 +98,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES face_reconstruction
-  CATKIN_DEPENDS roscpp std_msgs opt_msgs
+  CATKIN_DEPENDS roscpp std_msgs opt_msgs message_filters sensor_msgs image_transport pcl_ros pcl_conversions opt_utils
 #  DEPENDS system_lib
 )
 message(STATUS CURRENT_DIR: ${CMAKE_CURRENT_LIST_DIR})
