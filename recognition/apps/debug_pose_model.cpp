@@ -36,7 +36,7 @@
 #include <Eigen/Eigen>
 #include <boost/format.hpp>
 //#include <boost/foreach.hpp>
-#include <opencv2/opencv.hpp>
+//#include <opencv2/opencv.hpp>
 
 #include <ros/ros.h>
 #include <ros/package.h>
@@ -1447,8 +1447,47 @@ class TVMPoseNode {
         return rotated_cloud;
       }
 
+    Eigen::VectorXf rotateGround(Eigen::VectorXf ground_coeffs, Eigen::Affine3f transform){
 
-    void set_ground_variables(PointCloudPtr& cloud){
+      Eigen::VectorXf ground_coeffs_new;
+
+      // Create a cloud with three points on the input ground plane:
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr dummy (new pcl::PointCloud<pcl::PointXYZRGB>);
+
+      pcl::PointXYZRGB first = pcl::PointXYZRGB(0.0,0.0,0.0);
+      first.x = 1.0;
+      pcl::PointXYZRGB second = pcl::PointXYZRGB(0.0,0.0,0.0);
+      second.y = 1.0;
+      pcl::PointXYZRGB third = pcl::PointXYZRGB(0.0,0.0,0.0);
+      third.x = 1.0;
+      third.y = 1.0;
+
+      dummy->points.push_back( first );
+      dummy->points.push_back( second );
+      dummy->points.push_back( third );
+
+      for(uint8_t i = 0; i < dummy->points.size(); i++ )
+      { // Find z given x and y:
+        dummy->points[i].z = (double) ( -ground_coeffs(3) -(ground_coeffs(0) * dummy->points[i].x) - (ground_coeffs(1) * dummy->points[i].y) ) / ground_coeffs(2);
+      }
+
+      // Rotate them:
+      dummy = rotateCloud(dummy, transform);
+
+      // Compute new ground coeffs:
+      std::vector<int> indices;
+      for(unsigned int i = 0; i < dummy->points.size(); i++)
+      {
+        indices.push_back(i);
+      }
+      pcl::SampleConsensusModelPlane<pcl::PointXYZRGB> model_plane(dummy);
+      model_plane.computeModelCoefficients(indices, ground_coeffs_new);
+
+      return ground_coeffs_new;
+    }
+
+
+    void set_ground_variables(const PointCloudT::ConstPtr& cloud){
       if (!estimate_ground_plane){
          std::cout << "Ground plane finished already..." << std::endl;
       } else {
