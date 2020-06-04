@@ -1949,9 +1949,9 @@ class TVMPoseNode {
               Eigen::Vector3f bottom3d = anti_transform * bottom_vec;
               Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
 
-              world_to_temp.x =  static_cast<float>(tmp.x);
-              world_to_temp.y =  static_cast<float>(tmp.y);
-              world_to_temp.z =  static_cast<float>(tmp.z);
+              world_to_temp.x =  static_cast<float>(middle.x);
+              world_to_temp.y =  static_cast<float>(middle.y);
+              world_to_temp.z =  static_cast<float>(middel.z);
 
               tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
 
@@ -1968,12 +1968,12 @@ class TVMPoseNode {
               // get height
               float sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
               Eigen::Vector4f height_point;
-              height_point << top.x, top.y_, top.z_, 1.0f;
+              height_point << top.x, top.y, top.z, 1.0f;
               float height = std::fabs(height_point.dot(ground_coeffs));
               height /= sqrt_ground_coeffs;
               //height_ = height;
-              distance_ = std::sqrt(top.x * top.x + c_z_ * c_z_);
-              
+              float distance_ = std::sqrt(top.x * top.x + c_z_ * c_z_);
+               float head_centroid_compensation = 0.05;
               detection_msg.height = height;
               detection_msg.confidence = score;
               detection_msg.distance = head_z;
