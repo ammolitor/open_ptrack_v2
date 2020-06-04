@@ -1715,7 +1715,7 @@ class TVMPoseNode {
       std::cout << "running algorithm callback" << std::endl;
 
       if (estimate_ground_plane) {
-        set_ground_variables(cloud_)
+        set_ground_variables(cloud_);
       }
 
       //tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
