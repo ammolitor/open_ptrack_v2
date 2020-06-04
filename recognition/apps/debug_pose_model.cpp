@@ -97,7 +97,12 @@
 #include <open_ptrack/opt_utils/conversions.h>
 
 
-
+#include <opt_msgs/RoiRect.h>
+#include <opt_msgs/Rois.h>
+#include <std_msgs/String.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <opt_msgs/Detection.h>
+#include <opt_msgs/DetectionArray.h>
 
 ///////////////////////////////////// all detection headers here
 #include <iostream>
@@ -1218,7 +1223,7 @@ class TVMPoseNode {
     Eigen::VectorXf ground_coeffs;
 
     //bool background_subtraction = true;
-    int ground_estimation_mode = 0;
+    int ground_estimation_mode = 1;
     //# Flag enabling manual ground selection via ssh:
     bool remote_ground_selection = true; //#false
     //# Flag stating if the ground should be read from file, if present:
@@ -1265,7 +1270,7 @@ class TVMPoseNode {
     int mean_k_denoising = 5;
     // Standard deviation for denoising (the lower it is, the stronger is the filtering) =
     float std_dev_denoising = 0.3;
-    open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator(1, true);
+    open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator(ground_estimation_mode, remote_ground_selection);
     PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
 
 
