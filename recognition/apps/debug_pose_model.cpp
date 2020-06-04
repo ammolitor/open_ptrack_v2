@@ -1910,7 +1910,7 @@ class TVMPoseNode {
               middle.z = cloud_->at(median_x,median_y).z;
               Eigen::Vector3f middle_vec = Eigen::Vector3f(cloud_->at(median_x,median_y).x, 
                                                            cloud_->at(median_x,median_y).y,
-                                                           cloud_->at(median_x,median_y).z)
+                                                           cloud_->at(median_x,median_y).z);
 
               // head
               Point3f top;
@@ -1926,7 +1926,7 @@ class TVMPoseNode {
 
               Eigen::Vector3f top_vec = Eigen::Vector3f(cloud_->at(top_cast_x,top_cast_y).x, 
                                                         cloud_->at(top_cast_x,top_cast_y).y,
-                                                        cloud_->at(top_cast_x,top_cast_y).z)
+                                                        cloud_->at(top_cast_x,top_cast_y).z);
 
               float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
            
@@ -1938,7 +1938,7 @@ class TVMPoseNode {
               bottom.z = cloud_->at(median_x,new_y).z;
               Eigen::Vector3f bottom_vec = Eigen::Vector3f(cloud_->at(median_x,new_y).x, 
                                                            cloud_->at(median_x,new_y).y,
-                                                           cloud_->at(median_x,new_y).z)
+                                                           cloud_->at(median_x,new_y).z);
               
               Eigen::Vector3f centroid3d = anti_transform * middle_vec;
               Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
