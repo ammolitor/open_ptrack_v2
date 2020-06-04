@@ -74,7 +74,9 @@ link_directories(${OpenCV_LIB_DIR})
 find_package(PCL 1.7 REQUIRED)
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+# add_definitions(${PCL_DEFINITIONS})
+
+
 
 # add eigen
 find_package(Eigen3 REQUIRED)
@@ -277,7 +279,8 @@ target_link_libraries(debug_pose_model PUBLIC Threads::Threads ${OpenCV_LIBS}
                                           ${CUDA_CURAND_LIBRARY}
                                           ${CUDA_CUDNN_LIBRARY}
                                           ${TVM_RUNTIME_LINKER_LIBS}
-                                          ${TORCH_LIBRARIES})
+                                          ${TORCH_LIBRARIES}
+                                          ${PCL_LIBRARY_DIRS})
 
 add_dependencies(debug_pose_model ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 target_include_directories(debug_pose_model PUBLIC ${CUDA_INCLUDE_DIRS})
