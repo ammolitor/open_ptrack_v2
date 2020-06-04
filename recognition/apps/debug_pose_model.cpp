@@ -1528,8 +1528,7 @@ class TVMPoseNode {
       } else {
          std::cout << "Ground plane finished already..." << std::endl;
       }
-    
-    };
+    }
 
   private:
     /**
