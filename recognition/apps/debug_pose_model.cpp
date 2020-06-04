@@ -1270,7 +1270,7 @@ class TVMPoseNode {
     float std_dev_denoising = 0.3;
     open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator = open_ptrack::detection::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
     PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
-
+    double rate_value = 60.0;
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
     //transform = transform.Identity();
@@ -1368,6 +1368,60 @@ class TVMPoseNode {
       _constant_y = 1.0f /  msg->K[4];
       camera_info_available_flag = true;
     }
+
+
+
+    PointCloudT computeBackgroundCloud (const PointCloudT::ConstPtr& cloud){
+      std::cout << "Background acquisition..." << std::flush;
+      // Initialization for background subtraction:
+      background_cloud = PointCloudT::Ptr (new PointCloudT); = PointCloudT::Ptr (new PointCloudT);
+      std::string frame_id = cloud->header.frame_id;
+      frames = int(background_seconds * rate_value);
+      ros::Rate rate(rate_value);
+      std::cout << "Background subtraction enabled." << std::endl;
+
+      // Try to load the background from file:
+      if (pcl::io::loadPCDFile<PointT> ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud = PointCloudT::Ptr (new PointCloudT);) == -1)
+      {
+        // File not found, then background acquisition:
+        //computeBackgroundCloud (max_background_frames, voxel_size, frame_id, rate, background_cloud);
+
+        // Create background cloud:
+        background_cloud->header = cloud->header;
+        background_cloud->points.clear();
+        for (unsigned int i = 0; i < frames; i++)
+        {
+          // Point cloud pre-processing (downsampling and filtering):
+          PointCloudT::Ptr cloud_filtered(new PointCloudT);
+          cloud_filtered = preprocessCloud (cloud);
+
+          *background_cloud += *cloud_filtered;
+          ros::spinOnce();
+          rate.sleep();
+        }
+
+        // Voxel grid filtering:
+        PointCloudT::Ptr cloud_filtered(new PointCloudT);
+        pcl::VoxelGrid<PointT> voxel_grid_filter_object;
+        voxel_grid_filter_object.setInputCloud(background_cloud);
+        voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
+        voxel_grid_filter_object.filter (*cloud_filtered);
+
+        background_cloud = cloud_filtered;
+
+        // Background saving:
+        pcl::io::savePCDFileASCII ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud);
+
+        std::cout << "done." << std::endl << std::endl;
+
+      }
+      return background_cloud;
+    }
+
+
+
+
+    
 
     PointCloudPtr preprocessCloud (PointCloudPtr& input_cloud)
     {
@@ -1495,7 +1549,7 @@ class TVMPoseNode {
          std::cout << "Ground plane finished already..." << std::endl;
       } else {
 
-
+        PointCloudT background_cloud = computeBackgroundCloud(cloud);
         //sampling_factor_ = 1;
         //voxel_size_ = 0.06;
         //max_distance_ = 50.0;
@@ -1531,6 +1585,9 @@ class TVMPoseNode {
         // Point cloud pre-processing (downsampling and filtering):
         PointCloudPtr cloud_filtered(new PointCloud);
         cloud_filtered = preprocessCloud(cloud);
+
+        // set background cloud here
+
 
         // Ground removal and update:
         pcl::IndicesPtr inliers(new std::vector<int>);
@@ -1657,14 +1714,12 @@ class TVMPoseNode {
                   const PointCloudT::ConstPtr& cloud_,
                   json zone_json) {
 
-
       std::cout << "running algorithm callback" << std::endl;
 
       if (estimate_ground_plane) {
         *cloud = *cloud_;
         set_ground_variables(cloud)
       }
-
 
       //tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
       //tf_listener.lookupTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ir2rgb_transform);
