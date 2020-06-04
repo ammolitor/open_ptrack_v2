@@ -1661,7 +1661,8 @@ class TVMPoseNode {
       std::cout << "running algorithm callback" << std::endl;
 
       if (estimate_ground_plane) {
-        set_ground_variables(cloud_)
+        *cloud = *cloud_;
+        set_ground_variables(cloud)
       }
 
 
