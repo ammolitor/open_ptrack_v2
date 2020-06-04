@@ -1339,7 +1339,7 @@ class TVMPoseNode {
       }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
-      intrinsics_matrix << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
+      intrinsics_matrix << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0,` 0, 1;
       _cx = msg->K[2];
       _cy = msg->K[5];
       _constant_x =  1.0f / msg->K[0];
@@ -1401,28 +1401,30 @@ class TVMPoseNode {
       // Voxel grid filtering:
       PointCloudPtr cloud_filtered(new PointCloud);
       pcl::VoxelGrid<PointT> voxel_grid_filter_object;
-      if (apply_denoising_)
+      if (apply_denoising_) {
         voxel_grid_filter_object.setInputCloud(cloud_denoised);
-      else
-      {
-        if (sampling_factor_ != 1)
+      } else {
+        if (sampling_factor_ != 1) {
           voxel_grid_filter_object.setInputCloud(cloud_downsampled);
-        else
+        } else {
           voxel_grid_filter_object.setInputCloud(input_cloud);
+        }
       }
       voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
       voxel_grid_filter_object.setFilterFieldName("z");
-      if (isZed_)
-        voxel_grid_filter_object.setFilterLimits(-1 * max_distance, max_distance);
-      else
-        voxel_grid_filter_object.setFilterLimits(0.0, max_distance);
+      //if (isZed_)
+      //  voxel_grid_filter_object.setFilterLimits(-1 * max_distance, max_distance);
+      //else
+      voxel_grid_filter_object.setFilterLimits(0.0, max_distance);
       voxel_grid_filter_object.filter (*cloud_filtered);
 
       return cloud_filtered;
     }
 
     void set_ground_variables(PointCloudPtr& cloud){
-      if (estimate_ground_plane){
+      if (!estimate_ground_plane){
+         std::cout << "Ground plane finished already..." << std::endl;
+      } else {
         // Ground estimation:
         std::cout << "Ground plane initialization starting..." << std::endl;
         ground_estimator.setInputCloud(cloud);
@@ -1455,23 +1457,21 @@ class TVMPoseNode {
         //    sizeCheck = true;
         //}
         //else {
-        if (inliers->size () >= (300 * 0.06 / voxel_size_ / std::pow (static_cast<double> (sampling_factor_), 2)))
+        if (inliers->size () >= (300 * 0.06 / voxel_size_ / std::pow (static_cast<double> (sampling_factor_), 2))){
             sizeCheck = true;
-        //}
+        }
 
-        if (sizeCheck)
+        if (sizeCheck) {
           ground_model->optimizeModelCoefficients (*inliers, ground_coeffs_, ground_coeffs_);
-        else
-        {
-          if (debug_flag)
-          {
-            PCL_INFO ("No groundplane update!\n");
-          }
-
+        }
+        //} else {
+        //  if (debug_flag)
+        //  {
+        //    PCL_INFO ("No groundplane update!\n");
+        //  }
 
         // Background Subtraction (optional):
-        if (background_subtraction)
-        {
+        if (background_subtraction) {
           PointCloudPtr foreground_cloud(new PointCloud);
           for (unsigned int i = 0; i < no_ground_cloud_->points.size(); i++)
           {
@@ -1484,8 +1484,8 @@ class TVMPoseNode {
         }
 
 
-       // if (no_ground_cloud_->points.size() > 0)
-       // {
+        // if (no_ground_cloud_->points.size() > 0)
+        // {
           // Euclidean Clustering:
         std::vector<pcl::PointIndices> cluster_indices;
         typename pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
@@ -1525,8 +1525,6 @@ class TVMPoseNode {
           no_ground_cloud_rotated = no_ground_cloud_;
           ground_coeffs_new = ground_coeffs_;
         }
-      } else {
-         std::cout << "Ground plane finished already..." << std::endl;
       }
     }
 
