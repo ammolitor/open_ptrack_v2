@@ -1546,7 +1546,7 @@ class TVMPoseNode {
          std::cout << "Ground plane finished already..." << std::endl;
       } else {
 
-        PointCloudT background_cloud = computeBackgroundCloud(cloud);
+        PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
         //sampling_factor_ = 1;
         //voxel_size_ = 0.06;
         //max_distance_ = 50.0;
@@ -1592,7 +1592,7 @@ class TVMPoseNode {
         //if (isZed_)
         //  ground_model->selectWithinDistance(ground_coeffs_, 0.2, *inliers);
         //else
-        ground_model->selectWithinDistanceno_ground_cloud(ground_coeffs, voxel_size, *inliers);
+        ground_model->selectWithinDistance(ground_coeffs, voxel_size, *inliers);
         PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
         pcl::ExtractIndices<PointT> extract;
         extract.setInputCloud(cloud_filtered);
