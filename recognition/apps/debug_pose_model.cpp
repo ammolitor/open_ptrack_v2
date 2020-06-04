@@ -1217,7 +1217,7 @@ class TVMPoseNode {
     bool estimate_ground_plane = true;
     Eigen::VectorXf ground_coeffs;
 
-    bool background_subtraction = true;
+    //bool background_subtraction = true;
     int ground_estimation_mode = 0;
     //# Flag enabling manual ground selection via ssh:
     bool remote_ground_selection = true; //#false
@@ -1235,8 +1235,8 @@ class TVMPoseNode {
     bool background_subtraction = true;// #false
     //# Resolution of the octree representing the background:
     float background_resolution =  0.3;
-    //# Seconds to use to learn the background:
-    float background_seconds: 3.0;
+    //# Seconds to use to lear n the background:
+    float background_seconds = 3.0;
 
 
     // Minimum detection confidence:
@@ -1254,7 +1254,7 @@ class TVMPoseNode {
     // Threshold on image luminance. If luminance is over this threhsold, classifiers on RGB image are also used =
     int minimum_luminance = 0;
     // If true, sensor tilt angle wrt ground plane is compensated to improve people detection =
-    bool sensor_tilt_compensation = true ; 
+    bool sensor_tilt_compensation = true; 
     // Minimum distance between two persons =
     float heads_minimum_distance = 0.3;
     // Voxel size used to downsample the point cloud (lower = detection slower but more precise; higher = detection faster but less precise) =
@@ -1477,12 +1477,6 @@ class TVMPoseNode {
         //sqrt_ground_coeffs_ = std::numeric_limits<float>::quiet_NaN();
         //person_classifier_set_flag_ = false;
         //frame_counter_ = 0;
-
-
-
-
-
-
 
         // Ground estimation:
         std::cout << "Ground plane initialization starting..." << std::endl;
