@@ -268,6 +268,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 ###############################################################################
 add_executable(debug_pose_model apps/debug_pose_model.cpp include/open_ptrack/yolo_tvm.hpp)
+SET_TARGET_PROPERTIES(debug_pose_model PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
 target_link_libraries(debug_pose_model PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES} 
                                           ${LINKER_LIBS}
