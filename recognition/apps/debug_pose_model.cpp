@@ -1371,7 +1371,7 @@ class TVMPoseNode {
 
 
 
-    PointCloudT computeBackgroundCloud (const PointCloudT::ConstPtr& cloud){
+    PointCloudT computeBackgroundCloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
       // Initialization for background subtraction:
       PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
