@@ -1539,7 +1539,9 @@ class TVMPoseNode {
     }
 
 
-    void set_ground_variables(const PointCloudT::ConstPtr& cloud){
+    void set_ground_variables(const PointCloudT::ConstPtr& cloud_){
+      PointCloudT::Ptr cloud(new PointCloudT);
+      *cloud = *cloud_;
       if (!estimate_ground_plane){
          std::cout << "Ground plane finished already..." << std::endl;
       } else {
@@ -1712,8 +1714,6 @@ class TVMPoseNode {
       std::cout << "running algorithm callback" << std::endl;
 
       if (estimate_ground_plane) {
-        PointCloudT::Ptr cloud(new PointCloudT);
-        *cloud = *cloud_;
         set_ground_variables(cloud)
       }
 
