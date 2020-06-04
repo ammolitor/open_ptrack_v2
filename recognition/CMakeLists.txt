@@ -41,6 +41,7 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     dynamic_reconfigure
     image_transport
+    detection
 )
 
 # list(APPEND LINKER_LIBS ${CMAKE_DL_LIBS})
