@@ -1951,7 +1951,7 @@ class TVMPoseNode {
 
               world_to_temp.x =  static_cast<float>(middle.x);
               world_to_temp.y =  static_cast<float>(middle.y);
-              world_to_temp.z =  static_cast<float>(middel.z);
+              world_to_temp.z =  static_cast<float>(middle.z);
 
               tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
 
@@ -1972,7 +1972,7 @@ class TVMPoseNode {
               float height = std::fabs(height_point.dot(ground_coeffs));
               height /= sqrt_ground_coeffs;
               //height_ = height;
-              float distance_ = std::sqrt(top.x * top.x + c_z_ * c_z_);
+              float distance_ = std::sqrt(top.x * top.x + top.z * top.z);
                float head_centroid_compensation = 0.05;
               detection_msg.height = height;
               detection_msg.confidence = score;
