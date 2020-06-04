@@ -1215,7 +1215,28 @@ class TVMPoseNode {
     //transform = transform.Identity();
     //anti_transform = transform.inverse();
     bool estimate_ground_plane = true;
-    Eigen::VectorXf ground_coeff;
+    Eigen::VectorXf ground_coeffs;
+
+    bool background_subtraction = true;
+    int ground_estimation_mode = 0;
+    //# Flag enabling manual ground selection via ssh:
+    bool remote_ground_selection = true; //#false
+    //# Flag stating if the ground should be read from file, if present:
+    bool read_ground_from_file = true;
+    //# Flag that locks the ground plane update:
+    bool lock_ground = true;
+    //# Threshold on the ratio of valid points needed for ground estimation:
+    bool valid_points_threshold = 0.0;
+
+    //############################
+    //## Background subtraction ##
+    //############################
+    //# Flag enabling/disabling background subtraction:
+    bool background_subtraction = true;// #false
+    //# Resolution of the octree representing the background:
+    float background_resolution =  0.3;
+    //# Seconds to use to learn the background:
+    float background_seconds: 3.0;
 
 
     // Minimum detection confidence:
@@ -1244,7 +1265,7 @@ class TVMPoseNode {
     int mean_k_denoising = 5;
     // Standard deviation for denoising (the lower it is, the stronger is the filtering) =
     float std_dev_denoising = 0.3;
-    open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator;
+    open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator(1, true);
 
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
@@ -1334,7 +1355,6 @@ class TVMPoseNode {
         worldToCamTransform = read_poses_from_json(sensor_name);
       
         // 0 == manual
-        ground_estimator(1, true);
       }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
@@ -1379,8 +1399,8 @@ class TVMPoseNode {
           sor.setInputCloud (cloud_downsampled);
         else
           sor.setInputCloud (input_cloud);
-        sor.setMeanK (mean_k_denoising_);
-        sor.setStddevMulThresh (std_dev_denoising_);
+        sor.setMeanK (mean_k_denoising);
+        sor.setStddevMulThresh (std_dev_denoising);
         sor.filter (*cloud_denoised);
       }
 
@@ -1420,21 +1440,61 @@ class TVMPoseNode {
       return cloud_filtered;
     }
 
+    PointCloudPtr rotateCloud(PointCloudPtr cloud, Eigen::Affine3f transform ){
+        PointCloudPtr rotated_cloud (new PointCloud);
+        pcl::transformPointCloud(*cloud, *rotated_cloud, transform);
+        rotated_cloud->header.frame_id = cloud->header.frame_id;
+        return rotated_cloud;
+      }
+
+
     void set_ground_variables(PointCloudPtr& cloud){
       if (!estimate_ground_plane){
          std::cout << "Ground plane finished already..." << std::endl;
       } else {
+
+
+        //sampling_factor_ = 1;
+        //voxel_size_ = 0.06;
+        //max_distance_ = 50.0;
+        //vertical_ = false;
+        //head_centroid_ = true;
+        //min_height_ = 1.3;
+        //max_height_ = 2.3;
+        //min_points_ = 30;     // this value is adapted to the voxel size in method "compute"
+        //max_points_ = 5000;   // this value is adapted to the voxel size in method "compute"
+        //dimension_limits_set_ = false;
+        //heads_minimum_distance_ = 0.3;
+        //use_rgb_ = true;
+        //mean_luminance_ = 0.0;
+        //sensor_tilt_compensation_ = false;
+        //background_subtraction_ = false;
+        int min_points = 30;
+        int max_points = 5000;
+
+
+        // set flag values for mandatory parameters:
+        sqrt_ground_coeffs_ = std::numeric_limits<float>::quiet_NaN();
+        person_classifier_set_flag_ = false;
+        frame_counter_ = 0;
+
+
+
+
+
+
+
         // Ground estimation:
         std::cout << "Ground plane initialization starting..." << std::endl;
         ground_estimator.setInputCloud(cloud);
         //Eigen::VectorXf ground_coeffs = ground_estimator.computeMulticamera(ground_from_extrinsic_calibration, read_ground_from_file,
         //    pointcloud_topic, sampling_factor, voxel_size);
         ground_coeffs = ground_estimator.computeMulticamera(false, false,
-                  sensor_string + "/depth_registered/points", 4, 0.06);
+                  sensor_name + "/depth_registered/points", 4, 0.06);
 
         // Point cloud pre-processing (downsampling and filtering):
         PointCloudPtr cloud_filtered(new PointCloud);
-        cloud_filtered = preprocessCloud (cloud_);
+        cloud_filtered = preprocessCloud(cloud);
 
         // Ground removal and update:
         pcl::IndicesPtr inliers(new std::vector<int>);
@@ -1456,12 +1516,12 @@ class TVMPoseNode {
         //    sizeCheck = true;
         //}
         //else {
-        if (inliers->size () >= (300 * 0.06 / voxel_size_ / std::pow (static_cast<double> (sampling_factor_), 2))){
+        if (inliers->size () >= (300 * 0.06 / voxel_size / std::pow (static_cast<double> (sampling_factor), 2))){
             sizeCheck = true;
         }
 
         if (sizeCheck) {
-          ground_model->optimizeModelCoefficients (*inliers, ground_coeffs_, ground_coeffs_);
+          ground_model->optimizeModelCoefficients (*inliers, ground_coeffs, ground_coeffs);
         }
         //} else {
         //  if (debug_flag)
@@ -1471,6 +1531,23 @@ class TVMPoseNode {
 
         // Background Subtraction (optional):
         if (background_subtraction) {
+
+          //people_detector.setBackground(background_subtraction, background_octree_resolution, background_cloud);
+          //template <typename PointT> void
+          //open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::setBackground (bool background_subtraction, float background_octree_resolution, PointCloudPtr& background_cloud)
+          //{
+          //  background_subtraction_ = background_subtraction;
+          //
+          //  background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
+          //  background_octree_->defineBoundingBox(-max_distance_/2, -max_distance_/2, 0.0, max_distance_/2, max_distance_/2, max_distance_);
+          //  background_octree_->setInputCloud (background_cloud);
+          //  background_octree_->addPointsFromInputCloud ();
+          //}
+          float background_octree_resolution = background_resolution;
+          background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
+          background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
+          background_octree_->setInputCloud (background_cloud);
+          background_octree_->addPointsFromInputCloud ();
           PointCloudPtr foreground_cloud(new PointCloud);
           for (unsigned int i = 0; i < no_ground_cloud_->points.size(); i++)
           {
@@ -1491,8 +1568,8 @@ class TVMPoseNode {
         tree->setInputCloud(no_ground_cloud_);
         pcl::EuclideanClusterExtraction<PointT> ec;
         ec.setClusterTolerance(2 * 0.06);
-        ec.setMinClusterSize(min_points_);
-        ec.setMaxClusterSize(max_points_);
+        ec.setMinClusterSize(min_points);
+        ec.setMaxClusterSize(max_points);
         ec.setSearchMethod(tree);
         ec.setInputCloud(no_ground_cloud_);
         ec.extract(cluster_indices);
@@ -1504,7 +1581,7 @@ class TVMPoseNode {
         {
           // We want to rotate the point cloud so that the ground plane is parallel to the xOz plane of the sensor:
           Eigen::Vector3f input_plane, output_plane;
-          input_plane << ground_coeffs_(0), ground_coeffs_(1), ground_coeffs_(2);
+          input_plane << ground_coeffs(0), ground_coeffs(1), ground_coeffs(2);
           output_plane << 0.0, -1.0, 0.0;
 
           Eigen::Vector3f axis = input_plane.cross(output_plane);
@@ -1515,14 +1592,14 @@ class TVMPoseNode {
           anti_transform_ = transform_.inverse();
           no_ground_cloud_rotated = rotateCloud(no_ground_cloud_, transform_);
           ground_coeffs_new.resize(4);
-          ground_coeffs_new = rotateGround(ground_coeffs_, transform_);
+          ground_coeffs_new = rotateGround(ground_coeffs, transform_);
         }
         else
         {
           transform_ = transform_.Identity();
           anti_transform_ = transform_.inverse();
           no_ground_cloud_rotated = no_ground_cloud_;
-          ground_coeffs_new = ground_coeffs_;
+          ground_coeffs_new = ground_coeffs;
         }
       }
     }
@@ -1678,7 +1755,7 @@ class TVMPoseNode {
       }
     
       // define this, but maybe do like the camera transform here????
-      Eigen::MatrixXd points_2d_homo = cam_intrins_ * points_3d_in_cam;
+      Eigen::MatrixXd points_2d_homo = intrinsics_matrix * points_3d_in_cam;
 
       // lets assume that points_2d_homo == world transform...
 
@@ -1713,16 +1790,6 @@ class TVMPoseNode {
       cv_image_clone = cv_image.clone();
 
       // EXTRACT POINTCLOUD-DEPTH HERE...
-
-
-
-      Eigen::MatrixXd points_2d(2, pcl_cloud->size());
-      for(int i = 0; i < pcl_cloud->size(); i++)
-      {
-          points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
-          points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
-      }
-
 
       // necessary? or can we just use height/width of cv_image
       int DISPLAY_RESOLUTION_HEIGHT = image_size.height;
@@ -1804,9 +1871,9 @@ class TVMPoseNode {
               opt_msgs::Detection detection_msg;
               Point3f middle;
               Point3f world_to_temp;
-              middle.x = cloud_->at(median_x,median_y).x
-              middle.y = cloud_->at(median_x,median_y).y
-              middle.z = cloud_->at(median_x,median_y).z
+              middle.x = cloud_->at(median_x,median_y).x;
+              middle.y = cloud_->at(median_x,median_y).y;
+              middle.z = cloud_->at(median_x,median_y).z;
              
               // head
               Point3f top;
@@ -1816,17 +1883,17 @@ class TVMPoseNode {
               cv::Point3f head = points[0];
               int top_cast_x = static_cast<int>(head.x);
               int top_cast_y = static_cast<int>(head.y);   
-              top.x = cloud_->at(top_cast_x,top_cast_y).x
-              top.y = cloud_->at(top_cast_x,top_cast_y).y
-              top.z = cloud_->at(top_cast_x,top_cast_y).z
+              top.x = cloud_->at(top_cast_x,top_cast_y).x;
+              top.y = cloud_->at(top_cast_x,top_cast_y).y;
+              top.z = cloud_->at(top_cast_x,top_cast_y).z;
               float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
            
               // just bottom of box should be ok?
               // could just do feet / 2
               Point3f bottom;
-              bottom.x = cloud_->at(median_x,new_y).x
-              bottom.y = cloud_->at(median_x,new_y).y
-              bottom.z = cloud_->at(median_x,new_y).z
+              bottom.x = cloud_->at(median_x,new_y).x;
+              bottom.y = cloud_->at(median_x,new_y).y;
+              bottom.z = cloud_->at(median_x,new_y).z;
 
               Eigen::Vector3f centroid3d = anti_transform * middle;
               Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
