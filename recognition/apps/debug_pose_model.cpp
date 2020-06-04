@@ -1242,8 +1242,6 @@ class TVMPoseNode {
     float background_resolution =  0.3;
     //# Seconds to use to lear n the background:
     float background_seconds = 3.0;
-
-
     // Minimum detection confidence:
     float ground_based_people_detection_min_confidence = -5.0; //-1.75
     // Minimum person height =
@@ -1272,7 +1270,6 @@ class TVMPoseNode {
     float std_dev_denoising = 0.3;
     open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator = open_ptrack::detection::GroundplaneEstimation<PointT>::GroundplaneEstimation(ground_estimation_mode, remote_ground_selection);
     PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
-
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
@@ -1919,9 +1916,9 @@ class TVMPoseNode {
 
               // head
               Point3f top;
-              //top.x = cloud_->at(new_x,median_y).x
-              //top.y = cloud_->at(new_x,median_y).y
-              //top.z = cloud_->at(new_x,median_y).z
+              // top.x = cloud_->at(new_x,median_y).x
+              // top.y = cloud_->at(new_x,median_y).y
+              // top.z = cloud_->at(new_x,median_y).z
               cv::Point3f head = points[0];
               int top_cast_x = static_cast<int>(head.x);
               int top_cast_y = static_cast<int>(head.y);   
