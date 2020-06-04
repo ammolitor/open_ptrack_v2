@@ -1474,9 +1474,9 @@ class TVMPoseNode {
 
 
         // set flag values for mandatory parameters:
-        sqrt_ground_coeffs_ = std::numeric_limits<float>::quiet_NaN();
-        person_classifier_set_flag_ = false;
-        frame_counter_ = 0;
+        //sqrt_ground_coeffs_ = std::numeric_limits<float>::quiet_NaN();
+        //person_classifier_set_flag_ = false;
+        //frame_counter_ = 0;
 
 
 
