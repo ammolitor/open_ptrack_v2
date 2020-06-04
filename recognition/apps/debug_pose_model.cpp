@@ -1376,12 +1376,12 @@ class TVMPoseNode {
       // Initialization for background subtraction:
       PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
       std::string frame_id = cloud->header.frame_id;
-      frames = int(background_seconds * rate_value);
+      int frames = int(background_seconds * rate_value);
       ros::Rate rate(rate_value);
       std::cout << "Background subtraction enabled." << std::endl;
 
       // Try to load the background from file:
-      if (pcl::io::loadPCDFile<PointT> ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud = PointCloudT::Ptr (new PointCloudT);) == -1)
+      if (pcl::io::loadPCDFile<PointT> ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud) == -1)
       {
         // File not found, then background acquisition:
         //computeBackgroundCloud (max_background_frames, voxel_size, frame_id, rate, background_cloud);
