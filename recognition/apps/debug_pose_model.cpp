@@ -1907,7 +1907,10 @@ class TVMPoseNode {
               middle.x = cloud_->at(median_x,median_y).x;
               middle.y = cloud_->at(median_x,median_y).y;
               middle.z = cloud_->at(median_x,median_y).z;
-             
+              Eigen::Vector3f middle_vec = Eigen::Vector3f(cloud_->at(median_x,median_y).x, 
+                                                           cloud_->at(median_x,median_y).y,
+                                                           cloud_->at(median_x,median_y).z)
+
               // head
               Point3f top;
               //top.x = cloud_->at(new_x,median_y).x
@@ -1919,6 +1922,11 @@ class TVMPoseNode {
               top.x = cloud_->at(top_cast_x,top_cast_y).x;
               top.y = cloud_->at(top_cast_x,top_cast_y).y;
               top.z = cloud_->at(top_cast_x,top_cast_y).z;
+
+              Eigen::Vector3f top_vec = Eigen::Vector3f(cloud_->at(top_cast_x,top_cast_y).x, 
+                                                        cloud_->at(top_cast_x,top_cast_y).y,
+                                                        cloud_->at(top_cast_x,top_cast_y).z)
+
               float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
            
               // just bottom of box should be ok?
@@ -1927,14 +1935,16 @@ class TVMPoseNode {
               bottom.x = cloud_->at(median_x,new_y).x;
               bottom.y = cloud_->at(median_x,new_y).y;
               bottom.z = cloud_->at(median_x,new_y).z;
-
-              Eigen::Vector3f centroid3d = anti_transform * middle;
+              Eigen::Vector3f bottom_vec = Eigen::Vector3f(cloud_->at(median_x,new_y).x, 
+                                                           cloud_->at(median_x,new_y).y,
+                                                           cloud_->at(median_x,new_y).z)
+              Eigen::Vector3f centroid3d = anti_transform * top_vec;
               Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
 
               Eigen::Vector3f top3d = anti_transform * top;
               Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
               // theoretical person bottom point:
-              Eigen::Vector3f bottom3d = anti_transform * bottom;
+              Eigen::Vector3f bottom3d = anti_transform * bottom_vec;
               Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
 
               world_to_temp.x =  static_cast<float>(tmp.x);
