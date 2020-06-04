@@ -1244,7 +1244,7 @@ class TVMPoseNode {
     int mean_k_denoising = 5;
     // Standard deviation for denoising (the lower it is, the stronger is the filtering) =
     float std_dev_denoising = 0.3;
-
+    open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator;
 
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
@@ -1333,13 +1333,12 @@ class TVMPoseNode {
         sensor_name = sensor_string;
         worldToCamTransform = read_poses_from_json(sensor_name);
       
-
         // 0 == manual
-        open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator(1, true);
+        ground_estimator(1, true);
       }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
-      intrinsics_matrix << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0,` 0, 1;
+      intrinsics_matrix << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
       _cx = msg->K[2];
       _cy = msg->K[5];
       _constant_x =  1.0f / msg->K[0];
@@ -1370,7 +1369,7 @@ class TVMPoseNode {
       }
       bool apply_denoising_ = true;
       bool isZed_ = false;
-      int voxel_size: 0.06
+      int voxel_size = 0.06;
 
       if (apply_denoising_)
       {
