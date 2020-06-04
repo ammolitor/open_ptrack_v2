@@ -1374,7 +1374,7 @@ class TVMPoseNode {
     PointCloudT computeBackgroundCloud (const PointCloudT::ConstPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
       // Initialization for background subtraction:
-      background_cloud = PointCloudT::Ptr (new PointCloudT); = PointCloudT::Ptr (new PointCloudT);
+      PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
       std::string frame_id = cloud->header.frame_id;
       frames = int(background_seconds * rate_value);
       ros::Rate rate(rate_value);
