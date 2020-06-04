@@ -1418,11 +1418,6 @@ class TVMPoseNode {
       return background_cloud;
     }
 
-
-
-
-    
-
     PointCloudPtr preprocessCloud (PointCloudPtr& input_cloud)
     {
       // Downsample of sampling_factor in every dimension:
@@ -1717,6 +1712,7 @@ class TVMPoseNode {
       std::cout << "running algorithm callback" << std::endl;
 
       if (estimate_ground_plane) {
+        PointCloudT::Ptr cloud(new PointCloudT);
         *cloud = *cloud_;
         set_ground_variables(cloud)
       }
