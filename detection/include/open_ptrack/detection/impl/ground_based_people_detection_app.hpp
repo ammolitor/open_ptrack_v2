@@ -625,7 +625,7 @@ open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::compute (std::vec
           bottom /= bottom(2);
 
           // if(i == 0){
-
+           
           it->setPersonConfidence(person_classifier_.evaluate(rgb_image_, bottom, top, centroid, vertical_));
 
           // }

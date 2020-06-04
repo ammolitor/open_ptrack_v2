@@ -70,6 +70,33 @@
 #include <recognition/FaceDetectionConfig.h>
 #include <recognition/GenDetectionConfig.h>
 
+
+#include <pcl/segmentation/organized_multi_plane_segmentation.h>
+#include <pcl/features/integral_image_normal.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/conversions.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/common/transforms.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/console/time.h>
+#include <pcl/filters/passthrough.h>
+
+
+#include <open_ptrack/detection/ground_segmentation.h>
+#include <open_ptrack/detection/ground_based_people_detection_app.h>
+#include <open_ptrack/opt_utils/conversions.h>
+
+
 // not sure if this is the correct json reading code
 // but will be easier than continually recompiling t
 // import header files
@@ -77,8 +104,17 @@
 using json = nlohmann::json;
 typedef sensor_msgs::Image Image;
 typedef sensor_msgs::CameraInfo CameraInfo;
+// adding this 
 using namespace message_filters::sync_policies;
-
+using namespace std;
+using namespace cv;
+using namespace std;
+using namespace cv;
+typedef pcl::PointXYZRGB PointT;
+typedef pcl::PointCloud<PointT> PointCloudT;
+typedef pcl::PointCloud<PointT> PointCloud;
+typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
 double sum_score, sum_fps;
 
@@ -907,6 +943,91 @@ void draw_skelaton(cv::Mat cv_image_clone, std::vector<cv::Point3f> points){
 //    }
 //}
 
+tf::Transform read_poses_from_json(std::string camera_name)
+{
+  tf::Transform worldToCamTransform;
+  double translation_x;
+  double translation_y;
+  double translation_z;
+  double rotation_x;
+  double rotation_y;
+  double rotation_z;
+  double rotation_w;
+
+  json pose_config;
+  std::string hard_coded_path = "/cfg/poses.json";
+  std::cout << "--- detector cfg_callback ---" << std::endl;
+  std::string package_path = ros::package::getPath("recognition");
+  std::string full_path = package_path + hard_coded_path;
+  std::ifstream json_read(full_path);
+  json_read >> pose_config;
+
+  //<!-- pc: Jetson-TX2-Ubuntu-18-CUDA-10-NEW -->
+  //<!-- sensor: d415 -->
+  //<node pkg="tf" type="static_transform_publisher" name="d415_broadcaster"
+  //      args="2.18334 0.46989 1.28112 0.522227 0.598362 -0.456386 -0.401191 /world /d415 100" />
+  //              tx       ty      tz      rx        ry       rz        rw      
+  //double translation_x = pose_config[camera_name]["pose"]["translation"]["x"];
+  //double translation_y = pose_config[camera_name]["pose"]["translation"]["y"];
+  //double translation_z = pose_config[camera_name]["pose"]["translation"]["z"];
+  //double rotation_x = pose_config[camera_name]["pose"]["rotation"]["x"];
+  //double rotation_y = pose_config[camera_name]["pose"]["rotation"]["y"];
+  //double rotation_z = pose_config[camera_name]["pose"]["rotation"]["z"];
+  //double rotation_w = pose_config[camera_name]["pose"]["rotation"]["w"];
+
+  /// cameras: cam0, cam1, cam2
+  for (auto& cameras : pose_config.items()){
+    if (cameras.key() == camera_name) {
+      //pose: pose, other thing, etc. 
+      for (auto& pose : cameras.value().items()) {
+        if (pose.key() == "pose") {
+          //pose_type: translation, rotation
+          for (auto& pose_type : pose.value().items()){
+            if (pose_type.key() == "translation"){
+              // x, y, z 
+              for (auto& translations : pose_type.value().items()){
+                //x, y, z
+                if (translations.key() == "x"){
+                  translation_x = translations.value();
+                }
+                if (translations.key() == "y"){
+                  translation_y = translations.value();
+                }
+                if (translations.key() == "z"){
+                  translation_z = translations.value();
+                }
+              }
+            }
+            if (pose_type.key() == "rotation"){
+              // x, y, z 
+              for (auto& rotations : pose_type.value().items()){
+                //x, y, z
+                if (rotations.key() == "x"){
+                  rotation_x = rotations.value();
+                }
+                if (rotations.key() == "y"){
+                  rotation_y = rotations.value();
+                }
+                if (rotations.key() == "z"){
+                  rotation_z = rotations.value();
+                }
+                if (rotations.key() == "w"){
+                  rotation_w = rotations.value();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  std::cout << "translation x: " << translation_x << std::endl;
+  worldToCamTransform.setOrigin(tf::Vector3(translation_x, translation_y, translation_z));
+  worldToCamTransform.setRotation(tf::Quaternion(rotation_x, rotation_y, rotation_z, rotation_w));
+
+  return worldToCamTransform;
+}
+
 /**
  * @brief The TVMPoseNode
  */
@@ -916,6 +1037,7 @@ class TVMPoseNode {
     std::unique_ptr<PoseFromConfig> tvm_pose_detector;
     // TF listener
     tf::TransformListener tf_listener;
+    tf::Transform worldToCamTransform;
     
     // ROS
     dynamic_reconfigure::Server<recognition::GenDetectionConfig> cfg_server;
@@ -935,13 +1057,19 @@ class TVMPoseNode {
     // Message Filters
     message_filters::Subscriber<sensor_msgs::Image> rgb_image_sub;
     message_filters::Subscriber<sensor_msgs::Image> depth_image_sub;
+    message_filters::Subscriber<PointCloudT> cloud_sub;
 
     // Message Synchronizers 
     typedef ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> ApproximatePolicy;
     typedef message_filters::Synchronizer<ApproximatePolicy> ApproximateSync;
     boost::shared_ptr<ApproximateSync> approximate_sync_;
 
-    // vars
+    //seconday sync??????
+    typedef ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, PointCloudT> ImageApproximatePolicy;
+    typedef message_filters::Synchronizer<ImageApproximatePolicy> ImageApproximateSync;
+    boost::shared_ptr<ImageApproximateSync> image_approximate_sync_;// vars
+
+
     std::string encoding;
     float mm_factor = 1000.0f;
     float median_factor = 0.1;
@@ -970,6 +1098,48 @@ class TVMPoseNode {
     // use this for tests
     bool json_found = false;
     float max_capable_depth = 10.0; // 6.25 is what the default is;
+    /** \brief transforms used for compensating sensor tilt with respect to the ground plane */
+    // Initialize transforms to be used to correct sensor tilt to identity matrix:
+    Eigen::Affine3f transform, transform_, anti_transform, anti_transform_;
+    transform = transform.Identity();
+    anti_transform = transform.inverse();
+    bool estimate_ground_plane = true;
+    Eigen::VectorXf ground_coeff;
+
+
+    // Minimum detection confidence:
+    float ground_based_people_detection_min_confidence = -5.0; //-1.75
+    // Minimum person height =
+    float minimum_person_height = 0.6;
+    // Maximum person height =
+    float maximum_person_height = 2.3;
+    // Max depth range =
+    float max_distance = 10.0 ;
+    // Point cloud downsampling factor =
+    int sampling_factor = 4;
+    // Flag stating if classifiers based on RGB image should be used or not =
+    bool use_rgb = true;
+    // Threshold on image luminance. If luminance is over this threhsold, classifiers on RGB image are also used =
+    int minimum_luminance = 0;
+    // If true, sensor tilt angle wrt ground plane is compensated to improve people detection =
+    bool sensor_tilt_compensation = true ; 
+    // Minimum distance between two persons =
+    float heads_minimum_distance = 0.3;
+    // Voxel size used to downsample the point cloud (lower = detection slower but more precise; higher = detection faster but less precise) =
+    float voxel_size = 0.06;
+    // Denoising flag. If true, a statistical filter is applied to the point cloud to remove noise =
+    bool apply_denoising = true;
+    // MeanK for denoising (the higher it is, the stronger is the filtering) =
+    int mean_k_denoising = 5;
+    // Standard deviation for denoising (the lower it is, the stronger is the filtering) =
+    float std_dev_denoising = 0.3;
+
+
+
+   // Initialize transforms to be used to correct sensor tilt to identity matrix:
+    //Eigen::Affine3f transform, anti_transform;
+    //transform = transform.Identity();
+    //anti_transform = transform.inverse();
 
     /**
      * @brief constructor
@@ -1020,6 +1190,7 @@ class TVMPoseNode {
         // Subscribe to Messages
         rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
         depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
+        cloud_sub.subscribe(node_, sensor_string + "/depth_registered/points", 10);
         
         image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
 
@@ -1027,11 +1198,16 @@ class TVMPoseNode {
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMPoseNode::camera_info_callback, this);
 
         //Time sync policies for the subscribers
-        approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(10), rgb_image_sub, depth_image_sub));
+        //approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(10), rgb_image_sub, depth_image_sub));
         // _1 = rgb_image_sub
         // _2 = depth_image_sub
         // _3 = zone_json or zone_json
-        approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::callback, this, _1, _2, zone_json));
+        //approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::callback, this, _1, _2, zone_json));
+
+
+        image_approximate_sync_.reset(new ImageApproximateSync(ImageApproximatePolicy(10), rgb_image_sub, depth_image_sub, cloud_sub));
+        image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::callback, this, _1, _2, _3, zone_json));
+
 
         // create callback config 
         cfg_server.setCallback(boost::bind(&TVMPoseNode::cfg_callback, this, _1, _2));      
@@ -1044,6 +1220,11 @@ class TVMPoseNode {
         // TODO add that to debugger
         tvm_pose_detector.reset(new PoseFromConfig("/cfg/pose_model.json", "recognition"));
         sensor_name = sensor_string;
+        worldToCamTransform = read_poses_from_json(sensor_name);
+      
+
+        // 0 == manual
+        open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator(1, true);
       }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
@@ -1055,6 +1236,190 @@ class TVMPoseNode {
       camera_info_available_flag = true;
     }
 
+    PointCloudPtr preprocessCloud (PointCloudPtr& input_cloud)
+    {
+      // Downsample of sampling_factor in every dimension:
+      PointCloudPtr cloud_downsampled(new PointCloud);
+      PointCloudPtr cloud_denoised(new PointCloud);
+      int sampling_factor_ = 4;
+      if (sampling_factor_ != 1)
+      {
+        cloud_downsampled->width = (input_cloud->width)/sampling_factor_;
+        cloud_downsampled->height = (input_cloud->height)/sampling_factor_;
+        cloud_downsampled->points.resize(cloud_downsampled->height*cloud_downsampled->width);
+        cloud_downsampled->is_dense = input_cloud->is_dense;
+        cloud_downsampled->header = input_cloud->header;
+        for (int j = 0; j < cloud_downsampled->width; j++)
+        {
+          for (int i = 0; i < cloud_downsampled->height; i++)
+          {
+            (*cloud_downsampled)(j,i) = (*input_cloud)(sampling_factor_*j,sampling_factor_*i);
+          }
+        }
+      }
+      bool apply_denoising_ = true;
+      bool isZed_ = false;
+      int voxel_size: 0.06
+
+      if (apply_denoising_)
+      {
+        // Denoising with statistical filtering:
+        pcl::StatisticalOutlierRemoval<PointT> sor;
+        if (sampling_factor_ != 1)
+          sor.setInputCloud (cloud_downsampled);
+        else
+          sor.setInputCloud (input_cloud);
+        sor.setMeanK (mean_k_denoising_);
+        sor.setStddevMulThresh (std_dev_denoising_);
+        sor.filter (*cloud_denoised);
+      }
+
+      //  // Denoising viewer
+      //  int v1(0);
+      //  int v2(0);
+      //  denoising_viewer_->removeAllPointClouds(v1);
+      //  denoising_viewer_->removeAllPointClouds(v2);
+      //  denoising_viewer_->createViewPort (0.0, 0.0, 0.5, 1.0, v1);
+      //  pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(input_cloud);
+      //  denoising_viewer_->addPointCloud<PointT> (input_cloud, rgb, "original", v1);
+      //  denoising_viewer_->createViewPort (0.5, 0.0, 1.0, 1.0, v2);
+      //  pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb2(cloud_denoised);
+      //  denoising_viewer_->addPointCloud<PointT> (cloud_denoised, rgb2, "denoised", v2);
+      //  denoising_viewer_->spinOnce();
+
+      // Voxel grid filtering:
+      PointCloudPtr cloud_filtered(new PointCloud);
+      pcl::VoxelGrid<PointT> voxel_grid_filter_object;
+      if (apply_denoising_)
+        voxel_grid_filter_object.setInputCloud(cloud_denoised);
+      else
+      {
+        if (sampling_factor_ != 1)
+          voxel_grid_filter_object.setInputCloud(cloud_downsampled);
+        else
+          voxel_grid_filter_object.setInputCloud(input_cloud);
+      }
+      voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
+      voxel_grid_filter_object.setFilterFieldName("z");
+      if (isZed_)
+        voxel_grid_filter_object.setFilterLimits(-1 * max_distance, max_distance);
+      else
+        voxel_grid_filter_object.setFilterLimits(0.0, max_distance);
+      voxel_grid_filter_object.filter (*cloud_filtered);
+
+      return cloud_filtered;
+    }
+
+    void set_ground_variables(PointCloudPtr& cloud){
+      if (estimate_ground_plane){
+        // Ground estimation:
+        std::cout << "Ground plane initialization starting..." << std::endl;
+        ground_estimator.setInputCloud(cloud);
+        //Eigen::VectorXf ground_coeffs = ground_estimator.computeMulticamera(ground_from_extrinsic_calibration, read_ground_from_file,
+        //    pointcloud_topic, sampling_factor, voxel_size);
+        ground_coeffs = ground_estimator.computeMulticamera(false, false,
+                  sensor_string + "/depth_registered/points", 4, 0.06);
+
+        // Point cloud pre-processing (downsampling and filtering):
+        PointCloudPtr cloud_filtered(new PointCloud);
+        cloud_filtered = preprocessCloud (cloud_);
+
+        // Ground removal and update:
+        pcl::IndicesPtr inliers(new std::vector<int>);
+        boost::shared_ptr<pcl::SampleConsensusModelPlane<PointT> > ground_model(new pcl::SampleConsensusModelPlane<PointT>(cloud_filtered));
+        //if (isZed_)
+        //  ground_model->selectWithinDistance(ground_coeffs_, 0.2, *inliers);
+        //else
+        ground_model->selectWithinDistance(ground_coeffs, voxel_size, *inliers);
+        no_ground_cloud_ = PointCloudPtr (new PointCloud);
+        pcl::ExtractIndices<PointT> extract;
+        extract.setInputCloud(cloud_filtered);
+        extract.setIndices(inliers);
+        extract.setNegative(true);
+        extract.filter(*no_ground_cloud_);
+        bool debug_flag = false;
+        bool sizeCheck = false;
+        //if (isZed_) {
+        //  if (inliers->size () >= (300 * 0.06 / 0.02 / std::pow (static_cast<double> (sampling_factor_), 2)))
+        //    sizeCheck = true;
+        //}
+        //else {
+        if (inliers->size () >= (300 * 0.06 / voxel_size_ / std::pow (static_cast<double> (sampling_factor_), 2)))
+            sizeCheck = true;
+        //}
+
+        if (sizeCheck)
+          ground_model->optimizeModelCoefficients (*inliers, ground_coeffs_, ground_coeffs_);
+        else
+        {
+          if (debug_flag)
+          {
+            PCL_INFO ("No groundplane update!\n");
+          }
+
+
+        // Background Subtraction (optional):
+        if (background_subtraction)
+        {
+          PointCloudPtr foreground_cloud(new PointCloud);
+          for (unsigned int i = 0; i < no_ground_cloud_->points.size(); i++)
+          {
+            if (not (background_octree_->isVoxelOccupiedAtPoint(no_ground_cloud_->points[i].x, no_ground_cloud_->points[i].y, no_ground_cloud_->points[i].z)))
+            {
+              foreground_cloud->points.push_back(no_ground_cloud_->points[i]);
+            }
+          }
+          no_ground_cloud_ = foreground_cloud;
+        }
+
+
+       // if (no_ground_cloud_->points.size() > 0)
+       // {
+          // Euclidean Clustering:
+        std::vector<pcl::PointIndices> cluster_indices;
+        typename pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
+        tree->setInputCloud(no_ground_cloud_);
+        pcl::EuclideanClusterExtraction<PointT> ec;
+        ec.setClusterTolerance(2 * 0.06);
+        ec.setMinClusterSize(min_points_);
+        ec.setMaxClusterSize(max_points_);
+        ec.setSearchMethod(tree);
+        ec.setInputCloud(no_ground_cloud_);
+        ec.extract(cluster_indices);
+
+        // Sensor tilt compensation to improve people detection:
+        PointCloudPtr no_ground_cloud_rotated(new PointCloud);
+        Eigen::VectorXf ground_coeffs_new;
+        if(sensor_tilt_compensation)
+        {
+          // We want to rotate the point cloud so that the ground plane is parallel to the xOz plane of the sensor:
+          Eigen::Vector3f input_plane, output_plane;
+          input_plane << ground_coeffs_(0), ground_coeffs_(1), ground_coeffs_(2);
+          output_plane << 0.0, -1.0, 0.0;
+
+          Eigen::Vector3f axis = input_plane.cross(output_plane);
+          float angle = acos( input_plane.dot(output_plane)/ ( input_plane.norm()/output_plane.norm() ) );
+          transform_ = Eigen::AngleAxisf(angle, axis);
+
+          // Setting also anti_transform for later
+          anti_transform_ = transform_.inverse();
+          no_ground_cloud_rotated = rotateCloud(no_ground_cloud_, transform_);
+          ground_coeffs_new.resize(4);
+          ground_coeffs_new = rotateGround(ground_coeffs_, transform_);
+        }
+        else
+        {
+          transform_ = transform_.Identity();
+          anti_transform_ = transform_.inverse();
+          no_ground_cloud_rotated = no_ground_cloud_;
+          ground_coeffs_new = ground_coeffs_;
+        }
+      } else {
+         std::cout << "Ground plane finished already..." << std::endl;
+      }
+    
+    };
+
   private:
     /**
      * @brief callback for camera information that does detection on images
@@ -1063,12 +1428,23 @@ class TVMPoseNode {
      * @param depth_image  the depth/stereo image message
      * @param zone_json the json that contains the zone information
      */
+    //void callback(const sensor_msgs::Image::ConstPtr& rgb_image,
+    //              const sensor_msgs::Image::ConstPtr& depth_image,
+    //              json zone_json) {
+
     void callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                   const sensor_msgs::Image::ConstPtr& depth_image,
+                  const PointCloudT::ConstPtr& cloud_
                   json zone_json) {
-        
+
+
       std::cout << "running algorithm callback" << std::endl;
-    
+
+      if (estimate_ground_plane) {
+        set_ground_variables(cloud_)
+      }
+
+
       //tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
       //tf_listener.lookupTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ir2rgb_transform);
       //tf_listener.waitForTransform("/world", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
@@ -1077,7 +1453,6 @@ class TVMPoseNode {
       // transform to eigen
       //tf::transformTFToEigen(world2rgb_transform, world2rgb);
       //tf::transformTFToEigen(ir2rgb_transform, ir2rgb);
-
 
       // find a better way to do this...
       // json call back...
@@ -1127,6 +1502,89 @@ class TVMPoseNode {
         }
       }
 
+      //////////////////////////////////////////////////////////////////////////////////////////////
+      // Create XYZ cloud:
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_xyzrgb(new pcl::PointCloud<pcl::PointXYZRGB>);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      // fails?
+      //pcl::fromROSMsg(*cloud_, *pcl_cloud);
+      //https://answers.ros.org/question/9515/how-to-convert-between-different-point-cloud-types-using-pcl/
+      pcl::PointXYZRGB xyzrgb_point;
+      cloud_xyzrgb->points.resize(cloud_->width * cloud_->height, xyzrgb_point);
+      cloud_xyzrgb->width = cloud_->width;
+      cloud_xyzrgb->height = cloud_->height;
+      cloud_xyzrgb->is_dense = false;
+
+      int cloud__is_empty = cloud_->size();
+      std::cout << "DEBUG: cloud__is_empty: " << cloud__is_empty << std::endl;
+      int cloud_width = cloud_->width;
+      std::cout << "DEBUG: cloud_width: " << cloud_width << std::endl;
+      int cloud_height = cloud_->height;
+      std::cout << "DEBUG: cloud_height: " << cloud_height << std::endl;
+
+      // fill xyzrgb
+      for (int i=0;i<cloud_->height;i++)
+      {
+          for (int j=0;j<cloud_->width;j++)
+          {
+          cloud_xyzrgb->at(j,i).x = cloud_->at(j,i).x;
+          cloud_xyzrgb->at(j,i).y = cloud_->at(j,i).y;
+          cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
+          }
+      }
+
+      int cloud_xyzrgb_is_empty = cloud_xyzrgb->size();
+      std::cout << "DEBUG: cloud_xyzrgb_is_empty: " << cloud_xyzrgb_is_empty << std::endl;
+
+      pcl::PointXYZ xyz_point;
+      pcl_cloud->points.resize(cloud_->width * cloud_->height, xyz_point);
+      pcl_cloud->width = cloud_->width;
+      pcl_cloud->height = cloud_->height;
+      pcl_cloud->is_dense = false;
+
+      for (size_t i = 0; i < cloud_->points.size(); i++) {
+          pcl_cloud->points[i].x = cloud_->points[i].x;
+          pcl_cloud->points[i].y = cloud_->points[i].y;
+          pcl_cloud->points[i].z = cloud_->points[i].z;
+      }
+
+
+      // define xyz 3d points in cloud
+      Eigen::MatrixXd points_3d_in_cam(3, pcl_cloud->size());
+      for(int i = 0; i < pcl_cloud->size(); i++)
+      {
+          points_3d_in_cam(0, i) = (*pcl_cloud)[i].x;
+          points_3d_in_cam(1, i) = (*pcl_cloud)[i].y;
+          points_3d_in_cam(2, i) = (*pcl_cloud)[i].z;
+      }    
+
+
+      cv::Mat curr_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_8UC3);
+      for (int i=0;i<cloud_->height;i++)
+      {
+          for (int j=0;j<cloud_->width;j++)
+          {
+          curr_image.at<cv::Vec3b>(i,j)[2] = cloud_->at(j,i).r;
+          curr_image.at<cv::Vec3b>(i,j)[1] = cloud_->at(j,i).g;
+          curr_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
+          }
+      }
+    
+      // define this, but maybe do like the camera transform here????
+      Eigen::MatrixXd points_2d_homo = cam_intrins_ * points_3d_in_cam;
+
+      // lets assume that points_2d_homo == world transform...
+
+      Eigen::MatrixXd points_2d(2, pcl_cloud->size());
+      for(int i = 0; i < pcl_cloud->size(); i++)
+      {
+          points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
+          points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
+      }
+
+      //////////////////////////////////////////////////////////////////////////////////////////////
+
+      open_ptrack::opt_utils::Conversions converter; 
       // NOTE
       // convert message to usable formats
       // available encoding types:
@@ -1142,6 +1600,22 @@ class TVMPoseNode {
       height =  static_cast<float>(image_size.height);
       width =  static_cast<float>(image_size.width);
       cv_image_clone = cv_image.clone();
+
+      // override and use pointcloud
+      cv_image = curr_image.clone();
+      cv_image_clone = cv_image.clone();
+
+      // EXTRACT POINTCLOUD-DEPTH HERE...
+
+
+
+      Eigen::MatrixXd points_2d(2, pcl_cloud->size());
+      for(int i = 0; i < pcl_cloud->size(); i++)
+      {
+          points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
+          points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
+      }
+
 
       // necessary? or can we just use height/width of cv_image
       int DISPLAY_RESOLUTION_HEIGHT = image_size.height;
@@ -1173,6 +1647,7 @@ class TVMPoseNode {
           float ymin = output->boxes[i].ymin;
           float xmax = output->boxes[i].xmax;
           float ymax = output->boxes[i].ymax;
+          float score = output->boxes[i].score;
           std::vector<cv::Point3f> points = output->boxes[i].points;
           int num_parts = points.size();
 
@@ -1220,33 +1695,98 @@ class TVMPoseNode {
 
             if (send_message) {
               opt_msgs::Detection detection_msg;
+              Point3f middle;
+              Point3f world_to_temp;
+              middle.x = cloud_->at(median_x,median_y).x
+              middle.y = cloud_->at(median_x,median_y).y
+              middle.z = cloud_->at(median_x,median_y).z
+             
+              // head
+              Point3f top;
+              //top.x = cloud_->at(new_x,median_y).x
+              //top.y = cloud_->at(new_x,median_y).y
+              //top.z = cloud_->at(new_x,median_y).z
+              cv::Point3f head = points[0];
+              int top_cast_x = static_cast<int>(head.x);
+              int top_cast_y = static_cast<int>(head.y);   
+              top.x = cloud_->at(top_cast_x,top_cast_y).x
+              top.y = cloud_->at(top_cast_x,top_cast_y).y
+              top.z = cloud_->at(top_cast_x,top_cast_y).z
+              float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
+           
+              // just bottom of box should be ok?
+              // could just do feet / 2
+              Point3f bottom;
+              bottom.x = cloud_->at(median_x,new_y).x
+              bottom.y = cloud_->at(median_x,new_y).y
+              bottom.z = cloud_->at(median_x,new_y).z
+
+              Eigen::Vector3f centroid3d = anti_transform * middle;
+              Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
+
+              Eigen::Vector3f top3d = anti_transform * top;
+              Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
+              // theoretical person bottom point:
+              Eigen::Vector3f bottom3d = anti_transform * bottom;
+              Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
+
+              world_to_temp.x =  static_cast<float>(tmp.x);
+              world_to_temp.y =  static_cast<float>(tmp.y);
+              world_to_temp.z =  static_cast<float>(tmp.z);
+
+              tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
+
+              float enlarge_factor = 1.1;
+              float pixel_xc = centroid2d(0);
+              float pixel_yc = centroid2d(1);
+              float pixel_height = (bottom2d(1) - top2d(1)) * enlarge_factor;
+              float pixel_width = pixel_height / 2;
+              detection_msg.box_2D.x = int(centroid2d(0) - pixel_width/2.0);
+              detection_msg.box_2D.y = int(centroid2d(1) - pixel_height/2.0);
+              detection_msg.box_2D.width = int(pixel_width);
+              detection_msg.box_2D.height = int(pixel_height);
+
+              // get height
+              float sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
+              Eigen::Vector4f height_point;
+              height_point << top.x, top.y_, top.z_, 1.0f;
+              float height = std::fabs(height_point.dot(ground_coeffs));
+              height /= sqrt_ground_coeffs;
+              //height_ = height;
+              distance_ = std::sqrt(top.x * top.x + c_z_ * c_z_);
+              
+              detection_msg.height = height;
+              detection_msg.confidence = score;
+              detection_msg.distance = head_z;
+              converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
+              converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
+              converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
+
+
               detection_msg.box_3D.p1.x = mx;
               detection_msg.box_3D.p1.y = my;
               detection_msg.box_3D.p1.z = median_depth;
               
-              detection_msg.box_3D.p2.x = mx;
-              detection_msg.box_3D.p2.y = my;
-              detection_msg.box_3D.p2.z = median_depth;
+
+              //detection_msg.box_2D.x = median_x;
+              //detection_msg.box_2D.y = median_y;
+              //detection_msg.box_2D.width = 0;
+              //detection_msg.box_2D.height = 0;
+              //detection_msg.height = 0;
+              //detection_msg.confidence = 10;
+              //detection_msg.distance = median_depth;
               
-              detection_msg.box_2D.x = median_x;
-              detection_msg.box_2D.y = median_y;
-              detection_msg.box_2D.width = 0;
-              detection_msg.box_2D.height = 0;
-              detection_msg.height = 0;
-              detection_msg.confidence = 10;
-              detection_msg.distance = median_depth;
+              //detection_msg.centroid.x = mx;
+              //detection_msg.centroid.y = my;
+              //detection_msg.centroid.z = median_depth;
               
-              detection_msg.centroid.x = mx;
-              detection_msg.centroid.y = my;
-              detection_msg.centroid.z = median_depth;
+              //detection_msg.top.x = 0;
+              //detection_msg.top.y = 0;
+              //detection_msg.top.z = 0;
               
-              detection_msg.top.x = 0;
-              detection_msg.top.y = 0;
-              detection_msg.top.z = 0;
-              
-              detection_msg.bottom.x = 0;
-              detection_msg.bottom.y = 0;
-              detection_msg.bottom.z = 0;
+              //detection_msg.bottom.x = 0;
+              //detection_msg.bottom.y = 0;
+              //detection_msg.bottom.z = 0;
               
               // DO POSE HERE
               // do rtpose skelaton detection message here...

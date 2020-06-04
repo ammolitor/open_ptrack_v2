@@ -58,6 +58,7 @@
         "condition_variable": "cpp",
         "string": "cpp",
         "random": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "numericaldiff": "cpp"
     }
 }
