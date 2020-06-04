@@ -1371,7 +1371,7 @@ class TVMPoseNode {
 
 
 
-    PointCloudT computeBackgroundCloud (PointCloudPtr& cloud){
+    PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
       // Initialization for background subtraction:
       PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
@@ -1634,7 +1634,7 @@ class TVMPoseNode {
           //  background_octree_->addPointsFromInputCloud ();
           //}
           float background_octree_resolution = background_resolution;
-          background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
+          pcl::octree::OctreePointCloud<PointT> background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
           background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
           background_octree_->setInputCloud (background_cloud);
           background_octree_->addPointsFromInputCloud ();
