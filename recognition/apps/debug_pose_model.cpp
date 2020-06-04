@@ -1265,7 +1265,7 @@ class TVMPoseNode {
     int mean_k_denoising = 5;
     // Standard deviation for denoising (the lower it is, the stronger is the filtering) =
     float std_dev_denoising = 0.3;
-    open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator(1, true);
+    open_ptrack::detection::GroundplaneEstimation ground_estimator(1, true);
 
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
@@ -1651,7 +1651,7 @@ class TVMPoseNode {
 
     void callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                   const sensor_msgs::Image::ConstPtr& depth_image,
-                  const PointCloudT::ConstPtr& cloud_
+                  const PointCloudT::ConstPtr& cloud_,
                   json zone_json) {
 
 
