@@ -1310,6 +1310,11 @@ class TVMPoseNode {
         // Create background cloud:
         background_cloud->header = cloud->header;
         background_cloud->points.clear();
+
+        if (frames == 0){
+          frames = 1;
+        }
+
         for (unsigned int i = 0; i < frames; i++)
         {
           // Point cloud pre-processing (downsampling and filtering):
@@ -1321,8 +1326,10 @@ class TVMPoseNode {
           ros::spinOnce();
           rate.sleep();
         }
+        std::cout << "generation loop finished: " << i << std::endl;
 
         // Voxel grid filtering:
+        std::cout << "starting voxel grid filtering: " << std::endl;
         PointCloudT::Ptr cloud_filtered(new PointCloudT);
         pcl::VoxelGrid<PointT> voxel_grid_filter_object;
         voxel_grid_filter_object.setInputCloud(background_cloud);
