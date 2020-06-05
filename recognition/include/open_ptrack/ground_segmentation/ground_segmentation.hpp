@@ -40,7 +40,7 @@
 // NOTE - WE ARE REMOVING ALL REFERENCES TO MANAUAL GROUND PLANE FINDING
 
 
-#include <open_ptrack/recognition/ground_segmentation/ground_segmentation.h>
+#include <open_ptrack/ground_segmentation/ground_segmentation.h>
 
 template <typename PointT>
 open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::GroundplaneEstimation (int ground_estimation_mode, bool remote_ground_selection)
