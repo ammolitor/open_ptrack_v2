@@ -190,7 +190,7 @@
 //#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 
-#include <open_ptrack/detection/person_classifier.h>
+//#include <open_ptrack/detection/person_classifier.h>
 #include <Eigen/Eigen>
 #include <visualization_msgs/MarkerArray.h>
 #include <pcl/segmentation/organized_multi_plane_segmentation.h>
