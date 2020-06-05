@@ -1326,7 +1326,7 @@ class TVMPoseNode {
           ros::spinOnce();
           rate.sleep();
         }
-        std::cout << "generation loop finished: " << i << std::endl;
+        std::cout << "generation loop finished: " << std::endl;
 
         // Voxel grid filtering:
         std::cout << "starting voxel grid filtering: " << std::endl;
