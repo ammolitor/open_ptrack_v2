@@ -106,6 +106,7 @@
 
 ///////////////////////////////////// all detection headers here
 #include <iostream>
+#include <ifstream>
 #include <string>
 
 
@@ -117,7 +118,7 @@
 #include <pcl/conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/visualization/pcl_visualizer.h>
+//#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/sample_consensus/sac_model_plane.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/io/pcd_io.h>
@@ -149,7 +150,7 @@
 #include <pcl/people/head_based_subcluster.h>
 #include <pcl/common/transforms.h>
 #include <pcl/octree/octree.h>
-#include <pcl/visualization/pcl_visualizer.h>
+//#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <Eigen/Eigen>
 #include <visualization_msgs/MarkerArray.h>
@@ -187,7 +188,7 @@
 #include <pcl/people/head_based_subcluster.h>
 #include <pcl/common/transforms.h>
 #include <pcl/octree/octree.h>
-#include <pcl/visualization/pcl_visualizer.h>
+//#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 
 #include <open_ptrack/detection/person_classifier.h>
