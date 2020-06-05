@@ -1321,10 +1321,13 @@ class TVMPoseNode {
           std::cout << "computing background frames: " << i << std::endl;
           PointCloudT::Ptr cloud_filtered(new PointCloudT);
           cloud_filtered = preprocessCloud (cloud);
+          std::cout << "preprocessed frame: " << i << std::endl;
 
           *background_cloud += *cloud_filtered;
+          std::cout << "frame added to background: " << i << std::endl;
           ros::spinOnce();
           rate.sleep();
+          std::cout << "loop finished: " << i << std::endl;
         }
         std::cout << "generation loop finished: " << std::endl;
 
