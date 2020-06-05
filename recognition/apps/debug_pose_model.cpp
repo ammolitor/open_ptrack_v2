@@ -1315,21 +1315,32 @@ class TVMPoseNode {
           frames = 1;
         }
 
-        for (unsigned int i = 0; i < frames; i++)
-        {
-          // Point cloud pre-processing (downsampling and filtering):
-          std::cout << "computing background frames: " << i << std::endl;
-          PointCloudT::Ptr cloud_filtered(new PointCloudT);
-          cloud_filtered = preprocessCloud (cloud);
-          std::cout << "preprocessed frame: " << i << std::endl;
+        //for (unsigned int i = 0; i < frames; i++)
+        //{
+        //  // Point cloud pre-processing (downsampling and filtering):
+        //  std::cout << "computing background frames: " << i << std::endl;
+        //  PointCloudT::Ptr cloud_filtered(new PointCloudT);
+        //  cloud_filtered = preprocessCloud (cloud);
+        //  std::cout << "preprocessed frame: " << i << std::endl;
 
-          *background_cloud += *cloud_filtered;
-          std::cout << "frame added to background: " << i << std::endl;
-          ros::spinOnce();
-          rate.sleep();
-          std::cout << "loop finished: " << i << std::endl;
-        }
+        //  *background_cloud += *cloud_filtered;
+        //  std::cout << "frame added to background: " << i << std::endl;
+        //  ros::spinOnce();
+        //  rate.sleep();
+        //  std::cout << "loop finished: " << i << std::endl;
+        //}
+        //std::cout << "generation loop finished: " << std::endl;
+
+        // Point cloud pre-processing (downsampling and filtering):
+        std::cout << "computing background frames: " << std::endl;
+        PointCloudT::Ptr cloud_filtered(new PointCloudT);
+        cloud_filtered = preprocessCloud (cloud);
+        std::cout << "preprocessed frame: " << std::endl;
+
+        *background_cloud += *cloud_filtered;
+        std::cout << "frame added to background: " << std::endl;
         std::cout << "generation loop finished: " << std::endl;
+
 
         // Voxel grid filtering:
         std::cout << "starting voxel grid filtering: " << std::endl;
