@@ -1655,7 +1655,7 @@ class TVMPoseNode {
           ground_coeffs_new = ground_coeffs;
         }
       // maybe not needed
-      estimate_ground_plane = true;
+      estimate_ground_plane = false;
       }
     }
 
@@ -1680,7 +1680,7 @@ class TVMPoseNode {
 
       if (estimate_ground_plane) {
         set_ground_variables(cloud_);
-        estimate_ground_plane = true;
+        estimate_ground_plane = false;
       }
 
       //tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
@@ -1785,7 +1785,6 @@ class TVMPoseNode {
           pcl_cloud->points[i].y = cloud_->points[i].y;
           pcl_cloud->points[i].z = cloud_->points[i].z;
       }
-
 
       // define xyz 3d points in cloud
       Eigen::MatrixXd points_3d_in_cam(3, pcl_cloud->size());
