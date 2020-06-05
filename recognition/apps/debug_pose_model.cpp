@@ -1189,7 +1189,7 @@ class TVMPoseNode {
     PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
     // out of frame resources at 60./
     // try 30, then 15
-    double rate_value = 15.0;
+    double rate_value = 1.0;
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
     //transform = transform.Identity();
