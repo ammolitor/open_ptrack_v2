@@ -1187,7 +1187,9 @@ class TVMPoseNode {
     float std_dev_denoising = 0.3;
     open_ptrack::ground_segmentation::GroundplaneEstimation<PointT> ground_estimator = open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
     PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
-    double rate_value = 60.0;
+    // out of frame resources at 60./
+    // try 30, then 15
+    double rate_value = 15.0;
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
     //transform = transform.Identity();
@@ -1420,7 +1422,7 @@ class TVMPoseNode {
         return rotated_cloud;
       }
 
-    Eigen::VectorXf rotateGround(Eigen::VectorXf ground_coeffs, Eigen::Affine3f transform){
+    Eigen::VectorXf rotateGround( Eigen::VectorXf ground_coeffs, Eigen::Affine3f transform){
       std::cout << "rotating ground cloud." << std::endl;
       Eigen::VectorXf ground_coeffs_new;
 
