@@ -1291,6 +1291,7 @@ class TVMPoseNode {
 
     PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
+      std::cout << "computing background cloud" << std::endl;
       // Initialization for background subtraction:
       PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
       std::string frame_id = cloud->header.frame_id;
@@ -1303,7 +1304,7 @@ class TVMPoseNode {
       {
         // File not found, then background acquisition:
         //computeBackgroundCloud (max_background_frames, voxel_size, frame_id, rate, background_cloud);
-
+        std::cout << "could not find background file, begining generation..." << std::flush;
         // Create background cloud:
         background_cloud->header = cloud->header;
         background_cloud->points.clear();
@@ -1330,7 +1331,7 @@ class TVMPoseNode {
         // Background saving:
         pcl::io::savePCDFileASCII ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud);
 
-        std::cout << "done." << std::endl << std::endl;
+        std::cout << "background cloud done." << std::endl << std::endl;
 
       }
       return background_cloud;
@@ -1338,6 +1339,7 @@ class TVMPoseNode {
 
     PointCloudPtr preprocessCloud (PointCloudPtr& input_cloud)
     {
+      std::cout << "preprocessing cloud." << std::endl;
       // Downsample of sampling_factor in every dimension:
       PointCloudPtr cloud_downsampled(new PointCloud);
       PointCloudPtr cloud_denoised(new PointCloud);
@@ -1411,6 +1413,7 @@ class TVMPoseNode {
     }
 
     PointCloudPtr rotateCloud(PointCloudPtr cloud, Eigen::Affine3f transform ){
+      std::cout << "rotating cloud." << std::endl;
         PointCloudPtr rotated_cloud (new PointCloud);
         pcl::transformPointCloud(*cloud, *rotated_cloud, transform);
         rotated_cloud->header.frame_id = cloud->header.frame_id;
@@ -1418,7 +1421,7 @@ class TVMPoseNode {
       }
 
     Eigen::VectorXf rotateGround(Eigen::VectorXf ground_coeffs, Eigen::Affine3f transform){
-
+      std::cout << "rotating ground cloud." << std::endl;
       Eigen::VectorXf ground_coeffs_new;
 
       // Create a cloud with three points on the input ground plane:
@@ -1458,6 +1461,7 @@ class TVMPoseNode {
 
 
     void set_ground_variables(const PointCloudT::ConstPtr& cloud_){
+      std::cout << "setting ground variables." << std::endl;
       PointCloudT::Ptr cloud(new PointCloudT);
       *cloud = *cloud_;
       if (!estimate_ground_plane){
