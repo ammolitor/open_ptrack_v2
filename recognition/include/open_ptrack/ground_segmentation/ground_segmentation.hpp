@@ -326,7 +326,6 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
         cv::Point p = cb_args.clicked_points_2d[i];
         clicked_points_3d->points.push_back (cloud_->at(p.x,p.y));
       }
-    }
 
     // Keep only the last three clicked points:
     while(clicked_points_3d->points.size()>3)
