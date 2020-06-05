@@ -1313,6 +1313,7 @@ class TVMPoseNode {
         for (unsigned int i = 0; i < frames; i++)
         {
           // Point cloud pre-processing (downsampling and filtering):
+          std::cout << "computing background frames: " << i << std::endl;
           PointCloudT::Ptr cloud_filtered(new PointCloudT);
           cloud_filtered = preprocessCloud (cloud);
 
