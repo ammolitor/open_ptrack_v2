@@ -170,7 +170,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opt_msgs/Detection.h>
-#include <open_ptrack/detection/detection_source.h>
+//#include <open_ptrack/detection/detection_source.h>
 #include <opencv2/opencv.hpp>
 #include <Eigen/Eigen>
 #include <open_ptrack/opt_utils/conversions.h>
