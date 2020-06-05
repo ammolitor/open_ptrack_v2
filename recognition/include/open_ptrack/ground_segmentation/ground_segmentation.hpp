@@ -224,6 +224,7 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
 {
   Eigen::VectorXf ground_coeffs;
   ground_coeffs.resize(4);
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
 
   // Manual mode:
   if (ground_estimation_mode_ == 0)
@@ -246,8 +247,6 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
         cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
       }
     }
-
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
 
     cv::Mat curr_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_8UC3);
     for (int i=0;i<cloud_->height;i++)
