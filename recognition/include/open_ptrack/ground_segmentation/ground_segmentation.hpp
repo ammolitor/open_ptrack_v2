@@ -305,7 +305,7 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
     std::cout << "Ground plane coefficients: " << ground_coeffs(0) << ", " << ground_coeffs(1) << ", " << ground_coeffs(2) <<
         ", " << ground_coeffs(3) << "." << std::endl;
   }
-`
+
   // Semi-automatic mode:
   if (ground_estimation_mode_ == 1)
   {
