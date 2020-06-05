@@ -1332,14 +1332,14 @@ class TVMPoseNode {
         //std::cout << "generation loop finished: " << std::endl;
 
         // Point cloud pre-processing (downsampling and filtering):
-        std::cout << "computing background frames: " << std::endl;
+        std::cout << "computing background frame" << std::endl;
         PointCloudT::Ptr cloud_filtered(new PointCloudT);
         cloud_filtered = preprocessCloud (cloud);
-        std::cout << "preprocessed frame: " << std::endl;
+        std::cout << "preprocessed frame" << std::endl;
 
         *background_cloud += *cloud_filtered;
-        std::cout << "frame added to background: " << std::endl;
-        std::cout << "generation loop finished: " << std::endl;
+        std::cout << "frame added to background" << std::endl;
+        std::cout << "generation loop finished" << std::endl;
 
 
         // Voxel grid filtering:
