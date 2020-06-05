@@ -92,8 +92,7 @@
 #include <pcl/filters/passthrough.h>
 
 
-#include <open_ptrack/detection/ground_segmentation.h>
-#include <open_ptrack/detection/ground_based_people_detection_app.h>
+#include <open_ptrack/recognition/detection/ground_segmentation.h>
 #include <open_ptrack/opt_utils/conversions.h>
 
 
@@ -126,9 +125,9 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 // Open PTrack includes:
-#include <open_ptrack/detection/ground_segmentation.h>
-#include <open_ptrack/detection/ground_based_people_detection_app.h>
-#include <open_ptrack/opt_utils/conversions.h>
+//#include <open_ptrack/detection/ground_segmentation.h>
+//#include <open_ptrack/detection/ground_based_people_detection_app.h>
+#//include <open_ptrack/opt_utils/conversions.h>
 
 //Publish Messages
 #include <opt_msgs/RoiRect.h>
@@ -1225,8 +1224,8 @@ class TVMPoseNode {
     Eigen::VectorXf ground_coeffs;
 
     //bool background_subtraction = true;
-    int ground_estimation_mode = 1;
-    //# Flag enabling manual ground selection via ssh:
+    int ground_estimation_mode = 2; // automatic
+    //# Flag enabling manual grond selection via ssh:
     bool remote_ground_selection = true; //#false
     //# Flag stating if the ground should be read from file, if present:
     bool read_ground_from_file = true;
@@ -1270,7 +1269,7 @@ class TVMPoseNode {
     int mean_k_denoising = 5;
     // Standard deviation for denoising (the lower it is, the stronger is the filtering) =
     float std_dev_denoising = 0.3;
-    open_ptrack::detection::GroundplaneEstimation<PointT> ground_estimator = open_ptrack::detection::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
+    open_ptrack::recognition::detection::GroundplaneEstimation<PointT> ground_estimator = open_ptrack::recognition::detection::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
     PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
     double rate_value = 60.0;
    // Initialize transforms to be used to correct sensor tilt to identity matrix:

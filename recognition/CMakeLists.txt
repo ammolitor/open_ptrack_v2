@@ -41,13 +41,11 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     dynamic_reconfigure
     image_transport
-    detection
+    # detection
     # adding from detection
     cmake_modules
     calibration_common
     message_filters 
-    pcl_conversions 
-    pcl_ros
     nodelet
     rosconsole
     opt_utils
@@ -309,7 +307,7 @@ target_compile_definitions(debug_test PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 ###############################################################################
-add_executable(tvm_pose_recognition_node apps/tvm_pose_recognition_node.cpp include/open_ptrack/yolo_tvm.hpp)
+add_executable(tvm_pose_recognition_node apps/tvm_pose_recognition_node.cpp include/open_ptrack/yolo_tvm.hpp include/detection/ground_segmentation.h include/detection/ground_segmentation.hpp)
 target_link_libraries(tvm_pose_recognition_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES} 
                                           ${LINKER_LIBS}
