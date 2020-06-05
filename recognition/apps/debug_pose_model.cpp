@@ -1306,7 +1306,7 @@ class TVMPoseNode {
       {
         // File not found, then background acquisition:
         //computeBackgroundCloud (max_background_frames, voxel_size, frame_id, rate, background_cloud);
-        std::cout << "could not find background file, begining generation..." << std::flush;
+        std::cout << "could not find background file, begining generation..." << std::endl;
         // Create background cloud:
         background_cloud->header = cloud->header;
         background_cloud->points.clear();
@@ -1314,7 +1314,7 @@ class TVMPoseNode {
         if (frames == 0){
           frames = 1;
         }
-
+        // ros insdide this node is failing
         //for (unsigned int i = 0; i < frames; i++)
         //{
         //  // Point cloud pre-processing (downsampling and filtering):
@@ -1349,7 +1349,6 @@ class TVMPoseNode {
         voxel_grid_filter_object.setInputCloud(background_cloud);
         voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
         voxel_grid_filter_object.filter (*cloud_filtered);
-
         background_cloud = cloud_filtered;
 
         // Background saving:
