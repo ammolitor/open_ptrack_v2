@@ -36,8 +36,8 @@
  *
  */
 
-#ifndef OPEN_PTRACK_RECOGNITION_DETECTION_GROUND_SEGMENTATION_H_
-#define OPEN_PTRACK_RECOGNITION_DETECTION_GROUND_SEGMENTATION_H_
+#ifndef OPEN_PTRACK_RECOGNITION_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_
+#define OPEN_PTRACK_RECOGNITION_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_
 
 #include <Eigen/Eigen>
 #include <visualization_msgs/MarkerArray.h>
@@ -57,7 +57,7 @@
 
 namespace open_ptrack
 {
-  namespace detection
+  namespace ground_segmentation
   {
     template <typename PointT> class GroundplaneEstimation;
 
@@ -242,8 +242,8 @@ namespace open_ptrack
             bool selection_finished;
         };
     };
-  } /* namespace detection */
+  } /* namespace ground_segmentation */
 } /* namespace open_ptrack */
-#include <open_ptrack/recognition/detection/ground_segmentation.hpp>
-#endif /* OPEN_PTRACK_RECOGNITION_DETECTION_GROUND_SEGMENTATION_H_ */
+#include <open_ptrack/recognition/ground_segmentation/ground_segmentation.hpp>
+#endif /* OPEN_PTRACK_RECOGNITION_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_ */
 

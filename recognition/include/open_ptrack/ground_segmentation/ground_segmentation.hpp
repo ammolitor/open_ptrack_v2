@@ -40,10 +40,10 @@
 // NOTE - WE ARE REMOVING ALL REFERENCES TO MANAUAL GROUND PLANE FINDING
 
 
-#include <open_ptrack/recognition/detection/ground_segmentation.h>
+#include <open_ptrack/recognition/ground_segmentation/ground_segmentation.h>
 
 template <typename PointT>
-open_ptrack::detection::GroundplaneEstimation<PointT>::GroundplaneEstimation (int ground_estimation_mode, bool remote_ground_selection)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::GroundplaneEstimation (int ground_estimation_mode, bool remote_ground_selection)
 {
   ground_estimation_mode_ = ground_estimation_mode;
   remote_ground_selection_ = remote_ground_selection;
@@ -56,19 +56,19 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::GroundplaneEstimation (in
 }
 
 template <typename PointT>
-open_ptrack::detection::GroundplaneEstimation<PointT>::~GroundplaneEstimation()
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::~GroundplaneEstimation()
 {
 
 }
 
 template <typename PointT> void
-open_ptrack::detection::GroundplaneEstimation<PointT>::setInputCloud (PointCloudPtr& cloud)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::setInputCloud (PointCloudPtr& cloud)
 {
   cloud_ = cloud;
 }
 
 template <typename PointT> bool
-open_ptrack::detection::GroundplaneEstimation<PointT>::tooManyNaN(PointCloudConstPtr cloud, float max_ratio)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::tooManyNaN(PointCloudConstPtr cloud, float max_ratio)
 {
   int nan_counter = 0;
   for(unsigned int i = 0; i < cloud->size(); i++)
@@ -88,7 +88,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::tooManyNaN(PointCloudCons
 }
 
 template <typename PointT> bool
-open_ptrack::detection::GroundplaneEstimation<PointT>::tooManyLowConfidencePoints (cv::Mat& confidence_image, int confidence_threshold, double max_ratio)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::tooManyLowConfidencePoints (cv::Mat& confidence_image, int confidence_threshold, double max_ratio)
 {
   int invalid_counter = 0;
   for(unsigned int i = 0; i < confidence_image.rows; i++)
@@ -111,7 +111,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::tooManyLowConfidencePoint
 }
 
 template <typename PointT> Eigen::VectorXf
-open_ptrack::detection::GroundplaneEstimation<PointT>::computeFromTF (std::string camera_frame, std::string ground_frame)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::computeFromTF (std::string camera_frame, std::string ground_frame)
 {
   // Select 3 points in world reference frame:
   pcl::PointCloud<pcl::PointXYZ>::Ptr ground_points (new pcl::PointCloud<pcl::PointXYZ>);
@@ -156,7 +156,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::computeFromTF (std::strin
 }
 
 template <typename PointT> Eigen::VectorXf
-open_ptrack::detection::GroundplaneEstimation<PointT>::computeFromTF (tf::Transform worldToCamTransform)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::computeFromTF (tf::Transform worldToCamTransform)
 {
   // Select 3 points in world reference frame:
   pcl::PointCloud<pcl::PointXYZ>::Ptr ground_points (new pcl::PointCloud<pcl::PointXYZ>);
@@ -188,7 +188,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::computeFromTF (tf::Transf
 }
 
 template <typename PointT> tf::Transform
-open_ptrack::detection::GroundplaneEstimation<PointT>::readTFFromFile (std::string filename, std::string camera_name)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::readTFFromFile (std::string filename, std::string camera_name)
 {
   tf::Transform worldToCamTransform;
 
@@ -217,7 +217,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::readTFFromFile (std::stri
 }
 
 template <typename PointT> Eigen::VectorXf
-open_ptrack::detection::GroundplaneEstimation<PointT>::compute ()
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
 {
   Eigen::VectorXf ground_coeffs;
   ground_coeffs.resize(4);
@@ -535,7 +535,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::compute ()
 }
 
 template <typename PointT> Eigen::VectorXf
-open_ptrack::detection::GroundplaneEstimation<PointT>::computeMulticamera (bool ground_from_extrinsic_calibration, bool read_ground_from_file,
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::computeMulticamera (bool ground_from_extrinsic_calibration, bool read_ground_from_file,
     std::string pointcloud_topic, int sampling_factor, float voxel_size)
 {
   Eigen::VectorXf ground_coeffs;
@@ -628,7 +628,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::computeMulticamera (bool 
 }
 
 template <typename PointT> bool
-open_ptrack::detection::GroundplaneEstimation<PointT>::refineGround (int num_iter, float voxel_size, float inliers_threshold, Eigen::VectorXf& ground_coeffs_calib)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::refineGround (int num_iter, float voxel_size, float inliers_threshold, Eigen::VectorXf& ground_coeffs_calib)
 {
 //  PointCloudT::Ptr no_ground_cloud(new PointCloudT);
   bool updated = false;
@@ -660,7 +660,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::refineGround (int num_ite
 }
 
 //template <typename PointT> void
-//open_ptrack::detection::GroundplaneEstimation<PointT>::pp_callback (const pcl::visualization::PointPickingEvent& event, void* args)
+//open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::pp_callback (const pcl::visualization::PointPickingEvent& event, void* args)
 //{
 //  struct callback_args_color* data = (struct callback_args_color *)args;
 //  if (event.getPointIndex () == -1)
@@ -677,7 +677,7 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::refineGround (int num_ite
 //}
 
 template <typename PointT> void
-open_ptrack::detection::GroundplaneEstimation<PointT>::click_cb(int event, int x, int y, int flags, void* args)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::click_cb(int event, int x, int y, int flags, void* args)
 {
   struct callback_args_image* data = (struct callback_args_image *)args;
 
@@ -707,13 +707,13 @@ open_ptrack::detection::GroundplaneEstimation<PointT>::click_cb(int event, int x
 }
 
 template <typename PointT> bool
-open_ptrack::detection::GroundplaneEstimation<PointT>::planeHeightComparator (pcl::PlanarRegion<PointT> region1, pcl::PlanarRegion<PointT> region2)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::planeHeightComparator (pcl::PlanarRegion<PointT> region1, pcl::PlanarRegion<PointT> region2)
 {
   return region1.getCentroid()[1] > region2.getCentroid()[1];
 }
 
 template <typename PointT> pcl::PointCloud<pcl::PointXYZRGB>::Ptr
-open_ptrack::detection::GroundplaneEstimation<PointT>::colorRegions (std::vector<pcl::PlanarRegion<PointT>, Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > > regions, int index)
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::colorRegions (std::vector<pcl::PlanarRegion<PointT>, Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > > regions, int index)
 {
   // Color different planes with different colors:
   float voxel_size = 0.06;

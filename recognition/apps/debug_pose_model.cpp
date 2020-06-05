@@ -92,7 +92,7 @@
 #include <pcl/filters/passthrough.h>
 
 
-#include <open_ptrack/recognition/detection/ground_segmentation.h>
+#include <open_ptrack/ground_segmentation/ground_segmentation.h>
 #include <open_ptrack/opt_utils/conversions.h>
 
 
