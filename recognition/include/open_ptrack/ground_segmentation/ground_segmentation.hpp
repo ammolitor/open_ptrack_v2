@@ -194,7 +194,7 @@ template <typename PointT> tf::Transform
 open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::readTFFromFile (std::string filename, std::string camera_name)
 {
   tf::Transform worldToCamTransform;
-
+  //wtf is wrong w this
   std::ifstream poses_file;
   poses_file.open(filename.c_str());
   std::string line;

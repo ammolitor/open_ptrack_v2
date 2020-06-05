@@ -36,8 +36,8 @@
  *
  */
 
-#ifndef OPEN_PTRACK_RECOGNITION_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_
-#define OPEN_PTRACK_RECOGNITION_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_
+#ifndef OPEN_PTRACK_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_
+#define OPEN_PTRACK_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_
 
 #include <Eigen/Eigen>
 #include <visualization_msgs/MarkerArray.h>
@@ -223,7 +223,9 @@ namespace open_ptrack
 
         /** \brief pointer to the input cloud */
         PointCloudPtr cloud_;
-
+        
+        
+        // rid all viz
         /** \brief structure used to pass arguments to the callback function */
         //struct callback_args{
         //    pcl::PointCloud<pcl::PointXYZ>::Ptr clicked_points_3d;
@@ -245,5 +247,5 @@ namespace open_ptrack
   } /* namespace ground_segmentation */
 } /* namespace open_ptrack */
 #include <open_ptrack/ground_segmentation/ground_segmentation.hpp>
-#endif /* OPEN_PTRACK_RECOGNITION_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_ */
+#endif /* OPEN_PTRACK_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_ */
 
