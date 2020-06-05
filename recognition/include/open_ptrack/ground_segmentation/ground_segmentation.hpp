@@ -195,7 +195,7 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::readTFFromFile 
 {
   tf::Transform worldToCamTransform;
 
-  ifstream poses_file;
+  std::ifstream poses_file;
   poses_file.open(filename.c_str());
   std::string line;
   std::string pose_string;
@@ -568,7 +568,7 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::computeMulticam
     {
       // Read ground from file, if the file exists:
       std::string ground_filename = ros::package::getPath("detection") + "/conf/ground_" + frame_id + ".txt";
-      ifstream infile(ground_filename.c_str());
+      std::ifstream infile(ground_filename.c_str());
       if (infile.good())
       {
         std::ifstream ground_file (ground_filename.c_str());
