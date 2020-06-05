@@ -1502,13 +1502,12 @@ class TVMPoseNode {
       return ground_coeffs_new;
     }
 
-
     void set_ground_variables(const PointCloudT::ConstPtr& cloud_){
       std::cout << "setting ground variables." << std::endl;
       PointCloudT::Ptr cloud(new PointCloudT);
       *cloud = *cloud_;
       if (!estimate_ground_plane){
-         std::cout << "Ground plane finished already..." << std::endl;
+         std::cout << "Ground plane already initialized..." << std::endl;
       } else {
 
         PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
@@ -1614,8 +1613,6 @@ class TVMPoseNode {
           }
           no_ground_cloud_ = foreground_cloud;
         }
-
-
         // if (no_ground_cloud_->points.size() > 0)
         // {
           // Euclidean Clustering:
@@ -1657,6 +1654,8 @@ class TVMPoseNode {
           no_ground_cloud_rotated = no_ground_cloud_;
           ground_coeffs_new = ground_coeffs;
         }
+      // maybe not needed
+      estimate_ground_plane = true;
       }
     }
 
@@ -1681,6 +1680,7 @@ class TVMPoseNode {
 
       if (estimate_ground_plane) {
         set_ground_variables(cloud_);
+        estimate_ground_plane = true;
       }
 
       //tf_listener.waitForTransform(sensor_name + "_infra1_optical_frame", sensor_name + "_color_optical_frame", ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
