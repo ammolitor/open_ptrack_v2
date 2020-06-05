@@ -41,6 +41,9 @@
 
 
 #include <open_ptrack/ground_segmentation/ground_segmentation.h>
+#include<iostream>
+#include<fstream>
+using namespace std;
 
 template <typename PointT>
 open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::GroundplaneEstimation (int ground_estimation_mode, bool remote_ground_selection)
