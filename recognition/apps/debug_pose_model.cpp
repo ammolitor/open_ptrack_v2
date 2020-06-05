@@ -15,7 +15,7 @@
 #include <map>
 #include <cmath>
 #include <random>
-#include <torch/torch.h>
+#include <torch/torch.h>   
 #include <cstdio>
 #include <mutex>
 #include <memory>
@@ -80,7 +80,7 @@
 #include <pcl/conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/visualization/pcl_visualizer.h>
+//#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/sample_consensus/sac_model_plane.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/io/pcd_io.h>
