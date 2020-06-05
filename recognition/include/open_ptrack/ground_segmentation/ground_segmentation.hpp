@@ -296,15 +296,16 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
 
     // Ground plane estimation:
     std::vector<int> clicked_points_indices;
-    for (unsigned int i = 0; i < clicked_points_3d->points.size(); i++)
+    for (unsigned int i = 0; i < clicked_points_3d->points.size(); i++){
       clicked_points_indices.push_back(i);
+    }
     //    pcl::SampleConsensusModelPlane<PointT> model_plane(clicked_points_3d);
     pcl::SampleConsensusModelPlane<pcl::PointXYZRGB> model_plane(clicked_points_3d);
     model_plane.computeModelCoefficients(clicked_points_indices,ground_coeffs);
     std::cout << "Ground plane coefficients: " << ground_coeffs(0) << ", " << ground_coeffs(1) << ", " << ground_coeffs(2) <<
         ", " << ground_coeffs(3) << "." << std::endl;
-    }
-
+  }
+`
   // Semi-automatic mode:
   if (ground_estimation_mode_ == 1)
   {

@@ -1269,7 +1269,7 @@ class TVMPoseNode {
     int mean_k_denoising = 5;
     // Standard deviation for denoising (the lower it is, the stronger is the filtering) =
     float std_dev_denoising = 0.3;
-    open_ptrack::recognition::detection::GroundplaneEstimation<PointT> ground_estimator = open_ptrack::recognition::detection::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
+    open_ptrack::ground_segmentation::GroundplaneEstimation<PointT> ground_estimator = open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
     PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
     double rate_value = 60.0;
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
