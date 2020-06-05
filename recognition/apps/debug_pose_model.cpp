@@ -1345,7 +1345,8 @@ class TVMPoseNode {
 
         // Voxel grid filtering:
         std::cout << "starting voxel grid filtering: " << std::endl;
-        PointCloudT::Ptr cloud_filtered(new PointCloudT);
+        //PointCloudT::Ptr cloud_filtered(new PointCloudT);
+        cloud_filtered(new PointCloudT);
         pcl::VoxelGrid<PointT> voxel_grid_filter_object;
         voxel_grid_filter_object.setInputCloud(background_cloud);
         voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
