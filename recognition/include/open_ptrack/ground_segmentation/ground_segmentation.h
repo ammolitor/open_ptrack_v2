@@ -198,7 +198,7 @@ namespace open_ptrack
          * \param[in] region2 Second planar region.
          *
          * \return true if region2 is lower than region1.
-         */`
+         */
         static bool
         planeHeightComparator (pcl::PlanarRegion<PointT> region1, pcl::PlanarRegion<PointT> region2);
 
