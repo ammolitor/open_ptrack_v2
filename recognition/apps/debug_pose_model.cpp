@@ -1293,7 +1293,6 @@ class TVMPoseNode {
 
     PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
-      std::cout << "computing background cloud" << std::endl;
       // Initialization for background subtraction:
       PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
       std::string frame_id = cloud->header.frame_id;
@@ -1331,6 +1330,8 @@ class TVMPoseNode {
         //}
         //std::cout << "generation loop finished: " << std::endl;
 
+
+
         // Point cloud pre-processing (downsampling and filtering):
         std::cout << "computing background frame" << std::endl;
         PointCloudT::Ptr cloud_filtered(new PointCloudT);
@@ -1352,6 +1353,7 @@ class TVMPoseNode {
         background_cloud = cloud_filtered;
 
         // Background saving:
+        std::cout << "saving background file to tmp space: " << std::endl;
         pcl::io::savePCDFileASCII ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud);
 
         std::cout << "background cloud done." << std::endl << std::endl;
