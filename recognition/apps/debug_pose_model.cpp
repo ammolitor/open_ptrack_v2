@@ -1271,7 +1271,7 @@ class TVMPoseNode {
 
 
         // create callback config 
-        cfg_server.setCallback(boost::bind(&TVMPoseNode::cfg_callback, this, _1, _2));      
+        //cfg_server.setCallback(boost::bind(&TVMPoseNode::cfg_callback, this, _1, _2));      
 
         // create object-detector pointer
         //tvm_pose_detector.reset(new YoloTVMGPU256(model_folder_path));
@@ -2249,6 +2249,13 @@ class TVMPoseNode {
                   world_x_max = zone_json[zone_string]["world"]["max"]["world"]["x"];
                   world_y_max = zone_json[zone_string]["world"]["max"]["world"]["y"];
                   world_z_max = zone_json[zone_string]["world"]["max"]["world"]["z"];
+
+                  std::cout << "world_x_min: " << world_x_min << std::endl;
+                  std::cout << "world_y_min: " << world_y_min << std::endl;
+                  std::cout << "world_z_min: " << world_z_min << std::endl;
+                  std::cout << "world_x_max: " << world_x_max << std::endl;
+                  std::cout << "world_y_max: " << world_y_max << std::endl;
+                  std::cout << "world_z_max: " << world_z_max << std::endl;
 
                   Eigen::Vector3d min_vec;
                   Eigen::Vector3d max_vec;
