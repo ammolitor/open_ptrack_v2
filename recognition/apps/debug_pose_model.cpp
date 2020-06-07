@@ -2258,6 +2258,7 @@ class TVMPoseNode {
                   // a given detection can be in only one place at one time, thus it can't be in
                   // multiple zones
                   zone_string = std::to_string(zone_id);
+                  std::cout << "zone_string: " << zone_string << std::endl;
                   // type must be number but is null...
                   //https://github.com/nlohmann/json/issues/1593
 
@@ -2268,14 +2269,13 @@ class TVMPoseNode {
                   //y_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["y"];
                   //z_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["z"];
                   
-
                   // translate between world and frame
-                  world_x_min = zone_json[zone_string]["world"]["min"]["world"]["x"];
-                  world_y_min = zone_json[zone_string]["world"]["min"]["world"]["y"];
-                  world_z_min = zone_json[zone_string]["world"]["min"]["world"]["z"];
-                  world_x_max = zone_json[zone_string]["world"]["max"]["world"]["x"];
-                  world_y_max = zone_json[zone_string]["world"]["max"]["world"]["y"];
-                  world_z_max = zone_json[zone_string]["world"]["max"]["world"]["z"];
+                  world_x_min = zone_json[zone_string]["min"]["world"]["x"];
+                  world_y_min = zone_json[zone_string]["min"]["world"]["y"];
+                  world_z_min = zone_json[zone_string]["min"]["world"]["z"];
+                  world_x_max = zone_json[zone_string]["max"]["world"]["x"];
+                  world_y_max = zone_json[zone_string]["max"]["world"]["y"];
+                  world_z_max = zone_json[zone_string]["max"]["world"]["z"];
 
                   std::cout << "world_x_min: " << world_x_min << std::endl;
                   std::cout << "world_y_min: " << world_y_min << std::endl;

@@ -682,12 +682,12 @@ class TVMPoseNode {
                   // type must be number but is null...
                   //https://github.com/nlohmann/json/issues/1593
 
-                  x_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["x"];
-                  y_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["y"];
-                  z_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["z"];
-                  x_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["x"];
-                  y_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["y"];
-                  z_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["z"];
+                  x_min = zone_json[zone_string]["min"][sensor_name]["x"];
+                  y_min = zone_json[zone_string]["min"][sensor_name]["y"];
+                  z_min = zone_json[zone_string]["min"][sensor_name]["z"];
+                  x_max = zone_json[zone_string]["max"][sensor_name]["x"];
+                  y_max = zone_json[zone_string]["max"][sensor_name]["y"];
+                  z_max = zone_json[zone_string]["max"][sensor_name]["z"];
                   
                   std::cout << "x_min: " << x_min << std::endl;
                   std::cout << "y_min: " << y_min << std::endl;
@@ -700,7 +700,7 @@ class TVMPoseNode {
                   std::cout << "median_depth: " << median_depth << std::endl;
 
                   // pythonic representation of above
-                  //double x_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["x"];
+                  //double x_min = zone_json[zone_string]["min"][sensor_name]["x"];
                   //double y_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["y"];
                   //double z_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["z"];
                   //double x_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["x"];
