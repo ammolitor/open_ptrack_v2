@@ -1230,6 +1230,33 @@ class TVMPoseNode {
           max_capable_depth = master_config["max_capable_depth"];
           std::cout << "n_zones: " << n_zones << std::endl;
           json_found = true;
+
+
+          //std::vector zones[100];
+          //for (size_t zone_id = 0; zone_id < n_zones; zone_id++)
+          //{
+          //  zone_string = std::to_string(zone_id);
+
+          //  double world_x_min = zone_json[zone_string]["world"]["min"]["world"]["x"];
+          //  double world_y_min = zone_json[zone_string]["world"]["min"]["world"]["y"];
+          //  double world_z_min = zone_json[zone_string]["world"]["min"]["world"]["z"];
+          //  double world_x_max = zone_json[zone_string]["world"]["max"]["world"]["x"];
+          //  double world_y_max = zone_json[zone_string]["world"]["max"]["world"]["y"];
+          //  double world_z_max = zone_json[zone_string]["world"]["max"]["world"]["z"];
+
+          //  std::cout << "world_x_min: " << world_x_min << std::endl;
+          //  std::cout << "world_y_min: " << world_y_min << std::endl;
+          //  std::cout << "world_z_min: " << world_z_min << std::endl;
+          //  std::cout << "world_x_max: " << world_x_max << std::endl;
+          //  std::cout << "world_y_max: " << world_y_max << std::endl;
+          //  std::cout << "world_z_max: " << world_z_max << std::endl;
+
+          //  
+
+          //}
+          
+
+
         }
         catch(const std::exception& e)
         {

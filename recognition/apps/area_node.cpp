@@ -1075,19 +1075,19 @@ class AreaDefinitionNode {
       min_xyz_world_point = worldToCamTransform(min_xyz_world_point);
 
       // add float info
-      zone_json[zone_string][sensor_name]["min"]["world"]["x"] = static_cast<float>(min_xyz_world_point.getX());
-      zone_json[zone_string][sensor_name]["min"][sensor_name]["x"] = static_cast<float>(min_xyz.x);
-      zone_json[zone_string][sensor_name]["min"]["world"]["y"] = static_cast<float>(min_xyz_world_point.getY());
-      zone_json[zone_string][sensor_name]["min"][sensor_name]["y"] = static_cast<float>(min_xyz.y);
-      zone_json[zone_string][sensor_name]["min"]["world"]["z"] = static_cast<float>(min_xyz_world_point.getZ());
-      zone_json[zone_string][sensor_name]["min"][sensor_name]["z"] = static_cast<float>(min_xyz.z);     
+      zone_json[zone_string]["min"]["world"]["x"] = static_cast<float>(min_xyz_world_point.getX());
+      zone_json[zone_string]["min"][sensor_name]["x"] = static_cast<float>(min_xyz.x);
+      zone_json[zone_string]["min"]["world"]["y"] = static_cast<float>(min_xyz_world_point.getY());
+      zone_json[zone_string]["min"][sensor_name]["y"] = static_cast<float>(min_xyz.y);
+      zone_json[zone_string]["min"]["world"]["z"] = static_cast<float>(min_xyz_world_point.getZ());
+      zone_json[zone_string]["min"][sensor_name]["z"] = static_cast<float>(min_xyz.z);     
 
-      zone_json[zone_string][sensor_name]["max"]["world"]["x"] = static_cast<float>(max_xyz_world_point.getX());
-      zone_json[zone_string][sensor_name]["max"][sensor_name]["x"] = static_cast<float>(max_xyz.x);
-      zone_json[zone_string][sensor_name]["max"]["world"]["y"] = static_cast<float>(max_xyz_world_point.getY());
-      zone_json[zone_string][sensor_name]["max"][sensor_name]["y"] = static_cast<float>(max_xyz.y);
-      zone_json[zone_string][sensor_name]["max"]["world"]["z"] = static_cast<float>(max_xyz_world_point.getZ());
-      zone_json[zone_string][sensor_name]["max"][sensor_name]["z"] = static_cast<float>(max_xyz.z);  
+      zone_json[zone_string]["max"]["world"]["x"] = static_cast<float>(max_xyz_world_point.getX());
+      zone_json[zone_string]["max"][sensor_name]["x"] = static_cast<float>(max_xyz.x);
+      zone_json[zone_string]["max"]["world"]["y"] = static_cast<float>(max_xyz_world_point.getY());
+      zone_json[zone_string]["max"][sensor_name]["y"] = static_cast<float>(max_xyz.y);
+      zone_json[zone_string]["max"]["world"]["z"] = static_cast<float>(max_xyz_world_point.getZ());
+      zone_json[zone_string]["max"][sensor_name]["z"] = static_cast<float>(max_xyz.z);  
 
       // destroy the named window
       cv::destroyAllWindows(); 
