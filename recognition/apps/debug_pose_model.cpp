@@ -1688,9 +1688,9 @@ class TVMPoseNode {
       //tf::transformTFToEigen(world2rgb_transform, world2rgb);
 
       //Calculate direct and inverse transforms between camera and world frame:
-      tf_listener->lookupTransform("/world", sensor_name, ros::Time(0),
+      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
                                  world_transform);
-      tf_listener->lookupTransform(sensor_name, "/world", ros::Time(0),
+      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
                                  world_inverse_transform);
 
       std::cout << "running algorithm callback" << std::endl;
