@@ -1190,6 +1190,13 @@ class TVMPoseNode {
     // out of frame resources at 60./
     // try 30, then 15
     double rate_value = 1.0;
+
+    // Image to "world" transforms
+    Eigen::Affine3d world2rgb;
+    tf::StampedTransform world2rgb_transform;
+    tf::StampedTransform transform;
+    tf::StampedTransform inverse_transform;
+
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
     //transform = transform.Identity();
@@ -1274,7 +1281,7 @@ class TVMPoseNode {
         // TODO add that to debugger
         tvm_pose_detector.reset(new PoseFromConfig("/cfg/pose_model.json", "recognition"));
         sensor_name = sensor_string;
-        worldToCamTransform = read_poses_from_json(sensor_name);
+        //worldToCamTransform = read_poses_from_json(sensor_name);
       
         // 0 == manual
       }
@@ -1288,7 +1295,6 @@ class TVMPoseNode {
       _constant_y = 1.0f /  msg->K[4];
       camera_info_available_flag = true;
     }
-
 
 
     PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
@@ -1675,6 +1681,17 @@ class TVMPoseNode {
                   const sensor_msgs::Image::ConstPtr& depth_image,
                   const PointCloudT::ConstPtr& cloud_,
                   json zone_json) {
+
+      //tf_listener.waitForTransform("/world", sensor_name, ros::Time(0), ros::Duration(3.0), ros::Duration(0.01));
+      //tf_listener.lookupTransform("/world", sensor_name, ros::Time(0), world2rgb_transform);
+      // transform to eigen
+      //tf::transformTFToEigen(world2rgb_transform, world2rgb);
+
+      //Calculate direct and inverse transforms between camera and world frame:
+      tf_listener->lookupTransform("/world", sensor_name, ros::Time(0),
+                                 transform);
+      tf_listener->lookupTransform(sensor_name, "/world", ros::Time(0),
+                                 inverse_transform);
 
       std::cout << "running algorithm callback" << std::endl;
 
@@ -2189,6 +2206,7 @@ class TVMPoseNode {
 
               // adding this so scan which zone the given detection is in 
               if (json_found){
+                
                 bool inside_area_cube = false;
                 int zone_id;
                 std::string zone_string;                  
@@ -2198,6 +2216,12 @@ class TVMPoseNode {
                 double x_max;
                 double y_max;
                 double z_max;
+                double world_x_min;
+                double world_y_min;
+                double world_z_min;
+                double world_x_max;
+                double world_y_max;
+                double world_z_max;
                 for (zone_id = 0; zone_id < n_zones; zone_id++)
                 {
                   // need a world view here bc each detection was transformed
@@ -2210,13 +2234,37 @@ class TVMPoseNode {
                   // type must be number but is null...
                   //https://github.com/nlohmann/json/issues/1593
 
-                  x_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["x"];
-                  y_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["y"];
-                  z_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["z"];
-                  x_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["x"];
-                  y_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["y"];
-                  z_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["z"];
+                  //x_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["x"];
+                  //y_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["y"];
+                  //z_min = zone_json[zone_string][sensor_name]["min"][sensor_name]["z"];
+                  //x_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["x"];
+                  //y_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["y"];
+                  //z_max = zone_json[zone_string][sensor_name]["max"][sensor_name]["z"];
                   
+
+                  // translate between world and frame
+                  world_x_min = zone_json[zone_string]["world"]["min"]["world"]["x"];
+                  world_y_min = zone_json[zone_string]["world"]["min"]["world"]["y"];
+                  world_z_min = zone_json[zone_string]["world"]["min"]["world"]["z"];
+                  world_x_max = zone_json[zone_string]["world"]["max"]["world"]["x"];
+                  world_y_max = zone_json[zone_string]["world"]["max"]["world"]["y"];
+                  world_z_max = zone_json[zone_string]["world"]["max"]["world"]["z"];
+
+                  Eigen::Vector3d min_vec;
+                  Eigen::Vector3d max_vec;
+                  tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
+                  tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
+                  
+                  min_point = transform(min_point);
+                  max_point = transform(max_point);
+
+                  x_min = min_point.getX();
+                  y_min = min_point.getY();
+                  z_min = min_point.getZ();
+                  x_max = min_point.getX();
+                  y_max = min_point.getY();
+                  z_max = min_point.getZ();
+
                   std::cout << "x_min: " << x_min << std::endl;
                   std::cout << "y_min: " << y_min << std::endl;
                   std::cout << "z_min: " << z_min << std::endl;
