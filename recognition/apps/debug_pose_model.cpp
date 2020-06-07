@@ -1194,8 +1194,8 @@ class TVMPoseNode {
     // Image to "world" transforms
     Eigen::Affine3d world2rgb;
     tf::StampedTransform world2rgb_transform;
-    tf::StampedTransform transform;
-    tf::StampedTransform inverse_transform;
+    tf::StampedTransform world_transform;
+    tf::StampedTransform world_inverse_transform;
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
@@ -1689,9 +1689,9 @@ class TVMPoseNode {
 
       //Calculate direct and inverse transforms between camera and world frame:
       tf_listener->lookupTransform("/world", sensor_name, ros::Time(0),
-                                 transform);
+                                 world_transform);
       tf_listener->lookupTransform(sensor_name, "/world", ros::Time(0),
-                                 inverse_transform);
+                                 world_inverse_transform);
 
       std::cout << "running algorithm callback" << std::endl;
 
@@ -2255,8 +2255,8 @@ class TVMPoseNode {
                   tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
                   tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
                   
-                  min_point = transform(min_point);
-                  max_point = transform(max_point);
+                  min_point = world_transform(min_point);
+                  max_point = world_transform(max_point);
 
                   x_min = min_point.getX();
                   y_min = min_point.getY();
