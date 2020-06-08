@@ -150,16 +150,23 @@ TrackerObject::newFrame(const std::vector<open_ptrack::detection::Detection>& de
 void
 TrackerObject::updateTracks()
 {
+  std::cout << "createDistanceMatrix" << std::endl;
   createDistanceMatrix();
+  std::cout << "createCostMatrix" << std::endl;
   createCostMatrix();
 
+  std::cout << "Solve Global Nearest Neighbor problem:" << std::endl;
   // Solve Global Nearest Neighbor problem:
   Munkres munkres;
   cost_matrix_ = munkres.solve(cost_matrix_, false);	// rows: targets (tracks), cols: detections
 
+  std::cout << "updateDetectedTracks" << std::endl;
   updateDetectedTracks();
+  std::cout << "fillUnassociatedDetections" << std::endl;
   fillUnassociatedDetections();
+  std::cout << "updateLostTracks" << std::endl;
   updateLostTracks();
+  std::cout << "createNewTracks" << std::endl;
   createNewTracks();
 }
 

@@ -60,6 +60,7 @@
         "random": "cpp",
         "core": "cpp",
         "numericaldiff": "cpp",
-        "eigen": "cpp"
+        "eigen": "cpp",
+        "*.ipp": "cpp"
     }
 }
