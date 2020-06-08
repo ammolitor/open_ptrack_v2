@@ -145,7 +145,11 @@ class TVMHandDetectionNode {
     double _constant_x;
     double _constant_y;
     image_transport::ImageTransport it;
-
+    // Image to "world" transforms
+    Eigen::Affine3d world2rgb;
+    tf::StampedTransform world2rgb_transform;
+    tf::StampedTransform world_transform;
+    tf::StampedTransform world_inverse_transform;
     /**
      * @brief constructor
      * @param nh node handler

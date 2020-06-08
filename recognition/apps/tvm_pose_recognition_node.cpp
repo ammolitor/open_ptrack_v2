@@ -238,7 +238,11 @@ class TVMPoseNode {
     // use this for tests
     bool json_found = false;
     float max_capable_depth = 10.0; // 6.25 is what the default is;
-
+    // Image to "world" transforms
+    Eigen::Affine3d world2rgb;
+    tf::StampedTransform world2rgb_transform;
+    tf::StampedTransform world_transform;
+    tf::StampedTransform world_inverse_transform;
     /**
      * @brief constructor
      * @param nh node handler
@@ -334,7 +338,11 @@ class TVMPoseNode {
     void callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                   const sensor_msgs::Image::ConstPtr& depth_image,
                   json zone_json) {
-        
+      //Calculate direct and inverse transforms between camera and world frame:
+      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
+                                 world_transform);
+      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
+                                 world_inverse_transform);
       std::cout << "running algorithm callback" << std::endl;
 
       // how to persist zone_json;
@@ -670,6 +678,12 @@ class TVMPoseNode {
                 double x_max;
                 double y_max;
                 double z_max;
+                double world_x_min;
+                double world_y_min;
+                double world_z_min;
+                double world_x_max;
+                double world_y_max;
+                double world_z_max;
                 for (zone_id = 0; zone_id < n_zones; zone_id++)
                 {
                   // need a world view here bc each detection was transformed
@@ -682,13 +696,43 @@ class TVMPoseNode {
                   // type must be number but is null...
                   //https://github.com/nlohmann/json/issues/1593
 
-                  x_min = zone_json[zone_string]["min"][sensor_name]["x"];
-                  y_min = zone_json[zone_string]["min"][sensor_name]["y"];
-                  z_min = zone_json[zone_string]["min"][sensor_name]["z"];
-                  x_max = zone_json[zone_string]["max"][sensor_name]["x"];
-                  y_max = zone_json[zone_string]["max"][sensor_name]["y"];
-                  z_max = zone_json[zone_string]["max"][sensor_name]["z"];
+                  //x_min = zone_json[zone_string]["min"][sensor_name]["x"];
+                  //y_min = zone_json[zone_string]["min"][sensor_name]["y"];
+                  //z_min = zone_json[zone_string]["min"][sensor_name]["z"];
+                  //x_max = zone_json[zone_string]["max"][sensor_name]["x"];
+                  //y_max = zone_json[zone_string]["max"][sensor_name]["y"];
+                  //z_max = zone_json[zone_string]["max"][sensor_name]["z"];
                   
+                  // translate between world and frame
+                  world_x_min = zone_json[zone_string]["min"]["world"]["x"];
+                  world_y_min = zone_json[zone_string]["min"]["world"]["y"];
+                  world_z_min = zone_json[zone_string]["min"]["world"]["z"];
+                  world_x_max = zone_json[zone_string]["max"]["world"]["x"];
+                  world_y_max = zone_json[zone_string]["max"]["world"]["y"];
+                  world_z_max = zone_json[zone_string]["max"]["world"]["z"];
+
+                  std::cout << "world_x_min: " << world_x_min << std::endl;
+                  std::cout << "world_y_min: " << world_y_min << std::endl;
+                  std::cout << "world_z_min: " << world_z_min << std::endl;
+                  std::cout << "world_x_max: " << world_x_max << std::endl;
+                  std::cout << "world_y_max: " << world_y_max << std::endl;
+                  std::cout << "world_z_max: " << world_z_max << std::endl;
+
+                  Eigen::Vector3d min_vec;
+                  Eigen::Vector3d max_vec;
+                  tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
+                  tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
+                  
+                  min_point = world_transform(min_point);
+                  max_point = world_transform(max_point);
+
+                  x_min = min_point.getX();
+                  y_min = min_point.getY();
+                  z_min = min_point.getZ();
+                  x_max = min_point.getX();
+                  y_max = min_point.getY();
+                  z_max = min_point.getZ();
+
                   std::cout << "x_min: " << x_min << std::endl;
                   std::cout << "y_min: " << y_min << std::endl;
                   std::cout << "z_min: " << z_min << std::endl;
