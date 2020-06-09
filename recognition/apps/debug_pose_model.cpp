@@ -1973,6 +1973,10 @@ class TVMPoseNode {
               Eigen::Vector3f middle_vec = Eigen::Vector3f(cloud_->at(median_x,median_y).x, 
                                                            cloud_->at(median_x,median_y).y,
                                                            cloud_->at(median_x,median_y).z);
+              
+              std::cout << "middle.x: " <<  middle.x << std::endl;
+              std::cout << "middle.x: " <<  middle.x << std::endl;
+              std::cout << "middle.x: " <<  middle.x << std::endl;
 
               // head
               Point3f top;
@@ -1990,6 +1994,11 @@ class TVMPoseNode {
                                                         cloud_->at(top_cast_x,top_cast_y).y,
                                                         cloud_->at(top_cast_x,top_cast_y).z);
 
+              std::cout << "top.x: " <<  top.x << std::endl;
+              std::cout << "top.x: " <<  top.x << std::endl;
+              std::cout << "top.x: " <<  top.x << std::endl;
+
+
               float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
            
               // just bottom of box should be ok?
@@ -2001,7 +2010,10 @@ class TVMPoseNode {
               Eigen::Vector3f bottom_vec = Eigen::Vector3f(cloud_->at(median_x,new_y).x, 
                                                            cloud_->at(median_x,new_y).y,
                                                            cloud_->at(median_x,new_y).z);
-              
+              std::cout << "bottom.x: " <<  bottom.x << std::endl;
+              std::cout << "bottom.x: " <<  bottom.x << std::endl;
+              std::cout << "bottom.x: " <<  bottom.x << std::endl;              
+
               Eigen::Vector3f centroid3d = anti_transform * middle_vec;
               Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
 
@@ -2043,7 +2055,7 @@ class TVMPoseNode {
               converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
               converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
 
-
+              // could probably add a .p2 to this 
               detection_msg.box_3D.p1.x = mx;
               detection_msg.box_3D.p1.y = my;
               detection_msg.box_3D.p1.z = median_depth;

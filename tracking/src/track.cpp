@@ -121,6 +121,11 @@ namespace open_ptrack
     Track::init(double x, double y, double z, double height, double distance,
         open_ptrack::detection::DetectionSource* detection_source)
     {
+      std::cout << "x: " << x << std::endl;
+      std::cout << "y: " << y << std::endl;
+      std::cout << "z: " << z << std::endl;
+      std::cout << "distance: " << distance << std::endl;
+      
       //Init Kalman filter
       filter_->init(x, y, distance, velocity_in_motion_term_);
       z_ = z;
