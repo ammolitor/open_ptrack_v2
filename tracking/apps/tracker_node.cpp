@@ -217,9 +217,9 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
   ros::Time frame_time = msg->header.stamp;
 
   std::string frame_id_tmp = frame_id;
-  int pos = frame_id_tmp.find("_rgb_optical_frame");
+  int pos = frame_id_tmp.find("_color_optical_frame");
   if (pos != std::string::npos)
-    frame_id_tmp.replace(pos, std::string("_rgb_optical_frame").size(), "");
+    frame_id_tmp.replace(pos, std::string("_color_optical_frame").size(), "");
   pos = frame_id_tmp.find("_depth_optical_frame");
   if (pos != std::string::npos)
   frame_id_tmp.replace(pos, std::string("_depth_optical_frame").size(), "");
