@@ -91,9 +91,11 @@ TrackObject::~TrackObject()
 void
 TrackObject::init(const TrackObject& old_track)
 {
+  std::cout << "TrackObject::init::getState" << std::endl;
   double x, y;
   old_track.filter_->getState(x, y);
 
+  std::cout << "TrackObject::init::filter_->init" << std::endl;
   filter_->init(x, y, 10, old_track.velocity_in_motion_term_);
 
   *tmp_filter_ = *filter_;
@@ -196,17 +198,21 @@ TrackObject::update(
 
   for(int i = 0; i < framesLost; i++)
   {
+    std::cout << "framesLost TrackObject::update::filter_->predict" << std::endl;
     filter_->predict();
+    std::cout << "framesLost TrackObject::update::filter_->update" << std::endl;
     filter_->update();
   }
-
+  std::cout << "TrackObject::update::filter_->predict" << std::endl;
   filter_->predict();
   if (velocity_in_motion_term_)
   {
+    std::cout << "velocity_in_motion_term_ TrackObject::update::filter_->update" << std::endl;
     filter_->update(x, y, vx, vy, distance);
   }
   else
   {
+    std::cout << "not velocity_in_motion_term_ TrackObject::update::filter_->update" << std::endl;
     filter_->update(x, y, distance);
   }
 
@@ -215,8 +221,12 @@ TrackObject::update(
   last_time_predicted_index_ = (MAX_SIZE + last_time_predicted_index_ + difference) % MAX_SIZE;
   last_time_predicted_ = last_time_detected_ = detection_source->getTime();
   if (velocity_in_motion_term_)
+    std::cout << "velocity_in_motion_term_ TrackObject::update:: update(x,y,vx,vy) " << std::endl;
+    filter_->update(x, y, vx, vy, distance);
+    std::cout << "velocity_in_motion_term_ TrackObject::update::  filter_->getMahalanobisParameters" << std::endl;
     filter_->getMahalanobisParameters(mahalanobis_map4d_[last_time_predicted_index_]);
   else
+    std::cout << "not velocity_in_motion_term_ TrackObject::update::  filter_->getMahalanobisParameters" << std::endl;
     filter_->getMahalanobisParameters(mahalanobis_map2d_[last_time_predicted_index_]);
 
   // Update z_ and height_ with a weighted combination of current and new values:
