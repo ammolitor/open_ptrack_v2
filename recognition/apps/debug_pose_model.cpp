@@ -1975,8 +1975,8 @@ class TVMPoseNode {
                                                            cloud_->at(median_x,median_y).z);
               
               std::cout << "middle.x: " <<  middle.x << std::endl;
-              std::cout << "middle.x: " <<  middle.x << std::endl;
-              std::cout << "middle.x: " <<  middle.x << std::endl;
+              std::cout << "middle.y: " <<  middle.y << std::endl;
+              std::cout << "middle.z: " <<  middle.z << std::endl;
 
               // head
               Point3f top;
@@ -1995,9 +1995,8 @@ class TVMPoseNode {
                                                         cloud_->at(top_cast_x,top_cast_y).z);
 
               std::cout << "top.x: " <<  top.x << std::endl;
-              std::cout << "top.x: " <<  top.x << std::endl;
-              std::cout << "top.x: " <<  top.x << std::endl;
-
+              std::cout << "top.y: " <<  top.y << std::endl;
+              std::cout << "top.z: " <<  top.z << std::endl;
 
               float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
            
@@ -2011,10 +2010,11 @@ class TVMPoseNode {
                                                            cloud_->at(median_x,new_y).y,
                                                            cloud_->at(median_x,new_y).z);
               std::cout << "bottom.x: " <<  bottom.x << std::endl;
-              std::cout << "bottom.x: " <<  bottom.x << std::endl;
-              std::cout << "bottom.x: " <<  bottom.x << std::endl;              
+              std::cout << "bottom.y: " <<  bottom.y << std::endl;
+              std::cout << "bottom.z: " <<  bottom.z << std::endl;              
 
               Eigen::Vector3f centroid3d = anti_transform * middle_vec;
+              std::cout << "centroid3d: " <<  centroid3d << std::endl;
               Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
 
               Eigen::Vector3f top3d = anti_transform * top_vec;
