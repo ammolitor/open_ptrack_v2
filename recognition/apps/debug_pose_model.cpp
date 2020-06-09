@@ -1967,9 +1967,9 @@ class TVMPoseNode {
               opt_msgs::Detection detection_msg;
               Point3f middle;
               Point3f world_to_temp;
-              middle.x = cloud_->at(median_x,median_y).x;
-              middle.y = cloud_->at(median_x,median_y).y;
-              middle.z = cloud_->at(median_x,median_y).z;
+              middle.x = mx;
+              middle.y = my;
+              middle.z = median_depth;
               Eigen::Vector3f middle_vec = Eigen::Vector3f(cloud_->at(median_x,median_y).x, 
                                                            cloud_->at(median_x,median_y).y,
                                                            cloud_->at(median_x,median_y).z);
@@ -1985,10 +1985,14 @@ class TVMPoseNode {
               // top.z = cloud_->at(new_x,median_y).z
               cv::Point3f head = points[0];
               int top_cast_x = static_cast<int>(head.x);
-              int top_cast_y = static_cast<int>(head.y);   
-              top.x = cloud_->at(top_cast_x,top_cast_y).x;
-              top.y = cloud_->at(top_cast_x,top_cast_y).y;
-              top.z = cloud_->at(top_cast_x,top_cast_y).z;
+              int top_cast_y = static_cast<int>(head.y);  
+              top.x = (head.x - _cx) * head.z * _constant_x;
+              top.y = (head.y - _cy) * head.z * _constant_y;
+              top.y = head.z
+
+              //top.x = cloud_->at(top_cast_x,top_cast_y).x;
+              //top.y = cloud_->at(top_cast_x,top_cast_y).y;
+              //top.z = cloud_->at(top_cast_x,top_cast_y).z;
 
               Eigen::Vector3f top_vec = Eigen::Vector3f(cloud_->at(top_cast_x,top_cast_y).x, 
                                                         cloud_->at(top_cast_x,top_cast_y).y,
@@ -1999,13 +2003,18 @@ class TVMPoseNode {
               std::cout << "top.z: " <<  top.z << std::endl;
 
               float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
-           
+
               // just bottom of box should be ok?
               // could just do feet / 2
               Point3f bottom;
-              bottom.x = cloud_->at(median_x,new_y).x;
-              bottom.y = cloud_->at(median_x,new_y).y;
-              bottom.z = cloud_->at(median_x,new_y).z;
+              //bottom.x = cloud_->at(median_x,new_y).x;
+              //bottom.y = cloud_->at(median_x,new_y).y;
+              //bottom.z = cloud_->at(median_x,new_y).z;
+              // or maybe like use the points???
+              bottom.x = (median_x - _cx) * median_depth * _constant_x;
+              bottom.y = (new_y - _cy) * median_depth * _constant_y;
+              top.y = median_depth              
+              
               Eigen::Vector3f bottom_vec = Eigen::Vector3f(cloud_->at(median_x,new_y).x, 
                                                            cloud_->at(median_x,new_y).y,
                                                            cloud_->at(median_x,new_y).z);
@@ -2029,31 +2038,76 @@ class TVMPoseNode {
 
               tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
 
-              float enlarge_factor = 1.1;
-              float pixel_xc = centroid2d(0);
-              float pixel_yc = centroid2d(1);
-              float pixel_height = (bottom2d(1) - top2d(1)) * enlarge_factor;
-              float pixel_width = pixel_height / 2;
-              detection_msg.box_2D.x = int(centroid2d(0) - pixel_width/2.0);
-              detection_msg.box_2D.y = int(centroid2d(1) - pixel_height/2.0);
-              detection_msg.box_2D.width = int(pixel_width);
-              detection_msg.box_2D.height = int(pixel_height);
+              if (use_pointcloud){
 
-              // get height
-              float sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
-              Eigen::Vector4f height_point;
-              height_point << top.x, top.y, top.z, 1.0f;
-              float height = std::fabs(height_point.dot(ground_coeffs));
-              height /= sqrt_ground_coeffs;
-              //height_ = height;
-              float distance_ = std::sqrt(top.x * top.x + top.z * top.z);
-               float head_centroid_compensation = 0.05;
-              detection_msg.height = height;
-              detection_msg.confidence = score;
-              detection_msg.distance = head_z;
-              converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
-              converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
-              converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
+                float enlarge_factor = 1.1;
+                float pixel_xc = centroid2d(0);
+                float pixel_yc = centroid2d(1);
+                float pixel_height = (bottom2d(1) - top2d(1)) * enlarge_factor;
+                float pixel_width = pixel_height / 2;
+                detection_msg.box_2D.x = int(centroid2d(0) - pixel_width/2.0);
+                detection_msg.box_2D.y = int(centroid2d(1) - pixel_height/2.0);
+                detection_msg.box_2D.width = int(pixel_width);
+                detection_msg.box_2D.height = int(pixel_height);
+
+                // get height
+                float sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
+                Eigen::Vector4f height_point;
+                height_point << top.x, top.y, top.z, 1.0f;
+                float height = std::fabs(height_point.dot(ground_coeffs));
+                height /= sqrt_ground_coeffs;
+                //height_ = height;
+                float distance_ = std::sqrt(top.x * top.x + top.z * top.z);
+                float head_centroid_compensation = 0.05;
+                detection_msg.height = height;
+                detection_msg.confidence = score;
+                detection_msg.distance = head_z;
+                converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
+                converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
+                converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
+              } else {
+
+                float enlarge_factor = 1.1;
+                //float pixel_xc = centroid2d(0);
+                //float pixel_yc = centroid2d(1);
+                float pixel_height = (bottom.y - top.y);// * enlarge_factor;
+                float pixel_width = pixel_height / 2;
+                detection_msg.box_2D.x = mx;
+                detection_msg.box_2D.y = my;
+                detection_msg.box_2D.width = int(pixel_width);
+                detection_msg.box_2D.height = int(pixel_height);
+
+                // get height
+                float sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
+                Eigen::Vector4f height_point;
+                height_point << top.x, top.y, top.z, 1.0f;
+                float height = std::fabs(height_point.dot(ground_coeffs));
+                height /= sqrt_ground_coeffs;
+                //height_ = height;
+                float distance_ = std::sqrt(top.x * top.x + top.z * top.z);
+                float head_centroid_compensation = 0.05;
+                detection_msg.height = height;
+                detection_msg.confidence = score;
+                detection_msg.distance = head.z;
+                //converter.Vector3fToVector3((/centroid3d.norm())*centroid3d, detection_msg.centroid);
+                //converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
+                //converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
+                
+                Eigen::Vector3f topv = Eigen::Vector3f(top.x, 
+                                                           top.y,
+                                                           top.z);
+                Eigen::Vector3f middlev = Eigen::Vector3f(middle.x, 
+                                                                          middle.y,
+                                                                          middle.z);                
+                Eigen::Vector3f bottomv = Eigen::Vector3f(bottom.x, 
+                                                           bottom.y,
+                                                           bottom.z);
+                converter.Vector3fToVector3((1+head_centroid_compensation/middlev.norm())*middlev, detection_msg.centroid);
+                converter.Vector3fToVector3((1+head_centroid_compensation/topv.norm())*topv, detection_msg.top);
+                converter.Vector3fToVector3((1+head_centroid_compensation/bottomv.norm())*bottomv, detection_msg.bottom);
+              }
+
+
 
               // could probably add a .p2 to this 
               detection_msg.box_3D.p1.x = mx;
