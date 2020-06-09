@@ -127,7 +127,7 @@ bool calibration_refinement;
 std::map<std::string, Eigen::Matrix4d> registration_matrices;
 double max_detection_delay;
 ros::Time latest_time;
-
+double maximum_distance;
 std::map<std::string, ros::Time> last_received_detection_;
 ros::Duration max_time_between_detections_;
 
@@ -858,7 +858,7 @@ main(int argc, char** argv)
   double sec_before_old;
   nh.param("sec_before_old", sec_before_old, 3.6);
 
-  double maximum_distance;
+  //double maximum_distance;
   nh.param("maximum_distance", maximum_distance, 6.25);
 
   double sec_before_fake;
