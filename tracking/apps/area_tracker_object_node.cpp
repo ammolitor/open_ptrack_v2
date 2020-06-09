@@ -438,6 +438,8 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
           double new_confidence = detections_vector[i].getConfidence();
           new_confidence = (new_confidence - (-3)) / 3 * 4 + 2;
           detections_vector[i].setConfidence(new_confidence);
+        } else {
+          std::cout << "rejecting observation! distance: " << object_distance << std::endl;
         }
 //        std::cout<< detections_vector[i].getConfidence() << std::endl;
       }
