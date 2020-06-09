@@ -274,11 +274,15 @@ namespace open_ptrack
       observation[2] = z;
 
       //printf("%d %f %f %f ", _id, x, y, height);
-
+      std::cout << "observation[0] = x: " << observation[0] << std::endl;
+      std::cout << "observation[1] = y; " << observation[1] << std::endl;
+      std::cout << "observation[2] = z; " << observation[2] << std::endl;
       observe_model_->Zv[0] = position_variance_ + std::pow(distance, 4) * depth_multiplier_;
       observe_model_->Zv[1] = position_variance_ + std::pow(distance, 4) * depth_multiplier_;
       observe_model_->Zv[2] = position_variance_ + std::pow(distance, 4) * depth_multiplier_;
-
+      std::cout << "observe_model_->Zv[0]" << observe_model_->Zv[0] << std::endl;
+      std::cout << "observe_model_->Zv[1]" << observe_model_->Zv[1] << std::endl;
+      std::cout << "observe_model_->Zv[2]" << observe_model_->Zv[2] << std::endl;
       filter_->observe(*observe_model_, observation);
       filter_->update();
       //filter_->update_XX(2.0);
@@ -297,6 +301,12 @@ namespace open_ptrack
       observation[3] = vx;
       observation[4] = vy;
       observation[5] = vz;
+      std::cout << "observation[0] = x: " << observation[0] << std::endl;
+      std::cout << "observation[1] = y; " << observation[1] << std::endl;
+      std::cout << "observation[2] = z; " << observation[2] << std::endl;\
+      std::cout << "observation[3] = vx; " << observation[3] << std::endl;
+      std::cout << "observation[4] = vy; " << observation[4] << std::endl;
+      std::cout << "observation[5] = vz; " << observation[5] << std::endl;
 
       //printf("%d %f %f %f ", _id, x, y, height);
 
