@@ -306,11 +306,11 @@ TrackerObject::appendToPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& pointc
 int
 TrackerObject::createNewTrack(open_ptrack::detection::Detection& detection)
 {
-  std::cout >> "getConfidence" << std::endl; 
+  std::cout << "getConfidence" << std::endl; 
   if(detection.getConfidence() < min_confidence_)
     return -1;
 
-  std::cout >> "new tracking pointer" << std::endl;
+  std::cout << "new tracking pointer" << std::endl;
   open_ptrack::tracking::TrackObject* t;
   t = new open_ptrack::tracking::TrackObject(
         ++tracks_counter_,
@@ -320,11 +320,11 @@ TrackerObject::createNewTrack(open_ptrack::detection::Detection& detection)
         period_,
         velocity_in_motion_term_  );
   
-  std::cout >> "t->init" << std::endl;
+  std::cout << "t->init" << std::endl;
   t->init(detection.getWorldCentroid()(0), detection.getWorldCentroid()(1),detection.getWorldCentroid()(2),
           detection.getHeight(), detection.getDistance(), detection.getObjectName(), detection.get_zone_id(), detection.getSource());
 
-  std::cout >> "t->update" << std::endl;
+  std::cout << "t->update" << std::endl;
   bool first_update = true;
   t->update(detection.getWorldCentroid()(0), detection.getWorldCentroid()(1), detection.getWorldCentroid()(2),
             detection.getHeight(), detection.getDistance(), detection.getObjectName(),0.0,
