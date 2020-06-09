@@ -1988,7 +1988,7 @@ class TVMPoseNode {
               int top_cast_y = static_cast<int>(head.y);  
               top.x = (head.x - _cx) * head.z * _constant_x;
               top.y = (head.y - _cy) * head.z * _constant_y;
-              top.y = head.z
+              top.y = head.z;
 
               //top.x = cloud_->at(top_cast_x,top_cast_y).x;
               //top.y = cloud_->at(top_cast_x,top_cast_y).y;
@@ -2013,7 +2013,7 @@ class TVMPoseNode {
               // or maybe like use the points???
               bottom.x = (median_x - _cx) * median_depth * _constant_x;
               bottom.y = (new_y - _cy) * median_depth * _constant_y;
-              top.y = median_depth              
+              top.y = median_depth;              
               
               Eigen::Vector3f bottom_vec = Eigen::Vector3f(cloud_->at(median_x,new_y).x, 
                                                            cloud_->at(median_x,new_y).y,
@@ -2037,7 +2037,7 @@ class TVMPoseNode {
               world_to_temp.z =  static_cast<float>(middle.z);
 
               tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
-
+              bool use_pointcloud = false;
               if (use_pointcloud){
 
                 float enlarge_factor = 1.1;
