@@ -220,15 +220,17 @@ TrackObject::update(
   difference = int(round((detection_source->getTime() - last_time_predicted_).toSec() / period_));
   last_time_predicted_index_ = (MAX_SIZE + last_time_predicted_index_ + difference) % MAX_SIZE;
   last_time_predicted_ = last_time_detected_ = detection_source->getTime();
-  if (velocity_in_motion_term_)
+  if (velocity_in_motion_term_) {
     std::cout << "velocity_in_motion_term_ TrackObject::update:: update(x,y,vx,vy) " << std::endl;
     filter_->update(x, y, vx, vy, distance);
     std::cout << "velocity_in_motion_term_ TrackObject::update::  filter_->getMahalanobisParameters" << std::endl;
     filter_->getMahalanobisParameters(mahalanobis_map4d_[last_time_predicted_index_]);
+  }
   else
+  {
     std::cout << "not velocity_in_motion_term_ TrackObject::update::  filter_->getMahalanobisParameters" << std::endl;
     filter_->getMahalanobisParameters(mahalanobis_map2d_[last_time_predicted_index_]);
-
+  }
   // Update z_ and height_ with a weighted combination of current and new values:
   z_ = z_ * 0.9 + z * 0.1;
   height_ = height_ * 0.9 + height * 0.1;
