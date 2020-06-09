@@ -57,6 +57,8 @@ sec_before_fake: 2.4
 sec_remain_new: 1.2
 # Minimum number of detection<->track associations needed for validating a track:
 detections_to_validate: 3
+# the maximum distance allowed for a given detection ~6.3 causes numerical issues. this is in meters
+maximum_distance: 6.25
 
 ###########
 ## Debug ##

@@ -1130,7 +1130,7 @@ class TVMPoseNode {
     int n_zones;
     // use this for tests
     bool json_found = false;
-    float max_capable_depth = 10.0; // 6.25 is what the default is;
+    float max_capable_depth = 6.25; // 6.25 is what the default is;
     /** \brief transforms used for compensating sensor tilt with respect to the ground plane */
     // Initialize transforms to be used to correct sensor tilt to identity matrix:
     Eigen::Affine3f transform, transform_, anti_transform, anti_transform_;
@@ -1206,7 +1206,7 @@ class TVMPoseNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json):
+    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json, double max_distance):
       node_(nh), it(node_)
       {
         
@@ -1309,7 +1309,7 @@ class TVMPoseNode {
         tvm_pose_detector.reset(new PoseFromConfig("/cfg/pose_model.json", "recognition"));
         sensor_name = sensor_string;
         //worldToCamTransform = read_poses_from_json(sensor_name);
-      
+        max_capable_depth = max_distance;
         // 0 == manual
       }
 
@@ -1943,7 +1943,6 @@ class TVMPoseNode {
           //float median_depth = cv_depth_image.at<float>(median_y, median_x) / 1000.0f;
           float median_depth = cv_depth_image.at<float>(ymax, median_x) / mm_factor;
 
-
           if (median_depth <= 0 || median_depth > max_capable_depth) {
             std::cout << "median_depth " << median_depth << " rejecting" << std::endl;
             continue;
@@ -2400,6 +2399,7 @@ int main(int argc, char** argv) {
   // NOTE: using json in main() is the way to persist across callbacks...
 
   std::string sensor_name;
+  double max_distance;
   //json master_config;
   //std::string package_path = ros::package::getPath("recognition");
   //std::string master_hard_coded_path = package_path + "/cfg/master.json";
@@ -2419,9 +2419,10 @@ int main(int argc, char** argv) {
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
+  pnh.param("max_distance", max_distance, 6.25);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMPoseNode node(nh, sensor_name, zone_json);
+  TVMPoseNode node(nh, sensor_name, zone_json, max_distance);
   std::cout << "detection node init " << std::endl;
   ros::spin();
   return 0;

@@ -433,11 +433,12 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
 //        new_confidence = (new_confidence - min_confidence_detections_sr) / (min_confidence_sr - min_confidence_detections_sr) *
 //                         (min_confidence - min_confidence_detections) + min_confidence_detections;
 //        detections_vector[i].setConfidence(new_confidence+2);
-
-        double new_confidence = detections_vector[i].getConfidence();
-        new_confidence = (new_confidence - (-3)) / 3 * 4 + 2;
-        detections_vector[i].setConfidence(new_confidence);
-
+        double object_distance = detections_vector[i].getDistance();
+        if(object_distance < maximum_distance) {
+          double new_confidence = detections_vector[i].getConfidence();
+          new_confidence = (new_confidence - (-3)) / 3 * 4 + 2;
+          detections_vector[i].setConfidence(new_confidence);
+        }
 //        std::cout<< detections_vector[i].getConfidence() << std::endl;
       }
     }
@@ -856,6 +857,9 @@ main(int argc, char** argv)
 
   double sec_before_old;
   nh.param("sec_before_old", sec_before_old, 3.6);
+
+  double maximum_distance;
+  nh.param("maximum_distance", maximum_distance, 6.25);
 
   double sec_before_fake;
   nh.param("sec_before_fake", sec_before_fake, 2.4);
