@@ -131,6 +131,12 @@ TrackObject::init(double x, double y, double z, double height, double distance, 
                    open_ptrack::detection::DetectionSource* detection_source)
 {
   //Init Kalman filter
+  std::cout << "TrackObject::init:: filter_->init(x, y, distance, velocity_in_motion_term_)" << std::endl;
+  std::cout << "x: " << x << std::endl;
+  std::cout << "y: " << y << std::endl;
+  std::cout << "z: " << z << std::endl;
+  std::cout << "distance: " << distance << std::endl; 
+  std::cout << "velocity_in_motion_term_: " << velocity_in_motion_term_ << std::endl; 
   filter_->init(x, y, distance, velocity_in_motion_term_);
   z_ = z;
   height_ = height;
