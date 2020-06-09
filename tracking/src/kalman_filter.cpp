@@ -296,11 +296,11 @@ namespace open_ptrack
       std::cout << "kalman init vars: depth_multiplier_: " << depth_multiplier_ << std::endl;
       //std::cout << "observe_model_->Zv[0]" << observe_model_->Zv[0] << std::endl;
       //std::cout << "observe_model_->Zv[1]" << observe_model_->Zv[1] << std::endl;
-
+      std::cout << "filter_->observe(*observe_model_, observation);" std::endl;
       filter_->observe(*observe_model_, observation);
+      std::cout << "filter_->update()" std::endl;
       filter_->update();
       //filter_->update_XX(2.0);
-
     }
 
     void
