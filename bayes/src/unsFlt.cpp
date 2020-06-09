@@ -345,7 +345,6 @@ Bayes_base::Float Unscented_scheme::observe (Correlated_additive_observe_model& 
 	//std::cout << "SI" << SI << std::endl;
 	//std::cout << "S" << S << std::endl;
 	std::cout << "rcond: " << rcond << std::endl;
-	std::cout << "limit_PD_init:" << rclimit.limit_PD << std::endl;
 	rclimit.check_PD(rcond, "S not PD in observe");
 						// Kalman gain
 	noalias(W) = prod(Xxz,SI);

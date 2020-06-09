@@ -79,6 +79,7 @@ public:
 	 * I.e. rcond is bellow given conditioning limit
 	 * Inverting condition provides a test for IEC 559 NaN values
 	 */
+	std::cout << "limit_PD" << limit_PD << std::endl;
 	{	if (!(rcond >= limit_PD))
 			Bayes_base::error (Numeric_exception (error_description));
 	}
