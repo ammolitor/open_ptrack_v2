@@ -286,6 +286,16 @@ namespace open_ptrack
       //	observe_model_->Zv[1] = position_variance_ + std::pow(distance, 4) * depth_multiplier_;
       //	observe_model_->Zv[2] = 16 * position_variance_ + std::pow(distance, 4) * depth_multiplier_;
       //	observe_model_->Zv[3] = 16 * position_variance_ + std::pow(distance, 4) * depth_multiplier_;
+      std::cout << "observation[0] = x: " << observation[0] << std::endl;
+      std::cout << "observation[1] = y; " << observation[1] << std::endl;
+      std::cout << "observation[2] = vx; " << observation[2] << std::endl;
+      std::cout << "observation[3] = vy; " << observation[3] << std::endl;
+      std::cout << "not used: ...." << std::endl;
+      std::cout << "kalman init vars: position_variance_: " << position_variance_ << std::endl;
+      std::cout << "kalman init vars: std::pow(distance, 4): " << std::pow(distance, 4) << std::endl;
+      std::cout << "kalman init vars: depth_multiplier_: " << depth_multiplier_ << std::endl;
+      //std::cout << "observe_model_->Zv[0]" << observe_model_->Zv[0] << std::endl;
+      //std::cout << "observe_model_->Zv[1]" << observe_model_->Zv[1] << std::endl;
 
       filter_->observe(*observe_model_, observation);
       filter_->update();
