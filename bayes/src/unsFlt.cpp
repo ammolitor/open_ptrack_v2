@@ -342,8 +342,8 @@ Bayes_base::Float Unscented_scheme::observe (Correlated_additive_observe_model& 
 	noalias(S) += h.Z;
 						// Inverse innovation covariance
 	Float rcond = UdUinversePD (SI, S);
-	std::cout << "SI" << SI << std::endl;
-	std::cout << "S" << S << std::endl;
+	//std::cout << "SI" << SI << std::endl;
+	//std::cout << "S" << S << std::endl;
 	std::cout << "rcond" << rcond << std::endl;
 	rclimit.check_PD(rcond, "S not PD in observe");
 						// Kalman gain
