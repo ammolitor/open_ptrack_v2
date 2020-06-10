@@ -255,7 +255,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     }
 
     // Read message header information:
-    std::string frame_id_tmp = frame_id;
+    std::string frame_id_tmp = msg->header.frame_id;
     std::cout << "frame_id_tmp pre: " << frame_id_tmp << std::endl;
     int pos = frame_id_tmp.find("_color_optical_frame");
     if (pos != std::string::npos)
