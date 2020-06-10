@@ -1190,6 +1190,7 @@ class TVMPoseNode {
     // out of frame resources at 60./
     // try 30, then 15
     double rate_value = 1.0;
+    bool use_pointcloud = false;
 
     // Image to "world" transforms
     Eigen::Affine3d world2rgb;
@@ -1206,7 +1207,7 @@ class TVMPoseNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json, double max_distance):
+    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json, double max_distance, bool pointcloud):
       node_(nh), it(node_)
       {
         
@@ -1310,6 +1311,7 @@ class TVMPoseNode {
         sensor_name = sensor_string;
         //worldToCamTransform = read_poses_from_json(sensor_name);
         max_capable_depth = max_distance;
+        use_pointcloud = pointcloud;
         // 0 == manual
       }
 
@@ -2037,7 +2039,7 @@ class TVMPoseNode {
               world_to_temp.z =  static_cast<float>(middle.z);
 
               tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
-              bool use_pointcloud = false;
+              
               if (use_pointcloud){
 
                 float enlarge_factor = 1.1;
@@ -2466,6 +2468,7 @@ int main(int argc, char** argv) {
 
   std::string sensor_name;
   double max_distance;
+  bool use_pointcloud;
   //json master_config;
   //std::string package_path = ros::package::getPath("recognition");
   //std::string master_hard_coded_path = package_path + "/cfg/master.json";
@@ -2486,9 +2489,10 @@ int main(int argc, char** argv) {
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
   pnh.param("max_distance", max_distance, 6.25);
+  pnh.param("use_pointcloud", use_pointcloud, false);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMPoseNode node(nh, sensor_name, zone_json, max_distance);
+  TVMPoseNode node(nh, sensor_name, zone_json, max_distance, use_pointcloud);
   std::cout << "detection node init " << std::endl;
   ros::spin();
   return 0;
