@@ -1080,7 +1080,7 @@ bool check_detection_msg(opt_msgs::Detection detection_msg){
     std::isfinite(detection_msg.top.z) &&
     std::isfinite(detection_msg.bottom.x) &&
     std::isfinite(detection_msg.bottom.y) &&
-    std::isfinite(detection_msg.bottom.z){
+    std::isfinite(detection_msg.bottom.z)){
       send_message = true;
     }
   return send_message;
