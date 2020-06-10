@@ -134,13 +134,13 @@ Track3D::init(double x, double y, double z, double height, double distance, int 
   age_ = 0.0;
   zone_id_ = zone_id;
 
-  std::cout << "int" << std::endl;
-  std::cout << "x: " << x << std::endl;
-  std::cout << "y: " << y << std::endl;
-  std::cout << "z: " << z << std::endl;
-  std::cout << "distance: " << distance << std::endl;
-  std::cout << "detection_source: " << detection_source_->getFrameId() << std::endl;
-
+  std::cout << "init" << std::endl;
+  std::cout << "init x: " << x << std::endl;
+  std::cout << "init y: " << y << std::endl;
+  std::cout << "init z: " << z << std::endl;
+  std::cout << "init distance: " << distance << std::endl;
+  std::cout << "init detection_source: " << detection_source_->getFrameId() << std::endl;
+  std::cout << "init id_ :" << id_ << std::endl;
 
 }
 
@@ -264,12 +264,12 @@ Track3D::update(
 
 
   std::cout << "update" << std::endl;
-  std::cout << "x: " << x << std::endl;
-  std::cout << "y: " << y << std::endl;
-  std::cout << "z: " << z << std::endl;
-  std::cout << "distance: " << distance << std::endl;
-  std::cout << "detection_source: " << detection_source_->getFrameId() << std::endl;
-
+  std::cout << "update x: " << x << std::endl;
+  std::cout << "update y: " << y << std::endl;
+  std::cout << "update z: " << z << std::endl;
+  std::cout << "update distance: " << distance << std::endl;
+  std::cout << "update detection_source: " << detection_source_->getFrameId() << std::endl;
+  std::cout << "update id_ :" << id_ << std::endl;
 
 }
 
