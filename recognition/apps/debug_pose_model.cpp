@@ -1060,6 +1060,32 @@ tf::Transform read_poses_from_json(std::string camera_name)
   return worldToCamTransform;
 }
 
+bool check_detection_msg(opt_msgs::Detection detection_msg){
+  bool send_message = false;
+  if (std::isfinite(detection_msg.box_2D.x) &&
+    std::isfinite(detection_msg.box_2D.y) &&
+    std::isfinite(detection_msg.box_2D.width) &&
+    std::isfinite(detection_msg.box_2D.height) &&
+    std::isfinite(detection_msg.height) &&
+    std::isfinite(detection_msg.confidence) &&
+    std::isfinite(detection_msg.distance) &&
+    std::isfinite(detection_msg.box_3D.p1.x) &&
+    std::isfinite(detection_msg.box_3D.p1.y) &&
+    std::isfinite(detection_msg.box_3D.p1.z) &&
+    std::isfinite(detection_msg.centroid(0)) &&
+    std::isfinite(detection_msg.centroid(1)) &&
+    std::isfinite(detection_msg.centroid(2)) &&
+    std::isfinite(detection_msg.top(0)) &&
+    std::isfinite(detection_msg.top(1)) &&
+    std::isfinite(detection_msg.top(2)) &&
+    std::isfinite(detection_msg.bottom(0)) &&
+    std::isfinite(detection_msg.bottom(1)) &&
+    std::isfinite(detection_msg.bottom(1))){
+      send_message = true;
+    }
+  return send_message;
+}
+
 /**
  * @brief The TVMPoseNode
  */
@@ -1910,8 +1936,15 @@ class TVMPoseNode {
       int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
       if (output->num >= 1) {
         for (int i = 0; i < output->num; i++) {
+          
           // get the label and the object name
           float label = static_cast<float>(output->boxes[i].id);
+
+          // only detect people.
+          if (label > 0) {
+            std::cout << "observation not a person: rejecting " << std::endl;
+            continue;
+          }
           // TODO do this with something callable from the json file
           std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
 
@@ -1954,92 +1987,72 @@ class TVMPoseNode {
           float mx = (median_x - _cx) * median_depth * _constant_x;
           float my = (median_y - _cy) * median_depth * _constant_y;
 
-          // publish the messages
+          Point3f middle;
+          Point3f world_to_temp;
+          middle.x = mx;
+          middle.y = my;
+          middle.z = median_depth;
+          Eigen::Vector3f middle_vec = Eigen::Vector3f(cloud_->at(median_x,median_y).x, 
+                                                        cloud_->at(median_x,median_y).y,
+                                                        cloud_->at(median_x,median_y).z);
+          std::cout << "middle.x: " <<  middle.x << std::endl;
+          std::cout << "middle.y: " <<  middle.y << std::endl;
+          std::cout << "middle.z: " <<  middle.z << std::endl;
+
+          // head
+          Point3f top;
+          cv::Point3f head = points[0];
+          int top_cast_x = static_cast<int>(head.x);
+          int top_cast_y = static_cast<int>(head.y);  
+          top.x = (head.x - _cx) * head.z * _constant_x;
+          top.y = (head.y - _cy) * head.z * _constant_y;
+          top.y = head.z;
+          Eigen::Vector3f top_vec = Eigen::Vector3f(cloud_->at(top_cast_x,top_cast_y).x, 
+                                                    cloud_->at(top_cast_x,top_cast_y).y,
+                                                    cloud_->at(top_cast_x,top_cast_y).z);
+
+          std::cout << "top.x: " <<  top.x << std::endl;
+          std::cout << "top.y: " <<  top.y << std::endl;
+          std::cout << "top.z: " <<  top.z << std::endl;
+          float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
+
+          // just bottom of box should be ok?
+          // could just do feet / 2
+          Point3f bottom;
+          // or maybe like use the points???
+          bottom.x = (median_x - _cx) * median_depth * _constant_x;
+          bottom.y = (new_y - _cy) * median_depth * _constant_y;
+          top.y = median_depth;              
+          Eigen::Vector3f bottom_vec = Eigen::Vector3f(cloud_->at(median_x,new_y).x, 
+                                                        cloud_->at(median_x,new_y).y,
+                                                        cloud_->at(median_x,new_y).z);
+          std::cout << "bottom.x: " <<  bottom.x << std::endl;
+          std::cout << "bottom.y: " <<  bottom.y << std::endl;
+          std::cout << "bottom.z: " <<  bottom.z << std::endl;              
+
+          Eigen::Vector3f centroid3d = anti_transform * middle_vec;
+          std::cout << "centroid3d: " <<  centroid3d << std::endl;
+          Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
+
+          Eigen::Vector3f top3d = anti_transform * top_vec;
+          Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
+          // theoretical person bottom point:
+          Eigen::Vector3f bottom3d = anti_transform * bottom_vec;
+          Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
+
+          world_to_temp.x =  static_cast<float>(middle.x);
+          world_to_temp.y =  static_cast<float>(middle.y);
+          world_to_temp.z =  static_cast<float>(middle.z);
+
+          tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
+
+          // initial sanity check
           if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
         
-            // defaults to sending the message
-            bool send_message = true;
-            if (people_only) {
-              if (label > 0) { // above 0 == not-hawtdog.
-                send_message = false;
-              }
-            }
-
-            if (send_message) {
               opt_msgs::Detection detection_msg;
-              Point3f middle;
-              Point3f world_to_temp;
-              middle.x = mx;
-              middle.y = my;
-              middle.z = median_depth;
-              Eigen::Vector3f middle_vec = Eigen::Vector3f(cloud_->at(median_x,median_y).x, 
-                                                           cloud_->at(median_x,median_y).y,
-                                                           cloud_->at(median_x,median_y).z);
-              
-              std::cout << "middle.x: " <<  middle.x << std::endl;
-              std::cout << "middle.y: " <<  middle.y << std::endl;
-              std::cout << "middle.z: " <<  middle.z << std::endl;
+              float skeleton_distance;
+              float skeleton_height;
 
-              // head
-              Point3f top;
-              // top.x = cloud_->at(new_x,median_y).x
-              // top.y = cloud_->at(new_x,median_y).y
-              // top.z = cloud_->at(new_x,median_y).z
-              cv::Point3f head = points[0];
-              int top_cast_x = static_cast<int>(head.x);
-              int top_cast_y = static_cast<int>(head.y);  
-              top.x = (head.x - _cx) * head.z * _constant_x;
-              top.y = (head.y - _cy) * head.z * _constant_y;
-              top.y = head.z;
-
-              //top.x = cloud_->at(top_cast_x,top_cast_y).x;
-              //top.y = cloud_->at(top_cast_x,top_cast_y).y;
-              //top.z = cloud_->at(top_cast_x,top_cast_y).z;
-
-              Eigen::Vector3f top_vec = Eigen::Vector3f(cloud_->at(top_cast_x,top_cast_y).x, 
-                                                        cloud_->at(top_cast_x,top_cast_y).y,
-                                                        cloud_->at(top_cast_x,top_cast_y).z);
-
-              std::cout << "top.x: " <<  top.x << std::endl;
-              std::cout << "top.y: " <<  top.y << std::endl;
-              std::cout << "top.z: " <<  top.z << std::endl;
-
-              float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
-
-              // just bottom of box should be ok?
-              // could just do feet / 2
-              Point3f bottom;
-              //bottom.x = cloud_->at(median_x,new_y).x;
-              //bottom.y = cloud_->at(median_x,new_y).y;
-              //bottom.z = cloud_->at(median_x,new_y).z;
-              // or maybe like use the points???
-              bottom.x = (median_x - _cx) * median_depth * _constant_x;
-              bottom.y = (new_y - _cy) * median_depth * _constant_y;
-              top.y = median_depth;              
-              
-              Eigen::Vector3f bottom_vec = Eigen::Vector3f(cloud_->at(median_x,new_y).x, 
-                                                           cloud_->at(median_x,new_y).y,
-                                                           cloud_->at(median_x,new_y).z);
-              std::cout << "bottom.x: " <<  bottom.x << std::endl;
-              std::cout << "bottom.y: " <<  bottom.y << std::endl;
-              std::cout << "bottom.z: " <<  bottom.z << std::endl;              
-
-              Eigen::Vector3f centroid3d = anti_transform * middle_vec;
-              std::cout << "centroid3d: " <<  centroid3d << std::endl;
-              Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
-
-              Eigen::Vector3f top3d = anti_transform * top_vec;
-              Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
-              // theoretical person bottom point:
-              Eigen::Vector3f bottom3d = anti_transform * bottom_vec;
-              Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
-
-              world_to_temp.x =  static_cast<float>(middle.x);
-              world_to_temp.y =  static_cast<float>(middle.y);
-              world_to_temp.z =  static_cast<float>(middle.z);
-
-              tf::Vector3 current_world_point(world_to_temp.x, world_to_temp.y, world_to_temp.z);
-              
               if (use_pointcloud){
 
                 float enlarge_factor = 1.1;
@@ -2067,6 +2080,8 @@ class TVMPoseNode {
                 converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
                 converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
                 converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
+                skeleton_distance = head_z;
+                skeleton_height = height;
               } else {
 
                 float enlarge_factor = 1.1;
@@ -2091,10 +2106,7 @@ class TVMPoseNode {
                 detection_msg.height = height;
                 detection_msg.confidence = score;
                 detection_msg.distance = head.z;
-                //converter.Vector3fToVector3((/centroid3d.norm())*centroid3d, detection_msg.centroid);
-                //converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
-                //converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
-                
+
                 Eigen::Vector3f topv = Eigen::Vector3f(top.x, 
                                                            top.y,
                                                            top.z);
@@ -2107,35 +2119,15 @@ class TVMPoseNode {
                 converter.Vector3fToVector3((1+head_centroid_compensation/middlev.norm())*middlev, detection_msg.centroid);
                 converter.Vector3fToVector3((1+head_centroid_compensation/topv.norm())*topv, detection_msg.top);
                 converter.Vector3fToVector3((1+head_centroid_compensation/bottomv.norm())*bottomv, detection_msg.bottom);
+                skeleton_distance = head.z;
+                skeleton_height = height;
               }
-
-
 
               // could probably add a .p2 to this 
               detection_msg.box_3D.p1.x = mx;
               detection_msg.box_3D.p1.y = my;
               detection_msg.box_3D.p1.z = median_depth;
               
-
-              //detection_msg.box_2D.x = median_x;
-              //detection_msg.box_2D.y = median_y;
-              //detection_msg.box_2D.width = 0;
-              //detection_msg.box_2D.height = 0;
-              //detection_msg.height = 0;
-              //detection_msg.confidence = 10;
-              //detection_msg.distance = median_depth;
-              
-              //detection_msg.centroid.x = mx;
-              //detection_msg.centroid.y = my;
-              //detection_msg.centroid.z = median_depth;
-              
-              //detection_msg.top.x = 0;
-              //detection_msg.top.y = 0;
-              //detection_msg.top.z = 0;
-              
-              //detection_msg.bottom.x = 0;
-              //detection_msg.bottom.y = 0;
-              //detection_msg.bottom.z = 0;
               
               // DO POSE HERE
               // do rtpose skelaton detection message here...
@@ -2400,12 +2392,17 @@ class TVMPoseNode {
                 } 
               }
               skeleton.confidence = 100;
-              skeleton.height = 0.0;
-              skeleton.distance = 0.0;
+              skeleton.height = skeleton_height;
+              skeleton.distance = skeleton_distance;
               skeleton.occluded = false;
-              skeleton_array->skeletons.push_back(skeleton);
-              detection_msg.object_name=object_name;            
-              detection_array_msg->detections.push_back(detection_msg);
+              
+              
+              // final check here 
+              // only add to message if no nans exist
+              if check_detection_msg(detection_msg){
+                skeleton_array->skeletons.push_back(skeleton);
+                detection_msg.object_name=object_name;            
+                detection_array_msg->detections.push_back(detection_msg);
             
               cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
               cv::putText(cv_image_clone, object_name, cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
