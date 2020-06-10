@@ -2395,11 +2395,12 @@ class TVMPoseNode {
               skeleton.height = skeleton_height;
               skeleton.distance = skeleton_distance;
               skeleton.occluded = false;
-              
-              
+            
+
               // final check here 
               // only add to message if no nans exist
               if check_detection_msg(detection_msg){
+                std::cout << "valid detection!" << std::endl;
                 skeleton_array->skeletons.push_back(skeleton);
                 detection_msg.object_name=object_name;            
                 detection_array_msg->detections.push_back(detection_msg);
