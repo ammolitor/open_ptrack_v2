@@ -255,7 +255,17 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     }
 
     // Read message header information:
-    std::string frame_id = msg->header.frame_id;
+    std::string frame_id_tmp = frame_id;
+    std::cout << "frame_id_tmp pre: " << frame_id_tmp << std::endl;
+    int pos = frame_id_tmp.find("_color_optical_frame");
+    if (pos != std::string::npos)
+      frame_id_tmp.replace(pos, std::string("_color_optical_frame").size(), "");
+    std::cout << "frame_id_tmp post: " << frame_id_tmp << std::endl;
+    pos = frame_id_tmp.find("_depth_optical_frame");
+    if (pos != std::string::npos)
+      frame_id_tmp.replace(pos, std::string("_depth_optical_frame").size(), "");
+
+    std::string frame_id = frame_id_tmp;
     ros::Time frame_time = msg->header.stamp;
 
     // Compute delay of detection message, if any:
