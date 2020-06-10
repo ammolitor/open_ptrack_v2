@@ -120,12 +120,7 @@ namespace open_ptrack
     void
     Track::init(double x, double y, double z, double height, double distance,
         open_ptrack::detection::DetectionSource* detection_source)
-    {
-      std::cout << "x: " << x << std::endl;
-      std::cout << "y: " << y << std::endl;
-      std::cout << "z: " << z << std::endl;
-      std::cout << "distance: " << distance << std::endl;
-      
+    {      
       //Init Kalman filter
       filter_->init(x, y, distance, velocity_in_motion_term_);
       z_ = z;
@@ -140,8 +135,12 @@ namespace open_ptrack
       last_time_predicted_ = last_time_detected_ = last_time_detected_with_high_confidence_ = detection_source->getTime();
       last_time_predicted_index_ = 0;
       age_ = 0.0;
-
-
+      std::cout << "init" << std::endl;
+      std::cout << "x: " << x << std::endl;
+      std::cout << "y: " << y << std::endl;
+      std::cout << "z: " << z << std::endl;
+      std::cout << "distance: " << distance << std::endl;
+      std::cout << "detection_source: " detection_source_.frame_id << std::endl;
     }
 
     void
@@ -252,6 +251,16 @@ namespace open_ptrack
       age_ = (detection_source->getTime() - first_time_detected_).toSec();
 
       detection_source_ = detection_source;
+
+      std::cout << "update" << std::endl;
+      std::cout << "x: " << x << std::endl;
+      std::cout << "y: " << y << std::endl;
+      std::cout << "z: " << z << std::endl;
+      std::cout << "distance: " << distance << std::endl;
+      std::cout << "detection_source: " detection_source_.frame_id << std::endl;
+
+
+
     }
 
     void
