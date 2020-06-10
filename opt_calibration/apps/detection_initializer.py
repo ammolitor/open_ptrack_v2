@@ -38,12 +38,13 @@
 #
 ######################################################################
 
+import os
+import json
 import roslib; roslib.load_manifest('opt_calibration')
 import rospy
 import rospkg
 from opt_msgs.srv import *
 from geometry_msgs.msg import Transform, Vector3, Quaternion
-import os
 
 class DetectionInitializer :
 
