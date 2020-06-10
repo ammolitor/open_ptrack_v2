@@ -137,7 +137,7 @@ TrackObject::init(double x, double y, double z, double height, double distance, 
   std::cout << "z: " << z << std::endl;
   std::cout << "distance: " << distance << std::endl; 
   std::cout << "velocity_in_motion_term_: " << velocity_in_motion_term_ << std::endl; 
-  std::cout << "detection_source: " detection_source_.frame_id << std::endl;
+  std::cout << "detection_source: " << detection_source_->getFrameId() << std::endl;
 
 
   filter_->init(x, y, distance, velocity_in_motion_term_);
@@ -277,7 +277,7 @@ TrackObject::update(
   std::cout << "z: " << z << std::endl;
   std::cout << "distance: " << distance << std::endl; 
   std::cout << "velocity_in_motion_term_: " << velocity_in_motion_term_ << std::endl; 
-  std::cout << "detection_source: " detection_source_.frame_id << std::endl;
+  std::cout << "detection_source: " << detection_source_->getFrameId() << std::endl;
 }
 
 void

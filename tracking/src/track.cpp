@@ -140,7 +140,7 @@ namespace open_ptrack
       std::cout << "y: " << y << std::endl;
       std::cout << "z: " << z << std::endl;
       std::cout << "distance: " << distance << std::endl;
-      std::cout << "detection_source: " << detection_source_.frame_id << std::endl;
+      std::cout << "detection_source: " << detection_source_->getFrameId() << std::endl;
     }
 
     void
@@ -257,7 +257,7 @@ namespace open_ptrack
       std::cout << "y: " << y << std::endl;
       std::cout << "z: " << z << std::endl;
       std::cout << "distance: " << distance << std::endl;
-      std::cout << "detection_source: " << detection_source_.frame_id << std::endl;
+      std::cout << "detection_source: " << detection_source_->getFrameId() << std::endl;
 
 
 
