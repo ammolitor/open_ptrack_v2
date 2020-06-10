@@ -139,7 +139,7 @@ Track3D::init(double x, double y, double z, double height, double distance, int 
   std::cout << "y: " << y << std::endl;
   std::cout << "z: " << z << std::endl;
   std::cout << "distance: " << distance << std::endl;
-  std::cout << "detection_source: " detection_source_.frame_id << std::endl;
+  std::cout << "detection_source: " << detection_source_.frame_id << std::endl;
 
 
 }
@@ -268,7 +268,7 @@ Track3D::update(
   std::cout << "y: " << y << std::endl;
   std::cout << "z: " << z << std::endl;
   std::cout << "distance: " << distance << std::endl;
-  std::cout << "detection_source: " detection_source_.frame_id << std::endl;
+  std::cout << "detection_source: " << detection_source_.frame_id << std::endl;
 
 
 }
