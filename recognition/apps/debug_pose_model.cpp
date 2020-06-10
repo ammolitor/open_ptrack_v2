@@ -1072,15 +1072,15 @@ bool check_detection_msg(opt_msgs::Detection detection_msg){
     std::isfinite(detection_msg.box_3D.p1.x) &&
     std::isfinite(detection_msg.box_3D.p1.y) &&
     std::isfinite(detection_msg.box_3D.p1.z) &&
-    std::isfinite(detection_msg.centroid(0)) &&
-    std::isfinite(detection_msg.centroid(1)) &&
-    std::isfinite(detection_msg.centroid(2)) &&
-    std::isfinite(detection_msg.top(0)) &&
-    std::isfinite(detection_msg.top(1)) &&
-    std::isfinite(detection_msg.top(2)) &&
-    std::isfinite(detection_msg.bottom(0)) &&
-    std::isfinite(detection_msg.bottom(1)) &&
-    std::isfinite(detection_msg.bottom(1))){
+    std::isfinite(detection_msg.centroid.x) &&
+    std::isfinite(detection_msg.centroid.y) &&
+    std::isfinite(detection_msg.centroid.z) &&
+    std::isfinite(detection_msg.top.x) &&
+    std::isfinite(detection_msg.top.y) &&
+    std::isfinite(detection_msg.top.z) &&
+    std::isfinite(detection_msg.bottom.x) &&
+    std::isfinite(detection_msg.bottom.y) &&
+    std::isfinite(detection_msg.bottom.z){
       send_message = true;
     }
   return send_message;
@@ -2399,7 +2399,7 @@ class TVMPoseNode {
 
               // final check here 
               // only add to message if no nans exist
-              if check_detection_msg(detection_msg){
+              if (check_detection_msg(detection_msg)){
                 std::cout << "valid detection!" << std::endl;
                 skeleton_array->skeletons.push_back(skeleton);
                 detection_msg.object_name=object_name;            
