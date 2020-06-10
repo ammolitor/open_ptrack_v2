@@ -80,6 +80,14 @@ target_link_libraries(opt_calibration_refinement
   ${catkin_LIBRARIES}
 )
 
+add_executable(opt_calibration_refinement_yolo
+  apps/opt_calibration_refinement_yolo.cpp
+  src/trajectory_registration.cpp
+)
+target_link_libraries(opt_calibration_refinement_yolo
+  ${catkin_LIBRARIES}
+)
+
 add_executable(opt_define_reference_frame
   src/opt_calibration.cpp              include/open_ptrack/opt_calibration/opt_calibration.h
   src/opt_define_reference_frame.cpp   include/open_ptrack/opt_calibration/opt_define_reference_frame.h
