@@ -1217,6 +1217,7 @@ class TVMPoseNode {
     // try 30, then 15
     double rate_value = 1.0;
     bool use_pointcloud = false;
+    int centroid_argument;
 
     // Image to "world" transforms
     Eigen::Affine3d world2rgb;
@@ -1233,7 +1234,7 @@ class TVMPoseNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json, double max_distance, bool pointcloud):
+    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json, double max_distance, bool pointcloud, int centroid_arg):
       node_(nh), it(node_)
       {
         
@@ -1338,6 +1339,7 @@ class TVMPoseNode {
         //worldToCamTransform = read_poses_from_json(sensor_name);
         max_capable_depth = max_distance;
         use_pointcloud = pointcloud;
+        centroid_argument = centroid_arg;
         // 0 == manual
       }
 
@@ -2136,26 +2138,33 @@ class TVMPoseNode {
                                                         neck_z);
                 // centroid as head
                 // centroid as middle
-
-                // first try -- standard
-                converter.Vector3fToVector3(middlev, detection_msg.centroid);
-                converter.Vector3fToVector3(topv, detection_msg.top);
-                converter.Vector3fToVector3(bottomv, detection_msg.bottom);
-
+                
+                // first try -- standard -- default
+                if (centroid_argument == 0) {  
+                  converter.Vector3fToVector3(middlev, detection_msg.centroid);
+                  converter.Vector3fToVector3(topv, detection_msg.top);
+                  converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+                }
                 // second try -- head
-                //converter.Vector3fToVector3(topv, detection_msg.centroid);
-                //converter.Vector3fToVector3(topv, detection_msg.top);
-                //converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+                if (centroid_argument == 1) {
+                  converter.Vector3fToVector3(topv, detection_msg.centroid);
+                  converter.Vector3fToVector3(topv, detection_msg.top);
+                  converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+                }
 
                 // third try -- neck
-                //converter.Vector3fToVector3(neck, detection_msg.centroid);
-                //converter.Vector3fToVector3(topv, detection_msg.top);
-                //converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+                if (centroid_argument == 2) {
+                  converter.Vector3fToVector3(neck, detection_msg.centroid);
+                  converter.Vector3fToVector3(topv, detection_msg.top);
+                  converter.Vector3fToVector3(bottomv, detection_msg.bottom);
 
                 // fourth try -- chest
-                //converter.Vector3fToVector3(chest, detection_msg.centroid);
-                //converter.Vector3fToVector3(topv, detection_msg.top);
-                //converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+                if (centroid_argument == 3) {
+                  converter.Vector3fToVector3(chest, detection_msg.centroid);
+                  converter.Vector3fToVector3(topv, detection_msg.top);
+                  converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+                }
+
 
                 skeleton_distance = head.z;
                 skeleton_height = height;
@@ -2505,6 +2514,7 @@ int main(int argc, char** argv) {
   std::string sensor_name;
   double max_distance;
   bool use_pointcloud;
+  int centroid_arg; //0, 1, 2, 3
   //json master_config;
   //std::string package_path = ros::package::getPath("recognition");
   //std::string master_hard_coded_path = package_path + "/cfg/master.json";
@@ -2526,9 +2536,10 @@ int main(int argc, char** argv) {
   pnh.param("sensor_name", sensor_name, std::string("d435"));
   pnh.param("max_distance", max_distance, 6.25);
   pnh.param("use_pointcloud", use_pointcloud, false);
+  pnh.param("centroid_arg", centroid_arg, 0);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMPoseNode node(nh, sensor_name, zone_json, max_distance, use_pointcloud);
+  TVMPoseNode node(nh, sensor_name, zone_json, max_distance, use_pointcloud, centroid_arg);
   std::cout << "detection node init " << std::endl;
   ros::spin();
   return 0;
