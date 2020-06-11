@@ -5,6 +5,7 @@
   <arg name="serial_no" default="" />
   <arg name="standalone" default="false" />
   <arg name="training_set" default="$(optenv OPT_OBJECT_TRAINING coco)" />
+  <arg name="centroid_arg" default="0" />
 
   <group if="$(arg standalone)" >
     <!-- Start the realsense -->
@@ -20,6 +21,9 @@
         name="$(arg sensor_name)_debug_pose_model" output="screen" respawn="false">
 
     <param name="sensor_name"               value="$(arg sensor_name)" />
+    <param name="centroid_arg"               value="$(arg centroid_arg)" />
+
+
     <param name="world_frame_id"            value="/world"/>
     <param name="depth_image_topic"         value="/$(arg sensor_name)/depth/image_rect_raw"/>
     <param name="rgb_image_topic"           value="/$(arg sensor_name)/color/image_rect_color"/>
