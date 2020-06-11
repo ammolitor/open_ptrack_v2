@@ -2157,7 +2157,8 @@ class TVMPoseNode {
                   converter.Vector3fToVector3(neck, detection_msg.centroid);
                   converter.Vector3fToVector3(topv, detection_msg.top);
                   converter.Vector3fToVector3(bottomv, detection_msg.bottom);
-
+                }
+                
                 // fourth try -- chest
                 if (centroid_argument == 3) {
                   converter.Vector3fToVector3(chest, detection_msg.centroid);
