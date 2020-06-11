@@ -2108,17 +2108,55 @@ class TVMPoseNode {
                 detection_msg.distance = head.z;
 
                 Eigen::Vector3f topv = Eigen::Vector3f(top.x, 
-                                                           top.y,
-                                                           top.z);
+                                                       top.y,
+                                                       top.z);
                 Eigen::Vector3f middlev = Eigen::Vector3f(middle.x, 
-                                                                          middle.y,
-                                                                          middle.z);                
+                                                          middle.y,
+                                                          middle.z);                
                 Eigen::Vector3f bottomv = Eigen::Vector3f(bottom.x, 
-                                                           bottom.y,
-                                                           bottom.z);
-                converter.Vector3fToVector3((1+head_centroid_compensation/middlev.norm())*middlev, detection_msg.centroid);
-                converter.Vector3fToVector3((1+head_centroid_compensation/topv.norm())*topv, detection_msg.top);
-                converter.Vector3fToVector3((1+head_centroid_compensation/bottomv.norm())*bottomv, detection_msg.bottom);
+                                                          bottom.y,
+                                                          bottom.z);
+                
+                float chest_x = (points[11].x + points[12].x) * 0.4 + (points[5].x + points[6].x) * 0.1;
+                float chest_y = (points[11].y + points[12].y) * 0.4 + (points[5].y + points[6].y) * 0.1;
+                int cast_chest_x = static_cast<int>(chest_x);
+                int cast_chest_y = static_cast<int>(chest_y);
+                float chest_z = cv_depth_image.at<float>(cast_chest_y, cast_chest_x) / mm_factor;
+                Eigen::Vector3f chest = Eigen::Vector3f(chest_x, 
+                                                        chest_y,
+                                                        chest_z);
+
+                float neck_x = (points[5].x + points[6].x) / 2;
+                float neck_y = (points[5].y + points[6].y) / 2;
+                int neck_cast_point_x = static_cast<int>(neck_x);
+                int neck_cast_point_y = static_cast<int>(neck_y);              
+                float neck_z = cv_depth_image.at<float>(neck_cast_point_y, neck_cast_point_x) / mm_factor;
+                Eigen::Vector3f neck = Eigen::Vector3f(neck_x, 
+                                                        neck_y,
+                                                        neck_z);
+                // centroid as head
+                // centroid as middle
+
+                // first try -- standard
+                converter.Vector3fToVector3(middlev, detection_msg.centroid);
+                converter.Vector3fToVector3(topv, detection_msg.top);
+                converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+
+                // second try -- head
+                //converter.Vector3fToVector3(topv, detection_msg.centroid);
+                //converter.Vector3fToVector3(topv, detection_msg.top);
+                //converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+
+                // third try -- neck
+                //converter.Vector3fToVector3(neck, detection_msg.centroid);
+                //converter.Vector3fToVector3(topv, detection_msg.top);
+                //converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+
+                // fourth try -- chest
+                //converter.Vector3fToVector3(chest, detection_msg.centroid);
+                //converter.Vector3fToVector3(topv, detection_msg.top);
+                //converter.Vector3fToVector3(bottomv, detection_msg.bottom);
+
                 skeleton_distance = head.z;
                 skeleton_height = height;
               }
