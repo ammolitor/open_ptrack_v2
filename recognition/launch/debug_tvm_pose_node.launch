@@ -3,7 +3,7 @@
 
   <arg name="sensor_name" default="camera" />
   <arg name="serial_no" default="" />
-  <arg name="standalone" default="false" />
+  <arg name="standalone" default="true" />
   <arg name="training_set" default="$(optenv OPT_OBJECT_TRAINING coco)" />
   <arg name="centroid_arg" default="0" />
 
