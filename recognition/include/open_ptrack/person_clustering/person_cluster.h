@@ -63,9 +63,9 @@
 //https://stackoverflow.com/questions/15870967/boost-error-reference-to-detail-is-ambiguous
 //https://github.com/opencv/opencv/issues/6661
 
-namespace person_clustering
+namespace open_ptrack
 {
-  namespace people
+  namespace person_clustering
   {
     /** \brief @b PersonCluster represents a class for representing information about a cluster containing a person.
      * \author Filippo Basso, Matteo Munaro

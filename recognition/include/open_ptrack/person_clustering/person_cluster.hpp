@@ -45,7 +45,7 @@
 
 
 template <typename PointT>
-person_clustering::people::PersonCluster<PointT>::PersonCluster (
+open_ptrack::person_clustering::PersonCluster<PointT>::PersonCluster (
     const PointCloudPtr& input_cloud,
     const pcl::PointIndices& indices,
     const Eigen::VectorXf& ground_coeffs,
@@ -57,7 +57,7 @@ person_clustering::people::PersonCluster<PointT>::PersonCluster (
     }
 
 template <typename PointT> void
-person_clustering::people::PersonCluster<PointT>::init (
+open_ptrack::person_clustering::PersonCluster<PointT>::init (
     const PointCloudPtr& input_cloud,
     const pcl::PointIndices& indices,
     const Eigen::VectorXf& ground_coeffs,
@@ -253,26 +253,26 @@ person_clustering::people::PersonCluster<PointT>::init (
 }
 
 template <typename PointT> pcl::PointIndices&
-person_clustering::people::PersonCluster<PointT>::getIndices ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getIndices ()
 {
   return (points_indices_);
 }
 
 template <typename PointT> float
-person_clustering::people::PersonCluster<PointT>::getHeight ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getHeight ()
 {
   return (height_);
 }
 
 template <typename PointT> float
-person_clustering::people::PersonCluster<PointT>::updateHeight (const Eigen::VectorXf& ground_coeffs)
+open_ptrack::person_clustering::PersonCluster<PointT>::updateHeight (const Eigen::VectorXf& ground_coeffs)
 {
   float sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
   return (updateHeight(ground_coeffs, sqrt_ground_coeffs));
 }
 
 template <typename PointT> float
-person_clustering::people::PersonCluster<PointT>::updateHeight (const Eigen::VectorXf& ground_coeffs, float sqrt_ground_coeffs)
+open_ptrack::person_clustering::PersonCluster<PointT>::updateHeight (const Eigen::VectorXf& ground_coeffs, float sqrt_ground_coeffs)
 {
   Eigen::Vector4f height_point;
   if (!vertical_)
@@ -287,103 +287,103 @@ person_clustering::people::PersonCluster<PointT>::updateHeight (const Eigen::Vec
 }
 
 template <typename PointT> float
-person_clustering::people::PersonCluster<PointT>::getDistance ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getDistance ()
 {
   return (distance_);
 }
 
 template <typename PointT> Eigen::Vector3f&
-person_clustering::people::PersonCluster<PointT>::getTTop ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getTTop ()
 {
   return (ttop_);
 }
 
 template <typename PointT> Eigen::Vector3f&
-person_clustering::people::PersonCluster<PointT>::getTBottom ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getTBottom ()
 {
   return (tbottom_);
 }
 
 template <typename PointT> Eigen::Vector3f&
-person_clustering::people::PersonCluster<PointT>::getTCenter ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getTCenter ()
 {
   return (tcenter_);
 }
 
 template <typename PointT> Eigen::Vector3f&
-person_clustering::people::PersonCluster<PointT>::getTop ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getTop ()
 {
   return (top_);
 }
 
 template <typename PointT> Eigen::Vector3f&
-person_clustering::people::PersonCluster<PointT>::getBottom ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getBottom ()
 {
   return (bottom_);
 }
 
 template <typename PointT> Eigen::Vector3f&
-person_clustering::people::PersonCluster<PointT>::getCenter ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getCenter ()
 {
   return (center_);
 }
 
 template <typename PointT> Eigen::Vector3f&
-person_clustering::people::PersonCluster<PointT>::getMin ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getMin ()
 {
   return (min_);
 }
 
 template <typename PointT> Eigen::Vector3f&
-person_clustering::people::PersonCluster<PointT>::getMax ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getMax ()
 {
   return (max_);
 }
 
 template <typename PointT> float
-person_clustering::people::PersonCluster<PointT>::getAngle ()
+open_ptrack::person_clustering::PersonCluster<PointT>::getAngle ()
 {
   return (angle_);
 }
 
 template <typename PointT>
-float person_clustering::people::PersonCluster<PointT>::getAngleMax ()
+float open_ptrack::person_clustering::PersonCluster<PointT>::getAngleMax ()
 {
   return (angle_max_);
 }
 
 template <typename PointT>
-float person_clustering::people::PersonCluster<PointT>::getAngleMin ()
+float open_ptrack::person_clustering::PersonCluster<PointT>::getAngleMin ()
 {
   return (angle_min_);
 }
 
 template <typename PointT>
-int person_clustering::people::PersonCluster<PointT>::getNumberPoints ()
+int open_ptrack::person_clustering::PersonCluster<PointT>::getNumberPoints ()
 {
   return (n_);
 }
 
 template <typename PointT>
-float person_clustering::people::PersonCluster<PointT>::getPersonConfidence ()
+float open_ptrack::person_clustering::PersonCluster<PointT>::getPersonConfidence ()
 {
   return (person_confidence_);
 }
 
 template <typename PointT>
-void person_clustering::people::PersonCluster<PointT>::setPersonConfidence (float confidence)
+void open_ptrack::person_clustering::PersonCluster<PointT>::setPersonConfidence (float confidence)
 {
   person_confidence_ = confidence;
 }
 
 template <typename PointT>
-void person_clustering::people::PersonCluster<PointT>::setHeight (float height)
+void open_ptrack::person_clustering::PersonCluster<PointT>::setHeight (float height)
 {
   height_ = height;
 }
 
 //template <typename PointT>
-//void person_clustering::people::PersonCluster<PointT>::drawTBoundingBox (pcl::visualization::PCLVisualizer& viewer, int person_number)
+//void open_ptrack::person_clustering::PersonCluster<PointT>::drawTBoundingBox (pcl::visualization::PCLVisualizer& viewer, int person_number)
 //{
 //  // draw theoretical person bounding box in the PCL viewer:
 //  pcl::ModelCoefficients coeffs;
@@ -427,7 +427,7 @@ void person_clustering::people::PersonCluster<PointT>::setHeight (float height)
 //}
 
 template <typename PointT>
-person_clustering::people::PersonCluster<PointT>::~PersonCluster ()
+open_ptrack::person_clustering::PersonCluster<PointT>::~PersonCluster ()
 {
   // Auto-generated destructor stub
 }

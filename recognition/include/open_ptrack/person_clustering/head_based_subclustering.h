@@ -61,9 +61,9 @@
 #include <pcl/console/time.h>
 #include <pcl/filters/passthrough.h>
 
-namespace person_clustering
+namespace open_ptrack
 {
-  namespace people
+  namespace person_clustering
   {
     /** \brief @b HeadBasedSubclustering represents a class for searching for people inside a HeightMap2D based on a 3D head detection algorithm
       * \author Matteo Munaro
@@ -92,7 +92,7 @@ namespace person_clustering
        * \param[in] clusters Vector of PersonCluster.
        */
       void
-      subcluster (std::vector<pcl::people::PersonCluster<PointT> >& clusters);
+      subcluster (std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters);
 
       /**
        * \brief Merge clusters close in floor coordinates.
@@ -101,8 +101,8 @@ namespace person_clustering
        * \param[in] output_clusters Output vector of PersonCluster (after merging).
        */
       void
-      mergeClustersCloseInFloorCoordinates (std::vector<pcl::people::PersonCluster<PointT> >& input_clusters,
-          std::vector<pcl::people::PersonCluster<PointT> >& output_clusters);
+      mergeClustersCloseInFloorCoordinates (std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& input_clusters,
+          std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& output_clusters);
 
       /**
        * \brief Create subclusters centered on the heads position from the current cluster.
@@ -113,8 +113,8 @@ namespace person_clustering
        * \param[out] subclusters Output vector of PersonCluster objects derived from the input cluster.
        */
       void
-      createSubClusters (pcl::people::PersonCluster<PointT>& cluster, int maxima_number_after_filtering,  std::vector<int>& maxima_cloud_indices_filtered,
-          std::vector<pcl::people::PersonCluster<PointT> >& subclusters);
+      createSubClusters (open_ptrack::person_clustering::PersonCluster<PointT>& cluster, int maxima_number_after_filtering,  std::vector<int>& maxima_cloud_indices_filtered,
+          std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& subclusters);
 
       /**
        * \brief Set input cloud.
