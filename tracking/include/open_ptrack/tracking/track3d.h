@@ -201,6 +201,7 @@ namespace open_ptrack
             double height,
             double distance,
             int zone_id,
+            cv::Rect box,
             open_ptrack::detection::DetectionSource* detection_source);
 
         /**
@@ -228,6 +229,7 @@ namespace open_ptrack
             double min_confidence,
             double min_confidence_detections,
             int zone_id,
+            cv::Rect box,
             open_ptrack::detection::DetectionSource* detection_source,
             bool first_update = false);
 

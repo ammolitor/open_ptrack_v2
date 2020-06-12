@@ -87,7 +87,7 @@
 #include <pcl/console/time.h>
 #include <pcl/filters/passthrough.h>
 
-
+// getting errors from here...????? (I might be able to recreate it...)
 #include <pcl/people/person_cluster.h>
 #include <pcl/people/head_based_subcluster.h>
 
@@ -1789,12 +1789,8 @@ class TVMPoseNode {
         return points_class[foreground_label];
     }
     //https://github.com/EpsAvlc/cam_lidar_fusion
-    bool filterBboxByArea(const cv::Rect rect, double range)
+    bool filterBboxByArea(int xmin, int ymin, int xmax, int ymax, double range)
     {
-        int xmin = rect.x;
-        int ymin = rect.y;
-        int xmax = rect.x + rect.width;
-        int ymax = rect.y + rect.height;
         
         int bbox_area = (xmax - xmin) * (ymax - ymin);
         //TODO add box class
@@ -1965,9 +1961,9 @@ class TVMPoseNode {
           it->setPersonConfidence(-100.0);
           cv::Point centroid2d;
           cv::Point3f centroid3d;
-          Eigen::Vector3f centroid3d = it->getTCenter();
-          centroid2d = cv::Point(centroid3d(0), centroid3d(1));
-          centroid3d = cv::Point3(centroid3d(0), centroid3d(1), centroid3d(2));
+          Eigen::Vector3f eigen_centroid3d = it->getTCenter();
+          centroid2d = cv::Point(eigen_centroid3d(0), eigen_centroid3d(1));
+          centroid3d = cv::Point3f(eigen_centroid3d(0), eigen_centroid3d(1), eigen_centroid3d(2));
           cluster_centroids2d.push_back(centroid2d);
           cluster_centroids3d.push_back(centroid3d);
         }
@@ -2188,11 +2184,12 @@ class TVMPoseNode {
           }
           else
           {
-              
+            pcl::people::PersonCluster<PointT> person_cluster = clusters[i];
             float xmin = output->boxes[i].xmin;
             float ymin = output->boxes[i].ymin;
             float xmax = output->boxes[i].xmax;
             float ymax = output->boxes[i].ymax;
+            float score = output->boxes[i].score;
             // get the coordinate information
             int cast_xmin = static_cast<int>(xmin);
             int cast_ymin = static_cast<int>(ymin);
@@ -2221,21 +2218,20 @@ class TVMPoseNode {
             float my = (median_y - _cy) * median_depth * _constant_y;
 
             // Create detection message: -- literally tatken ground_based_people_detector_node
-            Detection detection_msg;
-            converter.Vector3fToVector3(anti_transform * it->getMin(), detection_msg.box_3D.p1);
-            converter.Vector3fToVector3(anti_transform * it->getMax(), detection_msg.box_3D.p2);
+            opt_msgs::Detection detection_msg;
+            converter.Vector3fToVector3(anti_transform * person_cluster->getMin(), detection_msg.box_3D.p1);
+            converter.Vector3fToVector3(anti_transform * person_cluster->getMax(), detection_msg.box_3D.p2);
                 
-            pcl::people::PersonCluster<PointT> person_cluster = clusters[i];
             float head_centroid_compensation = 0.05;
 
             // theoretical person centroid:
-            Eigen::Vector3f centroid3d = anti_transform * it->getTCenter();
+            Eigen::Vector3f centroid3d = anti_transform * person_cluster->getTCenter();
             Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
             // theoretical person top point:
-            Eigen::Vector3f top3d = anti_transform * it->getTTop();
+            Eigen::Vector3f top3d = anti_transform * person_cluster->getTTop();
             Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
             // theoretical person bottom point:
-            Eigen::Vector3f bottom3d = anti_transform * it->getTBottom();
+            Eigen::Vector3f bottom3d = anti_transform * person_cluster->getTBottom();
             Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
             float enlarge_factor = 1.1;
             float pixel_xc = centroid2d(0);
@@ -2246,9 +2242,9 @@ class TVMPoseNode {
             detection_msg.box_2D.y = int(centroid2d(1) - pixel_height/2.0);
             detection_msg.box_2D.width = int(pixel_width);
             detection_msg.box_2D.height = int(pixel_height);
-            detection_msg.height = it->getHeight();
-            detection_msg.confidence = it->getPersonConfidence();
-            detection_msg.distance = it->getDistance();
+            detection_msg.height = person_cluster->getHeight();
+            detection_msg.confidence = person_cluster->getPersonConfidence();
+            detection_msg.distance = person_cluster->getDistance();
             converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
             converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
             converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
@@ -2645,6 +2641,7 @@ class TVMPoseNode {
           float ymin = output->boxes[i].ymin;
           float xmax = output->boxes[i].xmax;
           float ymax = output->boxes[i].ymax;
+          float score = output->boxes[i].score;
           // get the coordinate information
           int cast_xmin = static_cast<int>(xmin);
           int cast_ymin = static_cast<int>(ymin);
@@ -2720,7 +2717,8 @@ class TVMPoseNode {
               tmp_pt.x = points_fg[i].x;
               tmp_pt.y = points_fg[i].y;
               tmp_pt.z = points_fg[i].z;
-              out_cloud->push_back(tmp_pt);
+              // artifact for image generation
+              // out_cloud->push_back(tmp_pt);
               
               if(min_xyz.x > tmp_pt.x)
                   min_xyz.x = tmp_pt.x;
@@ -2737,10 +2735,10 @@ class TVMPoseNode {
                   max_xyz.z = tmp_pt.z;
           }
 
-          if(! filterBboxByArea(rect, (min_xyz.z + max_xyz.z) / 2))
+          if(!filterBboxByArea(cast_xmin, cast_ymin, cast_xmax, cast_ymax, (min_xyz.z + max_xyz.z) / 2))
           {
-            cv::rectangle(src_img, cv:: Point(cast_xmin, cast_ymin), cv::Point(cast_xmin + (cast_xmax - cast_min), cast_ymin + (cast_ymax - cast_ymin)), cv::Scalar(30,07,197), 3);
-            cv::putText(src_img, "fake", cv::Point(cast_xmin + 5, cast_ymin + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
+            cv::rectangle(cv_image_clone, cv:: Point(cast_xmin, cast_ymin), cv::Point(cast_xmin + (cast_xmax - cast_min), cast_ymin + (cast_ymax - cast_ymin)), cv::Scalar(30,07,197), 3);
+            cv::putText(cv_image_clone, "fake", cv::Point(cast_xmin + 5, cast_ymin + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
             std::cout << "DEBUG: filterBboxByArea finished" << std::endl;
           }
           else
@@ -2749,12 +2747,12 @@ class TVMPoseNode {
             double ave_y = (max_xyz.y + min_xyz.y) / 2;
             double ave_z = (max_xyz.z + min_xyz.z) / 2;
             
-            drawCube(src_img, min_xyz, max_xyz);
-            cv::putText(src_img, "area", cv::Point(cast_xmin + 5, cast_ymin + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
+            drawCube(cv_image_clone, min_xyz, max_xyz);
+            cv::putText(cv_image_clone, "area", cv::Point(cast_xmin + 5, cast_ymin + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
 
             char loc_str[30];
             sprintf(loc_str, "%.2f, %.2f, %.2f", ave_x, ave_y, ave_z);
-            cv::putText(src_img, loc_str, cv::Point(cast_xmin + 15, cast_ymin - 25), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
+            cv::putText(cv_image_clone, loc_str, cv::Point(cast_xmin + 15, cast_ymin - 25), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(255, 255, 255), 1);
             std::cout << "DEBUG: else filterBboxByArea finished" << std::endl;
           }
         
@@ -3327,7 +3325,7 @@ class TVMPoseNode {
       cv_image_clone = cv_image.clone();
 
       // override and use pointcloud
-      cv_image = curr_image.clone();
+      //cv_image = curr_image.clone();
       cv_image_clone = cv_image.clone();
 
       // EXTRACT POINTCLOUD-DEPTH HERE...
@@ -3375,6 +3373,7 @@ class TVMPoseNode {
           int cast_xmax = static_cast<int>(xmax);
           int cast_ymax = static_cast<int>(ymax);
           std::vector<cv::Point3f> points = output->boxes[i].points;
+          float score = output->boxes[i].score;
           int num_parts = points.size();
 
           // set the median of the bounding box
