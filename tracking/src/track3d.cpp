@@ -113,10 +113,12 @@ Track3D::init(const Track3D& old_track)
   last_time_predicted_index_ = old_track.last_time_predicted_index_;
 
   data_association_score_ = old_track.data_association_score_;
+
+  target_box2d_ = old_track.target_box2d_;
 }
 
 void
-Track3D::init(double x, double y, double z, double height, double distance, int zone_id,
+Track3D::init(double x, double y, double z, double height, double distance, int zone_id, cv::Rect box,
               open_ptrack::detection::DetectionSource* detection_source)
 {
 
@@ -133,7 +135,7 @@ Track3D::init(double x, double y, double z, double height, double distance, int 
   last_time_predicted_index_ = 0;
   age_ = 0.0;
   zone_id_ = zone_id;
-  target_box2d_ = detection_source->getBox2D()
+  target_box2d_ = box;
 
   std::cout << "init" << std::endl;
   std::cout << "init x: " << x << std::endl;
@@ -157,6 +159,7 @@ Track3D::update(
     double min_confidence,
     double min_confidence_detections,
     int zone_id,
+    cv::Rect box,
     open_ptrack::detection::DetectionSource* detection_source,
     bool first_update)
 {
@@ -263,7 +266,7 @@ Track3D::update(
   detection_source_ = detection_source;
   zone_id_ = zone_id;
 
-  target_box2d_ = detection_source->getBox2D()
+  target_box2d_ = box;
 
   std::cout << "update" << std::endl;
   std::cout << "update x: " << x << std::endl;
@@ -697,7 +700,8 @@ Track3D::getState()
   return p;
 }
 
-cv::Rect getTargetBox()
+cv::Rect 
+Track3D::getTargetBox()
 {
   return target_box2d_;
 }

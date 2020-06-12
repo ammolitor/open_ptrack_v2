@@ -1232,7 +1232,7 @@ class TVMPoseNode {
 
     // mode 1 args
     std::vector<pcl::PointIndices> cluster_indices;
-    PointCloudPtr no_ground_cloud_rotated(new PointCloud);
+    PointCloudPtr no_ground_cloud_rotated = PointCloudPtr (new PointCloud);
     Eigen::VectorXf ground_coeffs_new;
     float min_height_ = 1.3;
     float max_height_ = 2.3;
