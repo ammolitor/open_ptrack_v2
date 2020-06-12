@@ -43,6 +43,7 @@
 
 #include <open_ptrack/person_clustering/person_cluster.h>
 
+
 template <typename PointT>
 person_clustering::people::PersonCluster<PointT>::PersonCluster (
     const PointCloudPtr& input_cloud,

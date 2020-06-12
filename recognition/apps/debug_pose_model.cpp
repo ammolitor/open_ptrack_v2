@@ -88,8 +88,8 @@
 #include <pcl/filters/passthrough.h>
 
 // getting errors from here...????? (I might be able to recreate it...) stemming from pcl_visualizer
-#include <pcl/people/person_cluster.h>
-#include <pcl/people/head_based_subcluster.h>
+#include <open_ptrack/person_clustering/person_cluster.h>
+#include <open_ptrack/person_clustering/head_based_subcluster.h>
 
 #include <open_ptrack/ground_segmentation/ground_segmentation.h>
 #include <open_ptrack/opt_utils/conversions.h>
