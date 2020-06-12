@@ -87,7 +87,7 @@
 #include <pcl/console/time.h>
 #include <pcl/filters/passthrough.h>
 
-// getting errors from here...????? (I might be able to recreate it...)
+// getting errors from here...????? (I might be able to recreate it...) stemming from pcl_visualizer
 #include <pcl/people/person_cluster.h>
 #include <pcl/people/head_based_subcluster.h>
 
@@ -143,9 +143,8 @@ typedef sensor_msgs::CameraInfo CameraInfo;
 // adding this 
 using namespace message_filters::sync_policies;
 using namespace std;
-using namespace cv;
+//using namespace cv; // https://github.com/opencv/opencv/issues/6661
 using namespace std;
-using namespace cv;
 typedef pcl::PointXYZRGB PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT> PointCloud;
