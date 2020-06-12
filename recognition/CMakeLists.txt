@@ -159,10 +159,10 @@ ADD_LIBRARY(facedetection
 ADD_LIBRARY(segmentation_clustering
         include/open_ptrack/ground_segmentation/ground_segmentation.hpp
         include/open_ptrack/ground_segmentation/ground_segmentation.h
-        include/open_ptrack/people_clustering/person_cluster.hpp
-        include/open_ptrack/people_clustering/person_cluster.h
-        include/open_ptrack/people_clustering/head_based_subclustering.hpp
-        include/open_ptrack/people_clustering/head_based_subclustering.h
+        include/open_ptrack/person_clustering/person_cluster.hpp
+        include/open_ptrack/person_clustering/person_cluster.h
+        include/open_ptrack/person_clustering/head_based_subclustering.hpp
+        include/open_ptrack/person_clustering/head_based_subclustering.h
         )
 
 #ADD_LIBRARY(object_detection
