@@ -100,11 +100,11 @@ SkeletonTrack::anyNaNs(const std::vector<rtpose_wrapper::Joint3DMsg>& joints)
 }
 
 void
-SkeletonTrack::init(double x, double y, double z, double height, double distance, int zone_id,
+SkeletonTrack::init(double x, double y, double z, double height, double distance, int zone_id, cv::Rect box,
                     open_ptrack::detection::DetectionSource* detection_source,
                     const std::vector<rtpose_wrapper::Joint3DMsg>& joints)
 {
-  Track3D::init(x,y,z,height,distance, zone_id, detection_source);
+  Track3D::init(x,y,z,height,distance, zone_id, box, detection_source);
   bool any_nan = anyNaNs(joints);
   any_nan? all_joint_tracks_initialized_ = false :
       all_joint_tracks_initialized_ = true;
@@ -114,7 +114,7 @@ SkeletonTrack::init(double x, double y, double z, double height, double distance
     const rtpose_wrapper::Joint3DMsg& bj = joints[i];
     joint_tracks_[i] -> init(bj.x, bj.y, bj.z, 10,
                              Eigen::Vector3d(bj.x, bj.y, bj.z).norm(),
-                             zone_id,
+                             zone_id, box,
                              detection_source
                              );
   }
@@ -142,12 +142,13 @@ SkeletonTrack::update(
     double min_confidence,
     double min_confidence_detections,
     int zone_id,
+    cv::Rect box,
     open_ptrack::detection::DetectionSource* detection_source,
     const std::vector<rtpose_wrapper::Joint3DMsg>& joints,
     bool first_update)
 {
   Track3D::update(x,y,z,height,distance,data_assocation_score,
-                confidence,min_confidence,min_confidence_detections,zone_id,
+                confidence,min_confidence,min_confidence_detections,zone_id, box,
                 detection_source,first_update);
   if(all_joint_tracks_initialized_)
   {
@@ -156,7 +157,7 @@ SkeletonTrack::update(
       const rtpose_wrapper::Joint3DMsg& bj = joints[i];
       joint_tracks_[i] -> update(bj.x, bj.y, bj.z, 10,
                                  Eigen::Vector3d(bj.x, bj.y, bj.z).norm(), bj.confidence,
-                                 bj.confidence - 1, bj.confidence + 1, 0, zone_id,
+                                 bj.confidence - 1, bj.confidence + 1, 0, zone_id, box,
                                  detection_source, first_update
                                  );
     }
@@ -180,7 +181,7 @@ SkeletonTrack::update(
         joint_tracks_[i] -> update(
               bj.x, bj.y, bj.z, 10,
               Eigen::Vector3d(bj.x, bj.y, bj.z).norm(), bj.confidence,
-              bj.confidence - 1, bj.confidence + 1, 0, zone_id,
+              bj.confidence - 1, bj.confidence + 1, 0, zone_id, box,
               detection_source, first_update
               );
       }

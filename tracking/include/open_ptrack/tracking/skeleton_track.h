@@ -104,6 +104,7 @@ public:
          double min_confidence,
          double min_confidence_detections,
          int zone_id,
+         cv::Rect box,
          open_ptrack::detection::DetectionSource* detection_source,
          const std::vector<rtpose_wrapper::Joint3DMsg>& joints,
          bool first_update = false);
