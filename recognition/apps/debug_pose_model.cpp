@@ -1940,14 +1940,14 @@ class TVMPoseNode {
       }
 
 
-    void compute_subclustering(std::vector<open_ptrack::people::PersonCluster<PointT> >& clusters, std::vector<cv::Point> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+    void compute_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
 
       // To avoid PCL warning:
       if (cluster_indices.size() == 0)
         cluster_indices.push_back(pcl::PointIndices());
 
       // Head based sub-clustering //
-      open_ptrack::people::HeadBasedSubclustering<PointT> subclustering;
+      open_ptrack::person_clustering::HeadBasedSubclustering<PointT> subclustering;
       subclustering.setInputCloud(no_ground_cloud_rotated);
       subclustering.setGround(ground_coeffs_new);
       subclustering.setInitialClusters(cluster_indices);
@@ -1956,7 +1956,7 @@ class TVMPoseNode {
       subclustering.setSensorPortraitOrientation(vertical_);
       subclustering.subcluster(clusters);
 
-      for(typename std::vector<open_ptrack::people::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
+      for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
         {
           it->setPersonConfidence(-100.0);
           cv::Point centroid2d;
@@ -1979,7 +1979,7 @@ class TVMPoseNode {
 
       //  int i = 0;
 
-      //  for(typename std::vector<open_ptrack::people::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
+      //  for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
       //  {
 
       //    //Evaluate confidence for the current PersonCluster:
@@ -1994,7 +1994,7 @@ class TVMPoseNode {
       //}
       //else
       //{
-      //  for(typename std::vector<open_ptrack::people::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
+      //  for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
       //  {
       //    it->setPersonConfidence(-100.0);
       //  }
@@ -2106,7 +2106,7 @@ class TVMPoseNode {
       printf("yolo detection time: %f\n", duration);
       printf("yolo detections: %ld\n", output->num);
 
-      std::vector<open_ptrack::people::PersonCluster<PointT> > clusters;   // vector containing persons clusters
+      std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   // vector containing persons clusters
       // we run ground-based-people-detector pcl subclustering operation
 
       int r, c;
@@ -2176,7 +2176,7 @@ class TVMPoseNode {
         // to that of the bounding box
         HungAlgo.Solve(cost_matrix, assignment);
         printf("assignment shape: %ld\n", assignment.size());
-        //for(typename std::vector<open_ptrack::people::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
+        //for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
 
         for (int i = 0; i < output->num; i++) {
           if (assignment[i] == -1){
@@ -2184,7 +2184,7 @@ class TVMPoseNode {
           }
           else
           {
-            open_ptrack::people::PersonCluster<PointT> person_cluster = clusters[assignment[i]];
+            open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[assignment[i]];
             float xmin = output->boxes[i].xmin;
             float ymin = output->boxes[i].ymin;
             float xmax = output->boxes[i].xmax;

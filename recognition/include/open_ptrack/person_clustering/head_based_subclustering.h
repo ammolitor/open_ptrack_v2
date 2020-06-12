@@ -42,7 +42,7 @@
 #define PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_H_
 
 #include <open_ptrack/person_clustering/person_cluster.h>
-#include <pcl/people/height_map_2d.h>
+#include <open_ptrack/person_clustering/height_map_2d.h>
 #include <pcl/point_types.h>
 
 #include <pcl/segmentation/organized_multi_plane_segmentation.h>
