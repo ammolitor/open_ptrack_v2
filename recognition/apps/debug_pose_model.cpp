@@ -2184,7 +2184,7 @@ class TVMPoseNode {
           }
           else
           {
-            pcl::people::PersonCluster<PointT> person_cluster. clusters[assignment[i]];
+            pcl::people::PersonCluster<PointT> person_cluster = clusters[assignment[i]];
             float xmin = output->boxes[i].xmin;
             float ymin = output->boxes[i].ymin;
             float xmax = output->boxes[i].xmax;
@@ -3908,7 +3908,7 @@ int main(int argc, char** argv) {
   pnh.param("max_distance", max_distance, 6.25);
   pnh.param("use_pointcloud", use_pointcloud, false);
   pnh.param("centroid_arg", centroid_arg, 0);
-  pnh.param("cluster_mode", mode, 0);
+  pnh.param("cluster_mode", cluster_mode, 0);
 
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
