@@ -162,6 +162,9 @@ namespace open_ptrack
         /** \brief the current zone of the track */
         int zone_id_;
 
+        /** \brief the current zone of the track */
+        cv::Rect target_box2d_;
+
       public:
 
         /** \brief Constructor. */
@@ -406,6 +409,8 @@ namespace open_ptrack
 
         geometry_msgs::Point
         getState();
+
+        cv::Rect getTargetBox();
 
     };
 

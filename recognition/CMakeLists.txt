@@ -267,7 +267,7 @@ target_compile_definitions(debug_tvm_detector PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 ###############################################################################
-add_executable(debug_pose_model apps/debug_pose_model.cpp include/open_ptrack/yolo_tvm.hpp)
+add_executable(debug_pose_model apps/debug_pose_model.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/hungarian/Hungarian.cpp)
 SET_TARGET_PROPERTIES(debug_pose_model PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
 target_link_libraries(debug_pose_model PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES} 

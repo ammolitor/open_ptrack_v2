@@ -133,6 +133,7 @@ Track3D::init(double x, double y, double z, double height, double distance, int 
   last_time_predicted_index_ = 0;
   age_ = 0.0;
   zone_id_ = zone_id;
+  target_box2d_ = detection_source->getBox2D()
 
   std::cout << "init" << std::endl;
   std::cout << "init x: " << x << std::endl;
@@ -262,6 +263,7 @@ Track3D::update(
   detection_source_ = detection_source;
   zone_id_ = zone_id;
 
+  target_box2d_ = detection_source->getBox2D()
 
   std::cout << "update" << std::endl;
   std::cout << "update x: " << x << std::endl;
@@ -693,6 +695,11 @@ Track3D::getState()
   filter_->getState(p.x, p.y, p.z);
 
   return p;
+}
+
+cv::Rect getTargetBox()
+{
+  return target_box2d_;
 }
 
 } /* namespace tracking */
