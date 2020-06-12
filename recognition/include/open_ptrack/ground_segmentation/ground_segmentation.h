@@ -48,6 +48,8 @@
 #include <pcl/sample_consensus/ransac.h>
 #include <pcl/filters/extract_indices.h>
 #include <tf/transform_listener.h>
+#include <ros/ros.h>
+#include <ros/package.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
