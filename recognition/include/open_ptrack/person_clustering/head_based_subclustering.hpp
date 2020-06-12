@@ -38,8 +38,8 @@
  * Author: Matteo Munaro
  */
 
-#ifndef PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_HPP_
-#define PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_HPP_
+#ifndef OPEN_PTRACK_PERSON_CLUSTERING_HEAD_BASED_SUBCLUSTER_HPP_
+#define OPEN_PTRACK_PERSON_CLUSTERING_HEAD_BASED_SUBCLUSTER_HPP_
 
 #include <open_ptrack/person_clustering/head_based_subclustering.h>
 
@@ -338,4 +338,4 @@ open_ptrack::person_clusering::HeadBasedSubclustering<PointT>::~HeadBasedSubclus
 {
   // TODO Auto-generated destructor stub
 }
-#endif /* PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_HPP_ */
+#endif /* OPEN_PTRACK_PERSON_CLUSTERING_HEAD_BASED_SUBCLUSTER_HPP_ */

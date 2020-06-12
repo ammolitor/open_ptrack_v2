@@ -38,8 +38,8 @@
  * Author: Matteo Munaro
  */
 
-#ifndef PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_H_
-#define PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_H_
+#ifndef OPEN_PTRACK_PERSON_CLUSTERING_HEAD_BASED_SUBCLUSTER_H_
+#define OPEN_PTRACK_PERSON_CLUSTERING_HEAD_BASED_SUBCLUSTER_H_
 
 #include <open_ptrack/person_clustering/person_cluster.h>
 #include <open_ptrack/person_clustering/height_map_2d.h>
@@ -244,4 +244,4 @@ namespace open_ptrack
   } /* namespace people */
 } /* namespace pcl */
 #include <open_ptrack/person_clustering/head_based_subclustering.hpp>
-#endif /* PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_H_ */
+#endif /* OPEN_PTRACK_PERSON_CLUSTERING_HEAD_BASED_SUBCLUSTER_H_ */

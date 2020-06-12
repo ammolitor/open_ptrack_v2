@@ -38,8 +38,8 @@
  * Author: Matteo Munaro
  */
 
-#ifndef PCL_PEOPLE_HEIGHT_MAP_2D_H_
-#define PCL_PEOPLE_HEIGHT_MAP_2D_H_
+#ifndef OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_H_
+#define OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_H_
 
 #include <open_ptrack/person_clustering/person_cluster.h>
 #include <pcl/point_types.h>
@@ -75,7 +75,7 @@ namespace open_ptrack
        * \param[in] cluster The PersonCluster used to compute the height map.
        */
       void
-      compute (pcl::people::PersonCluster<PointT>& cluster);
+      compute (open_ptrack::person_clustering::PersonCluster<PointT>& cluster);
 
       /**
        * \brief Compute local maxima of the height map.
@@ -206,4 +206,4 @@ namespace open_ptrack
   } /* namespace people */
 } /* namespace pcl */
 #include <open_ptrack/person_clustering/height_map_2d.hpp>
-#endif /* PCL_PEOPLE_HEIGHT_MAP_2D_H_ */
+#endif /* OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_H_ */

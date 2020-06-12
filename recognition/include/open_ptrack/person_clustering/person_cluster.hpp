@@ -38,8 +38,8 @@
  * Author: Matteo Munaro
  */
 
-#ifndef PCL_PEOPLE_PERSON_CLUSTER_HPP_
-#define PCL_PEOPLE_PERSON_CLUSTER_HPP_
+#ifndef OPEN_PTRACK PERSON_CLUSTERING_PERSON_CLUSTER_HPP_
+#define OPEN_PTRACK PERSON_CLUSTERING_PERSON_CLUSTER_HPP_
 
 #include <open_ptrack/person_clustering/person_cluster.h>
 
@@ -431,4 +431,4 @@ open_ptrack::person_clustering::PersonCluster<PointT>::~PersonCluster ()
 {
   // Auto-generated destructor stub
 }
-#endif /* PCL_PEOPLE_PERSON_CLUSTER_HPP_ */
+#endif /* PERSON_CLUSTERING_PERSON_CLUSTER_HPP_ */

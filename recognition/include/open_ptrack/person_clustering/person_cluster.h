@@ -38,8 +38,8 @@
  * Author: Matteo Munaro
  */
 
-#ifndef PERSON_CLUSTER_PEOPLE_PERSON_CLUSTER_H_
-#define PERSON_CLUSTER_PEOPLE_PERSON_CLUSTER_H_
+#ifndef PERSON_CLUSTERING_PERSON_CLUSTER_H_
+#define PERSON_CLUSTERING_PERSON_CLUSTER_H_
 
 #include <pcl/point_types.h>
 #include <pcl/segmentation/organized_multi_plane_segmentation.h>
@@ -347,4 +347,4 @@ namespace open_ptrack
   } /* namespace people */
 } /* namespace pcl */
 #include <open_ptrack/person_clustering/person_cluster.hpp>
-#endif /* PERSON_CLUSTER_PEOPLE_PERSON_CLUSTER_H_ */
+#endif /* PERSON_CLUSTERING_PERSON_CLUSTER_H_ */

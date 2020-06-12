@@ -40,8 +40,8 @@
 
 #include <open_ptrack/person_clustering/height_map_2d.h>
 
-#ifndef PCL_PEOPLE_HEIGHT_MAP_2D_HPP_
-#define PCL_PEOPLE_HEIGHT_MAP_2D_HPP_
+#ifndef OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_HPP_
+#define OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_HPP_
 
 template <typename PointT>
 open_ptrack::person_clustering::HeightMap2D<PointT>::HeightMap2D ()
@@ -310,4 +310,4 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::~HeightMap2D ()
 {
   // TODO Auto-generated destructor stub
 }
-#endif /* PCL_PEOPLE_HEIGHT_MAP_2D_HPP_ */
+#endif /* OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_HPP_ */
