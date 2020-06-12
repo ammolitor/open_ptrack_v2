@@ -143,8 +143,9 @@ typedef sensor_msgs::CameraInfo CameraInfo;
 // adding this 
 using namespace message_filters::sync_policies;
 using namespace std;
-//using namespace cv; // https://github.com/opencv/opencv/issues/6661
+using namespace cv; // https://github.com/opencv/opencv/issues/6661
 using namespace std;
+using namespace cv; // https://github.com/opencv/opencv/issues/6661
 typedef pcl::PointXYZRGB PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT> PointCloud;
