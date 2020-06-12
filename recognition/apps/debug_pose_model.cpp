@@ -1240,7 +1240,7 @@ class TVMPoseNode {
     bool vertical_ = false;
     bool use_rgb_ = true;
     std::map<std::string, std::pair<double, double>> area_thres_;
-
+    int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
     // Image to "world" transforms
     Eigen::Affine3d world2rgb;
     tf::StampedTransform world2rgb_transform;
@@ -2156,7 +2156,7 @@ class TVMPoseNode {
           cv::Point output_centroid;
           cv::Point3f output_centroid3d;
           output_centroid = cv::Point(mx, my); // or median_x, median_y
-          output_centroid3d = cv::Point(mx, my, median_depth);
+          output_centroid3d = cv::Point3f(mx, my, median_depth);
           yolo_centroids.push_back(output_centroid);
           yolo_centroids3d.push_back(output_centroid3d);
         }
@@ -2179,17 +2179,19 @@ class TVMPoseNode {
         //for(typename std::vector<pcl::people::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
 
         for (int i = 0; i < output->num; i++) {
-          if (assigment[i] == -1){
+          if (assignment[i] == -1){
             continue;
           }
           else
           {
-            pcl::people::PersonCluster<PointT> person_cluster = clusters[i];
+            pcl::people::PersonCluster<PointT> person_cluster. clusters[assignment[i]];
             float xmin = output->boxes[i].xmin;
             float ymin = output->boxes[i].ymin;
             float xmax = output->boxes[i].xmax;
             float ymax = output->boxes[i].ymax;
             float score = output->boxes[i].score;
+            float label = static_cast<float>(output->boxes[i].id);
+            std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
             // get the coordinate information
             int cast_xmin = static_cast<int>(xmin);
             int cast_ymin = static_cast<int>(ymin);
@@ -2218,20 +2220,22 @@ class TVMPoseNode {
             float my = (median_y - _cy) * median_depth * _constant_y;
 
             // Create detection message: -- literally tatken ground_based_people_detector_node
+            float skeleton_distance;
+            float skeleton_height;
             opt_msgs::Detection detection_msg;
-            converter.Vector3fToVector3(anti_transform * person_cluster->getMin(), detection_msg.box_3D.p1);
-            converter.Vector3fToVector3(anti_transform * person_cluster->getMax(), detection_msg.box_3D.p2);
+            converter.Vector3fToVector3(anti_transform * person_cluster.getMin(), detection_msg.box_3D.p1);
+            converter.Vector3fToVector3(anti_transform * person_cluster.getMax(), detection_msg.box_3D.p2);
                 
             float head_centroid_compensation = 0.05;
 
             // theoretical person centroid:
-            Eigen::Vector3f centroid3d = anti_transform * person_cluster->getTCenter();
+            Eigen::Vector3f centroid3d = anti_transform * person_cluster.getTCenter();
             Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
             // theoretical person top point:
-            Eigen::Vector3f top3d = anti_transform * person_cluster->getTTop();
+            Eigen::Vector3f top3d = anti_transform * person_cluster.getTTop();
             Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
             // theoretical person bottom point:
-            Eigen::Vector3f bottom3d = anti_transform * person_cluster->getTBottom();
+            Eigen::Vector3f bottom3d = anti_transform * person_cluster.getTBottom();
             Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
             float enlarge_factor = 1.1;
             float pixel_xc = centroid2d(0);
@@ -2242,9 +2246,9 @@ class TVMPoseNode {
             detection_msg.box_2D.y = int(centroid2d(1) - pixel_height/2.0);
             detection_msg.box_2D.width = int(pixel_width);
             detection_msg.box_2D.height = int(pixel_height);
-            detection_msg.height = person_cluster->getHeight();
-            detection_msg.confidence = person_cluster->getPersonConfidence();
-            detection_msg.distance = person_cluster->getDistance();
+            detection_msg.height = person_cluster.getHeight();
+            detection_msg.confidence = person_cluster.getPersonConfidence();
+            detection_msg.distance = person_cluster.getDistance();
             converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
             converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
             converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
@@ -2252,6 +2256,9 @@ class TVMPoseNode {
             opt_msgs::SkeletonMsg skeleton;
             skeleton.skeleton_type = opt_msgs::SkeletonMsg::COCO;
             skeleton.joints.resize(num_parts);
+            skeleton_height = int(pixel_height);;
+            skeleton_distance = person_cluster.getDistance();
+
 
             for (size_t i = 0; i < num_parts; i++){
               /* code */
@@ -2417,7 +2424,6 @@ class TVMPoseNode {
             skeleton.distance = skeleton_distance;
             skeleton.occluded = false;
           
-
             // final check here 
             // only add to message if no nans exist
             if (check_detection_msg(detection_msg)){
@@ -2621,7 +2627,7 @@ class TVMPoseNode {
       //value == rtpose's index
       // 1 == neck, thus not in gluon
       // 14 == chest, thus not in gluon
-      int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
+      //int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
       if (output->num >= 1) {
         for (int i = 0; i < output->num; i++) {
           
@@ -2737,7 +2743,7 @@ class TVMPoseNode {
 
           if(!filterBboxByArea(cast_xmin, cast_ymin, cast_xmax, cast_ymax, (min_xyz.z + max_xyz.z) / 2))
           {
-            cv::rectangle(cv_image_clone, cv:: Point(cast_xmin, cast_ymin), cv::Point(cast_xmin + (cast_xmax - cast_min), cast_ymin + (cast_ymax - cast_ymin)), cv::Scalar(30,07,197), 3);
+            cv::rectangle(cv_image_clone, cv:: Point(cast_xmin, cast_ymin), cv::Point(cast_xmin + (cast_xmax - cast_xmin), cast_ymin + (cast_ymax - cast_ymin)), cv::Scalar(30,07,197), 3);
             cv::putText(cv_image_clone, "fake", cv::Point(cast_xmin + 5, cast_ymin + 25), cv::FONT_HERSHEY_TRIPLEX, 1, cv::Scalar(0, 255, 255));
             std::cout << "DEBUG: filterBboxByArea finished" << std::endl;
           }
@@ -3347,7 +3353,7 @@ class TVMPoseNode {
       //value == rtpose's index
       // 1 == neck, thus not in gluon
       // 14 == chest, thus not in gluon
-      int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
+      //int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
       if (output->num >= 1) {
         for (int i = 0; i < output->num; i++) {
           
@@ -3902,9 +3908,11 @@ int main(int argc, char** argv) {
   pnh.param("max_distance", max_distance, 6.25);
   pnh.param("use_pointcloud", use_pointcloud, false);
   pnh.param("centroid_arg", centroid_arg, 0);
+  pnh.param("cluster_mode", mode, 0);
+
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMPoseNode node(nh, sensor_name, zone_json, max_distance, use_pointcloud, centroid_arg);
+  TVMPoseNode node(nh, sensor_name, zone_json, max_distance, use_pointcloud, centroid_arg, cluster_mode);
   std::cout << "detection node init " << std::endl;
   ros::spin();
   return 0;
