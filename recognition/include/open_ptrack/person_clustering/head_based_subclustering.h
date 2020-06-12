@@ -243,5 +243,5 @@ namespace person_clustering
     };
   } /* namespace people */
 } /* namespace pcl */
-#include <open_ptrack/person_clustering/head_based_subclustering.cpp>
+#include <open_ptrack/person_clustering/head_based_subclustering.hpp>
 #endif /* PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_H_ */

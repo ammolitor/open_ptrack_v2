@@ -89,7 +89,7 @@
 
 // getting errors from here...????? (I might be able to recreate it...) stemming from pcl_visualizer
 #include <open_ptrack/person_clustering/person_cluster.h>
-#include <open_ptrack/person_clustering/head_based_subcluster.h>
+#include <open_ptrack/person_clustering/head_based_subclustering.h>
 
 #include <open_ptrack/ground_segmentation/ground_segmentation.h>
 #include <open_ptrack/opt_utils/conversions.h>

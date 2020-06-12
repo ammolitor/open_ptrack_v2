@@ -248,6 +248,6 @@ namespace open_ptrack
     };
   } /* namespace ground_segmentation */
 } /* namespace open_ptrack */
-#include <open_ptrack/ground_segmentation/ground_segmentation.cpp>
+#include <open_ptrack/ground_segmentation/ground_segmentation.hpp>
 #endif /* OPEN_PTRACK_GROUND_SEGMENTATION_GROUND_SEGMENTATION_H_ */
 
