@@ -88,6 +88,9 @@
 #include <pcl/filters/passthrough.h>
 
 
+#include <pcl/people/person_cluster.h>
+#include <pcl/people/head_based_subcluster.h>
+
 #include <open_ptrack/ground_segmentation/ground_segmentation.h>
 #include <open_ptrack/opt_utils/conversions.h>
 
@@ -1231,11 +1234,11 @@ class TVMPoseNode {
     std::vector<pcl::PointIndices> cluster_indices;
     PointCloudPtr no_ground_cloud_rotated(new PointCloud);
     Eigen::VectorXf ground_coeffs_new;
-    min_height_ = 1.3;
-    max_height_ = 2.3;
-    heads_minimum_distance_ = 0.3;
-    vertical_ = false;
-    use_rgb_ = true;
+    float min_height_ = 1.3;
+    float max_height_ = 2.3;
+    float heads_minimum_distance_ = 0.3;
+    bool vertical_ = false;
+    bool use_rgb_ = true;
     std::map<std::string, std::pair<double, double>> area_thres_;
 
     // Image to "world" transforms
