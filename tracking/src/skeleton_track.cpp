@@ -175,6 +175,7 @@ SkeletonTrack::update(
         joint_tracks_[i] -> init(bj.x, bj.y, bj.z, 10,
                                  Eigen::Vector3d(bj.x, bj.y, bj.z).norm(),
                                  zone_id,
+                                 box,
                                  detection_source
                                  );
         bool first_update = true;
