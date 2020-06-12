@@ -156,6 +156,14 @@ ADD_LIBRARY(facedetection
         include/open_ptrack/RetinaFace/ulsMatF.h
         include/open_ptrack/facetracking.hpp)
 
+ADD_LIBRARY(segmentation_clustering
+        include/open_ptrack/ground_segmentation/ground_segmentation.hpp
+        include/open_ptrack/ground_segmentation/ground_segmentation.h
+        include/open_ptrack/people_clustering/person_cluster.hpp
+        include/open_ptrack/people_clustering/person_cluster.h
+        include/open_ptrack/people_clustering/head+based_subclustering.hpp
+        include/open_ptrack/people_clustering/head+based_subclustering.h
+        )
 
 #ADD_LIBRARY(object_detection
 #        include/open_ptrack/yolo_tvm.hpp)
@@ -273,6 +281,7 @@ target_link_libraries(debug_pose_model PUBLIC Threads::Threads ${OpenCV_LIBS}
                                           ${catkin_LIBRARIES} 
                                           ${LINKER_LIBS}
                                           ${CUDA_CUDA_LIBRARY}
+                                          segmentation_clustering
                                           ${CUDA_CUDART_LIBRARY}
                                           ${CUDA_CURAND_LIBRARY}
                                           ${CUDA_CUDNN_LIBRARY}
