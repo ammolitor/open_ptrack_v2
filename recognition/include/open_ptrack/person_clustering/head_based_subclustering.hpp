@@ -298,7 +298,7 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   //  int cluster_max_points_sub = max_points_;
 
   // create HeightMap2D object:
-  pcl::people::HeightMap2D<PointT> height_map_obj;
+  open_ptrack::person_clustering::HeightMap2D<PointT> height_map_obj;
   height_map_obj.setGround(ground_coeffs_);
   height_map_obj.setInputCloud(cloud_);
   height_map_obj.setSensorPortraitOrientation(vertical_);
