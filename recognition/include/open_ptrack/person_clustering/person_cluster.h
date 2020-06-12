@@ -331,5 +331,5 @@ namespace person_clustering
     };
   } /* namespace people */
 } /* namespace pcl */
-#include <open_ptrack/person_clustering/person_cluster.hpp>
+#include <open_ptrack/person_clustering/person_cluster.cpp>
 #endif /* PERSON_CLUSTER_PEOPLE_PERSON_CLUSTER_H_ */
