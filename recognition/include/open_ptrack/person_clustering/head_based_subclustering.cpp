@@ -41,7 +41,7 @@
 #ifndef PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_HPP_
 #define PCL_PEOPLE_HEAD_BASED_SUBCLUSTER_HPP_
 
-#include <open_ptrack/person_clustering/head_based_subcluster.h>
+#include <open_ptrack/person_clustering/head_based_subclustering.h>
 
 
 template <typename PointT>
