@@ -119,7 +119,7 @@ public:
         bool vertical);
 
   void
-  init(double x, double y, double z, double height, double distance, int zone_id,
+  init(double x, double y, double z, double height, double distance, int zone_id, cv::Rect box,
        open_ptrack::detection::DetectionSource* detection_source,
        const std::vector<rtpose_wrapper::Joint3DMsg>& joints);
 
