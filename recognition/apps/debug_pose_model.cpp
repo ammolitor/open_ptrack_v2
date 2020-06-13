@@ -1254,6 +1254,7 @@ class TVMPoseNode {
     tf::StampedTransform world2rgb_transform;
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
+    json zone_json;
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
@@ -1264,7 +1265,7 @@ class TVMPoseNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json, double max_distance, bool pointcloud, int centroid_arg, int mode, bool pointcloud_only):
+    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone, double max_distance, bool pointcloud, int centroid_arg, int mode, bool pointcloud_only):
       node_(nh), it(node_)
       {
         
@@ -1392,7 +1393,7 @@ class TVMPoseNode {
         // maybe...
         transform = transform.Identity();
         anti_transform = transform.inverse();
-
+        zone_json = zone;
         // 0 == manual
       }
 
@@ -2038,8 +2039,8 @@ class TVMPoseNode {
   //                const PointCloudT::ConstPtr& cloud_,
   //                json zone_json) {
   
-  void mode_1_callback_cloud_only(const PointCloudT::ConstPtr& cloud_,
-                                  json zone_json) {
+  void mode_1_callback_cloud_only(const PointCloudT::ConstPtr& cloud_) {//,
+                                  //json zone_json) {
 
 
       //Calculate direct and inverse transforms between camera and world frame:
