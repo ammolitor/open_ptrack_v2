@@ -1137,9 +1137,12 @@ class TVMPoseNode {
     boost::shared_ptr<ImageApproximateSync> image_approximate_sync_;// vars
 
     //pointcloud only method
-    typedef ApproximateTime< PointCloudT> PointCloudApproximatePolicy;
-    typedef message_filters::Synchronizer<PointCloudApproximatePolicy> PointCloudApproximateSync;
-    boost::shared_ptr<PointCloudApproximateSync> point_cloud_approximate_sync_;// vars
+    //typedef ApproximateTime< PointCloudT> PointCloudApproximatePolicy;
+    //typedef message_filters::Synchronizer<PointCloudApproximatePolicy> PointCloudApproximateSync;
+    //boost::shared_ptr<PointCloudApproximateSync> point_cloud_approximate_sync_;// vars
+
+    ros::Subscriber point_cloud_approximate_sync_;
+
 
 
     std::string encoding;
@@ -1355,7 +1358,8 @@ class TVMPoseNode {
         // default
         if (mode == 1){
           if (pointcloud_only){
-            point_cloud_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback_cloud_only, this, _1, zone_json));
+            //point_cloud_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback_cloud_only, this, _1, zone_json));
+            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::mode_1_callback_cloud_only, this, zone_json);
           } else {
             image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback, this, _1, _2, _3, zone_json));
           }
