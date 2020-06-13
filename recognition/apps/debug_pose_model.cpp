@@ -1136,6 +1136,11 @@ class TVMPoseNode {
     typedef message_filters::Synchronizer<ImageApproximatePolicy> ImageApproximateSync;
     boost::shared_ptr<ImageApproximateSync> image_approximate_sync_;// vars
 
+    //pointcloud only method
+    typedef ApproximateTime< PointCloudT> PointCloudApproximatePolicy;
+    typedef message_filters::Synchronizer<PointCloudApproximatePolicy> PointCloudApproximateSync;
+    boost::shared_ptr<PointCloudApproximateSync> point_cloud_approximate_sync_;// vars
+
 
     std::string encoding;
     float mm_factor = 1000.0f;
@@ -1256,7 +1261,7 @@ class TVMPoseNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json, double max_distance, bool pointcloud, int centroid_arg, int mode):
+    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone_json, double max_distance, bool pointcloud, int centroid_arg, int mode, bool pointcloud_only):
       node_(nh), it(node_)
       {
         
@@ -1349,8 +1354,14 @@ class TVMPoseNode {
         }
         // default
         if (mode == 1){
-          image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback, this, _1, _2, _3, zone_json));
+          if (pointcloud_only){
+            point_cloud_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback_cloud_only, this, _1, zone_json));
+          } else {
+            image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback, this, _1, _2, _3, zone_json));
+          }
         }
+
+
         // default
         if (mode == 2){
           image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_2_callback, this, _1, _2, _3, zone_json));
@@ -2018,11 +2029,537 @@ class TVMPoseNode {
     //              json zone_json) {
     
     // yolo filters pcl cluster detections
+  //void mode_1_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
+  //                const sensor_msgs::Image::ConstPtr& depth_image,
+  //                const PointCloudT::ConstPtr& cloud_,
+  //                json zone_json) {
+  
+  void mode_1_callback_cloud_only(const PointCloudT::ConstPtr& cloud_,
+                                  json zone_json) {
+
+
+      //Calculate direct and inverse transforms between camera and world frame:
+      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
+                                 world_transform);
+      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
+                                 world_inverse_transform);
+
+      std::cout << "running algorithm callback" << std::endl;
+
+      if (estimate_ground_plane) {
+        set_ground_variables(cloud_);
+        estimate_ground_plane = false;
+      }
+
+      // set message vars here
+      cv_bridge::CvImagePtr cv_ptr_rgb;
+      cv_bridge::CvImage::Ptr  cv_ptr_depth;
+      cv::Mat cv_image;
+      cv::Mat cv_depth_image;
+      cv::Mat cv_image_clone;
+      
+      // set detection variables here
+      pose_results* output;
+      cv::Size image_size;
+      float height;
+      float width;
+      ros::Time begin;
+      double duration;
+
+      // set publication messages vars here
+      // generate new detection array message with the header from the rbg image
+      opt_msgs::DetectionArray::Ptr detection_array_msg(new opt_msgs::DetectionArray);
+      detection_array_msg->header = cloud_->header;
+      detection_array_msg->confidence_type = std::string("yolo");
+      detection_array_msg->image_type = std::string("rgb");
+      // set detection intrinsic matrix from camera variables
+      for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+          detection_array_msg->intrinsic_matrix.push_back(intrinsics_matrix(i, j));
+        }
+      }
+      // set skeleton array here not sure which one is correct
+      //opt_msgs::SkeletonArrayMsg skeleton_array;
+      opt_msgs::SkeletonArrayMsg::Ptr skeleton_array(new opt_msgs::SkeletonArrayMsg);
+      skeleton_array->header = cloud_->header;
+      skeleton_array->rgb_header = cloud_->header;
+      // set detection intrinsic matrix from camera variables
+      for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+          skeleton_array->intrinsic_matrix.push_back(intrinsics_matrix(i, j));
+        }
+      }
+
+      open_ptrack::opt_utils::Conversions converter; 
+      // NOTE
+      // convert message to usable formats
+      // available encoding types:
+      // ---- sensor_msgs::image_encodings::BGR8
+      // ---- sensor_msgs::image_encodings::TYPE_16UC1;
+      // ---- sensor_msgs::image_encodings::TYPE_32UC1;
+    
+      //cv_ptr_rgb = cv_bridge::toCvCopy(rgb_image, sensor_msgs::image_encodings::BGR8);
+      //cv_image = cv_ptr_rgb->image;
+      //cv_ptr_depth = cv_bridge::toCvCopy(depth_image, sensor_msgs::image_encodings::TYPE_32FC1);
+      //cv_depth_image = cv_ptr_depth->image;
+      //image_size = cv_image.size();
+      //height =  static_cast<float>(image_size.height);
+      //width =  static_cast<float>(image_size.width);
+      //cv_image_clone = cv_image.clone();
+
+      //////////////////////////////////////////////////////////////////////////////////////////////
+      // Create XYZ cloud:
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_xyzrgb(new pcl::PointCloud<pcl::PointXYZRGB>);
+      pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      // fails?
+      //pcl::fromROSMsg(*cloud_, *pcl_cloud);
+      //https://answers.ros.org/question/9515/how-to-convert-between-different-point-cloud-types-using-pcl/
+      pcl::PointXYZRGB xyzrgb_point;
+      cloud_xyzrgb->points.resize(cloud_->width * cloud_->height, xyzrgb_point);
+      cloud_xyzrgb->width = cloud_->width;
+      cloud_xyzrgb->height = cloud_->height;
+      cloud_xyzrgb->is_dense = false;
+
+      int cloud__is_empty = cloud_->size();
+      std::cout << "DEBUG: cloud__is_empty: " << cloud__is_empty << std::endl;
+      int cloud_width = cloud_->width;
+      std::cout << "DEBUG: cloud_width: " << cloud_width << std::endl;
+      int cloud_height = cloud_->height;
+      std::cout << "DEBUG: cloud_height: " << cloud_height << std::endl;
+
+      // fill xyzrgb
+      for (int i=0;i<cloud_->height;i++)
+      {
+          for (int j=0;j<cloud_->width;j++)
+          {
+          cloud_xyzrgb->at(j,i).x = cloud_->at(j,i).x;
+          cloud_xyzrgb->at(j,i).y = cloud_->at(j,i).y;
+          cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
+          }
+      }
+
+      int cloud_xyzrgb_is_empty = cloud_xyzrgb->size();
+      std::cout << "DEBUG: cloud_xyzrgb_is_empty: " << cloud_xyzrgb_is_empty << std::endl;
+
+      pcl::PointXYZ xyz_point;
+      pcl_cloud->points.resize(cloud_->width * cloud_->height, xyz_point);
+      pcl_cloud->width = cloud_->width;
+      pcl_cloud->height = cloud_->height;
+      pcl_cloud->is_dense = false;
+
+      for (size_t i = 0; i < cloud_->points.size(); i++) {
+          pcl_cloud->points[i].x = cloud_->points[i].x;
+          pcl_cloud->points[i].y = cloud_->points[i].y;
+          pcl_cloud->points[i].z = cloud_->points[i].z;
+      }
+
+      // define xyz 3d points in cloud
+      Eigen::MatrixXd points_3d_in_cam(3, pcl_cloud->size());
+      for(int i = 0; i < pcl_cloud->size(); i++)
+      {
+          points_3d_in_cam(0, i) = (*pcl_cloud)[i].x;
+          points_3d_in_cam(1, i) = (*pcl_cloud)[i].y;
+          points_3d_in_cam(2, i) = (*pcl_cloud)[i].z;
+      }    
+
+
+      cv::Mat cv_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_8UC3);
+      cv::Mat cv_depth_image (cloud_xyzrgb->height, cloud_xyzrgb->width, TYPE_32FC1);
+      for (int i=0;i<cloud_->height;i++)
+      {
+          for (int j=0;j<cloud_->width;j++)
+          {
+          cv_image.at<cv::Vec3b>(i,j)[2] = cloud_->at(j,i).r;
+          cv_image.at<cv::Vec3b>(i,j)[1] = cloud_->at(j,i).g;
+          cv_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
+          cv_depth_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).z;
+          }
+      }
+    
+      // define this, but maybe do like the camera transform here????
+      Eigen::MatrixXd points_2d_homo = cam_intrins_ * points_3d_in_cam;
+
+      // lets assume that points_2d_homo == world transform...
+
+      Eigen::MatrixXd points_2d(2, pcl_cloud->size());
+      for(int i = 0; i < pcl_cloud->size(); i++)
+      {
+          points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
+          points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
+      }
+
+      //////////////////////////////////////////////////////////////////////////////////////////////
+
+      // override and use pointcloud
+      //cv_image = curr_image.clone();
+      cv_image_clone = cv_image.clone();
+      image_size = cv_image.size();
+      height =  static_cast<float>(image_size.height);
+      width =  static_cast<float>(image_size.width);
+
+
+      // override and use pointcloud
+
+      // necessary? or can we just use height/width of cv_image
+      int DISPLAY_RESOLUTION_HEIGHT = image_size.height;
+      int DISPLAY_RESOLUTION_WIDTH = image_size.width;
+
+      std::cout << "running yolo" << std::endl;
+      // forward inference of object detector
+      begin = ros::Time::now();
+      output = tvm_pose_detector->forward_full(cv_image, .3);
+      duration = ros::Time::now().toSec() - begin.toSec();
+      printf("yolo detection time: %f\n", duration);
+      printf("yolo detections: %ld\n", output->num);
+
+      std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   // vector containing persons clusters
+      // we run ground-based-people-detector pcl subclustering operation
+
+      int r, c;
+      // don't forget to import hungarian algo
+      HungarianAlgorithm HungAlgo;
+      std::vector<cv::Point> yolo_centroids;
+      std::vector<cv::Point3f> yolo_centroids3d;
+      std::vector<cv::Point> cluster_centroids;
+      std::vector<cv::Point3f> cluster_centroids3d;
+      std::vector<std::vector<double>> cost_matrix;
+      std::vector<int> assignment;
+
+      // fall back on subclusters?????
+      // no detections? no forward...
+      
+      // build cost matrix
+      if (output->num >= 1) {
+        compute_subclustering(clusters, cluster_centroids, cluster_centroids3d);
+        for (int i = 0; i < output->num; i++) {
+          // get the label and the object name
+          float label = static_cast<float>(output->boxes[i].id);
+          // only detect people.
+          if (label > 0) {
+            std::cout << "observation not a person: rejecting " << std::endl;
+            continue;
+          }
+          // get the coordinate information
+          float xmin = output->boxes[i].xmin;
+          float ymin = output->boxes[i].ymin;
+          float xmax = output->boxes[i].xmax;
+          float ymax = output->boxes[i].ymax;
+          int cast_xmin = static_cast<int>(xmin);
+          int cast_ymin = static_cast<int>(ymin);
+          int cast_xmax = static_cast<int>(xmax);
+          int cast_ymax = static_cast<int>(ymax);
+          // set the median of the bounding box
+          float median_x = xmin + ((xmax - xmin) / 2.0);
+          float median_y = ymin + ((ymax - ymin) / 2.0);
+          // If the detect box coordinat is near edge of image, it will return a error 'Out of im.size().'
+          if ( median_x < width*0.02 || median_x > width*0.98) continue;
+          if ( median_y < height*0.02 || median_y > height*0.98) continue;
+          float median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
+          // set the mx/my wtr the intrinsic camera matrix
+          float mx = (median_x - _cx) * median_depth * _constant_x;
+          float my = (median_y - _cy) * median_depth * _constant_y;
+
+          cv::Point output_centroid;
+          cv::Point3f output_centroid3d;
+          output_centroid = cv::Point(mx, my); // or median_x, median_y
+          output_centroid3d = cv::Point3f(mx, my, median_depth);
+          yolo_centroids.push_back(output_centroid);
+          yolo_centroids3d.push_back(output_centroid3d);
+        }
+        
+        // Initialize cost matrix for the hungarian algorithm
+        for (int r = 0; r < cluster_centroids.size (); r++) {
+          std::vector<double> row;
+          for (int c = 0; c < yolo_centroids.size (); c++) {
+            float dist;
+            dist = cv::norm(cv::Mat(yolo_centroids[c]), cv::Mat (cluster_centroids[r]));
+            row.push_back(dist);
+          }
+          cost_matrix.push_back(row);
+        }
+        
+        // Solve the Hungarian problem to match the distance of the roi centroid
+        // to that of the bounding box
+        HungAlgo.Solve(cost_matrix, assignment);
+        printf("assignment shape: %ld\n", assignment.size());
+        //for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
+
+        for (int i = 0; i < output->num; i++) {
+          if (assignment[i] == -1){
+            continue;
+          }
+          else
+          {
+            open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[assignment[i]];
+            float xmin = output->boxes[i].xmin;
+            float ymin = output->boxes[i].ymin;
+            float xmax = output->boxes[i].xmax;
+            float ymax = output->boxes[i].ymax;
+            float score = output->boxes[i].score;
+            float label = static_cast<float>(output->boxes[i].id);
+            std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
+            // get the coordinate information
+            int cast_xmin = static_cast<int>(xmin);
+            int cast_ymin = static_cast<int>(ymin);
+            int cast_xmax = static_cast<int>(xmax);
+            int cast_ymax = static_cast<int>(ymax);
+            std::vector<cv::Point3f> points = output->boxes[i].points;
+            int num_parts = points.size();
+
+            // set the median of the bounding box
+            float median_x = xmin + ((xmax - xmin) / 2.0);
+            float median_y = ymin + ((ymax - ymin) / 2.0);
+
+            // If the detect box coordinat is near edge of image, it will return a error 'Out of im.size().'
+            if ( median_x < width*0.02 || median_x > width*0.98) continue;
+            if ( median_y < height*0.02 || median_y > height*0.98) continue;
+          
+            // set the new coordinates of the image so that the boxes are set
+            int new_x = static_cast<int>(median_x - (median_factor * (median_x - xmin)));
+            int new_y = static_cast<int>(median_y - (median_factor * (median_y - ymin)));
+            int new_width = static_cast<int>(2 * (median_factor * (median_x - xmin)));
+            int new_height = static_cast<int>(2 * (median_factor * (median_y - ymin)));
+          
+            float median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
+            // set the mx/my wtr the intrinsic camera matrix
+            float mx = (median_x - _cx) * median_depth * _constant_x;
+            float my = (median_y - _cy) * median_depth * _constant_y;
+
+            // Create detection message: -- literally tatken ground_based_people_detector_node
+            float skeleton_distance;
+            float skeleton_height;
+            opt_msgs::Detection detection_msg;
+            converter.Vector3fToVector3(anti_transform * person_cluster.getMin(), detection_msg.box_3D.p1);
+            converter.Vector3fToVector3(anti_transform * person_cluster.getMax(), detection_msg.box_3D.p2);
+                
+            float head_centroid_compensation = 0.05;
+
+            // theoretical person centroid:
+            Eigen::Vector3f centroid3d = anti_transform * person_cluster.getTCenter();
+            Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
+            // theoretical person top point:
+            Eigen::Vector3f top3d = anti_transform * person_cluster.getTTop();
+            Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
+            // theoretical person bottom point:
+            Eigen::Vector3f bottom3d = anti_transform * person_cluster.getTBottom();
+            Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
+            float enlarge_factor = 1.1;
+            float pixel_xc = centroid2d(0);
+            float pixel_yc = centroid2d(1);
+            float pixel_height = (bottom2d(1) - top2d(1)) * enlarge_factor;
+            float pixel_width = pixel_height / 2;
+            detection_msg.box_2D.x = int(centroid2d(0) - pixel_width/2.0);
+            detection_msg.box_2D.y = int(centroid2d(1) - pixel_height/2.0);
+            detection_msg.box_2D.width = int(pixel_width);
+            detection_msg.box_2D.height = int(pixel_height);
+            detection_msg.height = person_cluster.getHeight();
+            detection_msg.confidence = person_cluster.getPersonConfidence();
+            detection_msg.distance = person_cluster.getDistance();
+            converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
+            converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
+            converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
+
+            opt_msgs::SkeletonMsg skeleton;
+            skeleton.skeleton_type = opt_msgs::SkeletonMsg::COCO;
+            skeleton.joints.resize(num_parts);
+            skeleton_height = int(pixel_height);;
+            skeleton_distance = person_cluster.getDistance();
+
+
+            for (size_t i = 0; i < num_parts; i++){
+              /* code */
+              opt_msgs::Joint3DMsg joint3D;
+              int rtpose_part_index = gluon_to_rtpose[i];
+        
+              // IGNORE eyes/ears
+              if (rtpose_part_index == -1){
+                continue;
+              } else {
+                cv::Point3f point = points[i];
+                float confidence = point.z;
+                int cast_x = static_cast<int>(point.x);
+                int cast_y = static_cast<int>(point.y);
+                float z = cv_depth_image.at<float>(cast_y, cast_x) / mm_factor;
+                joint3D.x = point.x;
+                joint3D.y = point.y;
+                joint3D.z = z;
+                joint3D.max_height = DISPLAY_RESOLUTION_HEIGHT;
+                joint3D.max_width = DISPLAY_RESOLUTION_WIDTH;
+                joint3D.confidence = confidence;
+                joint3D.header = rgb_image->header;
+                skeleton.joints[rtpose_part_index] = joint3D;
+                // debug this 
+                //cv::circle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,255,0));
+              }
+            }
+            float confidence = 0.9f;
+            cv::Point3f point_left_shoulder = points[5];
+            cv::Point3f point_right_shoulder = points[6];
+            cv::Point3f point_left_hip = points[11];
+            cv::Point3f point_right_hip = points[12];
+
+            // ******* NECK == joint location 1
+            opt_msgs::Joint3DMsg joint3D_neck;
+            // center of each shoulder == chest
+            float x = (point_left_shoulder.x + point_right_shoulder.x) / 2;
+            float y = (point_left_shoulder.y + point_right_shoulder.y) / 2;
+            int cast_point_x = static_cast<int>(x);
+            int cast_point_y = static_cast<int>(y);              
+            float z = cv_depth_image.at<float>(cast_point_y, cast_point_x) / mm_factor;
+            joint3D_neck.x = x;
+            joint3D_neck.y = y;
+            joint3D_neck.z = z;
+            joint3D_neck.confidence = confidence;
+            joint3D_neck.header = rgb_image->header;
+            joint3D_neck.max_height = DISPLAY_RESOLUTION_HEIGHT;
+            joint3D_neck.max_width = DISPLAY_RESOLUTION_WIDTH;              
+            // NECK == joint location 1
+            skeleton.joints[1] = joint3D_neck;
+            //cv::circle(cv_image_clone, cv::Point(cast_point_x, cast_point_y), 3, (0,255,0));
+            
+            // ******** CHEST
+            opt_msgs::Joint3DMsg joint3D_chest;
+            // weighted mean from rtpose
+            // TODO if this looks ugly, we'll just use the neck
+            float cx = (point_left_hip.x + point_right_hip.x) * 0.4 + (point_left_shoulder.x + point_right_shoulder.x) * 0.1;
+            float cy = (point_left_hip.y + point_right_hip.y) * 0.4 + (point_left_shoulder.y + point_right_shoulder.y) * 0.1;
+            int cast_cx = static_cast<int>(cx);
+            int cast_cy = static_cast<int>(cy);
+            float cz = cv_depth_image.at<float>(cast_cy, cast_cx) / mm_factor;
+            joint3D_chest.x = cx;
+            joint3D_chest.y = cy;
+            joint3D_chest.z = cz;
+            joint3D_chest.confidence = confidence; //use confidence from previous
+            joint3D_chest.header = rgb_image->header;
+            joint3D_chest.max_height = DISPLAY_RESOLUTION_HEIGHT;
+            joint3D_chest.max_width = DISPLAY_RESOLUTION_WIDTH; 
+            // CHEST == joint location 15, index 14
+            skeleton.joints[14] = joint3D_chest;
+            //cv::circle(cv_image_clone, cv::Point(cast_cx, cast_cy), 3, (0,0,255));
+            draw_skelaton(cv_image_clone, points);
+
+            // adding this so scan which zone the given detection is in 
+            if (json_found){
+              
+              bool inside_area_cube = false;
+              int zone_id;
+              std::string zone_string;                  
+              double x_min;
+              double y_min;
+              double z_min;
+              double x_max;
+              double y_max;
+              double z_max;
+              double world_x_min;
+              double world_y_min;
+              double world_z_min;
+              double world_x_max;
+              double world_y_max;
+              double world_z_max;
+              for (zone_id = 0; zone_id < n_zones; zone_id++)
+              {
+                // need a world view here bc each detection was transformed
+                // this will work for a singular cam, but would mean each cam would have to tune
+                // to the specific area; which I think would be fine. // but will need
+                // to test to be sure
+                // a given detection can be in only one place at one time, thus it can't be in
+                // multiple zones
+                zone_string = std::to_string(zone_id);
+                std::cout << "zone_string: " << zone_string << std::endl;
+                // type must be number but is null...
+                //https://github.com/nlohmann/json/issues/1593
+
+                // translate between world and frame
+                world_x_min = zone_json[zone_string]["min"]["world"]["x"];
+                world_y_min = zone_json[zone_string]["min"]["world"]["y"];
+                world_z_min = zone_json[zone_string]["min"]["world"]["z"];
+                world_x_max = zone_json[zone_string]["max"]["world"]["x"];
+                world_y_max = zone_json[zone_string]["max"]["world"]["y"];
+                world_z_max = zone_json[zone_string]["max"]["world"]["z"];
+
+                std::cout << "world_x_min: " << world_x_min << std::endl;
+                std::cout << "world_y_min: " << world_y_min << std::endl;
+                std::cout << "world_z_min: " << world_z_min << std::endl;
+                std::cout << "world_x_max: " << world_x_max << std::endl;
+                std::cout << "world_y_max: " << world_y_max << std::endl;
+                std::cout << "world_z_max: " << world_z_max << std::endl;
+
+                Eigen::Vector3d min_vec;
+                Eigen::Vector3d max_vec;
+                tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
+                tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
+                
+                min_point = world_transform(min_point);
+                max_point = world_transform(max_point);
+
+                x_min = min_point.getX();
+                y_min = min_point.getY();
+                z_min = min_point.getZ();
+                x_max = min_point.getX();
+                y_max = min_point.getY();
+                z_max = min_point.getZ();
+
+                std::cout << "x_min: " << x_min << std::endl;
+                std::cout << "y_min: " << y_min << std::endl;
+                std::cout << "z_min: " << z_min << std::endl;
+                std::cout << "x_max: " << x_max << std::endl;
+                std::cout << "y_max: " << y_max << std::endl;
+                std::cout << "z_max: " << z_max << std::endl;
+                std::cout << "mx: " << mx << std::endl;
+                std::cout << "my: " << my << std::endl;
+                std::cout << "median_depth: " << median_depth << std::endl;
+
+                inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
+                std::cout << "inside_cube: " << inside_area_cube << std::endl;
+                // I think this works. 
+                if (inside_area_cube) {
+                  break;
+                }
+              }
+
+              if (inside_area_cube) {
+                detection_msg.zone_id = zone_id;
+                std::cout << "DEBUG -- INSIDE ZONE: " << zone_id << std::endl;
+              } else {
+                // meaning they're in transit
+                detection_msg.zone_id = 1000;
+              } 
+            }
+            skeleton.confidence = 100;
+            skeleton.height = skeleton_height;
+            skeleton.distance = skeleton_distance;
+            skeleton.occluded = false;
+          
+            // final check here 
+            // only add to message if no nans exist
+            if (check_detection_msg(detection_msg)){
+              std::cout << "valid detection!" << std::endl;
+              skeleton_array->skeletons.push_back(skeleton);
+              detection_msg.object_name=object_name;            
+              detection_array_msg->detections.push_back(detection_msg);
+          
+            cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
+            cv::putText(cv_image_clone, object_name, cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
+            // cv::imwrite("/home/nvidia/OUTPUTIMAGE.JPG", cv_image);
+          }
+        }
+      }
+    }
+  // this will publish empty detections if nothing is found
+  sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
+  detections_pub.publish(detection_array_msg);
+  skeleton_pub.publish(skeleton_array);
+  image_pub.publish(imagemsg);
+  free(output->boxes);
+  free(output);
+  }
+
   void mode_1_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
                   const sensor_msgs::Image::ConstPtr& depth_image,
                   const PointCloudT::ConstPtr& cloud_,
                   json zone_json) {
-      
+
+
       //Calculate direct and inverse transforms between camera and world frame:
       tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
                                  world_transform);
@@ -2447,6 +2984,8 @@ class TVMPoseNode {
   free(output->boxes);
   free(output);
   }
+
+
 
   //3d cubing
   void mode_2_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
@@ -3886,6 +4425,7 @@ int main(int argc, char** argv) {
   bool use_pointcloud;
   int centroid_arg; //0, 1, 2, 3
   int cluster_mode; //0, 1, 2, 3
+  bool pointcloud_only;
   //json master_config;
   //std::string package_path = ros::package::getPath("recognition");
   //std::string master_hard_coded_path = package_path + "/cfg/master.json";
@@ -3909,10 +4449,10 @@ int main(int argc, char** argv) {
   pnh.param("use_pointcloud", use_pointcloud, false);
   pnh.param("centroid_arg", centroid_arg, 0);
   pnh.param("cluster_mode", cluster_mode, 0);
-
+  pnh.param("pointcloud_only", pointcloud_only, true);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMPoseNode node(nh, sensor_name, zone_json, max_distance, use_pointcloud, centroid_arg, cluster_mode);
+  TVMPoseNode node(nh, sensor_name, zone_json, max_distance, use_pointcloud, centroid_arg, cluster_mode, pointcloud_only);
   std::cout << "detection node init " << std::endl;
   ros::spin();
   return 0;
