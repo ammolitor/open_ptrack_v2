@@ -2294,7 +2294,7 @@ class TVMPoseNode {
           // to that of the bounding box
           std::cout << "solving Hungarian problem" << std::endl;
           HungAlgo.Solve(cost_matrix, assignment);
-          printf("assignment shape: %ld\n", assignment.size());
+          std::cout << "assignment shape: " <<  assignment.size() << std::endl;
           //for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
 
           for (int i = 0; i < output->num; i++) {
