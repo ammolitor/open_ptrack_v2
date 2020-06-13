@@ -2057,7 +2057,7 @@ class TVMPoseNode {
       }
 
       // set message vars here
-      std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud->header);
+      std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
       cv_bridge::CvImagePtr cv_ptr_rgb;
       cv_bridge::CvImage::Ptr  cv_ptr_depth;
       //cv::Mat cv_image;
@@ -2392,7 +2392,7 @@ class TVMPoseNode {
                 joint3D.max_height = DISPLAY_RESOLUTION_HEIGHT;
                 joint3D.max_width = DISPLAY_RESOLUTION_WIDTH;
                 joint3D.confidence = confidence;
-                joint3D.header = rgb_image->header;
+                joint3D.header = cloud_header;
                 skeleton.joints[rtpose_part_index] = joint3D;
                 // debug this 
                 //cv::circle(cv_image_clone, cv::Point(cast_x, cast_y), 3, (0,255,0));
@@ -2416,7 +2416,7 @@ class TVMPoseNode {
             joint3D_neck.y = y;
             joint3D_neck.z = z;
             joint3D_neck.confidence = confidence;
-            joint3D_neck.header = rgb_image->header;
+            joint3D_neck.header = cloud_header;
             joint3D_neck.max_height = DISPLAY_RESOLUTION_HEIGHT;
             joint3D_neck.max_width = DISPLAY_RESOLUTION_WIDTH;              
             // NECK == joint location 1
@@ -2436,7 +2436,7 @@ class TVMPoseNode {
             joint3D_chest.y = cy;
             joint3D_chest.z = cz;
             joint3D_chest.confidence = confidence; //use confidence from previous
-            joint3D_chest.header = rgb_image->header;
+            joint3D_chest.header = cloud_header;
             joint3D_chest.max_height = DISPLAY_RESOLUTION_HEIGHT;
             joint3D_chest.max_width = DISPLAY_RESOLUTION_WIDTH; 
             // CHEST == joint location 15, index 14
