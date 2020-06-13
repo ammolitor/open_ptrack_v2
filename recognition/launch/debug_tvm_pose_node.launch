@@ -7,6 +7,7 @@
   <arg name="training_set" default="$(optenv OPT_OBJECT_TRAINING coco)" />
   <arg name="centroid_arg" default="0" />
   <arg name="cluster_mode" default="0" />
+  <arg name="use_pointcloud" default="false" />
 
   <group if="$(arg standalone)" >
     <!-- Start the realsense -->
@@ -24,6 +25,7 @@
     <param name="sensor_name"               value="$(arg sensor_name)" />
     <param name="centroid_arg"               value="$(arg centroid_arg)" />
     <param name="cluster_mode"               value="$(arg cluster_mode)" />
+    <param name="use_pointcloud"               value="$(arg use_pointcloud)" />
 
 
     <param name="world_frame_id"            value="/world"/>
