@@ -1254,7 +1254,7 @@ class TVMPoseNode {
     tf::StampedTransform world2rgb_transform;
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
-    json zone_json;
+    //json zone_json;
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
@@ -1360,7 +1360,7 @@ class TVMPoseNode {
         if (mode == 1){
           if (pointcloud_only){
             //point_cloud_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback_cloud_only, this, _1, zone_json));
-            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::mode_1_callback_cloud_only, this, zone_json);
+            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::mode_1_callback_cloud_only, this);
           } else {
             image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback, this, _1, _2, _3, zone_json));
           }
