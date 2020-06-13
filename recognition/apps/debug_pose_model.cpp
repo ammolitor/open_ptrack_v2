@@ -2057,10 +2057,11 @@ class TVMPoseNode {
       }
 
       // set message vars here
+      std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud->header);
       cv_bridge::CvImagePtr cv_ptr_rgb;
       cv_bridge::CvImage::Ptr  cv_ptr_depth;
-      cv::Mat cv_image;
-      cv::Mat cv_depth_image;
+      //cv::Mat cv_image;
+      //cv::Mat cv_depth_image;
       cv::Mat cv_image_clone;
       
       // set detection variables here
@@ -2074,7 +2075,7 @@ class TVMPoseNode {
       // set publication messages vars here
       // generate new detection array message with the header from the rbg image
       opt_msgs::DetectionArray::Ptr detection_array_msg(new opt_msgs::DetectionArray);
-      detection_array_msg->header = cloud_->header;
+      detection_array_msg->header = cloud_header;
       detection_array_msg->confidence_type = std::string("yolo");
       detection_array_msg->image_type = std::string("rgb");
       // set detection intrinsic matrix from camera variables
@@ -2086,8 +2087,8 @@ class TVMPoseNode {
       // set skeleton array here not sure which one is correct
       //opt_msgs::SkeletonArrayMsg skeleton_array;
       opt_msgs::SkeletonArrayMsg::Ptr skeleton_array(new opt_msgs::SkeletonArrayMsg);
-      skeleton_array->header = cloud_->header;
-      skeleton_array->rgb_header = cloud_->header;
+      skeleton_array->header = cloud_header;
+      skeleton_array->rgb_header = cloud_header;
       // set detection intrinsic matrix from camera variables
       for(int i = 0; i < 3; i++){
         for(int j = 0; j < 3; j++){
