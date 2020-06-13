@@ -2170,7 +2170,7 @@ class TVMPoseNode {
 
 
       cv::Mat cv_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_8UC3);
-      cv::Mat cv_depth_image (cloud_xyzrgb->height, cloud_xyzrgb->width, sensor_msgs::image_encodings::TYPE_32FC1);
+      cv::Mat cv_depth_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_32FC1);
       for (int i=0;i<cloud_->height;i++)
       {
           for (int j=0;j<cloud_->width;j++)
