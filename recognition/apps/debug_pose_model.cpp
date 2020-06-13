@@ -2275,9 +2275,9 @@ class TVMPoseNode {
         
         if (yolo_centroids.size() > 0){
 
-          std::cout << "starting clustering" << std::endl;
+          std::cout << "computing clusters" << std::endl;
           compute_subclustering(clusters, cluster_centroids, cluster_centroids3d);
-
+          std::cout << "clusters size: " << clusters.size() << std::endl;
           // Initialize cost matrix for the hungarian algorithm
           std::cout << "initialize cost matrix for the hungarian algorithm" << std::endl;
           for (int r = 0; r < cluster_centroids.size (); r++) {
