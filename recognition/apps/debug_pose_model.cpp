@@ -1412,7 +1412,7 @@ class TVMPoseNode {
     }
 
 
-    PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud, int n_frame){
+    PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
       // Initialization for background subtraction:
       //PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
@@ -2226,7 +2226,7 @@ class TVMPoseNode {
         std::cout << "background frame n: " << n_frame << std::endl;
         PointCloudT::Ptr newcloud(new PointCloudT);
         *newcloud = *cloud_;
-        background_cloud = computeBackgroundCloud(newcloud, n_frame);
+        background_cloud = computeBackgroundCloud(newcloud);
         if (n_frame >= n_frames){
           set_background = false;
         }
