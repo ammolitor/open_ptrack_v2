@@ -1256,6 +1256,9 @@ class TVMPoseNode {
     tf::StampedTransform world_inverse_transform;
     PointCloudT::Ptr background_cloud;
     //json zone_json;
+    int n_frame = 0;
+    int n_frames = 15;
+    bool set_background = true;
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
@@ -1409,11 +1412,14 @@ class TVMPoseNode {
     }
 
 
-    PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
+    PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud, int n_frame){
       std::cout << "Background acquisition..." << std::flush;
       // Initialization for background subtraction:
       //PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
-      background_cloud = PointCloudT::Ptr (new PointCloudT);
+      if (n_frame == 0){
+        background_cloud = PointCloudT::Ptr (new PointCloudT);
+      }
+
       std::string frame_id = cloud->header.frame_id;
       int frames = int(background_seconds * rate_value);
       ros::Rate rate(rate_value);
@@ -1466,8 +1472,6 @@ class TVMPoseNode {
         }
         std::cout << "generation loop finished: " << std::endl;
 
-
-
         // Point cloud pre-processing (downsampling and filtering):
         //std::cout << "computing background frame" << std::endl;
         //PointCloudT::Ptr cloud_filtered(new PointCloudT);
@@ -1490,13 +1494,15 @@ class TVMPoseNode {
         background_cloud = cloud_filtered;
 
         // Background saving:
-        std::cout << "saving background file to tmp space: " << std::endl;
-        pcl::io::savePCDFileASCII ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud);
-
-        std::cout << "background cloud done." << std::endl << std::endl;
-
+        if (n_frame >= n_frames){
+          std::cout << "saving background file to tmp space: " << std::endl;
+          pcl::io::savePCDFileASCII ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud);
+          std::cout << "background cloud done." << std::endl << std::endl;
+        }
       }
+      n_frame+=1;
       return background_cloud;
+
     }
 
     PointCloudPtr preprocessCloud (PointCloudPtr& input_cloud)
@@ -1749,9 +1755,9 @@ class TVMPoseNode {
       if (!estimate_ground_plane){
          std::cout << "Ground plane already initialized..." << std::endl;
       } else {
-
         //PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
-        background_cloud = computeBackgroundCloud(cloud);
+        // background_cloud = computeBackgroundCloud(cloud);
+        std::cout << "background cloud: " << background_cloud.size() << std::endl;
         //sampling_factor_ = 1;
         //voxel_size_ = 0.06;
         //max_distance_ = 50.0;
@@ -1798,7 +1804,7 @@ class TVMPoseNode {
       } else {
 
         //PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
-        background_cloud = computeBackgroundCloud(cloud);
+        //background_cloud = computeBackgroundCloud(cloud);
         //sampling_factor_ = 1;
         //voxel_size_ = 0.06;
         //max_distance_ = 50.0;
@@ -2215,6 +2221,15 @@ class TVMPoseNode {
                                  world_inverse_transform);
 
       std::cout << "running algorithm callback" << std::endl;
+
+      if (set_background){
+        background_cloud = computeBackgroundCloud(cloud, n_frame);
+        if (n_frame >= n_frames){
+          set_background = false;
+        }
+      }
+      else
+      {
 
       if (estimate_ground_plane) {
         set_ground_variables(cloud_);
@@ -2772,6 +2787,7 @@ class TVMPoseNode {
         }
       }
     }
+  }
   // this will publish empty detections if nothing is found
   sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
   detections_pub.publish(detection_array_msg);
