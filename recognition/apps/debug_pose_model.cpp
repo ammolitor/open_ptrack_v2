@@ -2206,12 +2206,15 @@ class TVMPoseNode {
     //return (true);
   }
 
-    void compute_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+    void compute_subclustering(const PointCloudT::ConstPtr& cloud_, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+      PointCloudT::Ptr cloud(new PointCloudT);
+      *cloud = *cloud_;      
       std::cout << "creating people clusters from compute_subclustering" << std::endl;
       // Person clusters creation from clusters indices:
-      for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_.begin(); it != cluster_indices_.end(); ++it)
+      bool head_centroid = true;
+      for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
       {
-        open_ptrack::person_clustering::PersonCluster<PointT> cluster(cloud_, *it, ground_coeffs_, sqrt_ground_coeffs_, head_centroid_, vertical_); //PersonCluster creation
+        open_ptrack::person_clustering::PersonCluster<PointT> cluster(cloud, *it, ground_coeffs, sqrt_ground_coeffs, head_centroid, vertical); //PersonCluster creation
         clusters.push_back(cluster);
       }
 
@@ -2521,7 +2524,7 @@ class TVMPoseNode {
           if (yolo_centroids.size() > 0){
 
             std::cout << "computing clusters" << std::endl;
-            compute_subclustering(clusters, cluster_centroids, cluster_centroids3d);
+            compute_subclustering(cloud_, clusters, cluster_centroids, cluster_centroids3d);
             //compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
             std::cout << "clusters size: " << clusters.size() << std::endl;
 
@@ -2942,7 +2945,7 @@ class TVMPoseNode {
       
       // build cost matrix
       if (output->num >= 1) {
-        compute_subclustering(clusters, cluster_centroids, cluster_centroids3d);
+        compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
         for (int i = 0; i < output->num; i++) {
           // get the label and the object name
           float label = static_cast<float>(output->boxes[i].id);
