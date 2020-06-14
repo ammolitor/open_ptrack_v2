@@ -2448,14 +2448,18 @@ class TVMPoseNode {
             median_y = height*0.98;
           }
 
+          // get x, y, z points
+          mx = cloud_->at(static_cast<int>(median_x), static_cast(median_y)).x
+          my = cloud_->at(static_cast<int>(median_x), static_cast(median_y)).y
+          median_depth = cloud_->at(static_cast<int>(median_x), static_cast(median_y)).z
+
           //if ( median_y < height*0.02 || median_y > height*0.98) continue;
           // wtf is happening if it continues...???
-          
           median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
           // set the mx/my wtr the intrinsic camera matrix
           mx = (median_x - _cx) * median_depth * _constant_x;
           my = (median_y - _cy) * median_depth * _constant_y;
-          std::cout << "yolo centroid - x:" << mx << ", y: " << my << " z: " << median_depth << std::endl;
+          std::cout << "yolo centroid - x:" << mx << ", y: " << my << ", z: " << median_depth << std::endl;
 
           output_centroid = cv::Point(mx, my); // or median_x, median_y
           output_centroid3d = cv::Point3f(mx, my, median_depth);
@@ -2463,6 +2467,7 @@ class TVMPoseNode {
           yolo_centroids3d.push_back(output_centroid3d);
           std::cout << "centroid added" << std::endl;
         }
+
         std::cout << "checking yolo centroids size: " << yolo_centroids.size() << std::endl;
         std::cout << "checking yolo centroids empty: " << yolo_centroids.empty() << std::endl;
 
