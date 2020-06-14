@@ -2505,25 +2505,24 @@ class TVMPoseNode {
             mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x;
             my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
             median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
-
+            
             std::cout << "yolo centroid - x:" << mx << ", y: " << my << ", z: " << median_depth << std::endl;
-
-            output_centroid = cv::Point(mx, my); // or median_x, median_y
-            output_centroid3d = cv::Point3f(mx, my, median_depth);
-            yolo_centroids.push_back(output_centroid);
-            yolo_centroids3d.push_back(output_centroid3d);
-            std::cout << "centroid added" << std::endl;
+            if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
+              output_centroid = cv::Point(mx, my); // or median_x, median_y
+              output_centroid3d = cv::Point3f(mx, my, median_depth);
+              yolo_centroids.push_back(output_centroid);
+              yolo_centroids3d.push_back(output_centroid3d);
+              std::cout << "centroid added" << std::endl;
           }
-          
-          // filter the background and create a filtered cloud
-          std::cout << "creating foreground cloud" << std::endl;
-          create_foreground_cloud(cloud_);
 
           std::cout << "checking yolo centroids size: " << yolo_centroids.size() << std::endl;
           std::cout << "checking yolo centroids empty: " << yolo_centroids.empty() << std::endl;
 
           if (yolo_centroids.size() > 0){
-
+          // filter the background and create a filtered cloud
+            std::cout << "creating foreground cloud" << std::endl;
+            create_foreground_cloud(cloud_);
+            
             std::cout << "computing clusters" << std::endl;
             compute_subclustering(cloud_, clusters, cluster_centroids, cluster_centroids3d);
             //compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
