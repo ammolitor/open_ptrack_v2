@@ -1717,7 +1717,7 @@ class TVMPoseNode {
       ec.extract(cluster_indices);
 
       // check cluster_indices
-      std::cout << "initial clusters size: " << cluster_indices.empty() << std::endl;
+      std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
 
       // Sensor tilt compensation to improve people detection:
       // moving to global PointCloudPtr no_ground_cloud_rotated(new PointCloud);
