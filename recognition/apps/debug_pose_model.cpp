@@ -2416,11 +2416,11 @@ class TVMPoseNode {
           std::cout << "building yolo centroid: " << i+1 << std::endl;
           // get the label and the object name
           float label = static_cast<float>(output->boxes[i].id);
-          // only detect people.
-          if (label > 0) {
-            std::cout << "observation not a person: rejecting " << std::endl;
-            continue;
-          }
+          // only detect people. ??
+          //if (label > 0) {
+          //  std::cout << "observation not a person: rejecting " << std::endl;
+          //  continue;
+          //}
           // get the coordinate information
           float xmin = output->boxes[i].xmin;
           float ymin = output->boxes[i].ymin;
