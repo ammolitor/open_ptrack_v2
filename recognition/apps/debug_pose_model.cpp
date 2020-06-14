@@ -2135,7 +2135,7 @@ class TVMPoseNode {
       }
 
 
-    void compute_head_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+    void compute_head_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point2f> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
 
       // Person clusters creation from clusters indices:
       //for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_.begin(); it != cluster_indices_.end(); ++it)
@@ -2163,13 +2163,14 @@ class TVMPoseNode {
       for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
         {
           it->setPersonConfidence(-100.0);
-          cv::Point centroid2d;
+          cv::Point2f centroid2d;
           cv::Point3f centroid3d;
           Eigen::Vector3f eigen_centroid3d = it->getTCenter();
-          centroid2d = cv::Point(eigen_centroid3d(0), eigen_centroid3d(1));
+          centroid2d = cv::Point2f(eigen_centroid3d(0), eigen_centroid3d(1));
           centroid3d = cv::Point3f(eigen_centroid3d(0), eigen_centroid3d(1), eigen_centroid3d(2));
           cluster_centroids2d.push_back(centroid2d);
           cluster_centroids3d.push_back(centroid3d);
+  
         }
 
 
@@ -2207,7 +2208,7 @@ class TVMPoseNode {
     //return (true);
   }
 
-    void compute_subclustering(const PointCloudT::ConstPtr& cloud_, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+    void compute_subclustering(const PointCloudT::ConstPtr& cloud_, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point2f> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
       PointCloudT::Ptr cloud(new PointCloudT);
       *cloud = *cloud_;      
       std::cout << "creating people clusters from compute_subclustering" << std::endl;
@@ -2226,10 +2227,10 @@ class TVMPoseNode {
       for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
         {
           it->setPersonConfidence(-100.0);
-          cv::Point centroid2d;
+          cv::Point2f centroid2d;
           cv::Point3f centroid3d;
           Eigen::Vector3f eigen_centroid3d = it->getTCenter();
-          centroid2d = cv::Point(eigen_centroid3d(0), eigen_centroid3d(1));
+          centroid2d = cv::Point2f(eigen_centroid3d(0), eigen_centroid3d(1));
           centroid3d = cv::Point3f(eigen_centroid3d(0), eigen_centroid3d(1), eigen_centroid3d(2));
           cluster_centroids2d.push_back(centroid2d);
           cluster_centroids3d.push_back(centroid3d);
@@ -2442,12 +2443,12 @@ class TVMPoseNode {
         int r, c;
         // don't forget to import hungarian algo
         HungarianAlgorithm HungAlgo;
-        std::vector<cv::Point> yolo_centroids;
+        std::vector<cv::Point2f> yolo_centroids;
         std::vector<cv::Point3f> yolo_centroids3d;
-        std::vector<cv::Point> cluster_centroids;
+        std::vector<cv::Point2f> cluster_centroids;
         std::vector<cv::Point3f> cluster_centroids3d;
         std::vector<std::vector<double>> cost_matrix;
-        cv::Point output_centroid;
+        cv::Point2f output_centroid;
         cv::Point3f output_centroid3d;
         std::vector<int> assignment;
 
@@ -2509,7 +2510,7 @@ class TVMPoseNode {
 
             std::cout << "yolo centroid - x:" << mx << ", y: " << my << ", z: " << median_depth << std::endl;
             if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
-              output_centroid = cv::Point(mx, my); // or median_x, median_y
+              output_centroid = cv::Point2f(mx, my); // or median_x, median_y
               output_centroid3d = cv::Point3f(mx, my, median_depth);
               yolo_centroids.push_back(output_centroid);
               yolo_centroids3d.push_back(output_centroid3d);
@@ -2935,9 +2936,9 @@ class TVMPoseNode {
       int r, c;
       // don't forget to import hungarian algo
       HungarianAlgorithm HungAlgo;
-      std::vector<cv::Point> yolo_centroids;
+      std::vector<cv::Point2f> yolo_centroids;
       std::vector<cv::Point3f> yolo_centroids3d;
-      std::vector<cv::Point> cluster_centroids;
+      std::vector<cv::Point2f> cluster_centroids;
       std::vector<cv::Point3f> cluster_centroids3d;
       std::vector<std::vector<double>> cost_matrix;
       std::vector<int> assignment;
@@ -2976,9 +2977,9 @@ class TVMPoseNode {
           float mx = (median_x - _cx) * median_depth * _constant_x;
           float my = (median_y - _cy) * median_depth * _constant_y;
 
-          cv::Point output_centroid;
+          cv::Point2f output_centroid;
           cv::Point3f output_centroid3d;
-          output_centroid = cv::Point(mx, my); // or median_x, median_y
+          output_centroid = cv::Point2f(mx, my); // or median_x, median_y
           output_centroid3d = cv::Point3f(mx, my, median_depth);
           yolo_centroids.push_back(output_centroid);
           yolo_centroids3d.push_back(output_centroid3d);
