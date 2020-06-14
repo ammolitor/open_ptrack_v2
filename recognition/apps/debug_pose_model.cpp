@@ -2432,15 +2432,30 @@ class TVMPoseNode {
           median_x = xmin + ((xmax - xmin) / 2.0);
           median_y = ymin + ((ymax - ymin) / 2.0);
           // If the detect box coordinat is near edge of image, it will return a error 'Out of im.size().'
-          if ( median_x < width*0.02 || median_x > width*0.98) continue;
-          if ( median_y < height*0.02 || median_y > height*0.98) continue;
+          // lets resize the detection until it's inside the width...
+          
+          if ( median_x < width*0.02) {
+            median_x = width*0.02;
+          }
+          if (median_x > width*0.98) {
+            median_x = width*0.98;
+          }
+
+          if ( median_y < height*0.02) {
+            median_y = height*0.02;
+          }
+          if ( median_y > height*0.98) {
+            median_y = height*0.98;
+          }
+
+          //if ( median_y < height*0.02 || median_y > height*0.98) continue;
           // wtf is happening if it continues...???
           
           median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
           // set the mx/my wtr the intrinsic camera matrix
           mx = (median_x - _cx) * median_depth * _constant_x;
           my = (median_y - _cy) * median_depth * _constant_y;
-          std::cout << "yolo centroid - x:" << mx << ", y: " << my << std::endl;
+          std::cout << "yolo centroid - x:" << mx << ", y: " << my << " z: " << median_depth << std::endl;
 
           output_centroid = cv::Point(mx, my); // or median_x, median_y
           output_centroid3d = cv::Point3f(mx, my, median_depth);
@@ -2504,9 +2519,23 @@ class TVMPoseNode {
                 float median_y = ymin + ((ymax - ymin) / 2.0);
 
                 // If the detect box coordinat is near edge of image, it will return a error 'Out of im.size().'
-                if ( median_x < width*0.02 || median_x > width*0.98) continue;
-                if ( median_y < height*0.02 || median_y > height*0.98) continue;
+                //if ( median_x < width*0.02 || median_x > width*0.98) continue;
+                //if ( median_y < height*0.02 || median_y > height*0.98) continue;
               
+                if ( median_x < width*0.02) {
+                  median_x = width*0.02;
+                }
+                if (median_x > width*0.98) {
+                  median_x = width*0.98;
+                }
+
+                if ( median_y < height*0.02) {
+                  median_y = height*0.02;
+                }
+                if ( median_y > height*0.98) {
+                  median_y = height*0.98;
+                }
+
                 // set the new coordinates of the image so that the boxes are set
                 int new_x = static_cast<int>(median_x - (median_factor * (median_x - xmin)));
                 int new_y = static_cast<int>(median_y - (median_factor * (median_y - ymin)));
