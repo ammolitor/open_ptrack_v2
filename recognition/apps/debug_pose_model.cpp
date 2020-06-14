@@ -1619,7 +1619,168 @@ class TVMPoseNode {
       return the_ground_coeffs_new;
     }
 
+    void create_foreground_cloud(const PointCloudT::ConstPtr& cloud_){
+      PointCloudT::Ptr cloud(new PointCloudT);
+      *cloud = *cloud_;
+      // Point cloud pre-processing (downsampling and filtering):
+      PointCloudPtr cloud_filtered(new PointCloud);
+      cloud_filtered = preprocessCloud(cloud);
+
+      // set background cloud here
+
+      // Ground removal and update:
+      pcl::IndicesPtr inliers(new std::vector<int>);
+      boost::shared_ptr<pcl::SampleConsensusModelPlane<PointT> > ground_model(new pcl::SampleConsensusModelPlane<PointT>(cloud_filtered));
+      //if (isZed_)
+      //  ground_model->selectWithinDistance(ground_coeffs_, 0.2, *inliers);
+      //else
+      ground_model->selectWithinDistance(ground_coeffs, voxel_size, *inliers);
+      PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
+      pcl::ExtractIndices<PointT> extract;
+      extract.setInputCloud(cloud_filtered);
+      extract.setIndices(inliers);
+      extract.setNegative(true);
+      extract.filter(*no_ground_cloud_);
+      bool debug_flag = false;
+      bool sizeCheck = false;
+      //if (isZed_) {
+      //  if (inliers->size () >= (300 * 0.06 / 0.02 / std::pow (static_cast<double> (sampling_factor_), 2)))
+      //    sizeCheck = true;
+      //}
+      //else {
+      if (inliers->size () >= (300 * 0.06 / voxel_size / std::pow (static_cast<double> (sampling_factor), 2))){
+          sizeCheck = true;
+      }
+
+      if (sizeCheck) {
+        ground_model->optimizeModelCoefficients (*inliers, ground_coeffs, ground_coeffs);
+      }
+      //} else {
+      //  if (debug_flag)
+      //  {`
+      //    PCL_INFO ("No groundplane update!\n");
+      //  }
+
+      // Background Subtraction (optional):
+      if (background_subtraction) {
+
+        //people_detector.setBackground(background_subtraction, background_octree_resolution, background_cloud);
+        //template <typename PointT> void
+        //open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::setBackground (bool background_subtraction, float background_octree_resolution, PointCloudPtr& background_cloud)
+        //{
+        //  background_subtraction_ = background_subtraction;
+        //
+        //  background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
+        //  background_octree_->defineBoundingBox(-max_distance_/2, -max_distance_/2, 0.0, max_distance_/2, max_distance_/2, max_distance_);
+        //  background_octree_->setInputCloud (background_cloud);
+        //  background_octree_->addPointsFromInputCloud ();
+        //}
+        //pcl::octree::OctreePointCloud<PointT> *background_octree_
+        //float background_octree_resolution = background_resolution;
+        pcl::octree::OctreePointCloud<PointT> *background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_resolution);
+        background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
+        background_octree_->setInputCloud (background_cloud);
+        background_octree_->addPointsFromInputCloud ();
+        PointCloudPtr foreground_cloud(new PointCloud);
+        for (unsigned int i = 0; i < no_ground_cloud_->points.size(); i++)
+        {
+          if (not (background_octree_->isVoxelOccupiedAtPoint(no_ground_cloud_->points[i].x, no_ground_cloud_->points[i].y, no_ground_cloud_->points[i].z)))
+          {
+            foreground_cloud->points.push_back(no_ground_cloud_->points[i]);
+          }
+        }
+        no_ground_cloud_ = foreground_cloud;
+      }
+      // if (no_ground_cloud_->points.size() > 0)
+      // {
+        // Euclidean Clustering:
+      // moving to global std::vector<pcl::PointIndices> cluster_indices;
+      typename pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
+      tree->setInputCloud(no_ground_cloud_);
+      pcl::EuclideanClusterExtraction<PointT> ec;
+      ec.setClusterTolerance(2 * 0.06);
+      ec.setMinClusterSize(min_points);
+      ec.setMaxClusterSize(max_points);
+      ec.setSearchMethod(tree);
+      ec.setInputCloud(no_ground_cloud_);
+      ec.extract(cluster_indices);
+
+      // Sensor tilt compensation to improve people detection:
+      // moving to global PointCloudPtr no_ground_cloud_rotated(new PointCloud);
+      // moving to global Eigen::VectorXf ground_coeffs_new;
+      if(sensor_tilt_compensation)
+      {
+        // We want to rotate the point cloud so that the ground plane is parallel to the xOz plane of the sensor:
+        Eigen::Vector3f input_plane, output_plane;
+        input_plane << ground_coeffs(0), ground_coeffs(1), ground_coeffs(2);
+        output_plane << 0.0, -1.0, 0.0;
+
+        Eigen::Vector3f axis = input_plane.cross(output_plane);
+        float angle = acos( input_plane.dot(output_plane)/ ( input_plane.norm()/output_plane.norm() ) );
+        transform_ = Eigen::AngleAxisf(angle, axis);
+
+        // Setting also anti_transform for later
+        anti_transform_ = transform_.inverse();
+        no_ground_cloud_rotated = rotateCloud(no_ground_cloud_, transform_);
+        ground_coeffs_new.resize(4);
+        ground_coeffs_new = rotateGround(ground_coeffs, transform_);
+      }
+      else
+      {
+        transform_ = transform_.Identity();
+        anti_transform_ = transform_.inverse();
+        no_ground_cloud_rotated = no_ground_cloud_;
+        ground_coeffs_new = ground_coeffs;
+      }
+    }
+
     void set_ground_variables(const PointCloudT::ConstPtr& cloud_){
+      std::cout << "setting ground variables." << std::endl;
+      PointCloudT::Ptr cloud(new PointCloudT);
+      *cloud = *cloud_;
+      if (!estimate_ground_plane){
+         std::cout << "Ground plane already initialized..." << std::endl;
+      } else {
+
+        PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
+        //sampling_factor_ = 1;
+        //voxel_size_ = 0.06;
+        //max_distance_ = 50.0;
+        //vertical_ = false;
+        //head_centroid_ = true;
+        //min_height_ = 1.3;
+        //max_height_ = 2.3;
+        //min_points_ = 30;     // this value is adapted to the voxel size in method "compute"
+        //max_points_ = 5000;   // this value is adapted to the voxel size in method "compute"
+        //dimension_limits_set_ = false;
+        //heads_minimum_distance_ = 0.3;
+        //use_rgb_ = true;
+        //mean_luminance_ = 0.0;
+        //sensor_tilt_compensation_ = false;
+        //background_subtraction_ = false;
+        int min_points = 30;
+        int max_points = 5000;
+
+        // set flag vales for mandatory parameters:
+        //sqrt_ground_coeffs_ = std::numeric_limits<float>::quiet_NaN();
+        //person_classifier_set_flag_ = false;
+        //frame_counter_ = 0;
+
+        // Ground estimation:
+        std::cout << "Ground plane initialization starting..." << std::endl;
+        ground_estimator.setInputCloud(cloud);
+        //Eigen::VectorXf ground_coeffs = ground_estimator.computeMulticamera(ground_from_extrinsic_calibration, read_ground_from_file,
+        //    pointcloud_topic, sampling_factor, voxel_size);
+        ground_coeffs = ground_estimator.computeMulticamera(false, false,
+                  sensor_name + "/depth_registered/points", 4, 0.06);
+
+      // maybe not needed
+      estimate_ground_plane = false;
+
+      }
+    }
+
+    void set_ground_variables_original(const PointCloudT::ConstPtr& cloud_){
       std::cout << "setting ground variables." << std::endl;
       PointCloudT::Ptr cloud(new PointCloudT);
       *cloud = *cloud_;
@@ -1773,6 +1934,7 @@ class TVMPoseNode {
         }
       // maybe not needed
       estimate_ground_plane = false;
+
       }
     }
 
@@ -2202,8 +2364,6 @@ class TVMPoseNode {
       image_size = cv_image.size();
       height =  static_cast<float>(image_size.height);
       width =  static_cast<float>(image_size.width);
-
-
       // override and use pointcloud
 
       // necessary? or can we just use height/width of cv_image
@@ -2218,6 +2378,9 @@ class TVMPoseNode {
       std::cout << "yolo detection time: " << duration << std::endl;
       std::cout << "yolo detections: " << output->num << std::endl;
       
+      // filter the background and create a filtered cloud
+      create_foreground_cloud(cloud_);
+
       std::cout << "initializing clusters" << std::endl;
       std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   // vector containing persons clusters
       // we run ground-based-people-detector pcl subclustering operation
