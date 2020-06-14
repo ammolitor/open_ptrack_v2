@@ -2445,7 +2445,8 @@ class TVMPoseNode {
           yolo_centroids.push_back(output_centroid);
           yolo_centroids3d.push_back(output_centroid3d);
         }
-        std::cout << "checking yolo centroids" << std::endl;
+        std::cout << "checking yolo centroids: " << yolo_centroids.size() << std::endl;
+
         if (yolo_centroids.size() > 0){
 
           std::cout << "computing clusters" << std::endl;
