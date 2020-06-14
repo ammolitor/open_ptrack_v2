@@ -2401,6 +2401,8 @@ class TVMPoseNode {
       std::vector<cv::Point> cluster_centroids;
       std::vector<cv::Point3f> cluster_centroids3d;
       std::vector<std::vector<double>> cost_matrix;
+      cv::Point output_centroid;
+      cv::Point3f output_centroid3d;
       std::vector<int> assignment;
 
       // fall back on subclusters?????
@@ -2438,14 +2440,14 @@ class TVMPoseNode {
           float mx = (median_x - _cx) * median_depth * _constant_x;
           float my = (median_y - _cy) * median_depth * _constant_y;
 
-          cv::Point output_centroid;
-          cv::Point3f output_centroid3d;
           output_centroid = cv::Point(mx, my); // or median_x, median_y
           output_centroid3d = cv::Point3f(mx, my, median_depth);
           yolo_centroids.push_back(output_centroid);
           yolo_centroids3d.push_back(output_centroid3d);
+          std::cout << "centroid added" << std::endl;
         }
-        std::cout << "checking yolo centroids: " << yolo_centroids.size() << std::endl;
+        std::cout << "checking yolo centroids size: " << yolo_centroids.size() << std::endl;
+        std::cout << "checking yolo centroids empty: " << yolo_centroids.empty() << std::endl;
 
         if (yolo_centroids.size() > 0){
 
