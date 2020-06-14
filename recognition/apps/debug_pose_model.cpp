@@ -2198,15 +2198,7 @@ class TVMPoseNode {
      * @param depth_image  the depth/stereo image message
      * @param zone_json the json that contains the zone information
      */
-    //void callback(const sensor_msgs::Image::ConstPtr& rgb_image,
-    //              const sensor_msgs::Image::ConstPtr& depth_image,
-    //              json zone_json) {
-    
-    // yolo filters pcl cluster detections
-  //void mode_1_callback(const sensor_msgs::Image::ConstPtr& rgb_image,
-  //                const sensor_msgs::Image::ConstPtr& depth_image,
-  //                const PointCloudT::ConstPtr& cloud_,
-  //                json zone_json) {
+
   
   void mode_1_callback_cloud_only(const PointCloudT::ConstPtr& cloud_) {//,
                                   //json zone_json) {
@@ -2427,14 +2419,7 @@ class TVMPoseNode {
         std::cout << "building yolo centroids" << std::endl;
         for (int i = 0; i < output->num; i++) {
           std::cout << "building yolo centroid: " << i+1 << std::endl;
-          // get the label and the object name
-          // float label = static_cast<float>(output->boxes[i].id);
-          // only detect people. ??
-          //if (label > 0) {
-          //  std::cout << "observation not a person: rejecting " << std::endl;
-          //  continue;
-          //}
-          // get the coordinate information
+          std::cout << "xmin check: " << output->boxes[i].xmin; << std::endl;
           xmin = output->boxes[i].xmin;
           ymin = output->boxes[i].ymin;
           xmax = output->boxes[i].xmax;
