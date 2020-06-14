@@ -2419,7 +2419,7 @@ class TVMPoseNode {
         std::cout << "building yolo centroids" << std::endl;
         for (int i = 0; i < output->num; i++) {
           std::cout << "building yolo centroid: " << i+1 << std::endl;
-          std::cout << "xmin check: " << output->boxes[i].xmin; << std::endl;
+          std::cout << "xmin check: " << output->boxes[i].xmin << std::endl;
           xmin = output->boxes[i].xmin;
           ymin = output->boxes[i].ymin;
           xmax = output->boxes[i].xmax;
@@ -2434,6 +2434,8 @@ class TVMPoseNode {
           // If the detect box coordinat is near edge of image, it will return a error 'Out of im.size().'
           if ( median_x < width*0.02 || median_x > width*0.98) continue;
           if ( median_y < height*0.02 || median_y > height*0.98) continue;
+          // wtf is happening if it continues...???
+          
           median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
           // set the mx/my wtr the intrinsic camera matrix
           mx = (median_x - _cx) * median_depth * _constant_x;
