@@ -2407,7 +2407,9 @@ class TVMPoseNode {
       // no detections? no forward...
       
       // build cost matrix
+      std::cout << "checking yolo output" << std::endl;
       if (output->num >= 1) {
+        std::cout << "building yolo centroids" << std::endl;
         for (int i = 0; i < output->num; i++) {
           // get the label and the object name
           float label = static_cast<float>(output->boxes[i].id);
@@ -2443,7 +2445,7 @@ class TVMPoseNode {
           yolo_centroids.push_back(output_centroid);
           yolo_centroids3d.push_back(output_centroid3d);
         }
-        
+        std::cout << "checking yolo centroids" << std::endl;
         if (yolo_centroids.size() > 0){
 
           std::cout << "computing clusters" << std::endl;
