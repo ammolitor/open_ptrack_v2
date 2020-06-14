@@ -586,10 +586,10 @@ class PoseFromConfig{
                 xmax = xmax * (img_width/detector_height);
                 ymax = ymax / (detector_width/img_height);
                 
-                std::cout << "xmin: " << xmin << std::endl;
-                std::cout << "ymin: " << ymin << std::endl;
-                std::cout << "xmax: " << xmax << std::endl;
-                std::cout << "ymax: " << ymax << std::endl;
+                //std::cout << "xmin: " << xmin << std::endl;
+                //std::cout << "ymin: " << ymin << std::endl;
+                //std::cout << "xmax: " << xmax << std::endl;
+                //std::cout << "ymax: " << ymax << std::endl;
                 // upscale bbox function from simple pose
                 // pose_input, upscale_bbox = detector_to_simple_pose(img, class_IDs, scores, bounding_boxs)
                 // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L218
@@ -619,19 +619,19 @@ class PoseFromConfig{
                 float upmaxx = center_x + w * scale;
                 float upmaxy = center_y + h * scale;
 
-                std::cout << "yolo_forward w: " << w << std::endl;
-                std::cout << "yolo_forward h: " << h << std::endl;
-                std::cout << "yolo_forward center_x " << center_x << std::endl;
-                std::cout << "yolo_forward center_y " << center_y << std::endl;
+                //std::cout << "yolo_forward w: " << w << std::endl;
+                //std::cout << "yolo_forward h: " << h << std::endl;
+                //std::cout << "yolo_forward center_x " << center_x << std::endl;
+                //std::cout << "yolo_forward center_y " << center_y << std::endl;
 
                 float upscaled_xmin = std::max(upminx, 0.0f);
                 float upscaled_ymin = std::max(upminy, 0.0f);
                 float upscaled_xmax = std::min(upmaxx, fwidth);
                 float upscaled_ymax = std::min(upmaxy, fheight);
-                std::cout << "upscaled_xmin: " << upscaled_xmin << std::endl;
-                std::cout << "upscaled_ymin: " << upscaled_ymin << std::endl;
-                std::cout << "upscaled_xmax: " << upscaled_xmax << std::endl;
-                std::cout << "upscaled_ymax: " << upscaled_ymax << std::endl;
+                //std::cout << "upscaled_xmin: " << upscaled_xmin << std::endl;
+                //std::cout << "upscaled_ymin: " << upscaled_ymin << std::endl;
+                //std::cout << "upscaled_xmax: " << upscaled_xmax << std::endl;
+                //std::cout << "upscaled_ymax: " << upscaled_ymax << std::endl;
 
                 //float upscaled_xmin = std::max(center_x - w * scale, 0.0f);
                 //float upscaled_ymin = std::max(center_y - h * scale, 0.0f);
@@ -642,10 +642,10 @@ class PoseFromConfig{
                 int int_upscaled_ymin = static_cast<int>(upscaled_ymin);
                 int int_upscaled_xmax = static_cast<int>(upscaled_xmax);
                 int int_upscaled_ymax = static_cast<int>(upscaled_ymax);
-                std::cout << "int_upscaled_xmin: " << int_upscaled_xmin << std::endl;
-                std::cout << "int_upscaled_ymin: " << int_upscaled_ymin << std::endl;
-                std::cout << "int_upscaled_xmax: " << int_upscaled_xmax << std::endl;
-                std::cout << "int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
+                //std::cout << "int_upscaled_xmin: " << int_upscaled_xmin << std::endl;
+                //std::cout << "int_upscaled_ymin: " << int_upscaled_ymin << std::endl;
+                //std::cout << "int_upscaled_xmax: " << int_upscaled_xmax << std::endl;
+                //std::cout << "int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
                 
                 //0 <= roi.x && 0 <= roi.width && roi.x + roi.width <= m.cols && 0 <= roi.y && 0 <= roi.height && roi.y + roi.height <= m.rows
                 if (0 >= int_upscaled_xmin){
@@ -664,22 +664,22 @@ class PoseFromConfig{
                   int_upscaled_ymax = img_height;
                   upscaled_ymax = fheight;
                 }
-                std::cout << "post_upscaled_xmin: " << upscaled_xmin << std::endl;
-                std::cout << "post_upscaled_ymin: " << upscaled_ymin << std::endl;
-                std::cout << "post_upscaled_xmax: " << upscaled_xmax << std::endl;
-                std::cout << "post_upscaled_ymax: " << upscaled_ymax << std::endl;
-                std::cout << "post_int_upscaled_xmin: " << int_upscaled_xmin << std::endl;
-                std::cout << "post_int_upscaled_ymin: " << int_upscaled_ymin << std::endl;
-                std::cout << "post_int_upscaled_xmax: " << int_upscaled_xmax << std::endl;
-                std::cout << "post_int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
+                //std::cout << "post_upscaled_xmin: " << upscaled_xmin << std::endl;
+                //std::cout << "post_upscaled_ymin: " << upscaled_ymin << std::endl;
+                //std::cout << "post_upscaled_xmax: " << upscaled_xmax << std::endl;
+                //std::cout << "post_upscaled_ymax: " << upscaled_ymax << std::endl;
+                //std::cout << "post_int_upscaled_xmin: " << int_upscaled_xmin << std::endl;
+                //std::cout << "post_int_upscaled_ymin: " << int_upscaled_ymin << std::endl;
+                //std::cout << "post_int_upscaled_xmax: " << int_upscaled_xmax << std::endl;
+                //std::cout << "post_int_upscaled_ymax: " << int_upscaled_ymax << std::endl;
                 
                 // get upscaled bounding box and extract image-patch/mask
                 cv::Rect roi(int_upscaled_xmin, int_upscaled_ymin, int_upscaled_xmax-int_upscaled_xmin, int_upscaled_ymax-int_upscaled_ymin);
-                std::cout << "created rect created" << std::endl;
+                //std::cout << "created rect created" << std::endl;
                 cv::Mat image_roi = frame(roi);
                 cv::Size image_roi_image_size = image_roi.size();
-                std::cout << "image_roi_image_size created: " << image_roi_image_size.height << std::endl;
-                std::cout << "image_roi_image_size created: " << image_roi_image_size.width << std::endl;
+                //std::cout << "image_roi_image_size created: " << image_roi_image_size.height << std::endl;
+                //std::cout << "image_roi_image_size created: " << image_roi_image_size.width << std::endl;
                 //debug only cv::imwrite("/home/nvidia/pose_image_roi.jpg", image_roi);
                 //preprocessing happens inside forward function
                 // why point3f and not 2f? 
@@ -777,11 +777,11 @@ class PoseFromConfig{
             torch::Tensor ndarray_heat_map_full = torch::zeros({1, 17, 64, 48}, at::kFloat);
 
             TVMArrayCopyToBytes(output_tensor_heatmap, ndarray_heat_map_full.data_ptr(), 1*17*64*48 * sizeof(float));
-            std::cout << "saving array output " << std::endl;
-            auto bytes = torch::pickle_save(ndarray_heat_map_full);
-            std::ofstream fout("/home/nvidia/pose.zip", std::ios::out | std::ios::binary);
-            fout.write(bytes.data(), bytes.size());
-            fout.close();
+            //std::cout << "saving array output " << std::endl;
+            //auto bytes = torch::pickle_save(ndarray_heat_map_full);
+            //std::ofstream fout("/home/nvidia/pose.zip", std::ios::out | std::ios::binary);
+            //fout.write(bytes.data(), bytes.size());
+            //fout.close();
 
             //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L172
             //heatmaps_reshaped = batch_heatmaps.reshape((batch_size, num_joints, -1))
@@ -789,13 +789,13 @@ class PoseFromConfig{
             // pytorch view vs. reshape; use of auto?
             auto ndarray_heat_map = ndarray_heat_map_full.view({17, 3072});
             //std::vector<int64_t> heatsize = ndarray_heat_map.sizes();
-            std::cout << "ndarray_heat_map reshape finished: " << ndarray_heat_map.sizes().size() << std::endl;
+            //std::cout << "ndarray_heat_map reshape finished: " << ndarray_heat_map.sizes().size() << std::endl;
             
             // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L173
             // idx = nd.argmax(heatmaps_reshaped, 2)
             torch::Tensor idx = torch::argmax(ndarray_heat_map, 1);
             //std::vector<int64_t> idxsize = idx.sizes().size();
-            std::cout << "argmax finished: " << idx.sizes().size() << std::endl;
+            //std::cout << "argmax finished: " << idx.sizes().size() << std::endl;
             
             // creat empty pred container
             torch::Tensor preds = torch::zeros({17, 2}, at::kFloat);
@@ -816,17 +816,17 @@ class PoseFromConfig{
             float h = (ymax - ymin) / 2.0f;
             float center_x = xmin + w; 
             float center_y = ymin + h;
-            std::cout << "pose_forward w: " << w << std::endl;
-            std::cout << "pose_forward h: " << h << std::endl;
-            std::cout << "pose_forward center_x: " << center_x << std::endl;
-            std::cout << "pose_forward center_y: " << center_y << std::endl;
+            //std::cout << "pose_forward w: " << w << std::endl;
+            //std::cout << "pose_forward h: " << h << std::endl;
+            //std::cout << "pose_forward center_x: " << center_x << std::endl;
+            //std::cout << "pose_forward center_y: " << center_y << std::endl;
             // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L168
             // might have to use a diff var name
             for (size_t i = 0; i < 17; i++){
               float index = idx_accessor[i];
-              std::cout << "index: " << index << std::endl;
+              //std::cout << "index: " << index << std::endl;
               float probability = heat_map_accessor[i][static_cast<int>(index)];
-              std::cout << "probability: " << probability << std::endl;
+              //std::cout << "probability: " << probability << std::endl;
               
               //// python modulo vs c++ is dfff
               ////https://stackoverflow.com/questions/1907565/c-and-python-different-behaviour-of-the-modulo-operation
@@ -836,13 +836,13 @@ class PoseFromConfig{
               // float modulo_pred = ((index % heatmap_width) + heatmap_width) % heatmap_width;
               // float floor_pred = std::floor(index / heatmap_width);
               int modulo_int = static_cast<int>(index) % static_cast<int>(heatmap_width);
-              std::cout << "modulo_int: " << modulo_int << std::endl;
+              //std::cout << "modulo_int: " << modulo_int << std::endl;
               float modulo_pred = static_cast<float>(modulo_int);
-              std::cout << "modulo_pred: " << modulo_pred << std::endl;
+              //std::cout << "modulo_pred: " << modulo_pred << std::endl;
               float floor = index / heatmap_width;
-              std::cout << "floor: " << floor << std::endl;
+              //std::cout << "floor: " << floor << std::endl;
               float floor_pred = std::floor(floor);
-              std::cout << "floor_pred: " << floor_pred << std::endl;
+              //std::cout << "floor_pred: " << floor_pred << std::endl;
               if (probability <= 0.0) {
                 // zero out the pred if the prob is bad...
                 //pred_mask = nd.tile(nd.greater(maxvals, 0.0), (1, 1, 2))
@@ -851,13 +851,13 @@ class PoseFromConfig{
                 modulo_pred = 0.0f;
                 floor_pred = 0.0f;
               }
-              std::cout << "modulo_pred_end: " << modulo_pred << std::endl;
-              std::cout << "floor_pred_end: " << floor_pred << std::endl;
+              //std::cout << "modulo_pred_end: " << modulo_pred << std::endl;
+              //std::cout << "floor_pred_end: " << floor_pred << std::endl;
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L289-L290
               float w_ratio = modulo_pred / heatmap_width;
               float h_ratio = floor_pred / heatmap_height;
-              std::cout << "w_ratio: " << w_ratio << std::endl;
-              std::cout << "h_ratio: " << h_ratio << std::endl;              
+              //std::cout << "w_ratio: " << w_ratio << std::endl;
+              //std::cout << "h_ratio: " << h_ratio << std::endl;              
               cv::Point3f point;
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L291-L292
               //scale = np.array([w, h])
@@ -866,8 +866,8 @@ class PoseFromConfig{
               point.x = w * 2.0f * w_ratio + center_x - w;
               point.y = h * 2.0f * h_ratio + center_y - h;
               point.z = probability;
-              std::cout << "point.x: " << point.x << std::endl;
-              std::cout << "point.y: " << point.y << std::endl;
+              //std::cout << "point.x: " << point.x << std::endl;
+              //std::cout << "point.y: " << point.y << std::endl;
               points.push_back(point);
             }
             // free outputs
@@ -877,7 +877,7 @@ class PoseFromConfig{
             output_tensor_heatmap = nullptr;
             free(data_x);
             data_x = nullptr;
-            std::cout << "freeing finished" << std::endl;
+            //std::cout << "freeing finished" << std::endl;
             return points;
         }
 };
