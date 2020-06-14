@@ -2449,9 +2449,9 @@ class TVMPoseNode {
           }
 
           // get x, y, z points
-          mx = cloud_->at(static_cast<int>(median_x), static_cast(median_y)).x
-          my = cloud_->at(static_cast<int>(median_x), static_cast(median_y)).y
-          median_depth = cloud_->at(static_cast<int>(median_x), static_cast(median_y)).z
+          mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x
+          my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y
+          median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z
 
           //if ( median_y < height*0.02 || median_y > height*0.98) continue;
           // wtf is happening if it continues...???
