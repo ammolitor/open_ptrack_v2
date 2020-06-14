@@ -2230,11 +2230,13 @@ class TVMPoseNode {
           cv::Point2f centroid2d;
           cv::Point3f centroid3d;
           Eigen::Vector3f eigen_centroid3d = it->getTCenter();
-          centroid2d = cv::Point2f(eigen_centroid3d(0), eigen_centroid3d(1));
-          centroid3d = cv::Point3f(eigen_centroid3d(0), eigen_centroid3d(1), eigen_centroid3d(2));
-          cluster_centroids2d.push_back(centroid2d);
-          cluster_centroids3d.push_back(centroid3d);
-          std::cout << "centroid2d: " << centroid2d << std::endl;
+          std::cout << "eigen_centroid3d: " << eigen_centroid3d(0) << eigen_centroid3d(1) <<  eigen_centroid3d(2) <<<< std::endl;
+          if(std::isfinite(eigen_centroid3d(0)) && std::isfinite(eigen_centroid3d(1)) && std::isfinite(eigen_centroid3d(2))){
+            centroid2d = cv::Point2f(eigen_centroid3d(0), eigen_centroid3d(1));
+            centroid3d = cv::Point3f(eigen_centroid3d(0), eigen_centroid3d(1), eigen_centroid3d(2));
+            cluster_centroids2d.push_back(centroid2d);
+            cluster_centroids3d.push_back(centroid3d);
+            std::cout << "centroid2d: " << centroid2d << std::endl;
         }
   }
 
