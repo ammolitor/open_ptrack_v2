@@ -2233,6 +2233,7 @@ class TVMPoseNode {
           centroid3d = cv::Point3f(eigen_centroid3d(0), eigen_centroid3d(1), eigen_centroid3d(2));
           cluster_centroids2d.push_back(centroid2d);
           cluster_centroids3d.push_back(centroid3d);
+          std::cout << "centroid2d: " << centroid2d << std::endl;
         }
   }
 
