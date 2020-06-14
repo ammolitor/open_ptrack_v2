@@ -2237,6 +2237,7 @@ class TVMPoseNode {
             cluster_centroids2d.push_back(centroid2d);
             cluster_centroids3d.push_back(centroid3d);
             std::cout << "centroid2d: " << centroid2d << std::endl;
+          }
         }
   }
 
