@@ -2223,7 +2223,9 @@ class TVMPoseNode {
       std::cout << "running algorithm callback" << std::endl;
 
       if (set_background){
-        background_cloud = computeBackgroundCloud(cloud_, n_frame);
+        PointCloudT::Ptr newcloud(new PointCloudT);
+        *newcloud = *cloud_;
+        background_cloud = computeBackgroundCloud(newcloud, n_frame);
         if (n_frame >= n_frames){
           set_background = false;
         }
