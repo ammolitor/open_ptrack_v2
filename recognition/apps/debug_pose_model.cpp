@@ -1254,6 +1254,7 @@ class TVMPoseNode {
     tf::StampedTransform world2rgb_transform;
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
+    PointCloudT::Ptr background_cloud;
     //json zone_json;
 
    // Initialize transforms to be used to correct sensor tilt to identity matrix:
@@ -1411,7 +1412,8 @@ class TVMPoseNode {
     PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
       // Initialization for background subtraction:
-      PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
+      //PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
+      background_cloud = PointCloudT::Ptr (new PointCloudT);
       std::string frame_id = cloud->header.frame_id;
       int frames = int(background_seconds * rate_value);
       ros::Rate rate(rate_value);
@@ -1742,7 +1744,8 @@ class TVMPoseNode {
          std::cout << "Ground plane already initialized..." << std::endl;
       } else {
 
-        PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
+        //PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
+        background_cloud = computeBackgroundCloud(cloud);
         //sampling_factor_ = 1;
         //voxel_size_ = 0.06;
         //max_distance_ = 50.0;
@@ -1788,7 +1791,8 @@ class TVMPoseNode {
          std::cout << "Ground plane already initialized..." << std::endl;
       } else {
 
-        PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
+        //PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
+        background_cloud = computeBackgroundCloud(cloud);
         //sampling_factor_ = 1;
         //voxel_size_ = 0.06;
         //max_distance_ = 50.0;
