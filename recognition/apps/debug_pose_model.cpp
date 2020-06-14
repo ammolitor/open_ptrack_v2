@@ -2539,7 +2539,7 @@ class TVMPoseNode {
             //compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
             std::cout << "clusters size: " << clusters.size() << std::endl;
 
-            if (clusters.size() > 0) {
+            if (cluster_centroids.size() > 0) {
               // Initialize cost matrix for the hungarian algorithm
               std::cout << "initialize cost matrix for the hungarian algorithm" << std::endl;
               for (int r = 0; r < cluster_centroids.size (); r++) {
