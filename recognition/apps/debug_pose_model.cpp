@@ -2455,10 +2455,10 @@ class TVMPoseNode {
 
           //if ( median_y < height*0.02 || median_y > height*0.98) continue;
           // wtf is happening if it continues...???
-          median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
+          //median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
           // set the mx/my wtr the intrinsic camera matrix
-          mx = (median_x - _cx) * median_depth * _constant_x;
-          my = (median_y - _cy) * median_depth * _constant_y;
+          //mx = (median_x - _cx) * median_depth * _constant_x;
+          //my = (median_y - _cy) * median_depth * _constant_y;
           std::cout << "yolo centroid - x:" << mx << ", y: " << my << ", z: " << median_depth << std::endl;
 
           output_centroid = cv::Point(mx, my); // or median_x, median_y
