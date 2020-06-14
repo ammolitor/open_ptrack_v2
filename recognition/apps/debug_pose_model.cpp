@@ -1259,8 +1259,8 @@ class TVMPoseNode {
     int n_frame = 0;
     int n_frames = 15;
     bool set_background = true;
-
-   // Initialize transforms to be used to correct sensor tilt to identity matrix:
+    float sqrt_ground_coeffs;
+    // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
     //transform = transform.Identity();
     //anti_transform = transform.inverse();
@@ -1949,6 +1949,7 @@ class TVMPoseNode {
           ground_coeffs_new = ground_coeffs;
         }
       // maybe not needed
+      float sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
       estimate_ground_plane = false;
 
       }
