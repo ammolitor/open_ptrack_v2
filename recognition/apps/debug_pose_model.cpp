@@ -1710,6 +1710,9 @@ class TVMPoseNode {
       ec.setInputCloud(no_ground_cloud_);
       ec.extract(cluster_indices);
 
+      // check cluster_indices
+      std::cout << "initial clusters size: " << cluster_indices.empty() << std::endl;
+
       // Sensor tilt compensation to improve people detection:
       // moving to global PointCloudPtr no_ground_cloud_rotated(new PointCloud);
       // moving to global Eigen::VectorXf ground_coeffs_new;
@@ -2132,6 +2135,7 @@ class TVMPoseNode {
         cluster_indices.push_back(pcl::PointIndices());
 
       // Head based sub-clustering //
+      std::cout << "compute_subclustering: setInputCloud" << std::endl;
       open_ptrack::person_clustering::HeadBasedSubclustering<PointT> subclustering;
       subclustering.setInputCloud(no_ground_cloud_rotated);
       subclustering.setGround(ground_coeffs_new);
@@ -2453,12 +2457,6 @@ class TVMPoseNode {
           my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
           median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
 
-          //if ( median_y < height*0.02 || median_y > height*0.98) continue;
-          // wtf is happening if it continues...???
-          //median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
-          // set the mx/my wtr the intrinsic camera matrix
-          //mx = (median_x - _cx) * median_depth * _constant_x;
-          //my = (median_y - _cy) * median_depth * _constant_y;
           std::cout << "yolo centroid - x:" << mx << ", y: " << my << ", z: " << median_depth << std::endl;
 
           output_centroid = cv::Point(mx, my); // or median_x, median_y
