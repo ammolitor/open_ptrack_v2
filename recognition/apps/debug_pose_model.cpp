@@ -2215,7 +2215,7 @@ class TVMPoseNode {
       bool head_centroid = true;
       for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
       {
-        open_ptrack::person_clustering::PersonCluster<PointT> cluster(cloud, *it, ground_coeffs, sqrt_ground_coeffs, head_centroid, vertical); //PersonCluster creation
+        open_ptrack::person_clustering::PersonCluster<PointT> cluster(cloud, *it, ground_coeffs, sqrt_ground_coeffs, head_centroid, vertical_); //PersonCluster creation
         clusters.push_back(cluster);
       }
 
