@@ -2413,6 +2413,7 @@ class TVMPoseNode {
       if (output->num >= 1) {
         std::cout << "building yolo centroids" << std::endl;
         for (int i = 0; i < output->num; i++) {
+          std::cout << "building yolo centroid: " << i+1 << std::endl;
           // get the label and the object name
           float label = static_cast<float>(output->boxes[i].id);
           // only detect people.
@@ -2439,6 +2440,8 @@ class TVMPoseNode {
           // set the mx/my wtr the intrinsic camera matrix
           float mx = (median_x - _cx) * median_depth * _constant_x;
           float my = (median_y - _cy) * median_depth * _constant_y;
+          std::cout << "yolo centroid - x:" << mx << ", y: " << my << std::endl;
+
 
           output_centroid = cv::Point(mx, my); // or median_x, median_y
           output_centroid3d = cv::Point3f(mx, my, median_depth);
@@ -4171,9 +4174,7 @@ class TVMPoseNode {
           top.y = head.z;
 
           std::cout << "top.x: " <<  top.x << std::endl;
-          std::cout << "top.y: " <<  top.y << std::endl;
-          std::cout << "top.z: " <<  top.z << std::endl;
-          float head_z = cv_depth_image.at<float>(top_cast_y, top_cast_x) / mm_factor;
+          std::cout << "top.y: " <<  top.y << std::endl;label;
 
           // just bottom of box should be ok?
           // could just do feet / 2
