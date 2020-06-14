@@ -2398,10 +2398,6 @@ class TVMPoseNode {
         std::cout << "yolo detection time: " << duration << std::endl;
         std::cout << "yolo detections: " << output->num << std::endl;
         
-        // filter the background and create a filtered cloud
-        std::cout << "creating foreground cloud" << std::endl;
-        create_foreground_cloud(cloud_);
-
         std::cout << "initializing clusters" << std::endl;
         std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   // vector containing persons clusters
         // we run ground-based-people-detector pcl subclustering operation
@@ -2482,6 +2478,10 @@ class TVMPoseNode {
             yolo_centroids3d.push_back(output_centroid3d);
             std::cout << "centroid added" << std::endl;
           }
+          
+          // filter the background and create a filtered cloud
+          std::cout << "creating foreground cloud" << std::endl;
+          create_foreground_cloud(cloud_);
 
           std::cout << "checking yolo centroids size: " << yolo_centroids.size() << std::endl;
           std::cout << "checking yolo centroids empty: " << yolo_centroids.empty() << std::endl;
