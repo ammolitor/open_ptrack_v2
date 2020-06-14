@@ -2411,37 +2411,49 @@ class TVMPoseNode {
       // build cost matrix
       std::cout << "checking yolo output" << std::endl;
       if (output->num >= 1) {
+        float xmin;
+        float ymin;
+        float xmax;
+        float ymax;
+        int cast_xmin;
+        int cast_ymin;
+        int cast_xmax;
+        int cast_ymax;
+        float median_x;
+        float median_y;
+        float median_depth;
+        float mx;
+        float my;
         std::cout << "building yolo centroids" << std::endl;
         for (int i = 0; i < output->num; i++) {
           std::cout << "building yolo centroid: " << i+1 << std::endl;
           // get the label and the object name
-          float label = static_cast<float>(output->boxes[i].id);
+          // float label = static_cast<float>(output->boxes[i].id);
           // only detect people. ??
           //if (label > 0) {
           //  std::cout << "observation not a person: rejecting " << std::endl;
           //  continue;
           //}
           // get the coordinate information
-          float xmin = output->boxes[i].xmin;
-          float ymin = output->boxes[i].ymin;
-          float xmax = output->boxes[i].xmax;
-          float ymax = output->boxes[i].ymax;
-          int cast_xmin = static_cast<int>(xmin);
-          int cast_ymin = static_cast<int>(ymin);
-          int cast_xmax = static_cast<int>(xmax);
-          int cast_ymax = static_cast<int>(ymax);
+          xmin = output->boxes[i].xmin;
+          ymin = output->boxes[i].ymin;
+          xmax = output->boxes[i].xmax;
+          ymax = output->boxes[i].ymax;
+          cast_xmin = static_cast<int>(xmin);
+          cast_ymin = static_cast<int>(ymin);
+          cast_xmax = static_cast<int>(xmax);
+          cast_ymax = static_cast<int>(ymax);
           // set the median of the bounding box
-          float median_x = xmin + ((xmax - xmin) / 2.0);
-          float median_y = ymin + ((ymax - ymin) / 2.0);
+          median_x = xmin + ((xmax - xmin) / 2.0);
+          median_y = ymin + ((ymax - ymin) / 2.0);
           // If the detect box coordinat is near edge of image, it will return a error 'Out of im.size().'
           if ( median_x < width*0.02 || median_x > width*0.98) continue;
           if ( median_y < height*0.02 || median_y > height*0.98) continue;
-          float median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
+          median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
           // set the mx/my wtr the intrinsic camera matrix
-          float mx = (median_x - _cx) * median_depth * _constant_x;
-          float my = (median_y - _cy) * median_depth * _constant_y;
+          mx = (median_x - _cx) * median_depth * _constant_x;
+          my = (median_y - _cy) * median_depth * _constant_y;
           std::cout << "yolo centroid - x:" << mx << ", y: " << my << std::endl;
-
 
           output_centroid = cv::Point(mx, my); // or median_x, median_y
           output_centroid3d = cv::Point3f(mx, my, median_depth);
