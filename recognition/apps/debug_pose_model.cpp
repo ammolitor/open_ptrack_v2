@@ -2223,17 +2223,22 @@ class TVMPoseNode {
       // To avoid PCL warning:
       if (cluster_indices.size() == 0)
         cluster_indices.push_back(pcl::PointIndices());
-
+      float x;
+      float y;
+      float z;
+      cv::Point2f centroid2d;
+      cv::Point3f centroid3d;
       for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
         {
           it->setPersonConfidence(-100.0);
-          cv::Point2f centroid2d;
-          cv::Point3f centroid3d;
           Eigen::Vector3f eigen_centroid3d = it->getTCenter();
-          std::cout << "eigen_centroid3d: " << eigen_centroid3d(0) << eigen_centroid3d(1) <<  eigen_centroid3d(2) << std::endl;
-          if(std::isfinite(eigen_centroid3d(0)) && std::isfinite(eigen_centroid3d(1)) && std::isfinite(eigen_centroid3d(2))){
-            centroid2d = cv::Point2f(eigen_centroid3d(0), eigen_centroid3d(1));
-            centroid3d = cv::Point3f(eigen_centroid3d(0), eigen_centroid3d(1), eigen_centroid3d(2));
+          x = eigen_centroid3d(0);
+          y = eigen_centroid3d(0);
+          z = eigen_centroid3d(0);
+          std::cout << "eigen_centroid3d -x: " << x << ", y: " << y << ", z: " << z << std::endl;
+          if(std::isfinite(x) && std::isfinite(y) && std::isfinite(z)){
+            centroid2d = cv::Point2f(x, y);
+            centroid3d = cv::Point3f(x, y, z);
             cluster_centroids2d.push_back(centroid2d);
             cluster_centroids3d.push_back(centroid3d);
             std::cout << "centroid2d: " << centroid2d << std::endl;
