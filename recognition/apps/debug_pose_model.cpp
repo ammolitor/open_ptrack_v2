@@ -2209,14 +2209,14 @@ class TVMPoseNode {
   }
 
     void compute_subclustering(const PointCloudT::ConstPtr& cloud_, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point2f> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
-      PointCloudT::Ptr cloud(new PointCloudT);
-      *cloud = *cloud_;      
+      //PointCloudT::Ptr cloud(new PointCloudT);
+      //*cloud = *cloud_;      
       std::cout << "creating people clusters from compute_subclustering" << std::endl;
       // Person clusters creation from clusters indices:
       bool head_centroid = true;
       for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
       {
-        open_ptrack::person_clustering::PersonCluster<PointT> cluster(cloud, *it, ground_coeffs, sqrt_ground_coeffs, head_centroid, vertical_); //PersonCluster creation
+        open_ptrack::person_clustering::PersonCluster<PointT> cluster(no_ground_cloud_, *it, ground_coeffs, sqrt_ground_coeffs, head_centroid, vertical_); //PersonCluster creation
         clusters.push_back(cluster);
       }
 
