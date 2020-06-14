@@ -1633,6 +1633,7 @@ class TVMPoseNode {
       // set background cloud here
 
       // Ground removal and update:
+      std::cout << "create_foreground_cloud: removing background" << std::endl;
       pcl::IndicesPtr inliers(new std::vector<int>);
       boost::shared_ptr<pcl::SampleConsensusModelPlane<PointT> > ground_model(new pcl::SampleConsensusModelPlane<PointT>(cloud_filtered));
       //if (isZed_)
@@ -2282,63 +2283,75 @@ class TVMPoseNode {
       //cv_image_clone = cv_image.clone();
 
       //////////////////////////////////////////////////////////////////////////////////////////////
-      // Create XYZ cloud:
-      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_xyzrgb(new pcl::PointCloud<pcl::PointXYZRGB>);
-      pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-      // fails?
-      //pcl::fromROSMsg(*cloud_, *pcl_cloud);
-      //https://answers.ros.org/question/9515/how-to-convert-between-different-point-cloud-types-using-pcl/
-      pcl::PointXYZRGB xyzrgb_point;
-      cloud_xyzrgb->points.resize(cloud_->width * cloud_->height, xyzrgb_point);
-      cloud_xyzrgb->width = cloud_->width;
-      cloud_xyzrgb->height = cloud_->height;
-      cloud_xyzrgb->is_dense = false;
+//////      // Create XYZ cloud:
+//////      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_xyzrgb(new pcl::PointCloud<pcl::PointXYZRGB>);
+//////      pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+//////      // fails?
+//////      //pcl::fromROSMsg(*cloud_, *pcl_cloud);
+//////      //https://answers.ros.org/question/9515/how-to-convert-between-different-point-cloud-types-using-pcl/
+//////      pcl::PointXYZRGB xyzrgb_point;
+//////      cloud_xyzrgb->points.resize(cloud_->width * cloud_->height, xyzrgb_point);
+//////      cloud_xyzrgb->width = cloud_->width;
+//////      cloud_xyzrgb->height = cloud_->height;
+//////      cloud_xyzrgb->is_dense = false;
 
-      int cloud__is_empty = cloud_->size();
-      std::cout << "DEBUG: cloud__is_empty: " << cloud__is_empty << std::endl;
-      int cloud_width = cloud_->width;
-      std::cout << "DEBUG: cloud_width: " << cloud_width << std::endl;
-      int cloud_height = cloud_->height;
-      std::cout << "DEBUG: cloud_height: " << cloud_height << std::endl;
+//////      int cloud__is_empty = cloud_->size();
+//////      std::cout << "DEBUG: cloud__is_empty: " << cloud__is_empty << std::endl;
+//////      int cloud_width = cloud_->width;
+//////      std::cout << "DEBUG: cloud_width: " << cloud_width << std::endl;
+//////      int cloud_height = cloud_->height;
+//////      std::cout << "DEBUG: cloud_height: " << cloud_height << std::endl;
 
-      // fill xyzrgb
-      for (int i=0;i<cloud_->height;i++)
-      {
-          for (int j=0;j<cloud_->width;j++)
-          {
-          cloud_xyzrgb->at(j,i).x = cloud_->at(j,i).x;
-          cloud_xyzrgb->at(j,i).y = cloud_->at(j,i).y;
-          cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
-          }
-      }
+//////      // fill xyzrgb
+//////      for (int i=0;i<cloud_->height;i++)
+//////      {
+//////          for (int j=0;j<cloud_->width;j++)
+//////          {
+//////          cloud_xyzrgb->at(j,i).x = cloud_->at(j,i).x;
+//////          cloud_xyzrgb->at(j,i).y = cloud_->at(j,i).y;
+//////          cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
+//////          }
+//////      }
 
-      int cloud_xyzrgb_is_empty = cloud_xyzrgb->size();
-      std::cout << "DEBUG: cloud_xyzrgb_is_empty: " << cloud_xyzrgb_is_empty << std::endl;
+//////      int cloud_xyzrgb_is_empty = cloud_xyzrgb->size();
+//////      std::cout << "DEBUG: cloud_xyzrgb_is_empty: " << cloud_xyzrgb_is_empty << std::endl;
 
-      pcl::PointXYZ xyz_point;
-      pcl_cloud->points.resize(cloud_->width * cloud_->height, xyz_point);
-      pcl_cloud->width = cloud_->width;
-      pcl_cloud->height = cloud_->height;
-      pcl_cloud->is_dense = false;
+//////      pcl::PointXYZ xyz_point;
+//////      pcl_cloud->points.resize(cloud_->width * cloud_->height, xyz_point);
+//////      pcl_cloud->width = cloud_->width;
+//////      pcl_cloud->height = cloud_->height;
+//////      pcl_cloud->is_dense = false;
 
-      for (size_t i = 0; i < cloud_->points.size(); i++) {
-          pcl_cloud->points[i].x = cloud_->points[i].x;
-          pcl_cloud->points[i].y = cloud_->points[i].y;
-          pcl_cloud->points[i].z = cloud_->points[i].z;
-      }
+//////      for (size_t i = 0; i < cloud_->points.size(); i++) {
+//////          pcl_cloud->points[i].x = cloud_->points[i].x;
+//////          pcl_cloud->points[i].y = cloud_->points[i].y;
+//////          pcl_cloud->points[i].z = cloud_->points[i].z;
+//////      }
 
-      // define xyz 3d points in cloud
-      Eigen::MatrixXd points_3d_in_cam(3, pcl_cloud->size());
-      for(int i = 0; i < pcl_cloud->size(); i++)
-      {
-          points_3d_in_cam(0, i) = (*pcl_cloud)[i].x;
-          points_3d_in_cam(1, i) = (*pcl_cloud)[i].y;
-          points_3d_in_cam(2, i) = (*pcl_cloud)[i].z;
-      }    
+//////      // define xyz 3d points in cloud
+//////      Eigen::MatrixXd points_3d_in_cam(3, pcl_cloud->size());
+//////      for(int i = 0; i < pcl_cloud->size(); i++)
+//////      {
+//////          points_3d_in_cam(0, i) = (*pcl_cloud)[i].x;
+//////          points_3d_in_cam(1, i) = (*pcl_cloud)[i].y;
+//////          points_3d_in_cam(2, i) = (*pcl_cloud)[i].z;
+//////      }    
 
+    
+//////      // define this, but maybe do like the camera transform here????
+//////      Eigen::MatrixXd points_2d_homo = cam_intrins_ * points_3d_in_cam;
 
-      cv::Mat cv_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_8UC3);
-      cv::Mat cv_depth_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_32FC1);
+//////      // lets assume that points_2d_homo == world transform...
+
+//////      Eigen::MatrixXd points_2d(2, pcl_cloud->size());
+//////      for(int i = 0; i < pcl_cloud->size(); i++)
+//////      {
+//////          points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
+//////          points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
+//////      }
+
+      cv::Mat cv_image (cloud_->height, cloud_->width, CV_8UC3);
+      cv::Mat cv_depth_image (cloud_->height, cloud_->width, CV_32FC1);
       for (int i=0;i<cloud_->height;i++)
       {
           for (int j=0;j<cloud_->width;j++)
@@ -2348,18 +2361,6 @@ class TVMPoseNode {
           cv_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
           cv_depth_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).z;
           }
-      }
-    
-      // define this, but maybe do like the camera transform here????
-      Eigen::MatrixXd points_2d_homo = cam_intrins_ * points_3d_in_cam;
-
-      // lets assume that points_2d_homo == world transform...
-
-      Eigen::MatrixXd points_2d(2, pcl_cloud->size());
-      for(int i = 0; i < pcl_cloud->size(); i++)
-      {
-          points_2d(0, i) = points_2d_homo(0, i) / points_2d_homo(2, i);
-          points_2d(1, i) = points_2d_homo(1, i) / points_2d_homo(2, i);
       }
 
       //////////////////////////////////////////////////////////////////////////////////////////////
@@ -2385,6 +2386,7 @@ class TVMPoseNode {
       std::cout << "yolo detections: " << output->num << std::endl;
       
       // filter the background and create a filtered cloud
+      std::cout << "creating foreground cloud" << std::endl;
       create_foreground_cloud(cloud_);
 
       std::cout << "initializing clusters" << std::endl;
