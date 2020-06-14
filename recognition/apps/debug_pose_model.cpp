@@ -2134,14 +2134,22 @@ class TVMPoseNode {
       }
 
 
-    void compute_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+    void compute_head_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+
+      // Person clusters creation from clusters indices:
+      //for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_.begin(); it != cluster_indices_.end(); ++it)
+      //{
+      //  open_ptrack::person_clustering::PersonCluster<PointT> cluster(cloud_, *it, ground_coeffs_, sqrt_ground_coeffs_, head_centroid_, vertical_);  // PersonCluster creation
+      //  clusters.push_back(cluster);
+     // }
+
 
       // To avoid PCL warning:
       if (cluster_indices.size() == 0)
         cluster_indices.push_back(pcl::PointIndices());
 
       // Head based sub-clustering //
-      std::cout << "compute_subclustering: setInputCloud" << std::endl;
+      std::cout << "compute_head_subclustering: setInputCloud" << std::endl;
       open_ptrack::person_clustering::HeadBasedSubclustering<PointT> subclustering;
       subclustering.setInputCloud(no_ground_cloud_rotated);
       subclustering.setGround(ground_coeffs_new);
@@ -2198,7 +2206,31 @@ class TVMPoseNode {
     //return (true);
   }
 
+    void compute_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+      std::cout << "creating people clusters from compute_subclustering" << std::endl;
+      // Person clusters creation from clusters indices:
+      for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_.begin(); it != cluster_indices_.end(); ++it)
+      {
+        open_ptrack::person_clustering::PersonCluster<PointT> cluster(cloud_, *it, ground_coeffs_, sqrt_ground_coeffs_, head_centroid_, vertical_); //PersonCluster creation
+        clusters.push_back(cluster);
+      }
 
+      // To avoid PCL warning:
+      if (cluster_indices.size() == 0)
+        cluster_indices.push_back(pcl::PointIndices());
+
+      for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
+        {
+          it->setPersonConfidence(-100.0);
+          cv::Point centroid2d;
+          cv::Point3f centroid3d;
+          Eigen::Vector3f eigen_centroid3d = it->getTCenter();
+          centroid2d = cv::Point(eigen_centroid3d(0), eigen_centroid3d(1));
+          centroid3d = cv::Point3f(eigen_centroid3d(0), eigen_centroid3d(1), eigen_centroid3d(2));
+          cluster_centroids2d.push_back(centroid2d);
+          cluster_centroids3d.push_back(centroid3d);
+        }
+  }
 
   private:
     /**
@@ -2490,6 +2522,7 @@ class TVMPoseNode {
 
             std::cout << "computing clusters" << std::endl;
             compute_subclustering(clusters, cluster_centroids, cluster_centroids3d);
+            //compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
             std::cout << "clusters size: " << clusters.size() << std::endl;
 
             if (clusters.size() > 0) {
