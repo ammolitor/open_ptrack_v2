@@ -2236,7 +2236,7 @@ class TVMPoseNode {
           y = eigen_centroid3d(0);
           z = eigen_centroid3d(0);
           std::cout << "eigen_centroid3d -x: " << x << ", y: " << y << ", z: " << z << std::endl;
-          if(std::isfinite(x) && std::isfinite(y) && std::isfinite(z)){
+          if((!std::isnan(x)) && (!std::isnan(y)) && (!std::isnan(z))){
             centroid2d = cv::Point2f(x, y);
             centroid3d = cv::Point3f(x, y, z);
             cluster_centroids2d.push_back(centroid2d);
