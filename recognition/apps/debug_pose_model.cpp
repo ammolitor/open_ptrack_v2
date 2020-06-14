@@ -1622,6 +1622,8 @@ class TVMPoseNode {
     }
 
     void create_foreground_cloud(const PointCloudT::ConstPtr& cloud_){
+      int min_points = 30;
+      int max_points = 5000;
       PointCloudT::Ptr cloud(new PointCloudT);
       *cloud = *cloud_;
       // Point cloud pre-processing (downsampling and filtering):
@@ -2824,8 +2826,10 @@ class TVMPoseNode {
       begin = ros::Time::now();
       output = tvm_pose_detector->forward_full(cv_image, .3);
       duration = ros::Time::now().toSec() - begin.toSec();
-      printf("yolo detection time: %f\n", duration);
-      printf("yolo detections: %ld\n", output->num);
+      //printf("yolo detection time: %f\n", duration);
+      //printf("yolo detections: %ld\n", output->num);
+      std::cout << "yolo detection time: " << duration << std::endl;
+      std::cout << "yolo detections: " << output->num << std::endl;
 
       std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   // vector containing persons clusters
       // we run ground-based-people-detector pcl subclustering operation
@@ -3342,8 +3346,10 @@ class TVMPoseNode {
       begin = ros::Time::now();
       output = tvm_pose_detector->forward_full(cv_image, .3);
       duration = ros::Time::now().toSec() - begin.toSec();
-      printf("yolo detection time: %f\n", duration);
-      printf("yolo detections: %ld\n", output->num);
+      //printf("yolo detection time: %f\n", duration);
+      //printf("yolo detections: %ld\n", output->num);
+      std::cout << "yolo detection time: " << duration << std::endl;
+      std::cout << "yolo detections: " << output->num << std::endl;
       //std::array gluon_to_rtpose[17] = {0, 15, 14, 17, 16, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10, 100};
       // ears/eyes are ignored in rtpose, but not in gluon
       //index == gluon
@@ -4068,8 +4074,10 @@ class TVMPoseNode {
       begin = ros::Time::now();
       output = tvm_pose_detector->forward_full(cv_image, .3);
       duration = ros::Time::now().toSec() - begin.toSec();
-      printf("yolo detection time: %f\n", duration);
-      printf("yolo detections: %ld\n", output->num);
+      //printf("yolo detection time: %f\n", duration);
+      //printf("yolo detections: %ld\n", output->num);
+      std::cout << "yolo detection time: " << duration << std::endl;
+      std::cout << "yolo detections: " << output->num << std::endl;
       //std::array gluon_to_rtpose[17] = {0, 15, 14, 17, 16, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10, 100};
       // ears/eyes are ignored in rtpose, but not in gluon
       //index == gluon
