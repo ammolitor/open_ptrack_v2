@@ -2401,7 +2401,7 @@ class TVMPoseNode {
               yolo_centroids2d.push_back(output_centroid);
               yolo_centroids3d.push_back(output_centroid3d);
               std::cout << "centroid added" << std::endl; 
-              valid.push_back(i)
+              valid.push_back(i);
             }
           }
 
@@ -2449,8 +2449,8 @@ class TVMPoseNode {
 
               //for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
 
-              for (int x = 0; x < valid.size() x++) {
-                int i = valid[x]
+              for (int x = 0; x < valid.size(); x++) {
+                int i = valid[x];
                 if (assignment[x] == -1){
                   continue;
                 }
