@@ -1519,7 +1519,7 @@ class TVMPoseNode {
       PointCloudPtr cloud_downsampled(new PointCloud);
       PointCloudPtr cloud_denoised(new PointCloud);
       bool isZed_ = false;
-      int voxel_size = 0.06;
+      int voxel_size = 0.006; //0.06;
       int sampling_factor_ = 4;//4;
       bool apply_denoising_ = true;//true;
       bool use_voxel = false;
