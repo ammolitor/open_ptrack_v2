@@ -1709,7 +1709,7 @@ class TVMPoseNode {
       std::cout << "compute_subclustering - cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
   }
 
-    void create_foreground_cloud(const PointCloudT::ConstPtr& cloud_, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point2f> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+    void create_foreground_cloud(const PointCloudT::ConstPtr& cloud_, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters){
       int min_points = 30;
       int max_points = 5000;
       PointCloudT::Ptr cloud(new PointCloudT);
@@ -1777,14 +1777,9 @@ class TVMPoseNode {
       ec.setSearchMethod(tree);
       ec.setInputCloud(no_ground_cloud_);
       ec.extract(cluster_indices);
+    }
 
-      // check cluster_indices
-      std::cout << "no_ground_cloud_ final:  " << no_ground_cloud_->size() << std::endl;
-      std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
-      std::cout << "computing clusters" << std::endl;
-      compute_subclustering(no_ground_cloud_, clusters, cluster_centroids2d, cluster_centroids3d);
-      std::cout << "create_foreground_cloud - cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
-      std::cout << "create_foreground_cloud - cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
+    void compensate_tilt(){
       // Sensor tilt compensation to improve people detection:
       // moving to global PointCloudPtr no_ground_cloud_rotated(new PointCloud);
       // moving to global Eigen::VectorXf ground_coeffs_new;
@@ -1813,6 +1808,7 @@ class TVMPoseNode {
         ground_coeffs_new = ground_coeffs;
       }
     }
+
 
     void set_ground_variables(const PointCloudT::ConstPtr& cloud_){
       std::cout << "setting ground variables." << std::endl;
@@ -2405,10 +2401,17 @@ class TVMPoseNode {
           if (yolo_centroids.size() > 0){
           // filter the background and create a filtered cloud
             std::cout << "creating foreground cloud" << std::endl;
-            create_foreground_cloud(cloud_, clusters, cluster_centroids, cluster_centroids3d);
-
-            //compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
-            std::cout << "cluster_centroids size: " << cluster_centroids.size() << std::endl;
+            create_foreground_cloud(cloud_, clusters);
+            // check cluster_indices
+            std::cout << "no_ground_cloud_ final:  " << no_ground_cloud_->size() << std::endl;
+            std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
+            std::cout << "computing clusters" << std::endl;
+            compute_subclustering(no_ground_cloud_, clusters, cluster_centroids2d, cluster_centroids3d);
+            std::cout << "cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
+            std::cout << "cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
+            compensate_tilt();
+            // compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
+            // std::cout << "cluster_centroids size: " << cluster_centroids.size() << std::endl;
 
             if (cluster_centroids.size() > 0) {
               // Initialize cost matrix for the hungarian algorithm
