@@ -1436,12 +1436,12 @@ class TVMPoseNode {
     }
 
         //sampling_factor_ = 1;
-    void setBackground (bool background_subtraction, float background_octree_resolution, PointCloudPtr& background_cloud)
+    void setBackground (bool _background_subtraction, float background_octree_resolution, PointCloudPtr& background_cloud)
     {
-      background_subtraction_ = background_subtraction;
+      background_subtraction = _background_subtraction;
 
       background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
-      background_octree_->defineBoundingBox(-max_distance_/2, -max_distance_/2, 0.0, max_distance_/2, max_distance_/2, max_distance_);
+      background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
       background_octree_->setInputCloud (background_cloud);
       background_octree_->addPointsFromInputCloud ();
     }
