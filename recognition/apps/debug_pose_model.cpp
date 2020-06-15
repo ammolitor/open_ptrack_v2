@@ -1265,6 +1265,7 @@ class TVMPoseNode {
     //Eigen::Affine3f transform, anti_transform;
     //transform = transform.Identity();
     //anti_transform = transform.inverse();
+    pcl::PointCloud<pcl::RGB>::Ptr rgb_image_;
 
     /**
      * @brief constructor
@@ -1400,6 +1401,7 @@ class TVMPoseNode {
         anti_transform = transform.inverse();
         zone_json = zone;
         // 0 == manual
+        rgb_image_ = pcl::PointCloud<pcl::RGB>::Ptr(new pcl::PointCloud<pcl::RGB>);
       }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
@@ -1412,6 +1414,26 @@ class TVMPoseNode {
       camera_info_available_flag = true;
     }
 
+
+    void extractRGBFromPointCloud (PointCloudPtr input_cloud, pcl::PointCloud<pcl::RGB>::Ptr& output_cloud)
+    {
+      // Extract RGB information from a point cloud and output the corresponding RGB point cloud  
+      output_cloud->points.resize(input_cloud->height*input_cloud->width);
+      output_cloud->width = input_cloud->width;
+      output_cloud->height = input_cloud->height;
+
+      pcl::RGB rgb_point;
+      for (int j = 0; j < input_cloud->width; j++)
+      {
+        for (int i = 0; i < input_cloud->height; i++)
+        { 
+          rgb_point.r = (*input_cloud)(j,i).r;
+          rgb_point.g = (*input_cloud)(j,i).g;
+          rgb_point.b = (*input_cloud)(j,i).b;    
+          (*output_cloud)(j,i) = rgb_point; 
+        }
+      }
+    }
 
     PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
@@ -1519,10 +1541,32 @@ class TVMPoseNode {
       PointCloudPtr cloud_downsampled(new PointCloud);
       PointCloudPtr cloud_denoised(new PointCloud);
       bool isZed_ = false;
-      int voxel_size = 0.06; //0.06;
+      float voxel_size = 0.06; //0.06;
       int sampling_factor_ = 4;//4;
       bool apply_denoising_ = true;//true;
       bool use_voxel = true;
+
+      // Compute mean luminance:
+      int n_points = input_cloud->points.size();
+      double sumR, sumG, sumB = 0.0;
+      for (int j = 0; j < input_cloud->width; j++)
+      {
+        for (int i = 0; i < input_cloud->height; i++)
+        {
+          sumR += (*input_cloud)(j,i).r;
+          sumG += (*input_cloud)(j,i).g;
+          sumB += (*input_cloud)(j,i).b;
+        }
+      }
+      double mean_luminance = 0.3 * sumR/n_points + 0.59 * sumG/n_points + 0.11 * sumB/n_points;
+      //    mean_luminance_ = 0.2126 * sumR/n_points + 0.7152 * sumG/n_points + 0.0722 * sumB/n_points;
+      std::cout << "mean_luminance: " << mean_luminance << std::endl;
+
+
+      // Adapt thresholds for clusters points number to the voxel size:
+      //max_points_ = int(float(max_points_) * std::pow(0.06/voxel_size_, 2));
+      //if (voxel_size_ > 0.06)
+      //  min_points_ = int(float(min_points_) * std::pow(0.06/voxel_size_, 2));
 
       //yolo centroid - x:0.595159, y: -1.07777, z: 5.883
       //centroid added
@@ -1567,6 +1611,7 @@ class TVMPoseNode {
         sor.filter (*cloud_denoised);
       }
       std::cout << "preprocessCloud cloud_denoised size: " << cloud_denoised->size() << std::endl;
+      
       //  // Denoising viewer
       //  int v1(0);
       //  int v2(0);
@@ -2453,6 +2498,9 @@ class TVMPoseNode {
             cv_depth_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).z;
             }
         }
+        // Fill rgb image:
+        rgb_image_->points.clear();                            // clear RGB pointcloud
+        extractRGBFromPointCloud(cloud_, rgb_image_);          // fill RGB pointcloud
 
         //////////////////////////////////////////////////////////////////////////////////////////////
 

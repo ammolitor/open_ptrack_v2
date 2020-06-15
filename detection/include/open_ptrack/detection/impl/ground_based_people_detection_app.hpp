@@ -340,13 +340,31 @@ open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::rotateGround(Eige
 template <typename PointT> typename open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::PointCloudPtr
 open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::preprocessCloud (PointCloudPtr& input_cloud)
 {
-  std::cout << "preprocessCloud: sampling_factor_" << sampling_factor_ << std::endl;
-  std::cout << "preprocessCloud: apply_denoising_" << apply_denoising_ << std::endl;
-  std::cout << "preprocessCloud: mean_k_denoising_" << mean_k_denoising_ << std::endl;
-  std::cout << "preprocessCloud: std_dev_denoising_" << std_dev_denoising_ << std::endl;
-  std::cout << "preprocessCloud: voxel_size_" << voxel_size_ << std::endl;
-  std::cout << "preprocessCloud: max_distance_" << max_distance_ << std::endl;  
+  std::cout << "preprocessCloud: sampling_factor_ " << sampling_factor_ << std::endl;
+  std::cout << "preprocessCloud: apply_denoising_ " << apply_denoising_ << std::endl;
+  std::cout << "preprocessCloud: mean_k_denoising_ " << mean_k_denoising_ << std::endl;
+  std::cout << "preprocessCloud: std_dev_denoising_ " << std_dev_denoising_ << std::endl;
+  std::cout << "preprocessCloud: voxel_size_ " << voxel_size_ << std::endl;
+  std::cout << "preprocessCloud: max_distance_ " << max_distance_ << std::endl;  
   std::cout << "input_cloud: " << input_cloud->size() << std::endl;
+
+
+  // Compute mean luminance:
+  int n_points = input_cloud->points.size();
+  double sumR, sumG, sumB = 0.0;
+  for (int j = 0; j < input_cloud->width; j++)
+  {
+    for (int i = 0; i < input_cloud->height; i++)
+    {
+      sumR += (*input_cloud)(j,i).r;
+      sumG += (*input_cloud)(j,i).g;
+      sumB += (*input_cloud)(j,i).b;
+    }
+  }
+  double mean_luminance = 0.3 * sumR/n_points + 0.59 * sumG/n_points + 0.11 * sumB/n_points;
+  //    mean_luminance_ = 0.2126 * sumR/n_points + 0.7152 * sumG/n_points + 0.0722 * sumB/n_points;
+  std::cout << "input mean_luminance: " << mean_luminance << std::endl;
+
   // Downsample of sampling_factor in every dimension:
   PointCloudPtr cloud_downsampled(new PointCloud);
   PointCloudPtr cloud_denoised(new PointCloud);
