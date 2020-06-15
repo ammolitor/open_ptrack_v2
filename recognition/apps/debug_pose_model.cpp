@@ -2499,8 +2499,8 @@ class TVMPoseNode {
             }
         }
         // Fill rgb image:
-        rgb_image_->points.clear();                            // clear RGB pointcloud
-        extractRGBFromPointCloud(cloud_, rgb_image_);          // fill RGB pointcloud
+        //rgb_image_->points.clear();                            // clear RGB pointcloud
+        //extractRGBFromPointCloud(cloud_, rgb_image_);          // fill RGB pointcloud
 
         //////////////////////////////////////////////////////////////////////////////////////////////
 
