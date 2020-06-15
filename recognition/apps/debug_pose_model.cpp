@@ -2433,6 +2433,10 @@ class TVMPoseNode {
               // to that of the bounding box
               std::cout << "solving Hungarian problem" << std::endl;
               HungAlgo.Solve(cost_matrix, assignment);
+              //rows == pcl centroids index
+              // values ==  yolo index
+              // assignment size == cluster_centroids2d size:
+              // value at each == yolo
               std::cout << "assignment shape: " <<  assignment.size() << std::endl;
               int negs = 0;
               int poss = 0;
@@ -2454,9 +2458,9 @@ class TVMPoseNode {
                 }
                 else
                 {
-                  int i = valid[x];
-                  std::cout << "assigning cluster: " << assignment[x] << " to yolo number: " << i << std::endl;
-                  open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[assignment[x]];
+                  int i = assignment[x];
+                  std::cout << "cluster: " << x << " to yolo number: " << i << std::endl;
+                  open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[x];
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
                   float xmax = output->boxes[i].xmax;
