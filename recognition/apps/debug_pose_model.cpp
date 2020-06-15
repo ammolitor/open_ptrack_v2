@@ -1513,8 +1513,9 @@ class TVMPoseNode {
       PointCloudPtr cloud_denoised(new PointCloud);
       bool isZed_ = false;
       int voxel_size = 0.06;
-      int sampling_factor_ = 1;//4;
-      bool apply_denoising_ = false;//true;
+      int sampling_factor_ = 4;//4;
+      bool apply_denoising_ = true;//true;
+      bool use_voxel = false;
       if (sampling_factor_ != 1)
       {
         cloud_downsampled->width = (input_cloud->width)/sampling_factor_;
@@ -1558,26 +1559,38 @@ class TVMPoseNode {
       //  denoising_viewer_->addPointCloud<PointT> (cloud_denoised, rgb2, "denoised", v2);
       //  denoising_viewer_->spinOnce();
 
+
       // Voxel grid filtering:
       PointCloudPtr cloud_filtered(new PointCloud);
-      pcl::VoxelGrid<PointT> voxel_grid_filter_object;
-      if (apply_denoising_) {
-        voxel_grid_filter_object.setInputCloud(cloud_denoised);
-      } else {
-        if (sampling_factor_ != 1) {
-          voxel_grid_filter_object.setInputCloud(cloud_downsampled);
-        } else {
-          voxel_grid_filter_object.setInputCloud(input_cloud);
+      if (use_voxel){
+        pcl::VoxelGrid<PointT> voxel_grid_filter_object;
+        if (apply_denoising_)
+          voxel_grid_filter_object.setInputCloud(cloud_denoised);
+        else
+        {
+          if (sampling_factor_ != 1)
+            voxel_grid_filter_object.setInputCloud(cloud_downsampled);
+          else
+            voxel_grid_filter_object.setInputCloud(input_cloud);
         }
-      }
-      voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
-      voxel_grid_filter_object.setFilterFieldName("z");
-      //if (isZed_)
-      //  voxel_grid_filter_object.setFilterLimits(-1 * max_distance, max_distance);
-      //else
-      voxel_grid_filter_object.setFilterLimits(0.0, max_distance);
-      voxel_grid_filter_object.filter (*cloud_filtered);
-
+        voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
+        voxel_grid_filter_object.setFilterFieldName("z");
+        //if (isZed_)
+        //  voxel_grid_filter_object.setFilterLimits(-1 * max_distance, max_distance);
+        //else
+        voxel_grid_filter_object.setFilterLimits(0.0, max_distance);
+        voxel_grid_filter_object.filter (*cloud_filtered);
+      } else {
+      if (apply_denoising_) {
+        if (sampling_factor_ != 1) {
+          cloud_filtered = cloud_downsampled;
+        } else {
+          cloud_filtered = cloud_denoised;
+        }
+      } else {
+        cloud_filtered = input_cloud;
+      } 
+     }
       return cloud_filtered;
     }
 
