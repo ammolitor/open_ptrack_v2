@@ -2437,9 +2437,9 @@ class TVMPoseNode {
               int poss = 0;
               for (int i = 0; i < assignment.size(); i++){
                 if (assignment[i] == -1){
-                  negs+=1
+                  negs+=1;
                 } else {
-                  poss+=1
+                  poss+=1;
                 }
               }
               std::cout << "assignment positives: " <<  poss << std::endl;
