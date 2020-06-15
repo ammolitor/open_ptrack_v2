@@ -2497,10 +2497,15 @@ class TVMPoseNode {
                   int new_width = static_cast<int>(2 * (median_factor * (median_x - xmin)));
                   int new_height = static_cast<int>(2 * (median_factor * (median_y - ymin)));
                 
-                  float median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
+                  //float median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
                   // set the mx/my wtr the intrinsic camera matrix
-                  float mx = (median_x - _cx) * median_depth * _constant_x;
-                  float my = (median_y - _cy) * median_depth * _constant_y;
+                  //float mx = (median_x - _cx) * median_depth * _constant_x;
+                  //float my = (median_y - _cy) * median_depth * _constant_y;
+
+                  // get x, y, z points
+                  float mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x;
+                  float my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
+                  float median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
 
                   // Create detection message: -- literally tatken ground_based_people_detector_node
                   float skeleton_distance;
@@ -2556,10 +2561,9 @@ class TVMPoseNode {
                       float confidence = point.z;
                       int cast_x = static_cast<int>(point.x);
                       int cast_y = static_cast<int>(point.y);
-                      float z = cv_depth_image.at<float>(cast_y, cast_x) / mm_factor;
-                      joint3D.x = point.x;
-                      joint3D.y = point.y;
-                      joint3D.z = z;
+                      joint3D.x = cloud_->at(static_cast<int>(cast_x), static_cast<int>(cast_y)).x;
+                      joint3D.y = cloud_->at(static_cast<int>(cast_x), static_cast<int>(cast_y)).y;
+                      joint3D.z = cloud_->at(static_cast<int>(cast_x), static_cast<int>(cast_y)).z;
                       joint3D.max_height = DISPLAY_RESOLUTION_HEIGHT;
                       joint3D.max_width = DISPLAY_RESOLUTION_WIDTH;
                       joint3D.confidence = confidence;
@@ -2581,11 +2585,10 @@ class TVMPoseNode {
                   float x = (point_left_shoulder.x + point_right_shoulder.x) / 2;
                   float y = (point_left_shoulder.y + point_right_shoulder.y) / 2;
                   int cast_point_x = static_cast<int>(x);
-                  int cast_point_y = static_cast<int>(y);              
-                  float z = cv_depth_image.at<float>(cast_point_y, cast_point_x) / mm_factor;
-                  joint3D_neck.x = x;
-                  joint3D_neck.y = y;
-                  joint3D_neck.z = z;
+                  int cast_point_y = static_cast<int>(y);
+                  joint3D.x = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).x;
+                  joint3D.y = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).y;
+                  joint3D.z = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).z;
                   joint3D_neck.confidence = confidence;
                   joint3D_neck.header = cloud_header;
                   joint3D_neck.max_height = DISPLAY_RESOLUTION_HEIGHT;
@@ -2602,10 +2605,9 @@ class TVMPoseNode {
                   float cy = (point_left_hip.y + point_right_hip.y) * 0.4 + (point_left_shoulder.y + point_right_shoulder.y) * 0.1;
                   int cast_cx = static_cast<int>(cx);
                   int cast_cy = static_cast<int>(cy);
-                  float cz = cv_depth_image.at<float>(cast_cy, cast_cx) / mm_factor;
-                  joint3D_chest.x = cx;
-                  joint3D_chest.y = cy;
-                  joint3D_chest.z = cz;
+                  joint3D.x = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).x;
+                  joint3D.y = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).y;
+                  joint3D.z = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).z;
                   joint3D_chest.confidence = confidence; //use confidence from previous
                   joint3D_chest.header = cloud_header;
                   joint3D_chest.max_height = DISPLAY_RESOLUTION_HEIGHT;
