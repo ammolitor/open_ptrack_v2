@@ -1544,7 +1544,7 @@ class TVMPoseNode {
         sor.setStddevMulThresh (std_dev_denoising);
         sor.filter (*cloud_denoised);
       }
-      std::cout << "preprocessCloud cloud_denoised size: " << cloud_denoiseds->size() std::endl;
+      std::cout << "preprocessCloud cloud_denoised size: " << cloud_denoised->size() std::endl;
       //  // Denoising viewer
       //  int v1(0);
       //  int v2(0);
