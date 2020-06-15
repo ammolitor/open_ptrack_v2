@@ -1522,7 +1522,21 @@ class TVMPoseNode {
       int voxel_size = 0.06;
       int sampling_factor_ = 4;//4;
       bool apply_denoising_ = true;//true;
-      bool use_voxel = true;
+      bool use_voxel = false;
+
+      //yolo centroid - x:0.595159, y: -1.07777, z: 5.883
+      //centroid added
+      //checking yolo centroids size: 1
+      //checking yolo centroids empty: 0
+      //creating foreground cloud
+      //create_foreground_cloud cloud: 307200
+      //preprocessing cloud.
+      //preprocessCloud downsampled size: 19200
+      //preprocessCloud cloud_denoised size: 15652
+      //create_foreground_cloud cloud_filtered: 2
+      //create_foreground_cloud: removing background
+      //create_foreground_cloud no_ground_cloud_: 2
+
       if (sampling_factor_ != 1)
       {
         cloud_downsampled->width = (input_cloud->width)/sampling_factor_;
@@ -1582,9 +1596,6 @@ class TVMPoseNode {
         }
         voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
         voxel_grid_filter_object.setFilterFieldName("z");
-        //if (isZed_)
-        //  voxel_grid_filter_object.setFilterLimits(-1 * max_distance, max_distance);
-        //else
         voxel_grid_filter_object.setFilterLimits(0.0, max_distance);
         voxel_grid_filter_object.filter (*cloud_filtered);
       } else {
