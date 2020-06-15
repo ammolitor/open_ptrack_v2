@@ -1522,7 +1522,7 @@ class TVMPoseNode {
       int voxel_size = 0.006; //0.06;
       int sampling_factor_ = 4;//4;
       bool apply_denoising_ = true;//true;
-      bool use_voxel = false;
+      bool use_voxel = true;
 
       //yolo centroid - x:0.595159, y: -1.07777, z: 5.883
       //centroid added
