@@ -1519,7 +1519,7 @@ class TVMPoseNode {
       PointCloudPtr cloud_downsampled(new PointCloud);
       PointCloudPtr cloud_denoised(new PointCloud);
       bool isZed_ = false;
-      int voxel_size = 0.006; //0.06;
+      int voxel_size = 0.06; //0.06;
       int sampling_factor_ = 4;//4;
       bool apply_denoising_ = true;//true;
       bool use_voxel = true;
@@ -1583,32 +1583,25 @@ class TVMPoseNode {
 
       // Voxel grid filtering:
       PointCloudPtr cloud_filtered(new PointCloud);
-      if (use_voxel){
-        pcl::VoxelGrid<PointT> voxel_grid_filter_object;
-        if (apply_denoising_)
-          voxel_grid_filter_object.setInputCloud(cloud_denoised);
+      pcl::VoxelGrid<PointT> voxel_grid_filter_object;
+      if (apply_denoising_)
+        voxel_grid_filter_object.setInputCloud(cloud_denoised);
+      else
+      {
+        if (sampling_factor_ != 1)
+          voxel_grid_filter_object.setInputCloud(cloud_downsampled);
         else
-        {
-          if (sampling_factor_ != 1)
-            voxel_grid_filter_object.setInputCloud(cloud_downsampled);
-          else
-            voxel_grid_filter_object.setInputCloud(input_cloud);
-        }
-        voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
-        voxel_grid_filter_object.setFilterFieldName("z");
+          voxel_grid_filter_object.setInputCloud(input_cloud);
+      }
+      voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
+      voxel_grid_filter_object.setFilterFieldName("z");
+      if (isZed_)
+        voxel_grid_filter_object.setFilterLimits(-1 * max_distance, max_distance);
+      else
         voxel_grid_filter_object.setFilterLimits(0.0, max_distance);
-        voxel_grid_filter_object.filter (*cloud_filtered);
-      } else {
-      if (apply_denoising_) {
-        if (sampling_factor_ != 1) {
-          cloud_filtered = cloud_downsampled;
-        } else {
-          cloud_filtered = cloud_denoised;
-        }
-      } else {
-        cloud_filtered = input_cloud;
-      } 
-     }
+      voxel_grid_filter_object.filter (*cloud_filtered);
+      std::cout << "preprocessCloud cloud_filtered: " << cloud_filtered->size() << std::endl;
+
       return cloud_filtered;
     }
 
