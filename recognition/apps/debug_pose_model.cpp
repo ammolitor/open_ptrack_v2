@@ -1260,6 +1260,7 @@ class TVMPoseNode {
     int n_frames = 15;
     bool set_background = true;
     float sqrt_ground_coeffs;
+    pcl::octree::OctreePointCloud<PointT> *background_octree_;
     // Initialize transforms to be used to correct sensor tilt to identity matrix:
     //Eigen::Affine3f transform, anti_transform;
     //transform = transform.Identity();
@@ -1495,6 +1496,12 @@ class TVMPoseNode {
 
         // Background saving:
         if (n_frame >= n_frames){
+
+          pcl::octree::OctreePointCloud<PointT> *background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_resolution);
+          background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
+          background_octree_->setInputCloud (background_cloud);
+          background_octree_->addPointsFromInputCloud ();
+
           std::cout << "saving background file to tmp space: " << std::endl;
           pcl::io::savePCDFileASCII ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud);
           std::cout << "background cloud done." << std::endl << std::endl;
@@ -1742,10 +1749,10 @@ class TVMPoseNode {
         //}
         //pcl::octree::OctreePointCloud<PointT> *background_octree_
         //float background_octree_resolution = background_resolution;
-        pcl::octree::OctreePointCloud<PointT> *background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_resolution);
-        background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
-        background_octree_->setInputCloud (background_cloud);
-        background_octree_->addPointsFromInputCloud ();
+        //pcl::octree::OctreePointCloud<PointT> *background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_resolution);
+        //background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
+        //background_octree_->setInputCloud (background_cloud);
+        //background_octree_->addPointsFromInputCloud ();
         PointCloudPtr foreground_cloud(new PointCloud);
         for (unsigned int i = 0; i < no_ground_cloud_->points.size(); i++)
         {
