@@ -1781,6 +1781,7 @@ class TVMPoseNode {
         PointCloudPtr foreground_cloud(new PointCloud);
         for (unsigned int i = 0; i < no_ground_cloud_->points.size(); i++)
         {
+          std::cout << "iter: " << i << std::endl;
           if (not (background_octree_->isVoxelOccupiedAtPoint(no_ground_cloud_->points[i].x, no_ground_cloud_->points[i].y, no_ground_cloud_->points[i].z)))
           {
             foreground_cloud->points.push_back(no_ground_cloud_->points[i]);
