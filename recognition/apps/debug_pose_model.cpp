@@ -2406,8 +2406,8 @@ class TVMPoseNode {
             std::cout << "no_ground_cloud_ final:  " << no_ground_cloud_->size() << std::endl;
             std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
             std::cout << "computing clusters" << std::endl;
-            compute_subclustering(no_ground_cloud_, clusters, cluster_centroids2d, cluster_centroids3d);
-            std::cout << "cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
+            compute_subclustering(no_ground_cloud_, clusters, cluster_centroids, cluster_centroids3d);
+            std::cout << "cluster_centroids2d size: " << cluster_centroids.size() << std::endl;
             std::cout << "cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
             compensate_tilt();
             // compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
