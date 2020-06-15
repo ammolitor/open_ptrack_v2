@@ -1522,7 +1522,7 @@ class TVMPoseNode {
       int voxel_size = 0.06;
       int sampling_factor_ = 4;//4;
       bool apply_denoising_ = true;//true;
-      bool use_voxel = false;
+      bool use_voxel = true;
       if (sampling_factor_ != 1)
       {
         cloud_downsampled->width = (input_cloud->width)/sampling_factor_;
