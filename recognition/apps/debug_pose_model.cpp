@@ -1454,7 +1454,7 @@ class TVMPoseNode {
       background_octree_->addPointsFromInputCloud ();
 
       std::cout << "saving background file to tmp space: " << std::endl;
-      pcl::io::savePCDFileASCII ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud);
+      pcl::io::savePCDFileASCII ("/tmp/background_" + sensor_name + ".pcd", *background_cloud);
       std::cout << "background cloud done." << std::endl << std::endl;
     }
 
@@ -1472,7 +1472,7 @@ class TVMPoseNode {
       std::cout << "Background subtraction enabled." << std::endl;
 
       // Try to load the background from file:
-      if (pcl::io::loadPCDFile<PointT> ("/tmp/background_" + frame_id.substr(1, frame_id.length()-1) + ".pcd", *background_cloud) == -1)
+      if (pcl::io::loadPCDFile<PointT> ("/tmp/background_" + sensor_name + ".pcd", *background_cloud) == -1)
       {
         // File not found, then background acquisition:
         //computeBackgroundCloud (max_background_frames, voxel_size, frame_id, rate, background_cloud);
