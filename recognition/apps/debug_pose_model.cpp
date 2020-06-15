@@ -2448,15 +2448,14 @@ class TVMPoseNode {
               std::cout << "assignment negatives: " <<  negs << std::endl;
 
               //for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
-
-              for (int x = 0; x < valid.size(); x++) {
-                int i = valid[x];
+              for (int x = 0; x < assignment.size(); x++) {
                 if (assignment[x] == -1){
                   continue;
                 }
                 else
                 {
-                  std::cout << "assigning output: " << x << " to cluster number: " << assignment[x] << std::endl;
+                  int i = valid[x];
+                  std::cout << "assigning cluster: " << x << " to yolo number: " << assignment[x] << std::endl;
                   open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[assignment[x]];
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
