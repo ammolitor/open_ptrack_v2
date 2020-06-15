@@ -340,6 +340,7 @@ open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::rotateGround(Eige
 template <typename PointT> typename open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::PointCloudPtr
 open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::preprocessCloud (PointCloudPtr& input_cloud)
 {
+   std::cout << "input_cloud: " << input_cloud->size() << std::endl;
   // Downsample of sampling_factor in every dimension:
   PointCloudPtr cloud_downsampled(new PointCloud);
   PointCloudPtr cloud_denoised(new PointCloud);
