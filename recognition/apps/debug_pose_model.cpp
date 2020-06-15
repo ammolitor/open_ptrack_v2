@@ -2586,9 +2586,9 @@ class TVMPoseNode {
                   float y = (point_left_shoulder.y + point_right_shoulder.y) / 2;
                   int cast_point_x = static_cast<int>(x);
                   int cast_point_y = static_cast<int>(y);
-                  joint3D.x = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).x;
-                  joint3D.y = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).y;
-                  joint3D.z = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).z;
+                  joint3D_neck.x = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).x;
+                  joint3D_neck.y = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).y;
+                  joint3D_neck.z = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).z;
                   joint3D_neck.confidence = confidence;
                   joint3D_neck.header = cloud_header;
                   joint3D_neck.max_height = DISPLAY_RESOLUTION_HEIGHT;
@@ -2605,9 +2605,9 @@ class TVMPoseNode {
                   float cy = (point_left_hip.y + point_right_hip.y) * 0.4 + (point_left_shoulder.y + point_right_shoulder.y) * 0.1;
                   int cast_cx = static_cast<int>(cx);
                   int cast_cy = static_cast<int>(cy);
-                  joint3D.x = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).x;
-                  joint3D.y = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).y;
-                  joint3D.z = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).z;
+                  joint3D_chest.x = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).x;
+                  joint3D_chest.y = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).y;
+                  joint3D_chest.z = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).z;
                   joint3D_chest.confidence = confidence; //use confidence from previous
                   joint3D_chest.header = cloud_header;
                   joint3D_chest.max_height = DISPLAY_RESOLUTION_HEIGHT;
