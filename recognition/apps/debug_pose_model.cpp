@@ -2433,6 +2433,18 @@ class TVMPoseNode {
               std::cout << "solving Hungarian problem" << std::endl;
               HungAlgo.Solve(cost_matrix, assignment);
               std::cout << "assignment shape: " <<  assignment.size() << std::endl;
+              int negs = 0;
+              int poss = 0;
+              for (int i = 0; i < assignment.size(); i++){
+                if (assignment[i] == -1){
+                  negs+=1
+                } else {
+                  poss+=1
+                }
+              }
+              std::cout << "assignment positives: " <<  poss << std::endl;
+              std::cout << "assignment negatives: " <<  negs << std::endl;
+
               //for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
 
               for (int i = 0; i < output->num; i++) {
