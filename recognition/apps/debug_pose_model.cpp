@@ -2440,6 +2440,7 @@ class TVMPoseNode {
                   negs+=1;
                 } else {
                   poss+=1;
+                  std::cout << "assignment i: " << i << " value: " << assignment[i] << std::endl;
                 }
               }
               std::cout << "assignment positives: " <<  poss << std::endl;
@@ -2453,6 +2454,7 @@ class TVMPoseNode {
                 }
                 else
                 {
+                  std::cout << "assigning output: " << i << " to cluster number: " << assignment[i] << std::endl;
                   open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[assignment[i]];
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
