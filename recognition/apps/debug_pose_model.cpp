@@ -1541,7 +1541,7 @@ class TVMPoseNode {
       PointCloudPtr cloud_downsampled(new PointCloud);
       PointCloudPtr cloud_denoised(new PointCloud);
       bool isZed_ = false;
-      float voxel_size = 0.06; //0.06;
+      //float voxel_size = 0.06; //0.06;
       int sampling_factor_ = 4;//4;
       bool apply_denoising_ = true;//true;
       bool use_voxel = true;
@@ -1749,12 +1749,9 @@ class TVMPoseNode {
       // set background cloud here
 
       // Ground removal and update:
-      std::cout << "create_foreground_cloud: removing background" << std::endl;
+      std::cout << "create_foreground_cloud: removing ground" << std::endl;
       pcl::IndicesPtr inliers(new std::vector<int>);
       boost::shared_ptr<pcl::SampleConsensusModelPlane<PointT> > ground_model(new pcl::SampleConsensusModelPlane<PointT>(cloud_filtered));
-      //if (isZed_)
-      //  ground_model->selectWithinDistance(ground_coeffs_, 0.2, *inliers);
-      //else
       ground_model->selectWithinDistance(ground_coeffs, voxel_size, *inliers);
       PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
       pcl::ExtractIndices<PointT> extract;
@@ -1776,32 +1773,11 @@ class TVMPoseNode {
       if (sizeCheck) {
         ground_model->optimizeModelCoefficients (*inliers, ground_coeffs, ground_coeffs);
       }
-      //} else {
-      //  if (debug_flag)
-      //  {`
-      //    PCL_INFO ("No groundplane update!\n");
-      //  }
-      std::cout << "create_foreground_cloud no_ground_cloud_: " << no_ground_cloud_->size() << std::endl;
+
+      std::cout << "create_foreground_cloud: ground removed no_ground_cloud_: " << no_ground_cloud_->size() << std::endl;
       // Background Subtraction (optional):
       if (background_subtraction) {
-
-        //people_detector.setBackground(background_subtraction, background_octree_resolution, background_cloud);
-        //template <typename PointT> void
-        //open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::setBackground (bool background_subtraction, float background_octree_resolution, PointCloudPtr& background_cloud)
-        //{
-        //  background_subtraction_ = background_subtraction;
-        //
-        //  background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
-        //  background_octree_->defineBoundingBox(-max_distance_/2, -max_distance_/2, 0.0, max_distance_/2, max_distance_/2, max_distance_);
-        //  background_octree_->setInputCloud (background_cloud);
-        //  background_octree_->addPointsFromInputCloud ();
-        //}
-        //pcl::octree::OctreePointCloud<PointT> *background_octree_
-        //float background_octree_resolution = background_resolution;
-        //pcl::octree::OctreePointCloud<PointT> *background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_resolution);
-        //background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
-        //background_octree_->setInputCloud (background_cloud);
-        //background_octree_->addPointsFromInputCloud ();
+        std::cout << "removing background" << std::endl;
         PointCloudPtr foreground_cloud(new PointCloud);
         for (unsigned int i = 0; i < no_ground_cloud_->points.size(); i++)
         {
@@ -1955,7 +1931,10 @@ class TVMPoseNode {
         cloud_filtered = preprocessCloud(cloud);
 
         // set background cloud here
-
+        //max_points_ = int(float(max_points_) * std::pow(0.06/voxel_size_, 2));
+        //if (voxel_size_ > 0.06)
+        //  min_points_ = int(float(min_points_) * std::pow(0.06/voxel_size_, 2));
+        
 
         // Ground removal and update:
         pcl::IndicesPtr inliers(new std::vector<int>);
