@@ -1670,6 +1670,7 @@ class TVMPoseNode {
       int max_points = 5000;
       PointCloudT::Ptr cloud(new PointCloudT);
       *cloud = *cloud_;
+      std::cout << "create_foreground_cloud cloud: " << cloud->size() << std::endl;
       // Point cloud pre-processing (downsampling and filtering):
       PointCloudPtr cloud_filtered(new PointCloud);
       cloud_filtered = preprocessCloud(cloud);
