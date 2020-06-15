@@ -340,7 +340,13 @@ open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::rotateGround(Eige
 template <typename PointT> typename open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::PointCloudPtr
 open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::preprocessCloud (PointCloudPtr& input_cloud)
 {
-   std::cout << "input_cloud: " << input_cloud->size() << std::endl;
+  std::cout << "preprocessCloud: sampling_factor_" << sampling_factor_ << std::endl;
+  std::cout << "preprocessCloud: apply_denoising_" << apply_denoising_ << std::endl;
+  std::cout << "preprocessCloud: mean_k_denoising_" << mean_k_denoising_ << std::endl;
+  std::cout << "preprocessCloud: std_dev_denoising_" << std_dev_denoising_ << std::endl;
+  std::cout << "preprocessCloud: voxel_size_" << voxel_size_ << std::endl;
+  std::cout << "preprocessCloud: max_distance_" << max_distance_ << std::endl;  
+  std::cout << "input_cloud: " << input_cloud->size() << std::endl;
   // Downsample of sampling_factor in every dimension:
   PointCloudPtr cloud_downsampled(new PointCloud);
   PointCloudPtr cloud_denoised(new PointCloud);
@@ -359,7 +365,7 @@ open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::preprocessCloud (
       }
     }
   }
-
+  std::cout << << std::endl;
   if (apply_denoising_)
   {
     // Denoising with statistical filtering:
