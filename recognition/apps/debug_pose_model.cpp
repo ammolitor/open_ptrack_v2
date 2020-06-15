@@ -2336,11 +2336,11 @@ class TVMPoseNode {
         yolo_centroids3d.clear();
         cluster_centroids2d.clear();
         cluster_centroids3d.clear();
-
+        std::vector<int> valid;
 
         // fall back on subclusters?????
         // no detections? no forward...
-        
+          
         // build cost matrix
         std::cout << "checking yolo output" << std::endl;
         if (output->num >= 1) {
@@ -2400,7 +2400,8 @@ class TVMPoseNode {
               output_centroid3d = cv::Point3f(mx, my, median_depth);
               yolo_centroids2d.push_back(output_centroid);
               yolo_centroids3d.push_back(output_centroid3d);
-              std::cout << "centroid added" << std::endl;
+              std::cout << "centroid added" << std::endl; 
+              valid.push_back(i)
             }
           }
 
@@ -2448,14 +2449,15 @@ class TVMPoseNode {
 
               //for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
 
-              for (int i = 0; i < output->num; i++) {
-                if (assignment[i] == -1){
+              for (int x = 0; x < valid.size() x++) {
+                int i = valid[x]
+                if (assignment[x] == -1){
                   continue;
                 }
                 else
                 {
-                  std::cout << "assigning output: " << i << " to cluster number: " << assignment[i] << std::endl;
-                  open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[assignment[i]];
+                  std::cout << "assigning output: " << x << " to cluster number: " << assignment[x] << std::endl;
+                  open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[assignment[x]];
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
                   float xmax = output->boxes[i].xmax;
