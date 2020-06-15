@@ -1662,8 +1662,10 @@ class TVMPoseNode {
       {
         open_ptrack::person_clustering::PersonCluster<PointT> cluster(no_ground_cloud, *it, ground_coeffs, sqrt_ground_coeffs, head_centroid, vertical_); //PersonCluster creation
         clusters.push_back(cluster);
+        std::cout << "debug person_cluster ground_coeffs: " << ground_coeffs << std::endl;
+        std::cout << "debug person_cluster sqrt_ground_coeffs: " << sqrt_ground_coeffs << std::endl;
         std::cout << "debug person_cluster getTCenter: " << cluster.getTCenter() << std::endl;
-        std::cout << "debug person_cluster getTenter: " << cluster.getCenter() << std::endl;
+        std::cout << "debug person_cluster getCenter: " << cluster.getCenter() << std::endl;
         std::cout << "debug person_cluster getHeight: " << cluster.getHeight() << std::endl;
         std::cout << "debug person_cluster getDistance: " << cluster.getDistance() << std::endl;
         std::cout << "debug person_cluster getTTop: " << cluster.getTTop() << std::endl;
