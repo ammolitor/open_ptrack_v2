@@ -1701,8 +1701,12 @@ class TVMPoseNode {
             cluster_centroids2d.push_back(centroid2d);
             cluster_centroids3d.push_back(centroid3d);
             std::cout << "centroid2d: " << centroid2d << std::endl;
+            std::cout << "centroid3d: " << centroid3d << std::endl;
+            std::cout << "centroid added. " << std::endl;
           }
         }
+      std::cout << "cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
+      std::cout << "cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
   }
 
     void create_foreground_cloud(const PointCloudT::ConstPtr& cloud_, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point2f> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
