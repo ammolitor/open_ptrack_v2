@@ -385,8 +385,8 @@ open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::preprocessCloud (
   //  denoising_viewer_->addPointCloud<PointT> (cloud_denoised, rgb2, "denoised", v2);
   //  denoising_viewer_->spinOnce();
 
-  std::cout << "cloud_downsampled: " << cloud_downsampled.size() << std::endl;
-  std::cout << "cloud_denoised: " << cloud_denoised.size() << std::endl;
+  std::cout << "cloud_downsampled: " << cloud_downsampled->size() << std::endl;
+  std::cout << "cloud_denoised: " << cloud_denoised->size() << std::endl;
 
   // Voxel grid filtering:
   PointCloudPtr cloud_filtered(new PointCloud);
@@ -407,7 +407,7 @@ open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::preprocessCloud (
   else
     voxel_grid_filter_object.setFilterLimits(0.0, max_distance_);
   voxel_grid_filter_object.filter (*cloud_filtered);
-  std::cout << "cloud_filtered: " << cloud_filtered.size() << std::endl;
+  std::cout << "cloud_filtered: " << cloud_filtered->size() << std::endl;
   return cloud_filtered;
 }
 
