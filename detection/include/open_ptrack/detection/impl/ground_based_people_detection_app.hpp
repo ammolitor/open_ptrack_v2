@@ -365,7 +365,6 @@ open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::preprocessCloud (
       }
     }
   }
-  std::cout << << std::endl;
   if (apply_denoising_)
   {
     // Denoising with statistical filtering:
