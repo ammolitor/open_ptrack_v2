@@ -1435,6 +1435,18 @@ class TVMPoseNode {
       }
     }
 
+        //sampling_factor_ = 1;
+    void setBackground (bool background_subtraction, float background_octree_resolution, PointCloudPtr& background_cloud)
+    {
+      background_subtraction_ = background_subtraction;
+
+      background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
+      background_octree_->defineBoundingBox(-max_distance_/2, -max_distance_/2, 0.0, max_distance_/2, max_distance_/2, max_distance_);
+      background_octree_->setInputCloud (background_cloud);
+      background_octree_->addPointsFromInputCloud ();
+    }
+
+
     PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
       // Initialization for background subtraction:
@@ -1495,29 +1507,18 @@ class TVMPoseNode {
         }
         std::cout << "generation loop finished: " << std::endl;
 
-        // Point cloud pre-processing (downsampling and filtering):
-        //std::cout << "computing background frame" << std::endl;
-        //PointCloudT::Ptr cloud_filtered(new PointCloudT);
-        //cloud_filtered = preprocessCloud (cloud);
-        //std::cout << "preprocessed frame" << std::endl;
-
-        //*background_cloud += *cloud_filtered;
-        //std::cout << "frame added to background" << std::endl;
-        //std::cout << "generation loop finished" << std::endl;
-
-
-        // Voxel grid filtering:
-        std::cout << "starting voxel grid filtering: " << std::endl;
-        PointCloudT::Ptr cloud_filtered(new PointCloudT);
-        //cloud_filtered(new PointCloudT);
-        pcl::VoxelGrid<PointT> voxel_grid_filter_object;
-        voxel_grid_filter_object.setInputCloud(background_cloud);
-        voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
-        voxel_grid_filter_object.filter (*cloud_filtered);
-        background_cloud = cloud_filtered;
 
         // Background saving:
         if (n_frame >= n_frames){
+          // Voxel grid filtering:
+          std::cout << "starting voxel grid filtering: " << std::endl;
+          PointCloudT::Ptr cloud_filtered(new PointCloudT);
+          //cloud_filtered(new PointCloudT);
+          pcl::VoxelGrid<PointT> voxel_grid_filter_object;
+          voxel_grid_filter_object.setInputCloud(background_cloud);
+          voxel_grid_filter_object.setLeafSize (voxel_size, voxel_size, voxel_size);
+          voxel_grid_filter_object.filter (*cloud_filtered);
+          background_cloud = cloud_filtered;
 
           pcl::octree::OctreePointCloud<PointT> *background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_resolution);
           background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
@@ -1781,7 +1782,7 @@ class TVMPoseNode {
         PointCloudPtr foreground_cloud(new PointCloud);
         for (unsigned int i = 0; i < no_ground_cloud_->points.size(); i++)
         {
-          std::cout << "iter: " << i << std::endl;
+          //std::cout << "iter: " << i << std::endl;
           if (not (background_octree_->isVoxelOccupiedAtPoint(no_ground_cloud_->points[i].x, no_ground_cloud_->points[i].y, no_ground_cloud_->points[i].z)))
           {
             foreground_cloud->points.push_back(no_ground_cloud_->points[i]);
