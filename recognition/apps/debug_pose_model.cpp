@@ -1757,7 +1757,7 @@ class TVMPoseNode {
       // check cluster_indices
       std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
       std::cout << "computing clusters" << std::endl;
-      compute_subclustering(no_ground_cloud_, clusters, cluster_centroids, cluster_centroids3d);
+      compute_subclustering(no_ground_cloud_, clusters, cluster_centroids2d, cluster_centroids3d);
       // Sensor tilt compensation to improve people detection:
       // moving to global PointCloudPtr no_ground_cloud_rotated(new PointCloud);
       // moving to global Eigen::VectorXf ground_coeffs_new;
