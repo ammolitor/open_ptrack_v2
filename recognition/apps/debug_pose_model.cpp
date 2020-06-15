@@ -1435,18 +1435,6 @@ class TVMPoseNode {
       }
     }
 
-        //sampling_factor_ = 1;
-    void setBackground (bool _background_subtraction, float background_octree_resolution, PointCloudPtr& background_cloud)
-    {
-      background_subtraction = _background_subtraction;
-
-      background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
-      background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
-      background_octree_->setInputCloud (background_cloud);
-      background_octree_->addPointsFromInputCloud ();
-    }
-
-
     PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
       // Initialization for background subtraction:
@@ -1470,43 +1458,9 @@ class TVMPoseNode {
         background_cloud->header = cloud->header;
         background_cloud->points.clear();
 
-        if (frames == 0){
-          frames = 1;
-        }
-        // ros insdide this node is failing
-        //for (unsigned int i = 0; i < frames; i++)
-        //{
-        //  // Point cloud pre-processing (downsampling and filtering):
-        //  std::cout << "computing background frames: " << i << std::endl;
-        //  PointCloudT::Ptr cloud_filtered(new PointCloudT);
-        //  cloud_filtered = preprocessCloud (cloud);
-        //  std::cout << "preprocessed frame: " << i << std::endl;
-
-        //  *background_cloud += *cloud_filtered;
-        //  std::cout << "frame added to background: " << i << std::endl;
-        //  ros::spinOnce();
-        //  rate.sleep();
-        //  std::cout << "loop finished: " << i << std::endl;
-        //}
-        //std::cout << "generation loop finished: " << std::endl;
-        frames = 1;
-        // ros insdide this node is failing
-        for (unsigned int i = 0; i < frames; i++)
-        {
-          // Point cloud pre-processing (downsampling and filtering):
-          std::cout << "computing background frames: " << i << std::endl;
-          PointCloudT::Ptr cloud_filtered(new PointCloudT);
-          cloud_filtered = preprocessCloud (cloud);
-          std::cout << "preprocessed frame: " << i << std::endl;
-
-          *background_cloud += *cloud_filtered;
-          std::cout << "frame added to background: " << i << std::endl;
-          //ros::spinOnce();
-          //rate.sleep();
-          std::cout << "loop finished: " << i << std::endl;
-        }
-        std::cout << "generation loop finished: " << std::endl;
-
+        PointCloudT::Ptr cloud_filtered(new PointCloudT);
+        cloud_filtered = preprocessCloud (cloud);
+        *background_cloud += *cloud_filtered;
 
         // Background saving:
         if (n_frame >= n_frames){
@@ -1846,8 +1800,6 @@ class TVMPoseNode {
       if (!estimate_ground_plane){
          std::cout << "Ground plane already initialized..." << std::endl;
       } else {
-        //PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
-        // background_cloud = computeBackgroundCloud(cloud);
         std::cout << "background cloud: " << background_cloud->size() << std::endl;
         //sampling_factor_ = 1;
         //voxel_size_ = 0.06;
@@ -1886,168 +1838,6 @@ class TVMPoseNode {
       }
     }
 
-    void set_ground_variables_original(const PointCloudT::ConstPtr& cloud_){
-      std::cout << "setting ground variables." << std::endl;
-      PointCloudT::Ptr cloud(new PointCloudT);
-      *cloud = *cloud_;
-      if (!estimate_ground_plane){
-         std::cout << "Ground plane already initialized..." << std::endl;
-      } else {
-
-        //PointCloudT::Ptr background_cloud = computeBackgroundCloud(cloud);
-        //background_cloud = computeBackgroundCloud(cloud);
-        //sampling_factor_ = 1;
-        //voxel_size_ = 0.06;
-        //max_distance_ = 50.0;
-        //vertical_ = false;
-        //head_centroid_ = true;
-        //min_height_ = 1.3;
-        //max_height_ = 2.3;
-        //min_points_ = 30;     // this value is adapted to the voxel size in method "compute"
-        //max_points_ = 5000;   // this value is adapted to the voxel size in method "compute"
-        //dimension_limits_set_ = false;
-        //heads_minimum_distance_ = 0.3;
-        //use_rgb_ = true;
-        //mean_luminance_ = 0.0;
-        //sensor_tilt_compensation_ = false;
-        //background_subtraction_ = false;
-        int min_points = 30;
-        int max_points = 5000;
-
-
-        // set flag values for mandatory parameters:
-        //sqrt_ground_coeffs_ = std::numeric_limits<float>::quiet_NaN();
-        //person_classifier_set_flag_ = false;
-        //frame_counter_ = 0;
-
-        // Ground estimation:
-        std::cout << "Ground plane initialization starting..." << std::endl;
-        ground_estimator.setInputCloud(cloud);
-        //Eigen::VectorXf ground_coeffs = ground_estimator.computeMulticamera(ground_from_extrinsic_calibration, read_ground_from_file,
-        //    pointcloud_topic, sampling_factor, voxel_size);
-        ground_coeffs = ground_estimator.computeMulticamera(false, false,
-                  sensor_name + "/depth_registered/points", 4, 0.06);
-
-        // Point cloud pre-processing (downsampling and filtering):
-        PointCloudPtr cloud_filtered(new PointCloud);
-        cloud_filtered = preprocessCloud(cloud);
-
-        // set background cloud here
-        //max_points_ = int(float(max_points_) * std::pow(0.06/voxel_size_, 2));
-        //if (voxel_size_ > 0.06)
-        //  min_points_ = int(float(min_points_) * std::pow(0.06/voxel_size_, 2));
-        
-
-        // Ground removal and update:
-        pcl::IndicesPtr inliers(new std::vector<int>);
-        boost::shared_ptr<pcl::SampleConsensusModelPlane<PointT> > ground_model(new pcl::SampleConsensusModelPlane<PointT>(cloud_filtered));
-        //if (isZed_)
-        //  ground_model->selectWithinDistance(ground_coeffs_, 0.2, *inliers);
-        //else
-        ground_model->selectWithinDistance(ground_coeffs, voxel_size, *inliers);
-        PointCloudPtr no_ground_cloud_ = PointCloudPtr (new PointCloud);
-        pcl::ExtractIndices<PointT> extract;
-        extract.setInputCloud(cloud_filtered);
-        extract.setIndices(inliers);
-        extract.setNegative(true);
-        extract.filter(*no_ground_cloud_);
-        bool debug_flag = false;
-        bool sizeCheck = false;
-        //if (isZed_) {
-        //  if (inliers->size () >= (300 * 0.06 / 0.02 / std::pow (static_cast<double> (sampling_factor_), 2)))
-        //    sizeCheck = true;
-        //}
-        //else {
-        if (inliers->size () >= (300 * 0.06 / voxel_size / std::pow (static_cast<double> (sampling_factor), 2))){
-            sizeCheck = true;
-        }
-
-        if (sizeCheck) {
-          ground_model->optimizeModelCoefficients (*inliers, ground_coeffs, ground_coeffs);
-        }
-        //} else {
-        //  if (debug_flag)
-        //  {
-        //    PCL_INFO ("No groundplane update!\n");
-        //  }
-
-        // Background Subtraction (optional):
-        if (background_subtraction) {
-
-          //people_detector.setBackground(background_subtraction, background_octree_resolution, background_cloud);
-          //template <typename PointT> void
-          //open_ptrack::detection::GroundBasedPeopleDetectionApp<PointT>::setBackground (bool background_subtraction, float background_octree_resolution, PointCloudPtr& background_cloud)
-          //{
-          //  background_subtraction_ = background_subtraction;
-          //
-          //  background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
-          //  background_octree_->defineBoundingBox(-max_distance_/2, -max_distance_/2, 0.0, max_distance_/2, max_distance_/2, max_distance_);
-          //  background_octree_->setInputCloud (background_cloud);
-          //  background_octree_->addPointsFromInputCloud ();
-          //}
-          //pcl::octree::OctreePointCloud<PointT> *background_octree_
-          //float background_octree_resolution = background_resolution;
-          pcl::octree::OctreePointCloud<PointT> *background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_resolution);
-          background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
-          background_octree_->setInputCloud (background_cloud);
-          background_octree_->addPointsFromInputCloud ();
-          PointCloudPtr foreground_cloud(new PointCloud);
-          for (unsigned int i = 0; i < no_ground_cloud_->points.size(); i++)
-          {
-            if (not (background_octree_->isVoxelOccupiedAtPoint(no_ground_cloud_->points[i].x, no_ground_cloud_->points[i].y, no_ground_cloud_->points[i].z)))
-            {
-              foreground_cloud->points.push_back(no_ground_cloud_->points[i]);
-            }
-          }
-          no_ground_cloud_ = foreground_cloud;
-        }
-        // if (no_ground_cloud_->points.size() > 0)
-        // {
-          // Euclidean Clustering:
-        // moving to global std::vector<pcl::PointIndices> cluster_indices;
-        typename pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT>);
-        tree->setInputCloud(no_ground_cloud_);
-        pcl::EuclideanClusterExtraction<PointT> ec;
-        ec.setClusterTolerance(2 * 0.06);
-        ec.setMinClusterSize(min_points);
-        ec.setMaxClusterSize(max_points);
-        ec.setSearchMethod(tree);
-        ec.setInputCloud(no_ground_cloud_);
-        ec.extract(cluster_indices);
-
-        // Sensor tilt compensation to improve people detection:
-        // moving to global PointCloudPtr no_ground_cloud_rotated(new PointCloud);
-        // moving to global Eigen::VectorXf ground_coeffs_new;
-        if(sensor_tilt_compensation)
-        {
-          // We want to rotate the point cloud so that the ground plane is parallel to the xOz plane of the sensor:
-          Eigen::Vector3f input_plane, output_plane;
-          input_plane << ground_coeffs(0), ground_coeffs(1), ground_coeffs(2);
-          output_plane << 0.0, -1.0, 0.0;
-
-          Eigen::Vector3f axis = input_plane.cross(output_plane);
-          float angle = acos( input_plane.dot(output_plane)/ ( input_plane.norm()/output_plane.norm() ) );
-          transform_ = Eigen::AngleAxisf(angle, axis);
-
-          // Setting also anti_transform for later
-          anti_transform_ = transform_.inverse();
-          no_ground_cloud_rotated = rotateCloud(no_ground_cloud_, transform_);
-          ground_coeffs_new.resize(4);
-          ground_coeffs_new = rotateGround(ground_coeffs, transform_);
-        }
-        else
-        {
-          transform_ = transform_.Identity();
-          anti_transform_ = transform_.inverse();
-          no_ground_cloud_rotated = no_ground_cloud_;
-          ground_coeffs_new = ground_coeffs;
-        }
-      // maybe not needed
-      float sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
-      estimate_ground_plane = false;
-
-      }
-    }
 
     // mode_ 0 specific utilities
     vector<Point3f> clusterPoints(vector<Point3f>& points)
