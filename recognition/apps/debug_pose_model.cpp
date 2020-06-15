@@ -1705,8 +1705,8 @@ class TVMPoseNode {
             std::cout << "centroid added. " << std::endl;
           }
         }
-      std::cout << "cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
-      std::cout << "cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
+      std::cout << "compute_subclustering - cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
+      std::cout << "compute_subclustering - cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
   }
 
     void create_foreground_cloud(const PointCloudT::ConstPtr& cloud_, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point2f> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
@@ -1783,6 +1783,8 @@ class TVMPoseNode {
       std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
       std::cout << "computing clusters" << std::endl;
       compute_subclustering(no_ground_cloud_, clusters, cluster_centroids2d, cluster_centroids3d);
+      std::cout << "create_foreground_cloud - cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
+      std::cout << "create_foreground_cloud - cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
       // Sensor tilt compensation to improve people detection:
       // moving to global PointCloudPtr no_ground_cloud_rotated(new PointCloud);
       // moving to global Eigen::VectorXf ground_coeffs_new;
