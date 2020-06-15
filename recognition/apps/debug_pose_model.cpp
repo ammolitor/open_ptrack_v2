@@ -1210,7 +1210,7 @@ class TVMPoseNode {
     // Maximum person height =
     float maximum_person_height = 2.3;
     // Max depth range =
-    float max_distance = 10.0;
+    float max_distance = 10.0 ;
     // Point cloud downsampling factor =
     int sampling_factor = 4;
     // Flag stating if classifiers based on RGB image should be used or not =
@@ -1269,7 +1269,7 @@ class TVMPoseNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone, double max_distance_, bool pointcloud, int centroid_arg, int mode, bool pointcloud_only):
+    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone, double max_distance, bool pointcloud, int centroid_arg, int mode, bool pointcloud_only):
       node_(nh), it(node_)
       {
         
@@ -1388,7 +1388,7 @@ class TVMPoseNode {
         tvm_pose_detector.reset(new PoseFromConfig("/cfg/pose_model.json", "recognition"));
         sensor_name = sensor_string;
         //worldToCamTransform = read_poses_from_json(sensor_name);
-        max_capable_depth = max_distance_;
+        max_capable_depth = max_distance;
         use_pointcloud = pointcloud;
         centroid_argument = centroid_arg;
         mode_ = mode;
@@ -1511,7 +1511,10 @@ class TVMPoseNode {
       // Downsample of sampling_factor in every dimension:
       PointCloudPtr cloud_downsampled(new PointCloud);
       PointCloudPtr cloud_denoised(new PointCloud);
-      int sampling_factor_ = 4;
+      bool isZed_ = false;
+      int voxel_size = 0.06;
+      int sampling_factor_ = 1;//4;
+      bool apply_denoising_ = false;//true;
       if (sampling_factor_ != 1)
       {
         cloud_downsampled->width = (input_cloud->width)/sampling_factor_;
@@ -1528,9 +1531,6 @@ class TVMPoseNode {
         }
       }
       std::cout << "preprocessCloud downsampled size: " << cloud_downsampled->size() << std::endl;
-      bool apply_denoising_ = true;
-      bool isZed_ = false;
-      int voxel_size = 0.06;
 
       if (apply_denoising_)
       {
@@ -1544,7 +1544,7 @@ class TVMPoseNode {
         sor.setStddevMulThresh (std_dev_denoising);
         sor.filter (*cloud_denoised);
       }
-
+      std::cout << "preprocessCloud cloud_denoised size: " << cloud_denoised->size() << std::endl;
       //  // Denoising viewer
       //  int v1(0);
       //  int v2(0);
@@ -1577,7 +1577,7 @@ class TVMPoseNode {
       //else
       voxel_grid_filter_object.setFilterLimits(0.0, max_distance);
       voxel_grid_filter_object.filter (*cloud_filtered);
-      std::cout << "preprocessCloud cloud_filtered size: " << cloud_filtered->size() << std::endl;
+
       return cloud_filtered;
     }
 
