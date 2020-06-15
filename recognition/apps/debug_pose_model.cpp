@@ -1266,7 +1266,10 @@ class TVMPoseNode {
     //transform = transform.Identity();
     //anti_transform = transform.inverse();
     pcl::PointCloud<pcl::RGB>::Ptr rgb_image_;
-
+    std::vector<cv::Point2f> cluster_centroids2d;
+    std::vector<cv::Point3f> cluster_centroids3d;
+    std::vector<cv::Point2f> yolo_centroids2d;
+    std::vector<cv::Point3f> yolo_centroids3d;
     /**
      * @brief constructor
      * @param nh node handler
@@ -1652,7 +1655,7 @@ class TVMPoseNode {
       return the_ground_coeffs_new;
     }
 
-    void compute_subclustering(PointCloudPtr no_ground_cloud, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point2f> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
+    void compute_subclustering(PointCloudPtr no_ground_cloud, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters){
       //PointCloudT::Ptr cloud(new PointCloudT);
       //*cloud = *cloud_;      
       std::cout << "creating people clusters from compute_subclustering" << std::endl;
@@ -1777,9 +1780,14 @@ class TVMPoseNode {
       ec.setSearchMethod(tree);
       ec.setInputCloud(no_ground_cloud_);
       ec.extract(cluster_indices);
-    }
 
-    void compensate_tilt(){
+      // check cluster_indices
+      std::cout << "no_ground_cloud_ final:  " << no_ground_cloud_->size() << std::endl;
+      std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
+      std::cout << "computing clusters" << std::endl;
+      compute_subclustering(no_ground_cloud_, clusters);
+      std::cout << "create_foreground_cloud - cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
+      std::cout << "create_foreground_cloud - cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
       // Sensor tilt compensation to improve people detection:
       // moving to global PointCloudPtr no_ground_cloud_rotated(new PointCloud);
       // moving to global Eigen::VectorXf ground_coeffs_new;
@@ -1808,7 +1816,6 @@ class TVMPoseNode {
         ground_coeffs_new = ground_coeffs;
       }
     }
-
 
     void set_ground_variables(const PointCloudT::ConstPtr& cloud_){
       std::cout << "setting ground variables." << std::endl;
@@ -2320,14 +2327,16 @@ class TVMPoseNode {
         int r, c;
         // don't forget to import hungarian algo
         HungarianAlgorithm HungAlgo;
-        std::vector<cv::Point2f> yolo_centroids;
-        std::vector<cv::Point3f> yolo_centroids3d;
-        std::vector<cv::Point2f> cluster_centroids;
-        std::vector<cv::Point3f> cluster_centroids3d;
         std::vector<std::vector<double>> cost_matrix;
         cv::Point2f output_centroid;
         cv::Point3f output_centroid3d;
         std::vector<int> assignment;
+        // empty each of the centroid arrays.
+        yolo_centroids2d.clear();
+        yolo_centroids3d.clear();
+        cluster_centroids2d.clear();
+        cluster_centroids3d.clear();
+
 
         // fall back on subclusters?????
         // no detections? no forward...
@@ -2389,38 +2398,31 @@ class TVMPoseNode {
             if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
               output_centroid = cv::Point2f(mx, my); // or median_x, median_y
               output_centroid3d = cv::Point3f(mx, my, median_depth);
-              yolo_centroids.push_back(output_centroid);
+              yolo_centroids2d.push_back(output_centroid);
               yolo_centroids3d.push_back(output_centroid3d);
               std::cout << "centroid added" << std::endl;
             }
           }
 
-          std::cout << "checking yolo centroids size: " << yolo_centroids.size() << std::endl;
-          std::cout << "checking yolo centroids empty: " << yolo_centroids.empty() << std::endl;
+          std::cout << "checking yolo centroids size: " << yolo_centroids2d.size() << std::endl;
+          std::cout << "checking yolo centroids empty: " << yolo_centroids2d.empty() << std::endl;
 
-          if (yolo_centroids.size() > 0){
+          if (yolo_centroids2d.size() > 0){
           // filter the background and create a filtered cloud
             std::cout << "creating foreground cloud" << std::endl;
             create_foreground_cloud(cloud_, clusters);
-            // check cluster_indices
-            std::cout << "no_ground_cloud_ final:  " << no_ground_cloud_->size() << std::endl;
-            std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
-            std::cout << "computing clusters" << std::endl;
-            compute_subclustering(no_ground_cloud_, clusters, cluster_centroids, cluster_centroids3d);
-            std::cout << "cluster_centroids2d size: " << cluster_centroids.size() << std::endl;
-            std::cout << "cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
-            compensate_tilt();
-            // compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
-            // std::cout << "cluster_centroids size: " << cluster_centroids.size() << std::endl;
 
-            if (cluster_centroids.size() > 0) {
+            //compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
+            std::cout << "cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
+
+            if (cluster_centroids2d.size() > 0) {
               // Initialize cost matrix for the hungarian algorithm
               std::cout << "initialize cost matrix for the hungarian algorithm" << std::endl;
-              for (int r = 0; r < cluster_centroids.size (); r++) {
+              for (int r = 0; r < cluster_centroids2d.size (); r++) {
                 std::vector<double> row;
-                for (int c = 0; c < yolo_centroids.size (); c++) {
+                for (int c = 0; c < yolo_centroids2d.size (); c++) {
                   float dist;
-                  dist = cv::norm(cv::Mat(yolo_centroids[c]), cv::Mat (cluster_centroids[r]));
+                  dist = cv::norm(cv::Mat(yolo_centroids2d[c]), cv::Mat (cluster_centroids2d[r]));
                   row.push_back(dist);
                 }
                 cost_matrix.push_back(row);
