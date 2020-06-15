@@ -1527,6 +1527,7 @@ class TVMPoseNode {
           }
         }
       }
+      std::cout << "preprocessCloud downsampled size: " << cloud_downsampled->size() std::endl;
       bool apply_denoising_ = true;
       bool isZed_ = false;
       int voxel_size = 0.06;
@@ -1543,7 +1544,7 @@ class TVMPoseNode {
         sor.setStddevMulThresh (std_dev_denoising);
         sor.filter (*cloud_denoised);
       }
-
+      std::cout << "preprocessCloud cloud_denoised size: " << cloud_denoiseds->size() std::endl;
       //  // Denoising viewer
       //  int v1(0);
       //  int v2(0);
