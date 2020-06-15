@@ -1846,7 +1846,7 @@ class TVMPoseNode {
         //    pointcloud_topic, sampling_factor, voxel_size);
         ground_coeffs = ground_estimator.computeMulticamera(false, false,
                   sensor_name + "/depth_registered/points", 4, 0.06);
-        sqrt_ground_coeffs_ = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
+        sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
       // maybe not needed
       estimate_ground_plane = false;
 
