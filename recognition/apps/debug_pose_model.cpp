@@ -1662,21 +1662,21 @@ class TVMPoseNode {
       {
         open_ptrack::person_clustering::PersonCluster<PointT> cluster(no_ground_cloud, *it, ground_coeffs, sqrt_ground_coeffs, head_centroid, vertical_); //PersonCluster creation
         clusters.push_back(cluster);
-        std::cout << "debug person_cluster ground_coeffs: " << ground_coeffs << std::endl;
-        std::cout << "debug person_cluster sqrt_ground_coeffs: " << sqrt_ground_coeffs << std::endl;
-        std::cout << "debug person_cluster getTCenter: " << cluster.getTCenter() << std::endl;
-        std::cout << "debug person_cluster getCenter: " << cluster.getCenter() << std::endl;
-        std::cout << "debug person_cluster getHeight: " << cluster.getHeight() << std::endl;
-        std::cout << "debug person_cluster getDistance: " << cluster.getDistance() << std::endl;
-        std::cout << "debug person_cluster getTTop: " << cluster.getTTop() << std::endl;
-        std::cout << "debug person_cluster getTBottom: " << cluster.getTBottom() << std::endl;
-        std::cout << "debug person_cluster getTop: " << cluster.getTop() << std::endl;
-        std::cout << "debug person_cluster getBottom: " << cluster.getBottom() << std::endl;
-        std::cout << "debug person_cluster getMin: " << cluster.getMin() << std::endl;
-        std::cout << "debug person_cluster getMax: " << cluster.getMax() << std::endl;
-        std::cout << "debug person_cluster getAngle: " << cluster.getAngle() << std::endl;
-        std::cout << "debug person_cluster getNumberPoints: " << cluster.getNumberPoints() << std::endl;
-        std::cout << "debug person_cluster getPersonConfidence: " << cluster.getPersonConfidence() << std::endl;
+        //std::cout << "debug person_cluster ground_coeffs: " << ground_coeffs << std::endl;
+        //std::cout << "debug person_cluster sqrt_ground_coeffs: " << sqrt_ground_coeffs << std::endl;
+        //std::cout << "debug person_cluster getTCenter: " << cluster.getTCenter() << std::endl;
+        //std::cout << "debug person_cluster getCenter: " << cluster.getCenter() << std::endl;
+        //std::cout << "debug person_cluster getHeight: " << cluster.getHeight() << std::endl;
+        //std::cout << "debug person_cluster getDistance: " << cluster.getDistance() << std::endl;
+        //std::cout << "debug person_cluster getTTop: " << cluster.getTTop() << std::endl;
+        //std::cout << "debug person_cluster getTBottom: " << cluster.getTBottom() << std::endl;
+        //std::cout << "debug person_cluster getTop: " << cluster.getTop() << std::endl;
+        //std::cout << "debug person_cluster getBottom: " << cluster.getBottom() << std::endl;
+        //std::cout << "debug person_cluster getMin: " << cluster.getMin() << std::endl;
+        //std::cout << "debug person_cluster getMax: " << cluster.getMax() << std::endl;
+        //std::cout << "debug person_cluster getAngle: " << cluster.getAngle() << std::endl;
+        //std::cout << "debug person_cluster getNumberPoints: " << cluster.getNumberPoints() << std::endl;
+        //std::cout << "debug person_cluster getPersonConfidence: " << cluster.getPersonConfidence() << std::endl;
       }
 
       // To avoid PCL warning:
@@ -1692,8 +1692,8 @@ class TVMPoseNode {
           it->setPersonConfidence(-100.0);
           Eigen::Vector3f eigen_centroid3d = it->getTCenter();
           x = eigen_centroid3d(0);
-          y = eigen_centroid3d(0);
-          z = eigen_centroid3d(0);
+          y = eigen_centroid3d(1);
+          z = eigen_centroid3d(2);
           std::cout << "eigen_centroid3d -x: " << x << ", y: " << y << ", z: " << z << std::endl;
           if((!std::isnan(x)) && (!std::isnan(y)) && (!std::isnan(z))){
             centroid2d = cv::Point2f(x, y);
