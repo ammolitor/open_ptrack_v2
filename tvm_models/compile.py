@@ -21,6 +21,9 @@ from tvm import autotvm
 num_threads = res = open('/proc/cpuinfo').read().count('processor\t:')
 os.environ["TVM_NUM_THREADS"] = str(num_threads)
 
+import logging
+logging.getLogger('autotvm').setLevel(logging.DEBUG)
+
 def prune_old_tasks(tasks, log_file):
     if os.path.isfile(log_file):
         new_tasks = []
@@ -340,6 +343,8 @@ if __name__ == '__main__':
     PARSER.add_argument('--profile_speed', type=int, default=0, help='TVM')
     PARSER.add_argument('--profile_speed_name', type=str, default=None, help='TVM')
     PARSER.add_argument('--opt_level', type=int, default=2, help='TVM')
+    PARSER.add_argument('--early_stopping', type=int, default=600, help='TVM') 
+    PARSER.add_argument('--rpc', type=int, default=2, help='TVM')
     ARGS = PARSER.parse_args()
 
     if ARGS.network not in AVAILABLE_MODELS:
@@ -457,18 +462,23 @@ if __name__ == '__main__':
             'graph_opt_sch_file' : ARGS.network + "_graph_opt.log",
             'tuner': 'xgb',
             'n_trial': int(ARGS.n_trial),
-            'early_stopping': 600,
+            'early_stopping': ARGS.early_stopping,
             'use_transfer_learning': True, # this failed?
             'try_winograd': True,
             'measure_option': autotvm.measure_option(
                 builder=autotvm.LocalBuilder(timeout=10),
-                runner=autotvm.LocalRunner(number=20, repeat=3, timeout=4, min_repeat_ms=150),
-                #runner=autotvm.RPCRunner(
-                #    device_key,  # change the device key to your key
-                #    '0.0.0.0', 8192,
-                #    number=20, repeat=3, timeout=4, min_repeat_ms=150)
-                ),
+                runner=autotvm.LocalRunner(number=20, repeat=3, timeout=4, min_repeat_ms=150)
+                )
             'model': MODEL_CONFIG[ARGS.network],
             'quantization': ARGS.quantization
             }
+        if ARGS.rpc:
+            # https://docs.tvm.ai/tutorials/autotvm/tune_nnvm_cuda.html#scale-up-measurement-by-using-multiple-devices
+            TUNING_OPTION['measure_option'] = autotvm.measure_option(
+                builder=autotvm.LocalBuilder(timeout=10),
+                runner=autotvm.RPCRunner(
+                    ARGS.board,  # change the device key to your key
+                    '0.0.0.0', 9190,
+                    number=20, repeat=3, timeout=4, min_repeat_ms=150)
+                )
         tune_and_evaluate(TUNING_OPTION, False)
