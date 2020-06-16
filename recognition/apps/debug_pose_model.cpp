@@ -2358,10 +2358,22 @@ class TVMPoseNode {
           for (int i = 0; i < output->num; i++) {
             std::cout << "building yolo centroid: " << i+1 << std::endl;
             std::cout << "xmin check: " << output->boxes[i].xmin << std::endl;
+
+            // there's a rare case when all values == 0...
             xmin = output->boxes[i].xmin;
             ymin = output->boxes[i].ymin;
             xmax = output->boxes[i].xmax;
             ymax = output->boxes[i].ymax;
+
+            if ((xmin == 0) && (ymin == 0) && (xmax == 0) && (ymax == 0)){
+              std::cout << "xmin: " << xmin << std::endl;
+              std::cout << "ymin: " << ymin << std::endl;
+              std::cout << "xmax: " << xmax << std::endl;
+              std::cout << "ymax: " << ymax << std::endl;
+              std::cout << "all values zero. passing" << std::endl;
+              continue;
+            }
+
             cast_xmin = static_cast<int>(xmin);
             cast_ymin = static_cast<int>(ymin);
             cast_xmax = static_cast<int>(xmax);
