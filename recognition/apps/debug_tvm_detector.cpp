@@ -2596,7 +2596,7 @@ class TVMDetectionNode {
                 }
                 else
                 {
-                  int i = assignment[x];
+                  int i = valid[assignment[x]];
                   std::cout << "cluster: " << x << " to yolo number: " << i << std::endl;
                   open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[x];
                   float xmin = output->boxes[i].xmin;
