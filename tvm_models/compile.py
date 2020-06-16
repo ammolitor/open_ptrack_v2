@@ -454,7 +454,7 @@ if __name__ == '__main__':
     else:
         TUNING_OPTION = {
             'log_filename': ARGS.network + '.log',
-            'graph_opt_sch_file' = ARGS.network"_graph_opt.log",
+            'graph_opt_sch_file' : ARGS.network"_graph_opt.log",
             'tuner': 'xgb',
             'n_trial': int(ARGS.n_trial),
             'early_stopping': 600,
