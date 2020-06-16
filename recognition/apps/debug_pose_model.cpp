@@ -4900,24 +4900,7 @@ class TVMYoloNode {
     message_filters::Subscriber<sensor_msgs::Image> depth_image_sub;
     message_filters::Subscriber<PointCloudT> cloud_sub;
 
-    // Message Synchronizers 
-    typedef ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> ApproximatePolicy;
-    typedef message_filters::Synchronizer<ApproximatePolicy> ApproximateSync;
-    boost::shared_ptr<ApproximateSync> approximate_sync_;
-
-    //seconday sync??????
-    typedef ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, PointCloudT> ImageApproximatePolicy;
-    typedef message_filters::Synchronizer<ImageApproximatePolicy> ImageApproximateSync;
-    boost::shared_ptr<ImageApproximateSync> image_approximate_sync_;// vars
-
-    //pointcloud only method
-    //typedef ApproximateTime< PointCloudT> PointCloudApproximatePolicy;
-    //typedef message_filters::Synchronizer<PointCloudApproximatePolicy> PointCloudApproximateSync;
-    //boost::shared_ptr<PointCloudApproximateSync> point_cloud_approximate_sync_;// vars
-
     ros::Subscriber point_cloud_approximate_sync_;
-
-
 
     std::string encoding;
     float mm_factor = 1000.0f;
@@ -4930,8 +4913,6 @@ class TVMYoloNode {
     std::string model_folder_path;
     // the threshold for confidence of face detection
     double confidence_thresh;
-
-
 
   public:
     // Set camera matrix transforms
@@ -5098,7 +5079,7 @@ class TVMYoloNode {
         // maybe have this in
         // arg one HAS to have / in front of path
         // TODO add that to debugger
-        tvm_detector.reset(new YoloTVMFromConfig("/cfg/pose_model.json", "recognition"));
+        tvm_detector.reset(new YoloTVMFromConfig("/cfg/model.json", "recognition"));
         sensor_name = sensor_string;
         //worldToCamTransform = read_poses_from_json(sensor_name);
         max_capable_depth = max_distance;
