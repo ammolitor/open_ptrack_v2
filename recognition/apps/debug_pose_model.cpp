@@ -2468,11 +2468,11 @@ class TVMPoseNode {
                   float xmax = output->boxes[i].xmax;
                   float ymax = output->boxes[i].ymax;
                   float score = output->boxes[i].score;
-                  // std::cout << "xmin: " << xmin << std::endl;
-                  // std::cout << "ymin: " << ymin << std::endl;
-                  // std::cout << "xmax: " << xmax << std::endl;
-                  // std::cout << "ymax: " << ymax << std::endl;
-                  // std::cout << "score: " << score << std::endl;
+                  std::cout << "xmin: " << xmin << std::endl;
+                  std::cout << "ymin: " << ymin << std::endl;
+                  std::cout << "xmax: " << xmax << std::endl;
+                  std::cout << "ymax: " << ymax << std::endl;
+                  std::cout << "score: " << score << std::endl;
 
                   std::cout << "yolo xmin check " << xmin << std::endl;
                   // make sure nothing == 0 or MAX so no display errors happen
@@ -2488,34 +2488,34 @@ class TVMPoseNode {
                   if (ymax >= height){
                     ymax = height-1.0f;
                   }                     
-                  //std::cout << "cleaned xmin: " << xmin << std::endl;
-                  //std::cout << "cleaned ymin: " << ymin << std::endl;
-                  //std::cout << "cleaned xmax: " << xmax << std::endl;
-                  //std::cout << "cleaned ymax: " << ymax << std::endl;                  
+                  std::cout << "cleaned xmin: " << xmin << std::endl;
+                  std::cout << "cleaned ymin: " << ymin << std::endl;
+                  std::cout << "cleaned xmax: " << xmax << std::endl;
+                  std::cout << "cleaned ymax: " << ymax << std::endl;                  
 
                   float label = static_cast<float>(output->boxes[i].id);
                   std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
-                  //std::cout << "object_name: " object_name << std::endl;
+                  std::cout << "object_name: " object_name << std::endl;
                   // get the coordinate information
                   int cast_xmin = static_cast<int>(xmin);
                   int cast_ymin = static_cast<int>(ymin);
                   int cast_xmax = static_cast<int>(xmax);
                   int cast_ymax = static_cast<int>(ymax);
 
-                  //std::cout << "cast_xmin: " << cast_xmin << std::endl;
-                  //std::cout << "cast_ymin: " << cast_ymin << std::endl;
-                  //std::cout << "cast_xmax: " << cast_xmax << std::endl;
-                  //std::cout << "cast_ymax: " << cast_ymax << std::endl; 
+                  std::cout << "cast_xmin: " << cast_xmin << std::endl;
+                  std::cout << "cast_ymin: " << cast_ymin << std::endl;
+                  std::cout << "cast_xmax: " << cast_xmax << std::endl;
+                  std::cout << "cast_ymax: " << cast_ymax << std::endl; 
 
                   std::vector<cv::Point3f> points = output->boxes[i].points;
                   int num_parts = points.size();
-                  //std::cout << "num_parts: " << num_parts << std::endl;
+                  std::cout << "num_parts: " << num_parts << std::endl;
 
                   // set the median of the bounding box
                   float median_x = xmin + ((xmax - xmin) / 2.0);
                   float median_y = ymin + ((ymax - ymin) / 2.0);
-                  //std::cout << "median_x: " << median_x << std::endl;
-                  //std::cout << "median_y: " << median_y << std::endl;
+                  std::cout << "median_x: " << median_x << std::endl;
+                  std::cout << "median_y: " << median_y << std::endl;
                   // If the detect box coordinat is near edge of image, it will return a error 'Out of im.size().'
                   //if ( median_x < width*0.02 || median_x > width*0.98) continue;
                   //if ( median_y < height*0.02 || median_y > height*0.98) continue;
@@ -2533,18 +2533,18 @@ class TVMPoseNode {
                   if ( median_y > height*0.98) {
                     median_y = height*0.98;
                   }
-                  //std::cout << "cleaned median_x: " << median_x << std::endl;
-                  //std::cout << "cleaned median_y: " << median_y << std::endl;
+                  std::cout << "cleaned median_x: " << median_x << std::endl;
+                  std::cout << "cleaned median_y: " << median_y << std::endl;
                   // set the new coordinates of the image so that the boxes are set
                   int new_x = static_cast<int>(median_x - (median_factor * (median_x - xmin)));
                   int new_y = static_cast<int>(median_y - (median_factor * (median_y - ymin)));
                   int new_width = static_cast<int>(2 * (median_factor * (median_x - xmin)));
                   int new_height = static_cast<int>(2 * (median_factor * (median_y - ymin)));
                   
-                  //std::cout << "new_x: " << new_x << std::endl;
-                  //std::cout << "new_y: " << new_y << std::endl;
-                  //std::cout << "new_width: " << new_width << std::endl;
-                  //std::cout << "new_height: " << new_height << std::endl;
+                  std::cout << "new_x: " << new_x << std::endl;
+                  std::cout << "new_y: " << new_y << std::endl;
+                  std::cout << "new_width: " << new_width << std::endl;
+                  std::cout << "new_height: " << new_height << std::endl;
 
                   //float median_depth = cv_depth_image.at<float>(median_y, median_x) / mm_factor;
                   // set the mx/my wtr the intrinsic camera matrix
@@ -2556,9 +2556,9 @@ class TVMPoseNode {
                   float my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
                   float median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
 
-                  //std::cout << "mx: " << mx << std::endl;
-                  //std::cout << "my: " << my << std::endl;
-                  //std::cout << "median_depth: " << median_depth << std::endl;
+                  std::cout << "mx: " << mx << std::endl;
+                  std::cout << "my: " << my << std::endl;
+                  std::cout << "median_depth: " << median_depth << std::endl;
 
                   // Create detection message: -- literally tatken ground_based_people_detector_node
                   float skeleton_distance;
