@@ -256,7 +256,7 @@ target_compile_definitions(area_node PUBLIC TVM_CUDA_RUNTIME=1)
 target_compile_definitions(area_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 ###############################################################################
-add_executable(debug_tvm_detector apps/debug_tvm_detector.cpp include/open_ptrack/yolo_tvm.hpp)
+add_executable(debug_tvm_detector apps/debug_tvm_detector.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/hungarian/Hungarian.cpp)
 target_link_libraries(debug_tvm_detector PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES} 
                                           ${LINKER_LIBS}
