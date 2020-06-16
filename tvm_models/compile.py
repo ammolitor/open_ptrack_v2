@@ -13,7 +13,13 @@ from tvm.autotvm.measure.measure_methods import set_cuda_target_arch
 import tvm
 from tvm.contrib import graph_runtime
 from tvm.autotvm.tuner import XGBTuner, GATuner, RandomTuner, GridSearchTuner
+from tvm.autotvm.graph_tuner import DPTuner, PBQPTuner
 from tvm import autotvm
+
+# https://stackoverflow.com/questions/1006289/how-to-find-out-the-number-of-cpus-using-python
+# get available n threads
+num_threads = res = open('/proc/cpuinfo').read().count('processor\t:')
+os.environ["TVM_NUM_THREADS"] = str(num_threads)
 
 def prune_old_tasks(tasks, log_file):
     if os.path.isfile(log_file):
@@ -25,6 +31,17 @@ def prune_old_tasks(tasks, log_file):
         return new_tasks
     else:
         return tasks
+
+
+# Use graph tuner to achieve graph level optimal schedules
+# Set use_DP=False if it takes too long to finish.
+def tune_graph(graph, dshape, records, opt_sch_file, use_DP=True):
+    target_op = [relay.op.get("nn.conv2d"),]
+    Tuner = DPTuner if use_DP else PBQPTuner
+    executor = Tuner(graph, {input_name: dshape}, records, target_op, target)
+    executor.benchmark_layout_transform(min_exec_num=2000)
+    executor.run()
+    executor.write_opt_sch2record_file(opt_sch_file)
 
 # You can skip the implementation of this function for this tutorial. 
 def tune_tasks(tasks,
@@ -151,8 +168,10 @@ def tune_and_evaluate(tuning_option, target_host, cc=None):
                try_winograd=tuning_option['try_winograd'],
                quantization=tuning_option['quantization'])
     # compile kernels with history best records
+    tune_graph(mod["main"], tuning_option['model']['shape'], tuning_option['log_filename'], tuning_option['graph_opt_sch_file'])
 
-    with autotvm.apply_history_best(tuning_option['log_filename']):
+    #with autotvm.apply_history_best(tuning_option['log_filename']):
+    with autotvm.apply_graph_best(tuning_option['graph_opt_sch_file']):
         print("Compile...")
         # level 3 optimization gave TVMError: Check failed: ir: :
         # VerifyMemory(x, target->device_type): Direct host side access to
@@ -163,9 +182,12 @@ def tune_and_evaluate(tuning_option, target_host, cc=None):
 
 def tvm_compiler(name, mod, params, target):
     print('[*] Compile To Target {}'.format(target))
-    with relay.build_config(opt_level=ARGS.opt_level):
-        graph, lib, params = relay.build(mod, target, params=params)
-    
+    #with relay.build_config(opt_level=ARGS.opt_level):
+    #    graph, lib, params = relay.build(mod, target, params=params)
+    with tvm.transform.PassContext(opt_level=ARGS.opt_level):
+        graph, lib, params = relay.build_module.build(
+            mod, target=target, params=params)    
+
     print(type(graph), type(lib), type(params))
     lib.export_library(
         "{}.so".format(MODEL_CONFIG[name]['output_name']))
@@ -182,6 +204,9 @@ def get_basic_mxnet_network(name, input_shape, dtype):
     block = model_zoo.get_model(name, pretrained=True)
     mod, params = relay.frontend.from_mxnet(block, shape={'data': input_shape}, dtype=dtype)
     #net = mod["main"]
+    net = mod["main"]
+    net = relay.Function(net.params, relay.nn.softmax(net.body), None, net.type_params, net.attrs)
+    mod = tvm.IRModule.from_expr(net)
     return mod, params
 
 def compile_hand_detector(use_compiler=False):
@@ -209,6 +234,9 @@ def compile_object_detector(use_compiler=False):
     block = model_zoo.get_model('yolo3_mobilenet1.0_coco', pretrained=True)
     block.hybridize(static_alloc=True)
     mod, params = relay.frontend.from_mxnet(block, shape={'data': (1, 3, 512, 512)}, dtype='float32')
+    net = mod["main"]
+    net = relay.Function(net.params, relay.nn.softmax(net.body), None, net.type_params, net.attrs)
+    mod = tvm.IRModule.from_expr(net)
     if use_compiler:
         tvm_compiler('object_detector', mod, params, target)
     return mod, params, target
@@ -223,6 +251,9 @@ def compile_simple_pose(use_compiler=False):
     block = model_zoo.get_model('simple_pose_resnet18_v1b', pretrained=True)
     block.hybridize(static_alloc=True)
     mod, params = relay.frontend.from_mxnet(block, shape={'data': (1, 3, 256, 192)}, dtype='float32')
+    net = mod["main"]
+    net = relay.Function(net.params, relay.nn.softmax(net.body), None, net.type_params, net.attrs)
+    mod = tvm.IRModule.from_expr(net)
     if use_compiler:
         tvm_compiler('simple_pose', mod, params, target)
     return mod, params, target
@@ -409,7 +440,7 @@ if __name__ == '__main__':
             ctx = tvm.cpu()
         evaluate_model(config, loaded_json, loaded_lib, loaded_params, ctx)
 
-    # compi;e model
+    # compile model
     #print(ARGS.tune)
     elif not ARGS.tune:
         MODEL_CONFIG[ARGS.network]['compile'](True)
@@ -423,6 +454,7 @@ if __name__ == '__main__':
     else:
         TUNING_OPTION = {
             'log_filename': ARGS.network + '.log',
+            'graph_opt_sch_file' = ARGS.network"_graph_opt.log",
             'tuner': 'xgb',
             'n_trial': int(ARGS.n_trial),
             'early_stopping': 600,
