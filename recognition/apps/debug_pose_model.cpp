@@ -2465,6 +2465,7 @@ class TVMPoseNode {
                   float score = output->boxes[i].score;
                   float label = static_cast<float>(output->boxes[i].id);
                   std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
+                  std::cout << "yolo coord xmin: " << xmin << std::endl;
                   // get the coordinate information
                   int cast_xmin = static_cast<int>(xmin);
                   int cast_ymin = static_cast<int>(ymin);
