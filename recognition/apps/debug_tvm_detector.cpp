@@ -2611,8 +2611,8 @@ class TVMDetectionNode {
                   int cast_ymin = static_cast<int>(ymin);
                   int cast_xmax = static_cast<int>(xmax);
                   int cast_ymax = static_cast<int>(ymax);
-                 //std::vector<cv::Point3f> points = output->boxes[i].points;
-                  int num_parts = points.size();
+                  //std::vector<cv::Point3f> points = output->boxes[i].points;
+                  //int num_parts = points.size();
 
                   // set the median of the bounding box
                   float median_x = xmin + ((xmax - xmin) / 2.0);
