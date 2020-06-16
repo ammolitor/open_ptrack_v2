@@ -1042,20 +1042,21 @@ class YoloTVMGPU256{
                 float label = ndarray_ids_a[0][i][0];
                 if (score < thresh) continue;
                 if (label < 0) continue;
+                if (label == 0){
+                  int cls_id = static_cast<int>(label);
+                  xmin = ndarray_bboxes_a[0][i][0];
+                  ymin = ndarray_bboxes_a[0][i][1];
+                  xmax = ndarray_bboxes_a[0][i][2];
+                  ymax = ndarray_bboxes_a[0][i][3];
 
-                int cls_id = static_cast<int>(label);
-                xmin = ndarray_bboxes_a[0][i][0];
-                ymin = ndarray_bboxes_a[0][i][1];
-                xmax = ndarray_bboxes_a[0][i][2];
-                ymax = ndarray_bboxes_a[0][i][3];
-
-                results->boxes[i].xmin = xmin * (640.0/256.0); // move down to 480 space
-                results->boxes[i].ymin = ymin / (256.0/480.0); // move up to 640
-                results->boxes[i].xmax = xmax * (640.0/256.0);
-                results->boxes[i].ymax = ymax / (256.0/480.0);
-                results->boxes[i].id = cls_id;
-                results->boxes[i].score = score;
-                new_num+=1;
+                  results->boxes[i].xmin = xmin * (640.0/256.0); // move down to 480 space
+                  results->boxes[i].ymin = ymin / (256.0/480.0); // move up to 640
+                  results->boxes[i].xmax = xmax * (640.0/256.0);
+                  results->boxes[i].ymax = ymax / (256.0/480.0);
+                  results->boxes[i].id = cls_id;
+                  results->boxes[i].score = score;
+                  new_num+=1;
+                }
             };
             results->num = new_num;
             auto for_loop_end = Clock::now();
@@ -1303,25 +1304,27 @@ class YoloTVMFromConfig{
                 float label = ndarray_ids_a[0][i][0];
                 if (score < thresh) continue;
                 if (label < 0) continue;
+                
+                if (label == 0){
+                  int cls_id = static_cast<int>(label);
+                  xmin = ndarray_bboxes_a[0][i][0];
+                  ymin = ndarray_bboxes_a[0][i][1];
+                  xmax = ndarray_bboxes_a[0][i][2];
+                  ymax = ndarray_bboxes_a[0][i][3];
 
-                int cls_id = static_cast<int>(label);
-                xmin = ndarray_bboxes_a[0][i][0];
-                ymin = ndarray_bboxes_a[0][i][1];
-                xmax = ndarray_bboxes_a[0][i][2];
-                ymax = ndarray_bboxes_a[0][i][3];
+                  results->boxes[i].xmin = xmin * (img_width/height); // move down to 480 space  ()
+                  results->boxes[i].ymin = ymin / (width/img_height); // move up to 640
+                  results->boxes[i].xmax = xmax * (img_width/height);
+                  results->boxes[i].ymax = ymax / (width/img_height);                
 
-                results->boxes[i].xmin = xmin * (img_width/height); // move down to 480 space  ()
-                results->boxes[i].ymin = ymin / (width/img_height); // move up to 640
-                results->boxes[i].xmax = xmax * (img_width/height);
-                results->boxes[i].ymax = ymax / (width/img_height);                
-
-                //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space  ()
-                //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
-                //results->boxes[i].xmax = xmax * (640.0/512.0);
-                //results->boxes[i].ymax = ymax / (512.0/480.0);
-                results->boxes[i].id = cls_id;
-                results->boxes[i].score = score;
-                new_num+=1;
+                  //results->boxes[i].xmin = xmin * (640.0/512.0); // move down to 480 space  ()
+                  //results->boxes[i].ymin = ymin / (512.0/480.0); // move up to 640
+                  //results->boxes[i].xmax = xmax * (640.0/512.0);
+                  //results->boxes[i].ymax = ymax / (512.0/480.0);
+                  results->boxes[i].id = cls_id;
+                  results->boxes[i].score = score;
+                  new_num+=1;
+                }
             };
             results->num = new_num;
             std::cout << "torch array iter finished" << std::endl;            
