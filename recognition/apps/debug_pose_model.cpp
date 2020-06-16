@@ -2463,6 +2463,21 @@ class TVMPoseNode {
                   float xmax = output->boxes[i].xmax;
                   float ymax = output->boxes[i].ymax;
                   float score = output->boxes[i].score;
+                  
+                  // make sure nothing == 0 or MAX so no display errors happen
+                  if (xmin <= 1.0f){
+                    xmin = 1.0f;
+                  }   
+                  if (ymin <= 1.0f){
+                    ymin = 1.0f;
+                  }
+                  if (xmax >= width){
+                    xmax = height-1.0f;
+                  }
+                  if (ymax >= height){
+                    ymax = height-1.0f;
+                  }                     
+
                   float label = static_cast<float>(output->boxes[i].id);
                   std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
                   std::cout << "yolo coord xmin: " << xmin << std::endl;
@@ -2551,7 +2566,6 @@ class TVMPoseNode {
                   skeleton.joints.resize(num_parts);
                   skeleton_height = int(pixel_height);;
                   skeleton_distance = person_cluster.getDistance();
-
 
                   for (size_t i = 0; i < num_parts; i++){
                     /* code */
