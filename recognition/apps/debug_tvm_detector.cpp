@@ -1340,7 +1340,34 @@ class YoloTVMFromConfig{
             std::cout << "freeing finished" << std::endl;
             return results;
         }  
-};    
+}; 
+
+bool check_detection_msg(opt_msgs::Detection detection_msg){
+  bool send_message = false;
+  if (std::isfinite(detection_msg.box_2D.x) &&
+    std::isfinite(detection_msg.box_2D.y) &&
+    std::isfinite(detection_msg.box_2D.width) &&
+    std::isfinite(detection_msg.box_2D.height) &&
+    std::isfinite(detection_msg.height) &&
+    std::isfinite(detection_msg.confidence) &&
+    std::isfinite(detection_msg.distance) &&
+    std::isfinite(detection_msg.box_3D.p1.x) &&
+    std::isfinite(detection_msg.box_3D.p1.y) &&
+    std::isfinite(detection_msg.box_3D.p1.z) &&
+    std::isfinite(detection_msg.centroid.x) &&
+    std::isfinite(detection_msg.centroid.y) &&
+    std::isfinite(detection_msg.centroid.z) &&
+    std::isfinite(detection_msg.top.x) &&
+    std::isfinite(detection_msg.top.y) &&
+    std::isfinite(detection_msg.top.z) &&
+    std::isfinite(detection_msg.bottom.x) &&
+    std::isfinite(detection_msg.bottom.y) &&
+    std::isfinite(detection_msg.bottom.z)){
+      send_message = true;
+    }
+  return send_message;
+}
+
 /**
  * @brief The TVMDetectionNode
  */
@@ -1537,10 +1564,10 @@ class TVMDetectionNode {
         image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
 
         // Camera callback for intrinsics matrix update
-        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMPoseNode::camera_info_callback, this);
+        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMDetectionNode::camera_info_callback, this);
 
 
-        point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::mode_1_callback_cloud_only, this);
+        point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMDetectionNode::mode_1_callback_cloud_only, this);
 
         // create callback config 
         //cfg_server.setCallback(boost::bind(&TVMPoseNode::cfg_callback, this, _1, _2));      
@@ -1555,9 +1582,6 @@ class TVMDetectionNode {
         sensor_name = sensor_string;
         //worldToCamTransform = read_poses_from_json(sensor_name);
         max_capable_depth = max_distance;
-        use_pointcloud = pointcloud;
-        centroid_argument = centroid_arg;
-        mode_ = mode;
         area_thres_["person"] = pair<double, double>(1.8, 0.5);
 
         // maybe...
@@ -2587,7 +2611,7 @@ class TVMDetectionNode {
                   int cast_ymin = static_cast<int>(ymin);
                   int cast_xmax = static_cast<int>(xmax);
                   int cast_ymax = static_cast<int>(ymax);
-                  std::vector<cv::Point3f> points = output->boxes[i].points;
+                 //std::vector<cv::Point3f> points = output->boxes[i].points;
                   int num_parts = points.size();
 
                   // set the median of the bounding box
@@ -2770,7 +2794,7 @@ class TVMDetectionNode {
     // this will publish empty detections if nothing is found
     sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
     detections_pub.publish(detection_array_msg);
-    skeleton_pub.publish(skeleton_array);
+    //skeleton_pub.publish(skeleton_array);
     image_pub.publish(imagemsg);
     free(output->boxes);
     free(output);
