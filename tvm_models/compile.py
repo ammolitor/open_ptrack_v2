@@ -150,7 +150,7 @@ def prune_old_tasks(tasks, log_file):
 def tune_graph(graph, dshape, records, opt_sch_file, use_DP=True):
     target_op = [relay.op.get("nn.conv2d"),]
     Tuner = DPTuner if use_DP else PBQPTuner
-    executor = Tuner(graph, {input_name: dshape}, records, target_op, target)
+    executor = Tuner(graph, {'data': dshape}, records, target_op, target)
     executor.benchmark_layout_transform(min_exec_num=2000)
     executor.run()
     executor.write_opt_sch2record_file(opt_sch_file)
@@ -317,7 +317,7 @@ def get_basic_mxnet_network(name, input_shape, dtype):
     mod, params = relay.frontend.from_mxnet(block, shape={'data': input_shape}, dtype=dtype)
     #net = mod["main"]
     net = mod["main"]
-    net = relay.Function(net.params, relay.nn.softmax(net.body), None, net.type_params, net.attrs)
+    net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
     mod = tvm.IRModule.from_expr(net)
     return mod, params
 
@@ -331,7 +331,10 @@ def compile_hand_detector(use_compiler=False):
     block = model_zoo.get_model('yolo3_mobilenet1.0_custom', classes=['hands'])
     block.load_parameters('models/yolo3_mobilenet1.0_hands.params')
     block.hybridize(static_alloc=True)
-    mod, params = relay.frontend.from_mxnet(block, shape={'data': (1, 3, 320, 320)}, dtype='float32')
+    mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["hand_detector"]["shape"]}, dtype='float32')
+    net = mod["main"]
+    net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
+    mod = tvm.IRModule.from_expr(net)
     if use_compiler:
         tvm_compiler('hand_detector', mod, params, target)
     return mod, params, target
@@ -339,15 +342,20 @@ def compile_hand_detector(use_compiler=False):
 def compile_object_detector(use_compiler=False):
     print("compiling object detector")
     target = 'cuda -libs=cudnn,cublas'
+    #target = 'cuda -libs=cudnn'
+    #target = 'cuda'
     if not CUDA:
         target = 'llvm'
     if ARCH == 'aarch64':
         target += ' -model={}'.format(ARGS.board)
+    print(target)
     block = model_zoo.get_model('yolo3_mobilenet1.0_coco', pretrained=True)
-    block.hybridize(static_alloc=True)
-    mod, params = relay.frontend.from_mxnet(block, shape={'data': (1, 3, 512, 512)}, dtype='float32')
+    # block.hybridize(static_alloc=True)
+    mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["object_detector"]["shape"]}, dtype='float32')
     net = mod["main"]
-    net = relay.Function(net.params, relay.nn.softmax(net.body), None, net.type_params, net.attrs)
+    # fused_nn_softmax: num_args should be 4
+    # https://discuss.tvm.ai/t/something-wrong-when-my-model-run/3300
+    net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
     mod = tvm.IRModule.from_expr(net)
     if use_compiler:
         tvm_compiler('object_detector', mod, params, target)
@@ -362,9 +370,9 @@ def compile_simple_pose(use_compiler=False):
         target += ' -model={}'.format(ARGS.board)
     block = model_zoo.get_model('simple_pose_resnet18_v1b', pretrained=True)
     block.hybridize(static_alloc=True)
-    mod, params = relay.frontend.from_mxnet(block, shape={'data': (1, 3, 256, 192)}, dtype='float32')
+    mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["simple_pose"]["shape"]}, dtype='float32')
     net = mod["main"]
-    net = relay.Function(net.params, relay.nn.softmax(net.body), None, net.type_params, net.attrs)
+    net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
     mod = tvm.IRModule.from_expr(net)
     if use_compiler:
         tvm_compiler('simple_pose', mod, params, target)
@@ -378,7 +386,7 @@ def compile_face_detector(use_compiler=False):
     if ARCH == 'aarch64':
         target += ' -model={}'.format(ARGS.board)
     sym, arg_params, aux_params = mx.model.load_checkpoint('models/mnet.25/mnet.25', 0)
-    shape_dict = {'data': (1, 3, 480, 640)}
+    shape_dict = {'data': MODEL_CONFIG["face_detector"]["shape"]}
     relay_sym, relay_params = relay.frontend.from_mxnet(
         symbol=sym,
         shape=shape_dict,
@@ -397,7 +405,7 @@ def compile_face_embedder(use_compiler=False):
     if ARCH == 'aarch64':
         target += ' -model={}'.format(ARGS.board)
     sym, arg_params, aux_params = mx.model.load_checkpoint('models/arcface_facerec', 0)
-    shape_dict = {'data': (1, 3, 112, 112)}
+    shape_dict = {'data': MODEL_CONFIG["face_embedder"]["shape"]}
     relay_sym, relay_params = relay.frontend.from_mxnet(
         symbol=sym,
         shape=shape_dict,
@@ -412,11 +420,15 @@ def evaluate_model(config, loaded_json, loaded_lib, loaded_params, ctx):
     module = graph_runtime.create(loaded_json, loaded_lib, ctx)
     module.load_params(loaded_params)
     print('[*] Graph RunTime is Created')
-    module.set_input('data', tvm.nd.array(np.random.randn(*config['shape']).astype(config['dtype'])))
+    tvm_input = np.random.randn(*config['shape']).astype(config['dtype'])
+    tvm_input = tvm.nd.array(tvm_input, ctx=ctx)
+    module.set_input('data', tvm_input)
     print('[*] Run Test')
     avg = []
     for i in range(100):
-        module.set_input('data', tvm.nd.array(np.random.randn(*config['shape']).astype(config['dtype'])))
+        tvm_input = np.random.randn(*config['shape']).astype(config['dtype'])
+        tvm_input = tvm.nd.array(tvm_input, ctx=ctx)
+        module.set_input('data', tvm_input)
         start = time()
         module.run()
         ctx.sync()
@@ -441,7 +453,7 @@ if __name__ == '__main__':
     PARSER = argparse.ArgumentParser(description='')
     PARSER.add_argument('--network', type=str, default='object_detector', help='Network Architecture')
     PARSER.add_argument('--target', type=str, default='cuda', help='Deploy Target')
-    PARSER.add_argument('--board', type=str, default='tx2', help='board')
+    PARSER.add_argument('--board', type=str, default='titanx', help='board')
     PARSER.add_argument('--dtype', type=str, default='float32', help='Data Type')
     PARSER.add_argument('--tune', type=int, default=0, help='whether to tune the models for the current arch')
     PARSER.add_argument('--ctx', type=int, default=0, help='TVM')
@@ -454,12 +466,15 @@ if __name__ == '__main__':
     PARSER.add_argument('--opt_level', type=int, default=2, help='TVM')
     PARSER.add_argument('--early_stopping', type=int, default=600, help='TVM') 
     PARSER.add_argument('--rpc', type=int, default=2, help='TVM')
+    PARSER.add_argument('--override-shape', type=int, default=0, help='TVM')
+    PARSER.add_argument('--override-width', type=int, default=0, help='TVM')
+    PARSER.add_argument('--override-height', type=int, default=0, help='TVM')
     ARGS = PARSER.parse_args()
 
     # https://stackoverflow.com/questions/1006289/how-to-find-out-the-number-of-cpus-using-python
     # get available n threads
     num_threads  = available_cpu_count()
-    os.environ["TVM_NUM_THREADS"] = str(num_threads)
+    #os.environ["TVM_NUM_THREADS"] = str(num_threads)
 
     if ARGS.network not in AVAILABLE_MODELS:
         raise Exception("{0} not in list of acceptable models: {1}".format(ARGS.network, list(AVAILABLE_MODELS)))
@@ -479,8 +494,11 @@ if __name__ == '__main__':
         "nano": {
             "arch": "sm_53"
         },
-        "1080": { # maxwell
+        "titanx": { # maxwell
             "arch": "sm_52"
+        },
+        "1080ti": { # maxwell
+            "arch": "sm_61"
         },
         "turing": {
           "arch" : "sm_75"
@@ -505,7 +523,7 @@ if __name__ == '__main__':
         'object_detector':
             {
                 'shape': (1, 3, 512, 512),
-                'output_name': 'mnet1.0.yolo.{}.{}'.format(ARCH, suffix),
+                'output_name': 'mnet1.0.yolo.{}.{}.'.format(ARCH, suffix),
                 'dtype': 'float32',
                 'cuda': CUDA,
                 'compile': compile_object_detector,
@@ -522,7 +540,7 @@ if __name__ == '__main__':
             },
         'face_detector':
             {
-                'shape': (1, 3, 480, 640),
+                'shape': (1, 3, 480, 640), # yes, this is correct, the height is 640 and width is 480
                 'output_name': 'mnet.25.{}.{}'.format(ARCH, suffix),
                 'dtype': 'float32',
                 'cuda': CUDA,
@@ -548,6 +566,12 @@ if __name__ == '__main__':
                 'name': 'hand_detector',
             }
     }
+
+    if ARGS.override_shape:
+        height = ARGS.override_height
+        width = ARGS.override_width
+        MODEL_CONFIG[ARGS.network]['shape'] = (1, 3, height, width)
+        MODEL_CONFIG[ARGS.network]['output_name'] = "{}.{}.{}".format(height, width, MODEL_CONFIG[ARGS.network]['output_name'])
 
     if ARGS.profile_speed and ARGS.profile_speed_name:
         config = MODEL_CONFIG[ARGS.network]
@@ -582,7 +606,7 @@ if __name__ == '__main__':
             'measure_option': autotvm.measure_option(
                 builder=autotvm.LocalBuilder(timeout=10),
                 runner=autotvm.LocalRunner(number=20, repeat=3, timeout=4, min_repeat_ms=150)
-                )
+                ),
             'model': MODEL_CONFIG[ARGS.network],
             'quantization': ARGS.quantization
             }

@@ -15,4 +15,6 @@ venv/
 *tvm_models/*.params
 *tvm_models/*.so
 # Emacs temp files
+*compile2*
+*dog.jpg*
 *~
