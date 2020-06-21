@@ -523,7 +523,7 @@ if __name__ == '__main__':
         'object_detector':
             {
                 'shape': (1, 3, 512, 512),
-                'output_name': 'mnet1.0.yolo.{}.{}.'.format(ARCH, suffix),
+                'output_name': 'mnet1.0.yolo.{}.{}'.format(ARCH, suffix),
                 'dtype': 'float32',
                 'cuda': CUDA,
                 'compile': compile_object_detector,
@@ -572,6 +572,9 @@ if __name__ == '__main__':
         width = ARGS.override_width
         MODEL_CONFIG[ARGS.network]['shape'] = (1, 3, height, width)
         MODEL_CONFIG[ARGS.network]['output_name'] = "{}.{}.{}".format(height, width, MODEL_CONFIG[ARGS.network]['output_name'])
+
+    MODEL_CONFIG[ARGS.network]['output_name'] = tvm.__version__ + "." + MODEL_CONFIG[ARGS.network]['output_name']
+
 
     if ARGS.profile_speed and ARGS.profile_speed_name:
         config = MODEL_CONFIG[ARGS.network]
