@@ -164,7 +164,7 @@ namespace open_ptrack
         /** \brief Count the number of consecutive updates with low confidence detections */
         int low_confidence_consecutive_frames_;
 
-         /** \brief the current zone of the track */
+         ]/** \brief the current zone of the track */
         int zone_id_;
 
 

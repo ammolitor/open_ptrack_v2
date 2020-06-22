@@ -71,6 +71,10 @@ class AreaInitializer :
     rospy.loginfo(self.sensor_map)
         
   
+  def translate_all(self):
+    
+
+
   def createTFLauncher(self) :
     
     file = open(self.file_name, 'w')

@@ -156,5 +156,6 @@ namespace open_ptrack
     {
       image_ = image;
     }
+
   } /* namespace detection */
 } /* namespace open_ptrack */

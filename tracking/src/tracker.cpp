@@ -275,7 +275,7 @@ Tracker::createNewTrack(open_ptrack::detection::Detection& detection)
 
   t->init(detection.getWorldCentroid()(0), detection.getWorldCentroid()(1),detection.getWorldCentroid()(2),
           detection.getHeight(), detection.getDistance(), detection.getSource());
-
+  
 
   bool first_update = true;
   t->update(detection.getWorldCentroid()(0), detection.getWorldCentroid()(1), detection.getWorldCentroid()(2),

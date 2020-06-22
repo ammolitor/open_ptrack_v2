@@ -98,6 +98,7 @@ struct pose_result{
     // actually point2d, with z being the confidence
     std::vector<cv::Point3f> points;
 };
+
 // boxInfo
 struct pose_results{
     pose_result* boxes;

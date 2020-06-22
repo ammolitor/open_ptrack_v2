@@ -316,9 +316,9 @@ def get_basic_mxnet_network(name, input_shape, dtype):
     block = model_zoo.get_model(name, pretrained=True)
     mod, params = relay.frontend.from_mxnet(block, shape={'data': input_shape}, dtype=dtype)
     #net = mod["main"]
-    net = mod["main"]
-    net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
-    mod = tvm.IRModule.from_expr(net)
+    #net = mod["main"]
+    #net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
+    #mod = tvm.IRModule.from_expr(net)
     return mod, params
 
 def compile_hand_detector(use_compiler=False):
@@ -332,9 +332,9 @@ def compile_hand_detector(use_compiler=False):
     block.load_parameters('models/yolo3_mobilenet1.0_hands.params')
     block.hybridize(static_alloc=True)
     mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["hand_detector"]["shape"]}, dtype='float32')
-    net = mod["main"]
-    net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
-    mod = tvm.IRModule.from_expr(net)
+    #net = mod["main"]
+    #net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
+    #mod = tvm.IRModule.from_expr(net)
     if use_compiler:
         tvm_compiler('hand_detector', mod, params, target)
     return mod, params, target
@@ -352,11 +352,11 @@ def compile_object_detector(use_compiler=False):
     block = model_zoo.get_model('yolo3_mobilenet1.0_coco', pretrained=True)
     # block.hybridize(static_alloc=True)
     mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["object_detector"]["shape"]}, dtype='float32')
-    net = mod["main"]
+    #net = mod["main"]
     # fused_nn_softmax: num_args should be 4
     # https://discuss.tvm.ai/t/something-wrong-when-my-model-run/3300
-    net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
-    mod = tvm.IRModule.from_expr(net)
+    #net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
+    #mod = tvm.IRModule.from_expr(net)
     if use_compiler:
         tvm_compiler('object_detector', mod, params, target)
     return mod, params, target
@@ -371,9 +371,9 @@ def compile_simple_pose(use_compiler=False):
     block = model_zoo.get_model('simple_pose_resnet18_v1b', pretrained=True)
     block.hybridize(static_alloc=True)
     mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["simple_pose"]["shape"]}, dtype='float32')
-    net = mod["main"]
-    net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
-    mod = tvm.IRModule.from_expr(net)
+    #net = mod["main"]
+    #net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
+    #mod = tvm.IRModule.from_expr(net)
     if use_compiler:
         tvm_compiler('simple_pose', mod, params, target)
     return mod, params, target

@@ -18,6 +18,7 @@
             <param name="set_object_names" value="true" />
     </node>
     <include file="$(find tracking)/launch/zoned_object_tracker_single.launch" />
+    <include file="$(find tracking)/launch/zoned_object_tracker_single.launch" />
    
     <!-- Load calibration results -->
     <include file="$(find opt_calibration)/launch/opt_calibration_results.launch"/>

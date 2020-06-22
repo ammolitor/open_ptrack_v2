@@ -251,7 +251,7 @@ void callback(const Image::ConstPtr& rgb_image,
 				      newWidth * _depth_image.cols / im.w, newHeight * _depth_image.rows / im.h);
 			float medianDepth = median(_depth_image(rect)) / mm_factor;
 			// If medianDepth <= 0, that means the sensor got a wrong depth distance.
-			if (medianDepth <= 0 || medianDepth > 6.25) {
+		yolo
 				std::cout << "mediandepth " << medianDepth << " rejecting" << std::endl;
 				continue;
 			}			
