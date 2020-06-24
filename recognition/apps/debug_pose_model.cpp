@@ -1128,7 +1128,7 @@ class NoNMSPoseFromConfig{
             // copy to output
             //ulsMatF(int cols, int rows, int channels)
             //at(int channel, int row, int c
-            ulsMatF yolo_output(6, 322560, 1); //ulsMatF yolo_output(1, 322560, 6);
+            MatF yolo_output(6, 322560, 1); //ulsMatF yolo_output(1, 322560, 6);
             TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* 322560 * 6 * sizeof(float));
             std::cout << "TVMSynchronize finished" << std::endl;  
             
