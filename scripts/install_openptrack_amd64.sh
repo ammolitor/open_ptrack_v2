@@ -143,10 +143,11 @@ ${APT_CMD} clean || true
 echo "#########################################################################"
 echo " increase usb fs buffer for multiple cameras on a single host           #"
 echo "#########################################################################"
-sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash usbcore.usbfs_memory_mb=128"/' /etc/default/grub
+sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash usbcore.usbfs_memory_mb=256"/' /etc/default/grub
 sudo tee /sys/module/usbcore/parameters/usbfs_memory_mb > /dev/null << EOF
-128
+256
 EOF
+sudo update-grub
 
 echo "#########################################################################"
 echo " setup ntp                                                              #"
@@ -194,7 +195,6 @@ ${APT_CMD} install \
   build-essential \
   clang \
   clinfo \
-  cmake \
   curl \
   doxygen \
   g++ \
@@ -269,10 +269,9 @@ ${APT_CMD} install \
   protobuf-compiler \
   python-pip \
   python-qt4 \
-  python3 \
-  python3-numpy \
-  python3-opencv \
-  python3-pip \
+  python3.7 \
+  python3.7-dev \
+  python3-testresources \
   software-properties-common \
   sox \
   ssh \
@@ -301,22 +300,43 @@ sudo curl -o /usr/include/nlohmann/json.hpp https://raw.githubusercontent.com/nl
 pick_your_blaster "openblas"
 
 echo "#########################################################################"
+echo "# install cmake                                                         #"
+echo "#########################################################################"
+mkdir -p ${INSTALL_SRC}/cmake
+pushd ${INSTALL_SRC}/cmake || pushd_fail
+curl -kL -O https://github.com/Kitware/CMake/releases/download/v3.17.3/cmake-3.17.3.tar.gz
+tar --strip-components=1 -xf cmake-3.17.3.tar.gz --directory ${INSTALL_SRC}/cmake && rm cmake-3.17.3.tar.gz
+./bootstrap
+make
+sudo make install
+popd || popd_fail
+
+echo "#########################################################################"
 echo "# install cuda 10                                                       #"
 echo "#########################################################################"
 mkdir -p ${INSTALL_SRC}/nvidia
 pushd ${INSTALL_SRC}/nvidia || pushd_fail
-curl -kL https://PLACEHOLDER/openptrack/nvidia/NVIDIA-Linux-x86_64-440.64.run -o nvidia.run
+curl -kL https://food-safety-infra.s3-us-west-2.amazonaws.com/openptrack/nvidia/NVIDIA-Linux-x86_64-440.64.run -o nvidia.run
 chmod +x nvidia.run
 sudo ./nvidia.run --silent --no-questions
-curl -kL https://PLACEHOLDER/openptrack/nvidia/cuda_10.2.89_440.33.01_linux.run -o cuda.run
+curl -kL https://food-safety-infra.s3-us-west-2.amazonaws.com/openptrack/nvidia/cuda_10.2.89_440.33.01_linux.run -o cuda.run
 chmod +x cuda.run
 sudo ./cuda.run --silent --toolkit --toolkitpath=/usr/local/cuda-10.2 --samples --samplespath=${INSTALL_SRC}/nvidia/samples
-curl -kL https://PLACEHOLDER/openptrack/nvidia/cudnn-10.2-linux-x64-v7.6.5.32.tgz -o cudnn-10.2.tgz
+curl -kL https://food-safety-infra.s3-us-west-2.amazonaws.com/openptrack/nvidia/cudnn-10.2-linux-x64-v7.6.5.32.tgz -o cudnn-10.2.tgz
 tar -xf cudnn-10.2.tgz
-sudo cp cuda/include/* /usr/local/cuda/include
-sudo cp cuda/lib64/* /usr/local/cuda/lib64/
+sudo cp -av cuda/include/* /usr/local/cuda/include
+sudo cp -av cuda/lib64/* /usr/local/cuda/lib64/
 echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda/lib64" >> ~/.bashrc
 echo "export PATH=${PATH}:/usr/local/cuda/bin" >> ~/.bashrc
+# shellcheck source=.bashrc
+. "${HOME}"/.bashrc
+sudo ldconfig
+
+sudo chown -R ubuntu:ubuntu /home/ubuntu
+curl -Ls https://bootstrap.pypa.io/get-pip.py | sudo -H python3.7
+sudo -H pip3.7 install cython
+pip3.7 install Pillow==7.1.2 attrs awscli decorator gluoncv mxnet-cu102mkl numpy pyyaml xgboost
+sudo chown -R ubuntu:ubuntu /home/ubuntu
 
 echo "#########################################################################"
 echo "# install eigen to most updated version                                 #"
@@ -333,20 +353,6 @@ sudo make install
 sudo cp -r /usr/local/include/eigen3 /usr/include/eigen3
 popd || popd_fail
 popd || popd_fail
-
-pip install requests numpy pyyaml typing
-pip3 install cython  # this is by itself on purpose (numpy needs it and I
-                     # dont trust pip to install them in the right order)
-pip3 install numpy decorator attrs pyyaml awscli
-
-echo "#########################################################################"
-echo "# install librealsense2                                                 #"
-echo "#########################################################################"
-sudo apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || \
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
-sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo bionic main" -u
-${APT_CMD} update
-${APT_CMD} install librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg
 
 echo "#########################################################################"
 echo "# calibration toolkit                                                   #"
@@ -401,6 +407,21 @@ mkdir -p ${CATKIN_SRC}/iai_kinect2
 pushd ${CATKIN_SRC}/iai_kinect2 || pushd_fail
 git clone --branch 1607 https://github.com/OpenPTrack/iai_kinect2.git .
 popd || popd_fail
+
+echo "#########################################################################"
+echo "# build and install librealsense2                                       #"
+echo "#########################################################################"
+export PATH=${PATH}:/usr/local/cuda/bin
+mkdir -p ${INSTALL_SRC}/librealsense
+pushd ${INSTALL_SRC}/librealsense || pushd_fail
+git clone https://github.com/IntelRealSense/librealsense.git .
+git checkout v2.34.1
+./scripts/setup_udev_rules.sh
+mkdir -p build
+pushd build || pushd_fail
+cmake ../ -DCMAKE_BUILD_TYPE=Release -DBUILD_WITH_CUDA=true
+make -j"${NPROC}"
+sudo make install
 
 echo "#########################################################################"
 echo "# install zed sdk                                                       #"
@@ -493,22 +514,70 @@ cd install/bin
 echo "#########################################################################"
 echo "# install openface                                                      #"
 echo "#########################################################################"
-mkdir -p /opt/src/openface
-cd /opt/src/openface
+mkdir -p ${INSTALL_SRC}/openface
+cd ${INSTALL_SRC}/openface
 git clone https://github.com/cmusatyalab/openface.git .
-sudo python setup.py install
+sudo python2.7 setup.py install
 
 echo "#########################################################################"
 echo "# install dlib                                                          #"
 echo "#########################################################################"
-mkdir -p /opt/src/dlib
-cd /opt/src/dlib
+mkdir -p ${INSTALL_SRC}/dlib
+cd ${INSTALL_SRC}/dlib
 git clone  --branch v19.4 https://github.com/davisking/dlib.git .
 mkdir python_examples/build
 cd python_examples/build
 cmake ../../tools/python -DUSE_AVX_INSTRUCTIONS=ON
 cmake --build . --config Release
 sudo cp dlib.so /usr/local/lib/python2.7/dist-packages
+
+echo "#########################################################################"
+echo "# install TVM and TVM deps                                              #"
+echo "#########################################################################"
+# https://docs.tvm.ai/install/from_source.html
+mkdir -p ${INSTALL_SRC}/tvm
+pushd ${INSTALL_SRC}/tvm || pushd_fail
+git clone --recursive https://github.com/apache/incubator-tvm .
+mkdir -p build
+cp cmake/config.cmake build/config.cmake
+pushd build || pushd_fail
+sed -i 's/set(USE_CUDA OFF)/set(USE_CUDA ON)/' config.cmake
+sed -i 's#set(USE_LLVM OFF)#set(USE_LLVM /usr/lib/llvm-10/bin/llvm-config)#' config.cmake
+sed -i 's/set(USE_CUDNN OFF)/set(USE_CUDNN ON)/' config.cmake
+sed -i 's/set(USE_CUBLAS OFF)/set(USE_CUBLAS ON)/' config.cmake
+sed -i 's/set(USE_THRUST OFF)/set(USE_THRUST ON)/' config.cmake
+cmake ..
+make -j"${NPROC}"
+sudo make install
+# install the python libraries -- it only works in py3
+# and we won't use tvm to ever compile device side, only run side
+pushd ${INSTALL_SRC}/tvm/python || pushd_fail
+python3.7 setup.py install --user
+popd || popd_fail
+pushd ${INSTALL_SRC}/tvm/topi/python
+python3.7 setup.py install --user
+popd || popd_fail
+popd || popd_fail
+
+echo "#########################################################################"
+echo "# install pytorch and pytorch deps                                      #"
+echo "#########################################################################"
+mkdir -p ${INSTALL_SRC}/pytorch
+pushd ${INSTALL_SRC}/pytorch || pushd_fail
+git clone --branch v1.4.0 --recursive https://github.com/pytorch/pytorch .
+git submodule sync
+git submodule update --init --recursive
+USE_NCCL=0 USE_DISTRIBUTED=0 python3.7 setup.py install --user
+popd || popd_fail
+
+echo "#########################################################################"
+echo "# install pytorch vision                                                #"
+echo "#########################################################################"
+mkdir -p ${INSTALL_SRC}/torchvision
+pushd ${INSTALL_SRC}/torchvision || pushd_fail
+git clone --branch v0.5.0 --recursive https://github.com/pytorch/vision.git .
+python3.7 setup.py install --user
+popd || popd_fail
 
 echo "#########################################################################"
 echo "# install ROS                                                           #"
@@ -547,11 +616,11 @@ popd || popd_fail
 echo "#########################################################################"
 echo "# fetch various model data files                                        #"
 echo "#########################################################################"
-curl -kL https://PLACEHOLDER/openptrack/models/coco.weights \
+curl -kL https://food-safety-infra.s3-us-west-2.amazonaws.com/openptrack/models/coco.weights \
   -o ${CATKIN_SRC}/open_ptrack/yolo_detector/darknet_opt/coco.weights
-curl -kL https://PLACEHOLDER/openptrack/models/shape_predictor_68_face_landmarks.dat \
+curl -kL https://food-safety-infra.s3-us-west-2.amazonaws.com/openptrack/models/shape_predictor_68_face_landmarks.dat \
   -o ${CATKIN_SRC}/open_ptrack/recognition/data/shape_predictor_68_face_landmarks.dat
-curl -kL https://PLACEHOLDER/openptrack/models/nn4.small2.v1.t7 \
+curl -kL https://food-safety-infra.s3-us-west-2.amazonaws.com/openptrack/models/nn4.small2.v1.t7 \
   -o ${CATKIN_SRC}/open_ptrack/recognition/data/nn4.small2.v1.t7
 
 echo "#########################################################################"
@@ -562,7 +631,7 @@ pushd ${CATKIN_WS} || pushd_fail
 export LD_LIBRARY_PATH=/root/workspace/ros/devel/lib:/opt/ros/melodic/lib:/opt/ros/melodic/lib/x86_64-linux-gnu:/usr/local/lib/x86_64-linux-gnu:/usr/local/lib/i386-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/cuda/lib64
 rosdep install -y -r --from-paths .
 # export ROS_PARALLEL_JOBS="-j1 -l1"  # for debugging catkin_make errors
-catkin_make -DCMAKE_BUILD_TYPE=Release
+catkin_make -DCMAKE_BUILD_TYPE=Release --cmake-args "-Wno-dev"
 popd || popd_fail
 
 echo "#########################################################################"
@@ -588,7 +657,8 @@ touch "${HOME}"/.Xauthority
 echo "
 set -o vi
 export EDITOR=vi
-alias ls='ls -lh --color=auto'" >> ~/.bashrc
+alias ls='ls -lh --color=auto'
+export LRS_LOG_LEVEL="Info"" >> ~/.bashrc
 
 echo "
 . ${CATKIN_WS}/devel/setup.bash

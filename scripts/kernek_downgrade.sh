@@ -15,7 +15,7 @@ echo "PLEASE SELECT 5.3.0-46 KERNEL ON BOOT"
 reboot
 
 # RUN THESE COMMANDS TO REMOVE THE UNDESIRED NEWER KERNEL
-apt list --installed | awk -F/ '/5.3.0-51/{print $1}' | xargs sudo apt-get remove -y
+apt list --installed | awk -F/ '/5.3.0-53/{print $1}' | xargs sudo apt-get remove -y
 
 # RE-COMPILE/INSTALL THE NVIDIA DRIVER AND CUDA
 cd /opt/src/nvidia/
