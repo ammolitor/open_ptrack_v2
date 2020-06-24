@@ -96,7 +96,6 @@
 
 #include <open_ptrack/nms/nms.h>
 
-
 #include <opt_msgs/RoiRect.h>
 #include <opt_msgs/Rois.h>
 #include <std_msgs/String.h>
