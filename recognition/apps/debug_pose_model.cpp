@@ -126,7 +126,6 @@
 #include <opencv2/opencv.hpp>
 
 #include <open_ptrack/hungarian/Hungarian.h>
-#include <open_ptrack/nms/nms.h>
 
 ///////////////////////////////////// all detection headers here end
 
