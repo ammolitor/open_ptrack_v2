@@ -1132,10 +1132,10 @@ class NoNMSPoseFromConfig{
             
             std::cout << "starting nms" << std::endl;
             //auto tick = Clock::now();
-            std::vector<sortable_result> results;
+            std::vector<sortable_result> tvm_results;
             std::vector<sortable_result> proposals;
             proposals.clear();
-            nms_cpu(proposals, yolo_output, thresh, thresh, results);
+            tvm_nms_cpu(proposals, yolo_output, thresh, thresh, tvm_results);
             std::cout << "ending nms" << std::endl;
 
             // dynamically set?
@@ -1177,7 +1177,7 @@ class NoNMSPoseFromConfig{
             float fheight = static_cast<float>(img_height);
             float fwidth = static_cast<float>(img_width);
             int new_num = 0;
-            for (int i = 0; i < results.size(); ++i) {
+            for (int i = 0; i < tvm_results.size(); ++i) {
 
 
                 float xmin;
@@ -1185,18 +1185,18 @@ class NoNMSPoseFromConfig{
                 float xmax;
                 float ymax;
 
-                float score = results[i].probs;
-                float label = results[i].cls;
+                float score = tvm_results[i].probs;
+                float label = tvm_results[i].cls;
                 if (score < thresh) continue;
                 if (label < 0) continue;
                 // people only
                 if (label > 0) continue;
 
                 int cls_id = static_cast<int>(label);
-                xmin = results[i].xmin;
-                ymin = results[i].ymin;
-                xmax = results[i].xmax;
-                ymax = results[i].ymax;
+                xmin = tvm_results[i].xmin;
+                ymin = tvm_results[i].ymin;
+                xmax = tvm_results[i].xmax;
+                ymax = tvm_results[i].ymax;
                 //SCALE to frame height
                 xmin = xmin * (img_width/detector_height); // move down to 480 space  ()
                 ymin = ymin / (detector_width/img_height); // move up to 640
