@@ -1,12 +1,12 @@
 #include <open_ptrack/nms/nms.h>
 
-class ulsMatF{
+class MatF{
 public:
     float* m_data;
     int m_rows, m_cols, m_channels;
 
 public:
-    ulsMatF(int cols, int rows, int channels){
+    MatF(int cols, int rows, int channels){
         m_rows = rows;
         m_cols = cols;
         m_channels = channels;
@@ -15,7 +15,7 @@ public:
         memset((void *)m_data, 0, size);
     }
     // this during free tvmfree while a pointer causes some weird probs
-    //~ulsMatF(){
+    //~MatF(){
     //    if(m_data) free(m_data);
     //}
 
@@ -90,7 +90,7 @@ public:
 
 };
 
-void nms_cpu(std::vector<sortable_result>& boxes, ulsMatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes) {
+void tvm_nms_cpu(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes) {
 
     //ulsMatF(int cols, int rows, int channels)
     //at(int channel, int row, int col)
