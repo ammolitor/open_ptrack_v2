@@ -62,6 +62,7 @@
         "numericaldiff": "cpp",
         "eigen": "cpp",
         "*.ipp": "cpp",
-        "*.txx": "cpp"
+        "*.txx": "cpp",
+        "forward_list": "cpp"
     }
 }

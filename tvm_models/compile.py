@@ -17,6 +17,7 @@ from tvm.contrib import graph_runtime
 from tvm.autotvm.tuner import XGBTuner, GATuner, RandomTuner, GridSearchTuner
 from tvm.autotvm.graph_tuner import DPTuner, PBQPTuner
 from tvm import autotvm
+# git checkout 38118befc0a7e8a3db87d652b30a9369abb60363
 
 import logging
 logging.getLogger('autotvm').setLevel(logging.DEBUG)
@@ -310,6 +311,7 @@ def tvm_compiler(name, mod, params, target):
     with open("{}.params".format(MODEL_CONFIG[name]['output_name']), "wb") as fo:
         fo.write(relay.save_param_dict(params))
     print("params export success")
+    print(MODEL_CONFIG[name]['output_name'])
 
 def get_basic_mxnet_network(name, input_shape, dtype):
     """Get the symbol definition and random weight of a network"""
@@ -341,7 +343,7 @@ def compile_hand_detector(use_compiler=False):
 
 def compile_object_detector(use_compiler=False):
     print("compiling object detector")
-    target = 'cuda -libs=cudnn,cublas'
+    target = 'cuda -libs=cudnn,cublas -model='+ARGS.board
     #target = 'cuda -libs=cudnn'
     #target = 'cuda'
     if not CUDA:
@@ -350,7 +352,7 @@ def compile_object_detector(use_compiler=False):
         target += ' -model={}'.format(ARGS.board)
     print(target)
     block = model_zoo.get_model('yolo3_mobilenet1.0_coco', pretrained=True)
-    # block.hybridize(static_alloc=True)
+    block.hybridize(static_alloc=True)
     mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["object_detector"]["shape"]}, dtype='float32')
     #net = mod["main"]
     # fused_nn_softmax: num_args should be 4
