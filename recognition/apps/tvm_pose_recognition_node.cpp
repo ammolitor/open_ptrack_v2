@@ -1095,7 +1095,7 @@ class TVMPoseNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone, double max_distance, bool pointcloud, int centroid_arg, int mode, bool pointcloud_only):
+    TVMPoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone, double max_distance):
       node_(nh), it(node_)
       {
         
@@ -1195,9 +1195,6 @@ class TVMPoseNode {
         sensor_name = sensor_string;
         //worldToCamTransform = read_poses_from_json(sensor_name);
         max_capable_depth = max_distance;
-        use_pointcloud = pointcloud;
-        centroid_argument = centroid_arg;
-        mode_ = mode;
         area_thres_["person"] = pair<double, double>(1.8, 0.5);
 
         // maybe...
@@ -2650,6 +2647,7 @@ int main(int argc, char** argv) {
   // NOTE: using json in main() is the way to persist across callbacks...
 
   std::string sensor_name;
+  float max_distance;
   //json master_config;
   //std::string package_path = ros::package::getPath("recognition");
   //std::string master_hard_coded_path = package_path + "/cfg/master.json";
@@ -2669,9 +2667,10 @@ int main(int argc, char** argv) {
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
+  pnh.param("max_distance", max_distance, 6.25);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMPoseNode node(nh, sensor_name, zone_json);
+  TVMPoseNode node(nh, sensor_name, zone_json, max_distance);
   std::cout << "TVMPoseNode init " << std::endl;
   ros::spin();
   return 0;
