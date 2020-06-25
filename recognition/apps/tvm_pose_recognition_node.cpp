@@ -74,6 +74,61 @@
 // but will be easier than continually recompiling t
 // import header files
 
+
+#include <pcl/segmentation/organized_multi_plane_segmentation.h>
+#include <pcl/features/integral_image_normal.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/conversions.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
+//#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/common/transforms.h>
+#include <pcl/console/time.h>
+#include <pcl/filters/passthrough.h>
+
+// getting errors from here...????? (I might be able to recreate it...) stemming from pcl_visualizer
+#include <open_ptrack/person_clustering/person_cluster.h>
+#include <open_ptrack/person_clustering/head_based_subclustering.h>
+
+#include <open_ptrack/ground_segmentation/ground_segmentation.h>
+#include <open_ptrack/opt_utils/conversions.h>
+
+#include <opt_msgs/RoiRect.h>
+#include <opt_msgs/Rois.h>
+#include <std_msgs/String.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <opt_msgs/Detection.h>
+#include <opt_msgs/DetectionArray.h>
+
+
+
+#include <pcl/common/transforms.h>
+
+
+#include <pcl/segmentation/extract_clusters.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/filters/voxel_grid.h>
+
+// technically not using any person clustering
+////#include <pcl/people/person_cluster.h>
+////#include <pcl/people/head_based_subcluster.h>
+#include <pcl/octree/octree.h>
+//#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <visualization_msgs/MarkerArray.h>
+
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
+
+#include <open_ptrack/hungarian/Hungarian.h>
+
 #include <nlohmann/json.hpp>
 #include <open_ptrack/yolo_tvm.hpp>
 
@@ -323,17 +378,17 @@ class TVMPoseNodeOld {
         image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
 
         // Camera callback for intrinsics matrix update
-        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMPoseNode::camera_info_callback, this);
+        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMPoseNodeOld::camera_info_callback, this);
 
         //Time sync policies for the subscribers
         approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(10), rgb_image_sub, depth_image_sub));
         // _1 = rgb_image_sub
         // _2 = depth_image_sub
         // _3 = zone_json or zone_json
-        approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::callback, this, _1, _2, zone_json));
+        approximate_sync_->registerCallback(boost::bind(&TVMPoseNodeOld::callback, this, _1, _2, zone_json));
 
         // create callback config 
-        cfg_server.setCallback(boost::bind(&TVMPoseNode::cfg_callback, this, _1, _2));      
+        cfg_server.setCallback(boost::bind(&TVMPoseNodeOld::cfg_callback, this, _1, _2));      
 
         // create object-detector pointer
         //tvm_pose_detector.reset(new YoloTVMGPU256(model_folder_path));
