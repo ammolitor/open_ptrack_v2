@@ -136,7 +136,13 @@ using json = nlohmann::json;
 typedef sensor_msgs::Image Image;
 typedef sensor_msgs::CameraInfo CameraInfo;
 using namespace message_filters::sync_policies;
-
+using namespace std;
+using namespace cv; // https://github.com/opencv/opencv/issues/6661
+typedef pcl::PointXYZRGB PointT;
+typedef pcl::PointCloud<PointT> PointCloudT;
+typedef pcl::PointCloud<PointT> PointCloud;
+typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
 /**
  * @brief calculate the median depth of a given object

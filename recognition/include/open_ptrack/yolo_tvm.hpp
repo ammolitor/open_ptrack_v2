@@ -1685,7 +1685,7 @@ class PoseFromConfig{
             return normalized_image;
         }
 
-        pose_results* forward_full(cv::Mat frame, float thresh)
+        yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             std::cout << "starting function" << std::endl;
             // get height/width dynamically
@@ -1719,9 +1719,9 @@ class PoseFromConfig{
             float *data_x = (float *) malloc(total_input * sizeof(float));
            
             // allocate memory for results
-            pose_results* results = (pose_results*)calloc(1, sizeof(pose_results));
+            yoloresults* results = (yoloresults*)calloc(1, sizeof(yoloresults));
             results->num = 100;
-            results->boxes = (pose_result*)calloc(100, sizeof(pose_result));
+            results->boxes = (box_result*)calloc(100, sizeof(box_result));
 
             std::cout << "about to allocate info" << std::endl;
             // allocate DLTensor memory on device for all the vars needed
@@ -2900,7 +2900,7 @@ class NoNMSYoloFromConfig{
             // allocate memory for results
             pose_results* results = (pose_results*)calloc(1, sizeof(pose_results));
             results->num = 100;
-            results->boxes = (pose_result*)calloc(100, sizeof(pose_result));
+            results->boxes = (bbox_result*)calloc(100, sizeof(bbox_result));
 
             std::cout << "about to allocate info" << std::endl;
             // allocate DLTensor memory on device for all the vars needed
@@ -2942,7 +2942,6 @@ class NoNMSYoloFromConfig{
             TVMSynchronize(device_type, device_id, nullptr);
             get_output(0, output_for_nms);
             std::cout << "TVMSynchronize finished" << std::endl;  
-
 
             // copy to output
             //ulsMatF(int cols, int rows, int channels)
