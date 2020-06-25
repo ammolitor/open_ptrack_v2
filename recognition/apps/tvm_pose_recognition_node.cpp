@@ -2647,7 +2647,7 @@ int main(int argc, char** argv) {
   // NOTE: using json in main() is the way to persist across callbacks...
 
   std::string sensor_name;
-  float max_distance;
+  double max_distance;
   //json master_config;
   //std::string package_path = ros::package::getPath("recognition");
   //std::string master_hard_coded_path = package_path + "/cfg/master.json";
