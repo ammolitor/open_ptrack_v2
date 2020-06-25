@@ -1,7 +1,10 @@
 #include <vector>
 #include <iostream>
 #include <algorithm> 
-
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <assert.h>     /* assert */
 
 class MatF{
 public:
