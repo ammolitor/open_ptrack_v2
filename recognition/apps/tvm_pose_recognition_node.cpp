@@ -1179,28 +1179,8 @@ class TVMPoseNode {
         // _3 = zone_json or zone_json
         //approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::callback, this, _1, _2, zone_json));
 
+        point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::callback, this);
 
-        image_approximate_sync_.reset(new ImageApproximateSync(ImageApproximatePolicy(10), rgb_image_sub, depth_image_sub, cloud_sub));
-        
-        // default
-        if (mode == 0){
-          image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::callback, this, _1, _2, _3, zone_json));
-        }
-        // default
-        if (mode == 1){
-          if (pointcloud_only){
-            //point_cloud_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback_cloud_only, this, _1, zone_json));
-            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::mode_1_callback_cloud_only, this);
-          } else {
-            image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback, this, _1, _2, _3, zone_json));
-          }
-        }
-
-
-        // default
-        if (mode == 2){
-          image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_2_callback, this, _1, _2, _3, zone_json));
-        }
 
         // create callback config 
         //cfg_server.setCallback(boost::bind(&TVMPoseNode::cfg_callback, this, _1, _2));      
@@ -1949,7 +1929,7 @@ class TVMPoseNode {
      */
 
   
-  void mode_1_callback_cloud_only(const PointCloudT::ConstPtr& cloud_) {//,
+  void callback(const PointCloudT::ConstPtr& cloud_) {//,
                                   //json zone_json) {
 
 

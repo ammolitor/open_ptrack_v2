@@ -1685,7 +1685,7 @@ class PoseFromConfig{
             return normalized_image;
         }
 
-        yoloresults* forward_full(cv::Mat frame, float thresh)
+        pose_results* forward_full(cv::Mat frame, float thresh)
         {
             std::cout << "starting function" << std::endl;
             // get height/width dynamically
@@ -1719,9 +1719,9 @@ class PoseFromConfig{
             float *data_x = (float *) malloc(total_input * sizeof(float));
            
             // allocate memory for results
-            yoloresults* results = (yoloresults*)calloc(1, sizeof(yoloresults));
+            pose_results* results = (pose_results*)calloc(1, sizeof(pose_results));
             results->num = 100;
-            results->boxes = (box_result*)calloc(100, sizeof(box_result));
+            results->boxes = (pose_result*)calloc(100, sizeof(pose_result));
 
             std::cout << "about to allocate info" << std::endl;
             // allocate DLTensor memory on device for all the vars needed
@@ -2866,7 +2866,7 @@ class NoNMSYoloFromConfig{
             return normalized_image;
         }
 
-        pose_results* forward_full(cv::Mat frame, float thresh)
+        yoloresults* forward_full(cv::Mat frame, float thresh)
         {
             std::cout << "starting function" << std::endl;
             // get height/width dynamically
@@ -2898,7 +2898,7 @@ class NoNMSYoloFromConfig{
             float *data_x = (float *) malloc(total_input * sizeof(float));
            
             // allocate memory for results
-            pose_results* results = (pose_results*)calloc(1, sizeof(pose_results));
+            yoloresults* results = (yoloresults*)calloc(1, sizeof(yoloresults));
             results->num = 100;
             results->boxes = (bbox_result*)calloc(100, sizeof(bbox_result));
 
@@ -2965,14 +2965,6 @@ class NoNMSYoloFromConfig{
             free(data_x);
             data_x = nullptr;
 
-            // ******* NOTE **********
-            // Instead of running:
-            // yoloresult = yolo(image);
-            // poseresult = pose(image);
-            // aligned_poses_boxes = hungarian_munkres(yoloresult, poseresult);
-            // we're just going to run the pose detector
-            // in the forloop of the item
-            // ***************************
             float fheight = static_cast<float>(img_height);
             float fwidth = static_cast<float>(img_width);
             int new_num = 0;
