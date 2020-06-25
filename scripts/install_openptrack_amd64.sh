@@ -163,7 +163,7 @@ filegen loopstats file loopstats type day enable
 filegen peerstats file peerstats type day enable
 filegen clockstats file clockstats type day enable
 # Specify one or more NTP servers.
-server 192.168.1.200 iburst # DOUBLE CHECK THIS IP ADDRESS
+server 192.168.8.210 iburst # DOUBLE CHECK THIS IP ADDRESS
 disable auth
 broadcastclient
 EOF
@@ -662,7 +662,7 @@ export LRS_LOG_LEVEL="Info"" >> ~/.bashrc
 
 echo "
 . ${CATKIN_WS}/devel/setup.bash
-export ROS_MASTER_URI=http://${IP_ADDR}:11311/
+export ROS_MASTER_URI=http://192.168.8.210:11311/
 export ROS_IP=${IP_ADDR}
 export ROS_PC_NAME=${HOSTNAME}" >> ~/.bashrc
 
