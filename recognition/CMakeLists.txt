@@ -275,7 +275,7 @@ target_compile_definitions(debug_tvm_detector PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 ###############################################################################
-add_executable(debug_pose_model apps/debug_pose_model.cpp include/open_ptrack/yolo_tvm.hpp 
+add_executable(debug_pose_model apps/debug_pose_model.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp 
                                 include/open_ptrack/hungarian/Hungarian.cpp 
                                 # this might be redefining the already defined files in _include_
                                 # include/open_ptrack/ground_segmentation/ground_segmentation.h 
