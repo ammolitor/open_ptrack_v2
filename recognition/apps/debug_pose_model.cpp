@@ -1717,7 +1717,7 @@ bool check_detection_msg(opt_msgs::Detection detection_msg){
 class TVMPoseNode {
   private:
     ros::NodeHandle node_;
-    std::unique_ptr<PoseFromConfig> tvm_pose_detector;
+    std::unique_ptr<NoNMSPoseFromConfig> tvm_pose_detector;
     // TF listener
     tf::TransformListener tf_listener;
     tf::Transform worldToCamTransform;
@@ -2006,7 +2006,7 @@ class TVMPoseNode {
         // maybe have this in
         // arg one HAS to have / in front of path
         // TODO add that to debugger
-        tvm_pose_detector.reset(new PoseFromConfig("/cfg/pose_model.json", "recognition"));
+        tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
         sensor_name = sensor_string;
         //worldToCamTransform = read_poses_from_json(sensor_name);
         max_capable_depth = max_distance;
