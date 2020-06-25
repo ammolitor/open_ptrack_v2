@@ -93,7 +93,7 @@ class TVMHandDetectionNode {
     ros::NodeHandle node_;
     //std::unique_ptr<YoloTVMGPU256> tvm_object_detector;
     //std::unique_ptr<YoloTVMGPU320> tvm_object_detector;
-    std::unique_ptr<YoloTVMFromConfig> tvm_object_detector;
+    std::unique_ptr<NoNMSYoloFromConfig> tvm_object_detector;
 
     // TF listener
     tf::TransformListener tf_listener;
@@ -178,7 +178,7 @@ class TVMHandDetectionNode {
 
         // create object-detector pointer
         //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
-        tvm_object_detector.reset(new YoloTVMFromConfig("/cfg/hand_detector.json", "recognition"));
+        tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
         sensor_name = sensor_string;
       }
 

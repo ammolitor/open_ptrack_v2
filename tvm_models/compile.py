@@ -17,7 +17,8 @@ from tvm.contrib import graph_runtime
 from tvm.autotvm.tuner import XGBTuner, GATuner, RandomTuner, GridSearchTuner
 from tvm.autotvm.graph_tuner import DPTuner, PBQPTuner
 from tvm import autotvm
-# git checkout 38118befc0a7e8a3db87d652b30a9369abb60363
+# git checkout 38118befc0a7e8a3db87d652b30a9369abb60363 for pre-thrust, non slowness. 
+from non_nms_yolo import yolo3_mobilenet1_0_coco
 
 import logging
 logging.getLogger('autotvm').setLevel(logging.DEBUG)
@@ -341,6 +342,46 @@ def compile_hand_detector(use_compiler=False):
         tvm_compiler('hand_detector', mod, params, target)
     return mod, params, target
 
+def compile_nonms_hand_detector(use_compiler=False):
+    print("compiling hand detector")
+    target = 'cuda -libs=cudnn,cublas'
+    if not CUDA:
+        target = 'llvm'
+    if ARCH == 'aarch64':
+        target += ' -model={}'.format(ARGS.board)
+    block = yolo3_mobilenet1_0_custom(classes=['hands'])
+    block.load_parameters('models/yolo3_mobilenet1.0_hands.params')
+    block.hybridize(static_alloc=True)
+    mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["nonms_hand_detector"]["shape"]}, dtype='float32')
+    #net = mod["main"]
+    #net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
+    #mod = tvm.IRModule.from_expr(net)
+    if use_compiler:
+        tvm_compiler('nonms_hand_detector', mod, params, target)
+    return mod, params, target
+
+def compile_nonms_object_detector(use_compiler=False):
+    print("compiling object detector")
+    target = 'cuda -libs=cudnn,cublas -model='+ARGS.board
+    #target = 'cuda -libs=cudnn'
+    #target = 'cuda'
+    if not CUDA:
+        target = 'llvm'
+    if ARCH == 'aarch64':
+        target += ' -model={}'.format(ARGS.board)
+    print(target)
+    block = yolo3_mobilenet1_0_coco(pretrained=True)
+    block.hybridize(static_alloc=True)
+    mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["nonms_object_detector"]["shape"]}, dtype='float32')
+    #net = mod["main"]
+    # fused_nn_softmax: num_args should be 4
+    # https://discuss.tvm.ai/t/something-wrong-when-my-model-run/3300
+    #net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
+    #mod = tvm.IRModule.from_expr(net)
+    if use_compiler:
+        tvm_compiler('nonms_object_detector', mod, params, target)
+    return mod, params, target
+
 def compile_object_detector(use_compiler=False):
     print("compiling object detector")
     target = 'cuda -libs=cudnn,cublas -model='+ARGS.board
@@ -453,7 +494,7 @@ def load_raw_model(path_base):
 if __name__ == '__main__':
     AVAILABLE_MODELS = {'object_detector', 'simple_pose', 'face_detector', 'face_embedder', 'hand_detector'}
     PARSER = argparse.ArgumentParser(description='')
-    PARSER.add_argument('--network', type=str, default='object_detector', help='Network Architecture')
+    PARSER.add_argument('--network', type=str, default='nonms_object_detector', help='Network Architecture')
     PARSER.add_argument('--target', type=str, default='cuda', help='Deploy Target')
     PARSER.add_argument('--board', type=str, default='titanx', help='board')
     PARSER.add_argument('--dtype', type=str, default='float32', help='Data Type')
@@ -522,6 +563,15 @@ if __name__ == '__main__':
         suffix = 'cpu'
 
     MODEL_CONFIG = {
+        'nonms_object_detector':
+            {
+                'shape': (1, 3, 512, 512),
+                'output_name': 'mnet1.0.yolo.nonms.{}.{}'.format(ARCH, suffix),
+                'dtype': 'float32',
+                'cuda': CUDA,
+                'compile': compile_nonms_object_detector,
+                'name': 'nonms_object_detector',
+            },
         'object_detector':
             {
                 'shape': (1, 3, 512, 512),
@@ -566,6 +616,15 @@ if __name__ == '__main__':
                 'cuda': CUDA,
                 'compile': compile_hand_detector,
                 'name': 'hand_detector',
+            },
+        'nonms_hand_detector' :
+            {
+                'shape': (1, 3, 320, 320),
+                'output_name': 'mnet.1.nonms.{}.hands.{}'.format(ARCH, suffix),
+                'dtype': 'float32',
+                'cuda': CUDA,
+                'compile': compile_nonms_hand_detector,
+                'name': 'nonms_hand_detector',
             }
     }
 

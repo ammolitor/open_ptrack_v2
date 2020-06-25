@@ -91,7 +91,7 @@ float calc_median_of_object(const cv::Mat& Input){
 class TVMDetectionNode {
   private:
     ros::NodeHandle node_;
-    std::unique_ptr<YoloTVMFromConfig> tvm_object_detector;
+    std::unique_ptr<NoNMSYoloFromConfig> tvm_object_detector; //YoloTVMFromConfig
     // TF listener
     tf::TransformListener tf_listener;
     // only need this if I need to debug
@@ -206,7 +206,7 @@ class TVMDetectionNode {
         // maybe have this in
         // arg one HAS to have / in front of path
         // TODO add that to debugger
-        tvm_object_detector.reset(new YoloTVMFromConfig("/cfg/model.json", "recognition"));
+        tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/model.json", "recognition"));
         sensor_name = sensor_string;
       }
 
