@@ -2424,12 +2424,6 @@ class TVMDetectionNode {
           int new_height = static_cast<int>(2 * (median_factor * (median_y - ymin)));
         
 
-          // get x, y, z points
-          mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x;
-          my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
-          median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
-
-          
           float cpoint1x = cloud_->at(static_cast<int>(new_x), static_cast<int>(new_y)).x;
           float cpoint1y = cloud_->at(static_cast<int>(new_x), static_cast<int>(new_y)).y;
           float cpoint1z = cloud_->at(static_cast<int>(new_x), static_cast<int>(new_y)).z;
@@ -2439,9 +2433,16 @@ class TVMDetectionNode {
 
           // Create detection message: -- literally tatken ground_based_people_detector_node
           opt_msgs::Detection detection_msg;
-          
-          detection_msg.box_3D.p1 = mx;
-          detection_msg.box_3D.p2 = my;
+          geometry_msgs::Vector3 p1;
+          p1.x = mx;
+          p1.y = my;
+          p1.z = medium_depth;
+          detection_msg.box_3D.p1 = p1;
+          geometry_msgs::Vector3 p2;
+          p2.x = mx;
+          p2.y = my;
+          p2.z = medium_depth;
+          detection_msg.box_3D.p2 = p2;
           geometry_msgs::Vector3 centroid;
           centroid.x = mx;
           centroid.y = my;
