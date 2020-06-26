@@ -376,6 +376,9 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     }
 
     // If at least one detection has been received:
+    std::cout << "time_delay: " << time_delay << std::endl;
+    std::cout << "max_detection_delay: " << max_detection_delay << std::endl;
+    std::cout << "(time_delay < max_detection_delay): " << (time_delay < max_detection_delay) << std::endl;
     if((detections_vector.size() > 0) && (time_delay < max_detection_delay))
     {
       std::cout << "If at least one detection has been received:" << std::endl;
