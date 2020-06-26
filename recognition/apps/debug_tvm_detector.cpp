@@ -2436,22 +2436,22 @@ class TVMDetectionNode {
           geometry_msgs::Vector3 p1;
           p1.x = mx;
           p1.y = my;
-          p1.z = medium_depth;
+          p1.z = median_depth;
           detection_msg.box_3D.p1 = p1;
           geometry_msgs::Vector3 p2;
           p2.x = mx;
           p2.y = my;
-          p2.z = medium_depth;
+          p2.z = median_depth;
           detection_msg.box_3D.p2 = p2;
           geometry_msgs::Vector3 centroid;
           centroid.x = mx;
           centroid.y = my;
-          centroid.z = medium_depth;
+          centroid.z = median_depth;
           detection_msg.centroid = centroid;
           geometry_msgs::Vector3 top;
           top.x = mx;
           top.y = my;
-          top.z = medium_depth;
+          top.z = median_depth;
           detection_msg.top = top;
           // theoretical person centroid:
           //Eigen::Vector3f centroid3d = Eigen::Vector3f(mx, my_, median_depth);// * anti_transform
@@ -2473,7 +2473,7 @@ class TVMDetectionNode {
           detection_msg.box_2D.height = cpoint2y - cpoint1y;;//int(pixel_height);
           detection_msg.height = 0.0;//person_cluster.getHeight();
           detection_msg.confidence = score;//person_cluster.getPersonConfidence();
-          detection_msg.distance = medium_depth;//person_cluster.getDistance();
+          detection_msg.distance = median_depth;//person_cluster.getDistance();
           //converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
           //converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
 
