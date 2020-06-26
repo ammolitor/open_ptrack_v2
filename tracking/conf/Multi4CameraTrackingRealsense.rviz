@@ -1,0 +1,685 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /RGB Image 11
+        - /RGB Image 21
+        - /RGB Image 31
+        - /RGB Image 41
+        - /Detections1/Status1
+      Splitter Ratio: 0.5623268485069275
+    Tree Height: 1403
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.5886790156364441
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+      - /Current View1/Focal Point1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Experimental: false
+    Name: Time
+    SyncMode: 0
+    SyncSource: PersonTracking
+Preferences:
+  PromptSaveOnExit: true
+Toolbars:
+  toolButtonStyle: 2
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.029999999329447746
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        realsense_1:
+          Value: true
+        realsense_1_aligned_depth_to_color_frame:
+          Value: false
+        realsense_1_aligned_depth_to_infra1_frame:
+          Value: false
+        realsense_1_color_frame:
+          Value: false
+        realsense_1_color_optical_frame:
+          Value: false
+        realsense_1_depth_frame:
+          Value: false
+        realsense_1_depth_optical_frame:
+          Value: false
+        realsense_1_infra1_frame:
+          Value: false
+        realsense_1_infra1_optical_frame:
+          Value: false
+        realsense_1_infra2_frame:
+          Value: false
+        realsense_1_infra2_optical_frame:
+          Value: false
+        realsense_1_link:
+          Value: false
+        realsense_2:
+          Value: true
+        realsense_2_aligned_depth_to_color_frame:
+          Value: false
+        realsense_2_aligned_depth_to_infra1_frame:
+          Value: false
+        realsense_2_color_frame:
+          Value: false
+        realsense_2_color_optical_frame:
+          Value: false
+        realsense_2_depth_frame:
+          Value: false
+        realsense_2_depth_optical_frame:
+          Value: false
+        realsense_2_infra1_frame:
+          Value: false
+        realsense_2_infra1_optical_frame:
+          Value: false
+        realsense_2_infra2_frame:
+          Value: false
+        realsense_2_infra2_optical_frame:
+          Value: false
+        realsense_2_link:
+          Value: false
+        realsense_3:
+          Value: true
+        realsense_3_aligned_depth_to_color_frame:
+          Value: false
+        realsense_3_aligned_depth_to_infra1_frame:
+          Value: false
+        realsense_3_color_frame:
+          Value: false
+        realsense_3_color_optical_frame:
+          Value: false
+        realsense_3_depth_frame:
+          Value: false
+        realsense_3_depth_optical_frame:
+          Value: false
+        realsense_3_infra1_frame:
+          Value: false
+        realsense_3_infra1_optical_frame:
+          Value: false
+        realsense_3_infra2_frame:
+          Value: false
+        realsense_3_infra2_optical_frame:
+          Value: false
+        realsense_3_link:
+          Value: false
+        realsense_4:
+          Value: true
+        realsense_4_aligned_depth_to_color_frame:
+          Value: false
+        realsense_4_aligned_depth_to_infra1_frame:
+          Value: false
+        realsense_4_color_frame:
+          Value: false
+        realsense_4_color_optical_frame:
+          Value: false
+        realsense_4_depth_frame:
+          Value: false
+        realsense_4_depth_optical_frame:
+          Value: false
+        realsense_4_infra1_frame:
+          Value: false
+        realsense_4_infra1_optical_frame:
+          Value: false
+        realsense_4_infra2_frame:
+          Value: false
+        realsense_4_infra2_optical_frame:
+          Value: false
+        realsense_4_link:
+          Value: false
+        world:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          realsense_1:
+            realsense_1_link:
+              realsense_1_aligned_depth_to_color_frame:
+                realsense_1_color_optical_frame:
+                  {}
+              realsense_1_aligned_depth_to_infra1_frame:
+                realsense_1_infra1_optical_frame:
+                  {}
+              realsense_1_color_frame:
+                {}
+              realsense_1_depth_frame:
+                realsense_1_depth_optical_frame:
+                  {}
+              realsense_1_infra1_frame:
+                {}
+              realsense_1_infra2_frame:
+                realsense_1_infra2_optical_frame:
+                  {}
+          realsense_2:
+            realsense_2_link:
+              realsense_2_aligned_depth_to_color_frame:
+                realsense_2_color_optical_frame:
+                  {}
+              realsense_2_aligned_depth_to_infra1_frame:
+                realsense_2_infra1_optical_frame:
+                  {}
+              realsense_2_color_frame:
+                {}
+              realsense_2_depth_frame:
+                realsense_2_depth_optical_frame:
+                  {}
+              realsense_2_infra1_frame:
+                {}
+              realsense_2_infra2_frame:
+                realsense_2_infra2_optical_frame:
+                  {}
+          realsense_3:
+            realsense_3_link:
+              realsense_3_aligned_depth_to_color_frame:
+                realsense_3_color_optical_frame:
+                  {}
+              realsense_3_aligned_depth_to_infra1_frame:
+                realsense_3_infra1_optical_frame:
+                  {}
+              realsense_3_color_frame:
+                {}
+              realsense_3_depth_frame:
+                realsense_3_depth_optical_frame:
+                  {}
+              realsense_3_infra1_frame:
+                {}
+              realsense_3_infra2_frame:
+                realsense_3_infra2_optical_frame:
+                  {}
+          realsense_4:
+            realsense_4_link:
+              realsense_4_aligned_depth_to_color_frame:
+                realsense_4_color_optical_frame:
+                  {}
+              realsense_4_aligned_depth_to_infra1_frame:
+                realsense_4_infra1_optical_frame:
+                  {}
+              realsense_4_color_frame:
+                {}
+              realsense_4_depth_frame:
+                realsense_4_depth_optical_frame:
+                  {}
+              realsense_4_infra1_frame:
+                {}
+              realsense_4_infra2_frame:
+                realsense_4_infra2_optical_frame:
+                  {}
+      Update Interval: 0
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /realsense_1/color/image_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: RGB Image 1
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /realsense_2/color/image_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: RGB Image 2
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /realsense_3/color/image_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: RGB Image 3
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /realsense_4/color/image_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: RGB Image 4
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: false
+      Image Topic: /realsense_1/infra1/image_rect_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: IR Image 1
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: false
+    - Class: rviz/Image
+      Enabled: false
+      Image Topic: /realsense_2/infra1/image_rect_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: IR Image 2
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: false
+    - Class: rviz/Image
+      Enabled: false
+      Image Topic: /realsense_3/infra1/image_rect_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: IR Image 3
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: false
+    - Class: rviz/Image
+      Enabled: false
+      Image Topic: /realsense_4/infra1/image_rect_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: IR Image 4
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PersonTracking
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.10000000149011612
+      Style: Flat Squares
+      Topic: /tracker/history_smoothed
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /tracker/markers_array_smoothed
+      Name: PersonMarker
+      Namespaces:
+        numbers: true
+        people: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /detector/skeleton_centroid_markers_array
+      Name: SkeletonCentroid
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /detector/skeleton_markers_array
+      Name: SkeletonTracking
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Class: rviz/Marker
+      Enabled: false
+      Marker Topic: /tracker/object_markers
+      Name: ObjectName
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /tracker/object_markers_array_smoothed
+      Name: ObjectMarker
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: ObjectTracking
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.05000000074505806
+      Style: Flat Squares
+      Topic: /tracker/object_history_smoothed
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Class: rviz/Image
+      Enabled: false
+      Image Topic: /kinect2_head_yolo_object_detector_node/yolo_object_detector/image
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: ObjectTrackingImage
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2 1
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /realsense_1/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2 2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /realsense_2/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2 3
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /realsense_3/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2 4
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /realsense_4/depth_registered/points
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Detections
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.029999999329447746
+      Style: Flat Squares
+      Topic: /detector/history
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Default Light: true
+    Fixed Frame: world
+    Frame Rate: 60
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Theta std deviation: 0.2617993950843811
+      Topic: /initialpose
+      X std deviation: 0.5
+      Y std deviation: 0.5
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Class: rviz/Orbit
+      Distance: 15.701019287109375
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 0.75
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 1.5700000524520874
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 2105
+  Hide Left Dock: false
+  Hide Right Dock: false
+  IR Image 1:
+    collapsed: false
+  IR Image 2:
+    collapsed: false
+  IR Image 3:
+    collapsed: false
+  IR Image 4:
+    collapsed: false
+  ObjectTrackingImage:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000029b0000079ffc0200000012fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b00000604000000c700fffffffb0000000a00560069006500770073010000064500000195000000a000fffffffb000000140049005200200049006d0061006700650020004c0000000574000002640000000000000000fb000000140049005200200049006d00610067006500200052000000060b000001cd0000000000000000fb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb00000026004f0062006a0065006300740054007200610063006b0069006e00670049006d00610067006500000001a2000002200000001600fffffffb00000026004f0062006a0065006300740054007200610063006b0069006e00670049006d00610067006500000002540000014e0000000000000000fb0000001600530069006d0070006c00650049006d0061006700650000000000ffffffff0000000000000000fb0000001200520047004200200049006d006100670065010000023c000000980000000000000000fb000000100049005200200049006d00610067006501000002ad000000f50000000000000000fb0000000a0049006d006100670065000000003d0000079b0000000000000000fb000000140049005200200049006d0061006700650020004600000006d600000102000000000000000000000001000002500000079ffc0200000010fc0000003b000001e3000000310100001afa000000000100000002fb0000001600520047004200200049006d006100670065002000310100000a1d000004a00000008300fffffffb000000140049005200200049006d006100670065002000310100000000ffffffff0000007500fffffffc00000224000001e0000000310100001afa000000000100000002fb0000001600520047004200200049006d006100670065002000320100000a1d000004a00000008300fffffffb000000140049005200200049006d006100670065002000320100000000ffffffff0000007500fffffffc0000040a000001e9000000310100001afa000000000100000002fb0000001600520047004200200049006d006100670065002000330100000a1d000004a00000008300fffffffb000000140049005200200049006d006100670065002000330100000000ffffffff0000007500fffffffc000005f9000001e1000000310100001afa000000000100000002fb0000001600520047004200200049006d006100670065002000340100000a1d000004a00000008300fffffffb000000140049005200200049006d006100670065002000340100000000ffffffff0000007500fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000001600520047004200200049006d0061006700650020004c010000003b000000d40000000000000000fb0000001600520047004200200049006d006100670065002000520100000115000000d40000000000000000fc0000003b000001e40000000000fffffffa000000000100000002fb0000001600520047004200200049006d00610067006500200031010000083f0000067e0000000000000000fb000000140049005200200049006d006100670065002000310100000000ffffffff0000000000000000fc00000225000001df0000000000fffffffa000000000100000002fb0000001600520047004200200049006d00610067006500200032010000083f0000067e0000000000000000fb000000140049005200200049006d006100670065002000320100000000ffffffff0000000000000000fc0000040a000001e60000000000fffffffa000000000100000002fb0000001600520047004200200049006d00610067006500200033010000083f0000067e0000000000000000fb000000140049005200200049006d006100670065002000330100000000ffffffff0000000000000000fc000005f6000001e40000000000fffffffa000000000100000002fb0000001600520047004200200049006d00610067006500200034010000083f0000067e0000000000000000fb000000140049005200200049006d006100670065002000340100000000ffffffff0000000000000000fb0000001600520047004200200049006d006100670065002000460100000553000002870000000000000000fb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000fb00000018006b0069006e006500630074003000320020007200670062000000003a000001170000000000000000fb00000018006b0069006e0065006300740030003300200072006700620000000157000001160000000000000000fb00000018006b0069006e00650063007400300031002000720067006200000002730000011700000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e1000001970000000300000ebd0000003efc0100000002fb0000000800540069006d0065010000000000000ebd0000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000009c60000079f00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  RGB Image 1:
+    collapsed: false
+  RGB Image 2:
+    collapsed: false
+  RGB Image 3:
+    collapsed: false
+  RGB Image 4:
+    collapsed: false
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 3773
+  X: 67
+  Y: 27
