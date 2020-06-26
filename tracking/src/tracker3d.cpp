@@ -97,7 +97,8 @@ Tracker3D::newFrame(const std::vector<open_ptrack::detection::Detection>& detect
   lost_tracks_.clear();
   new_tracks_.clear();
   detections_ = detections;
-
+  
+  std::cout << "tracks_ count: " << tracks_.size() << std::endl;
   ros::Time current_detections_time = detections_[0].getSource()->getTime();
 
   for(std::list<open_ptrack::tracking::Track3D*>::iterator it = tracks_.begin(); it != tracks_.end();)
