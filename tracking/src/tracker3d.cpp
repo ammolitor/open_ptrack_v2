@@ -81,6 +81,7 @@ Tracker3D::Tracker3D(
   vertical_(vertical)
 {
   tracks_counter_ = 0;
+  std::cout << "debug_mode_: " << debug_mode_ << std::endl;
 }
 
 Tracker3D::~Tracker3D()
