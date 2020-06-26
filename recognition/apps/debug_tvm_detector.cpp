@@ -2270,6 +2270,322 @@ class TVMDetectionNode {
         }
   }
 
+  void no_ground_hands(const PointCloudT::ConstPtr& cloud_) {//,
+                                  //json zone_json) {
+
+
+      //Calculate direct and inverse transforms between camera and world frame:
+      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
+                                 world_transform);
+      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
+                                 world_inverse_transform);
+
+      std::cout << "running algorithm callback" << std::endl;
+
+      // set message vars here
+      std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
+      cv_bridge::CvImagePtr cv_ptr_rgb;
+      cv_bridge::CvImage::Ptr  cv_ptr_depth;
+      //cv::Mat cv_image;
+      //cv::Mat cv_depth_image;
+      cv::Mat cv_image_clone;
+      
+      // set detection variables here
+      yoloresults* output;
+      cv::Size image_size;
+      float height;
+      float width;
+      ros::Time begin;
+      double duration;
+
+      // set publication messages vars here
+      // generate new detection array message with the header from the rbg image
+      opt_msgs::DetectionArray::Ptr detection_array_msg(new opt_msgs::DetectionArray);
+      detection_array_msg->header = cloud_header;
+      detection_array_msg->confidence_type = std::string("yolo");
+      detection_array_msg->image_type = std::string("rgb");
+      // set detection intrinsic matrix from camera variables
+      for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+          detection_array_msg->intrinsic_matrix.push_back(intrinsics_matrix(i, j));
+        }
+      }
+      open_ptrack::opt_utils::Conversions converter; 
+
+      cv::Mat cv_image (cloud_->height, cloud_->width, CV_8UC3);
+      cv::Mat cv_depth_image (cloud_->height, cloud_->width, CV_32FC1);
+      for (int i=0;i<cloud_->height;i++)
+      {
+          for (int j=0;j<cloud_->width;j++)
+          {
+          cv_image.at<cv::Vec3b>(i,j)[2] = cloud_->at(j,i).r;
+          cv_image.at<cv::Vec3b>(i,j)[1] = cloud_->at(j,i).g;
+          cv_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
+          cv_depth_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).z;
+          }
+      }
+      // Fill rgb image:
+      //rgb_image_->points.clear();                            // clear RGB pointcloud
+      //extractRGBFromPointCloud(cloud_, rgb_image_);          // fill RGB pointcloud
+
+      //////////////////////////////////////////////////////////////////////////////////////////////
+
+      // override and use pointcloud
+      //cv_image = curr_image.clone();
+      cv_image_clone = cv_image.clone();
+      image_size = cv_image.size();
+      height =  static_cast<float>(image_size.height);
+      width =  static_cast<float>(image_size.width);
+      // override and use pointcloud
+
+      // necessary? or can we just use height/width of cv_image
+      int DISPLAY_RESOLUTION_HEIGHT = image_size.height;
+      int DISPLAY_RESOLUTION_WIDTH = image_size.width;
+
+      std::cout << "running yolo" << std::endl;
+      // forward inference of object detector
+      begin = ros::Time::now();
+      output = tvm_detector->forward_full(cv_image, .3);
+      duration = ros::Time::now().toSec() - begin.toSec();
+      std::cout << "yolo detection time: " << duration << std::endl;
+      std::cout << "yolo detections: " << output->num << std::endl;
+      
+      std::cout << "initializing clusters" << std::endl;
+      std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   // vector containing persons clusters
+      // we run ground-based-people-detector pcl subclustering operation
+
+      int r, c;
+      // don't forget to import hungarian algo
+      // fall back on subclusters?????
+      // no detections? no forward...
+        
+      // build cost matrix
+      std::cout << "checking yolo output" << std::endl;
+      if (output->num >= 1) {
+        float xmin;
+        float ymin;
+        float xmax;
+        float ymax;
+        int cast_xmin;
+        int cast_ymin;
+        int cast_xmax;
+        int cast_ymax;
+        float median_x;
+        float median_y;
+        float median_depth;
+        float mx;
+        float my;
+        float score;
+        float label;
+        std::cout << "building yolo centroids" << std::endl;
+        for (int i = 0; i < output->num; i++) {
+          std::cout << "building yolo centroid: " << i+1 << std::endl;
+          std::cout << "xmin check: " << output->boxes[i].xmin << std::endl;
+          xmin = output->boxes[i].xmin;
+          ymin = output->boxes[i].ymin;
+          xmax = output->boxes[i].xmax;
+          ymax = output->boxes[i].ymax;
+          score = output->boxes[i].score;
+          label = static_cast<float>(output->boxes[i].id);
+          std::string object_name = "hands";
+          cast_xmin = static_cast<int>(xmin);
+          cast_ymin = static_cast<int>(ymin);
+          cast_xmax = static_cast<int>(xmax);
+          cast_ymax = static_cast<int>(ymax);
+          // set the median of the bounding box
+          median_x = xmin + ((xmax - xmin) / 2.0);
+          median_y = ymin + ((ymax - ymin) / 2.0);
+          // If the detect box coordinat is near edge of image, it will return a error 'Out of im.size().'
+          // lets resize the detection until it's inside the width...
+          
+          if ( median_x < width*0.02) {
+            median_x = width*0.02;
+          }
+          if (median_x > width*0.98) {
+            median_x = width*0.98;
+          }
+
+          if ( median_y < height*0.02) {
+            median_y = height*0.02;
+          }
+          if ( median_y > height*0.98) {
+            median_y = height*0.98;
+          }
+
+          // get x, y, z points
+          mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x;
+          my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
+          median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
+
+          // set the new coordinates of the image so that the boxes are set
+          int new_x = static_cast<int>(median_x - (median_factor * (median_x - xmin)));
+          int new_y = static_cast<int>(median_y - (median_factor * (median_y - ymin)));
+          int new_width = static_cast<int>(2 * (median_factor * (median_x - xmin)));
+          int new_height = static_cast<int>(2 * (median_factor * (median_y - ymin)));
+        
+
+          // get x, y, z points
+          mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x;
+          my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
+          median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
+
+          
+          float cpoint1x = cloud_->at(static_cast<int>(new_x), static_cast<int>(new_y)).x;
+          float cpoint1y = cloud_->at(static_cast<int>(new_x), static_cast<int>(new_y)).y;
+          float cpoint1z = cloud_->at(static_cast<int>(new_x), static_cast<int>(new_y)).z;
+          float cpoint2x = cloud_->at(static_cast<int>(new_x+new_width), static_cast<int>(new_y+new_height)).x;
+          float cpoint2y = cloud_->at(static_cast<int>(new_x+new_width), static_cast<int>(new_y+new_height)).y;
+          float cpoint2z = cloud_->at(static_cast<int>(new_x+new_width), static_cast<int>(new_y+new_height)).z;
+
+          // Create detection message: -- literally tatken ground_based_people_detector_node
+          opt_msgs::Detection detection_msg;
+          
+          detection_msg.box_3D.p1 = mx;
+          detection_msg.box_3D.p2 = my;
+          geometry_msgs::Vector3 centroid;
+          centroid.x = mx;
+          centroid.y = my;
+          centroid.z = medium_depth;
+          detection_msg.centroid = centroid;
+          geometry_msgs::Vector3 top;
+          top.x = mx;
+          top.y = my;
+          top.z = medium_depth;
+          detection_msg.top = top;
+          // theoretical person centroid:
+          //Eigen::Vector3f centroid3d = Eigen::Vector3f(mx, my_, median_depth);// * anti_transform
+          //Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
+          // theoretical person top point:
+          //Eigen::Vector3f top3d = Eigen::Vector3f(mx, my_, median_depth);// * anti_transform
+          //Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
+          // theoretical person bottom point:
+          //Eigen::Vector3f bottom3d = Eigen::Vector3f(mx, my_, median_depth);// * anti_transform
+          //Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
+          //float enlarge_factor = 1.1;
+          //float pixel_xc = centroid2d(0);
+          //float pixel_yc = centroid2d(1);
+          //float pixel_height = (bottom2d(1) - top2d(1)) * enlarge_factor;
+          //float pixel_width = pixel_height / 2;
+          detection_msg.box_2D.x = mx;//int(centroid2d(0) - pixel_width/2.0);
+          detection_msg.box_2D.y = my;//int(centroid2d(1) - pixel_height/2.0);
+          detection_msg.box_2D.width = cpoint2x - cpoint1x;//int(pixel_width);
+          detection_msg.box_2D.height = cpoint2y - cpoint1y;;//int(pixel_height);
+          detection_msg.height = 0.0;//person_cluster.getHeight();
+          detection_msg.confidence = score;//person_cluster.getPersonConfidence();
+          detection_msg.distance = medium_depth;//person_cluster.getDistance();
+          //converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
+          //converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
+
+          // adding this so scan which zone the given detection is in 
+          if (json_found){
+            
+            bool inside_area_cube = false;
+            int zone_id;
+            std::string zone_string;                  
+            double x_min;
+            double y_min;
+            double z_min;
+            double x_max;
+            double y_max;
+            double z_max;
+            double world_x_min;
+            double world_y_min;
+            double world_z_min;
+            double world_x_max;
+            double world_y_max;
+            double world_z_max;
+            for (zone_id = 0; zone_id < n_zones; zone_id++)
+            {
+              // need a world view here bc each detection was transformed
+              // this will work for a singular cam, but would mean each cam would have to tune
+              // to the specific area; which I think would be fine. // but will need
+              // to test to be sure
+              // a given detection can be in only one place at one time, thus it can't be in
+              // multiple zones
+              zone_string = std::to_string(zone_id);
+              std::cout << "zone_string: " << zone_string << std::endl;
+              // type must be number but is null...
+              //https://github.com/nlohmann/json/issues/1593
+
+              // translate between world and frame
+              world_x_min = zone_json[zone_string]["min"]["world"]["x"];
+              world_y_min = zone_json[zone_string]["min"]["world"]["y"];
+              world_z_min = zone_json[zone_string]["min"]["world"]["z"];
+              world_x_max = zone_json[zone_string]["max"]["world"]["x"];
+              world_y_max = zone_json[zone_string]["max"]["world"]["y"];
+              world_z_max = zone_json[zone_string]["max"]["world"]["z"];
+
+              std::cout << "world_x_min: " << world_x_min << std::endl;
+              std::cout << "world_y_min: " << world_y_min << std::endl;
+              std::cout << "world_z_min: " << world_z_min << std::endl;
+              std::cout << "world_x_max: " << world_x_max << std::endl;
+              std::cout << "world_y_max: " << world_y_max << std::endl;
+              std::cout << "world_z_max: " << world_z_max << std::endl;
+
+              Eigen::Vector3d min_vec;
+              Eigen::Vector3d max_vec;
+              tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
+              tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
+              
+              min_point = world_transform(min_point);
+              max_point = world_transform(max_point);
+
+              x_min = min_point.getX();
+              y_min = min_point.getY();
+              z_min = min_point.getZ();
+              x_max = min_point.getX();
+              y_max = min_point.getY();
+              z_max = min_point.getZ();
+
+              std::cout << "x_min: " << x_min << std::endl;
+              std::cout << "y_min: " << y_min << std::endl;
+              std::cout << "z_min: " << z_min << std::endl;
+              std::cout << "x_max: " << x_max << std::endl;
+              std::cout << "y_max: " << y_max << std::endl;
+              std::cout << "z_max: " << z_max << std::endl;
+              std::cout << "mx: " << mx << std::endl;
+              std::cout << "my: " << my << std::endl;
+              std::cout << "median_depth: " << median_depth << std::endl;
+
+              inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
+              std::cout << "inside_cube: " << inside_area_cube << std::endl;
+              // I think this works. 
+              if (inside_area_cube) {
+                break;
+              }
+            }
+
+            if (inside_area_cube) {
+              detection_msg.zone_id = zone_id;
+              std::cout << "DEBUG -- INSIDE ZONE: " << zone_id << std::endl;
+            } else {
+              // meaning they're in transit
+              detection_msg.zone_id = 1000;
+            } 
+          }
+              
+          // final check here 
+          // only add to message if no nans exist
+          if (check_detection_msg(detection_msg)){
+            std::cout << "valid detection!" << std::endl;
+            detection_msg.object_name=object_name;            
+            detection_array_msg->detections.push_back(detection_msg);
+        
+          cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
+          cv::putText(cv_image_clone, object_name, cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
+          // cv::imwrite("/home/nvidia/OUTPUTIMAGE.JPG", cv_image);
+          }
+        }
+      }
+  // this will publish empty detections if nothing is found
+  sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
+  detections_pub.publish(detection_array_msg);
+  //skeleton_pub.publish(skeleton_array);
+  image_pub.publish(imagemsg);
+  free(output->boxes);
+  free(output);  
+  }
+
 
   private:
     /**
