@@ -315,7 +315,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     // Detection correction by means of calibration refinement:
     if (calibration_refinement)
     {
-      std::cout << "Detection correction by means of calibration refinement" << std::endl;
+      //std::cout << "Detection correction by means of calibration refinement" << std::endl;
       if (strcmp(frame_id.substr(0,1).c_str(), "/") == 0)
       {
         frame_id = frame_id.substr(1, frame_id.size() - 1);
