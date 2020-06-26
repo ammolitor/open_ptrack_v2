@@ -215,6 +215,7 @@ readMatrixFromFile (std::string filename)
 void
 detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
 {
+  std::cout << "det message received!" << std::endl;
   // Read message header information:
   std::string frame_id = msg->header.frame_id;
   ros::Time frame_time = msg->header.stamp;
