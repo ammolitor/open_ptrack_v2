@@ -256,6 +256,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
                                  ros::Time::now(), frame_id, world_frame_id));
     }
     //Calculate direct and inverse transforms between camera and world frame:
+    std::cout << "Calculate direct and inverse transforms between camera and world frame" << std::endl;
     tf_listener->lookupTransform(world_frame_id, frame_id, ros::Time(0),
                                  transform);
     tf_listener->lookupTransform(frame_id, world_frame_id, ros::Time(0),
@@ -268,6 +269,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
         intrinsic_matrix(i, j) = msg->intrinsic_matrix[i * 3 + j];
 
     // Add a new DetectionSource or update an existing one:
+    std::cout << "Add a new DetectionSource or update an existing one" << std::endl;
     if(detection_sources_map.find(frame_id) == detection_sources_map.end())
     {
       detection_sources_map[frame_id] = new
@@ -288,6 +290,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
         detection_sources_map[frame_id];
 
     // Create a Detection object for every detection in the detection message:
+    std::cout << "Create a Detection object for every detection in the detection message" << std::endl;
     std::vector<open_ptrack::detection::Detection> detections_vector;
     for(std::vector<opt_msgs::Detection>::const_iterator it =
         msg->detections.begin();
@@ -298,6 +301,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     }
 
     // Convert HOG+SVM confidences to HAAR+ADABOOST-like people detection confidences:
+    std::cout << "Convert HOG+SVM confidences to HAAR+ADABOOST-like people detection confidences" << std::endl;
     if (not std::strcmp(msg->confidence_type.c_str(), "hog+svm"))
     {
       for(unsigned int i = 0; i < detections_vector.size(); i++)
@@ -311,6 +315,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     // Detection correction by means of calibration refinement:
     if (calibration_refinement)
     {
+      std::cout << "Detection correction by means of calibration refinement" << std::endl;
       if (strcmp(frame_id.substr(0,1).c_str(), "/") == 0)
       {
         frame_id = frame_id.substr(1, frame_id.size() - 1);
@@ -373,6 +378,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     // If at least one detection has been received:
     if((detections_vector.size() > 0) && (time_delay < max_detection_delay))
     {
+      std::cout << "If at least one detection has been received:" << std::endl;
       // Perform detection-track association:
 //      std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
       tracker->newFrame(detections_vector);
