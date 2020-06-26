@@ -269,7 +269,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
         intrinsic_matrix(i, j) = msg->intrinsic_matrix[i * 3 + j];
 
     // Add a new DetectionSource or update an existing one:
-    std::cout << "Add a new DetectionSource or update an existing one" << std::endl;
+    //std::cout << "Add a new DetectionSource or update an existing one" << std::endl;
     if(detection_sources_map.find(frame_id) == detection_sources_map.end())
     {
       detection_sources_map[frame_id] = new
