@@ -247,6 +247,7 @@ Tracker3D::appendToPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr& pointcloud
 int
 Tracker3D::createNewTrack(open_ptrack::detection::Detection& detection)
 {
+  std::cout << "detection.getConfidence(): " << detection.getConfidence() << std::endl;
   if(detection.getConfidence() < min_confidence_)
     return -1;
 
