@@ -379,6 +379,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     std::cout << "time_delay: " << time_delay << std::endl;
     std::cout << "max_detection_delay: " << max_detection_delay << std::endl;
     std::cout << "(time_delay < max_detection_delay): " << (time_delay < max_detection_delay) << std::endl;
+    std::cout << "detections_vector.size(): " << detections_vector.size() << std::endl;
     if((detections_vector.size() > 0) && (time_delay < max_detection_delay))
     {
       std::cout << "If at least one detection has been received:" << std::endl;
@@ -769,7 +770,7 @@ main(int argc, char** argv)
         world_frame_id,
         debug_mode,
         vertical);
-
+  std::cout << "debug_mode: " << debug_mode << std::endl;
   starting_index = 0;
 
   // Set up dynamic reconfiguration
