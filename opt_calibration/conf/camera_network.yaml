@@ -7,17 +7,21 @@ network:
   - pc: "xps8930-01"
     sensors:
       - type: realsense
-        id: "realsense_l"
-        serial: "919122071456"
+        id: "realsense_2"
+        serial: "919122070521"
         people_detector: hog
       - type: realsense
-        id: "realsense_r"
-        serial: "919122070521"
+        id: "realsense_4"
+        serial: "919122070953"
         people_detector: hog
   - pc: "xps8930-02"
     sensors:
       - type: realsense
-        id: "realsense_f"
+        id: "realsense_1"
+        serial: "919122071456"
+        people_detector: hog
+      - type: realsense
+        id: "realsense_3"
         serial: "919122071628"
         people_detector: hog
 
