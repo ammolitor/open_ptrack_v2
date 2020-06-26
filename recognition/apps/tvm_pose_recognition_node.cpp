@@ -2401,7 +2401,7 @@ class TVMPoseNode {
                   detection_msg.box_2D.width = int(pixel_width);
                   detection_msg.box_2D.height = int(pixel_height);
                   detection_msg.height = person_cluster.getHeight();
-                  detection_msg.confidence = person_cluster.getPersonConfidence();
+                  detection_msg.confidence = score; //person_cluster.getPersonConfidence();
                   detection_msg.distance = person_cluster.getDistance();
                   converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
                   converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
