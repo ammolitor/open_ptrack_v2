@@ -256,7 +256,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
                                  ros::Time::now(), frame_id, world_frame_id));
     }
     //Calculate direct and inverse transforms between camera and world frame:
-    std::cout << "Calculate direct and inverse transforms between camera and world frame" << std::endl;
+    //std::cout << "Calculate direct and inverse transforms between camera and world frame" << std::endl;
     tf_listener->lookupTransform(world_frame_id, frame_id, ros::Time(0),
                                  transform);
     tf_listener->lookupTransform(frame_id, world_frame_id, ros::Time(0),
@@ -290,7 +290,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
         detection_sources_map[frame_id];
 
     // Create a Detection object for every detection in the detection message:
-    std::cout << "Create a Detection object for every detection in the detection message" << std::endl;
+    //std::cout << "Create a Detection object for every detection in the detection message" << std::endl;
     std::vector<open_ptrack::detection::Detection> detections_vector;
     for(std::vector<opt_msgs::Detection>::const_iterator it =
         msg->detections.begin();
@@ -301,7 +301,7 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     }
 
     // Convert HOG+SVM confidences to HAAR+ADABOOST-like people detection confidences:
-    std::cout << "Convert HOG+SVM confidences to HAAR+ADABOOST-like people detection confidences" << std::endl;
+    //std::cout << "Convert HOG+SVM confidences to HAAR+ADABOOST-like people detection confidences" << std::endl;
     if (not std::strcmp(msg->confidence_type.c_str(), "hog+svm"))
     {
       for(unsigned int i = 0; i < detections_vector.size(); i++)
@@ -376,13 +376,13 @@ detection_cb(const opt_msgs::DetectionArray::ConstPtr& msg)
     }
 
     // If at least one detection has been received:
-    std::cout << "time_delay: " << time_delay << std::endl;
-    std::cout << "max_detection_delay: " << max_detection_delay << std::endl;
-    std::cout << "(time_delay < max_detection_delay): " << (time_delay < max_detection_delay) << std::endl;
-    std::cout << "detections_vector.size(): " << detections_vector.size() << std::endl;
+    //::cout << "time_delay: " << time_delay << std::endl;
+    //std::cout << "max_detection_delay: " << max_detection_delay << std::endl;
+    //std::cout << "(time_delay < max_detection_delay): " << (time_delay < max_detection_delay) << std::endl;
+    //std::cout << "detections_vector.size(): " << detections_vector.size() << std::endl;
     if((detections_vector.size() > 0) && (time_delay < max_detection_delay))
     {
-      std::cout << "If at least one detection has been received:" << std::endl;
+      //std::cout << "If at least one detection has been received:" << std::endl;
       // Perform detection-track association:
 //      std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
       tracker->newFrame(detections_vector);

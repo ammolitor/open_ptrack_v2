@@ -278,6 +278,7 @@ void
 Tracker3D::createDistanceMatrix()
 {
   distance_matrix_ = cv::Mat_<double>(tracks_.size(), detections_.size());
+  std::cout << "distance_matrix_ shape: (" << tracks_.size() << ", " << detections_.size() << ")" << std::endl;
   int track = 0;
   for(std::list<Track3D*>::const_iterator it = tracks_.begin(),
       end = tracks_.end(); it != end; it++)
@@ -459,6 +460,7 @@ Tracker3D::fillUnassociatedDetections()
       }
     }
   }
+  std::cout << "unassociated_detections_size: " << unassociated_detections_.size() << std::endl;
 }
 
 void
