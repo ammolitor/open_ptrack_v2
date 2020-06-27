@@ -909,6 +909,7 @@ class NoNMSPoseFromConfig{
         int pose_out_ndim = 4;
         int detector_out_ndim = 3;
         int max_yolo_boxes = 100;
+        int n_dets = 322560;
         // maybe we can dynamically set all of these
         int64_t tvm_id_and_score_size[3] = {1, 100, 1};
         int64_t tvm_box_size[3] = {1, 100, 4};
@@ -943,6 +944,7 @@ class NoNMSPoseFromConfig{
             pose_width = model_config["pose_width"]; //(256, 192)
             pose_height = model_config["pose_height"]; //(256, 192)
             gpu = model_config["gpu"];
+            n_dets = model_config["n_dets"];
             detector_total_input = 1 * 3 * detector_width * detector_height;
             pose_total_input = 1 * 3 * pose_width * pose_height;
 
@@ -1126,8 +1128,8 @@ class NoNMSPoseFromConfig{
             // copy to output
             //ulsMatF(int cols, int rows, int channels)
             //at(int channel, int row, int c
-            MatF yolo_output(6, 322560, 1); //ulsMatF yolo_output(1, 322560, 6);
-            TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* 322560 * 6 * sizeof(float));
+            MatF yolo_output(6, n_dets, 1); //ulsMatF yolo_output(1, n_dets, 6);
+            TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* n_dets * 6 * sizeof(float));
             std::cout << "TVMSynchronize finished" << std::endl;  
             
             std::cout << "starting nms" << std::endl;
