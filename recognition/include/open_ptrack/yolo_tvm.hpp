@@ -2383,7 +2383,7 @@ class NoNMSPoseFromConfig{
             std::vector<sortable_result> tvm_results;
             std::vector<sortable_result> proposals;
             proposals.clear();
-              (proposals, yolo_output, thresh, thresh, tvm_results);
+            tvm_nms_cpu(proposals, yolo_output, thresh, thresh, tvm_results);
             std::cout << "ending nms" << std::endl;
 
             // dynamically set?
