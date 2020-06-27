@@ -945,7 +945,7 @@ class NoNMSPoseFromConfig{
             pose_height = model_config["pose_height"]; //(256, 192)
             gpu = model_config["gpu"];
             n_dets = model_config["n_dets"];
-            no_nms_output_size[3] = {1, n_dets, 6};
+            no_nms_output_size[1] = n_dets;
             detector_total_input = 1 * 3 * detector_width * detector_height;
             pose_total_input = 1 * 3 * pose_width * pose_height;
 
