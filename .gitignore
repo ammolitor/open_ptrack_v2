@@ -24,3 +24,4 @@ venv/
 *tvm_models/main.cpp*
 *~
 *__pycache__*
+*include/open_ptrack/base_node*
