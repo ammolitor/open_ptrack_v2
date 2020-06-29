@@ -1761,8 +1761,6 @@ class TVMPoseNode {
 
     ros::Subscriber point_cloud_approximate_sync_;
 
-
-
     std::string encoding;
     float mm_factor = 1000.0f;
     float median_factor = 0.1;
@@ -1977,27 +1975,30 @@ class TVMPoseNode {
         //approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::callback, this, _1, _2, zone_json));
 
 
-        image_approximate_sync_.reset(new ImageApproximateSync(ImageApproximatePolicy(10), rgb_image_sub, depth_image_sub, cloud_sub));
+        //image_approximate_sync_.reset(new ImageApproximateSync(ImageApproximatePolicy(10), rgb_image_sub, depth_image_sub, cloud_sub));
         
         // default
-        if (mode == 0){
-          image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::callback, this, _1, _2, _3, zone_json));
-        }
-        // default
-        if (mode == 1){
-          if (pointcloud_only){
-            //point_cloud_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback_cloud_only, this, _1, zone_json));
-            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::mode_1_callback_cloud_only, this);
-          } else {
-            image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback, this, _1, _2, _3, zone_json));
-          }
-        }
+        //if (mode == 0){
+        //  image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::callback, this, _1, _2, _3, zone_json));
+        //}
+        //// default
+        //if (mode == 1){
+        //  if (pointcloud_only){
+        //    //point_cloud_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback_cloud_only, this, _1, zone_json));
+        //    point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::mode_1_callback_cloud_only, this);
+        ///  } else {
+        //    image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_1_callback, this, _1, _2, _3, zone_json));
+        //  }
+        //}
 
 
-        // default
-        if (mode == 2){
-          image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_2_callback, this, _1, _2, _3, zone_json));
-        }
+        //// default
+        //if (mode == 2){
+        //  image_approximate_sync_->registerCallback(boost::bind(&TVMPoseNode::mode_2_callback, this, _1, _2, _3, zone_json));
+        //}
+
+        point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::mode_1_callback_cloud_only, this);
+
 
         // create callback config 
         //cfg_server.setCallback(boost::bind(&TVMPoseNode::cfg_callback, this, _1, _2));      
@@ -2056,7 +2057,7 @@ class TVMPoseNode {
       }
     }
 
-    void setBackground (PointCloudPtr& background_cloud)
+    void set_background (PointCloudPtr& background_cloud)
     {
       // Voxel grid filtering:
       std::cout << "starting voxel grid filtering: " << std::endl;
@@ -2079,7 +2080,7 @@ class TVMPoseNode {
       std::cout << "background cloud done." << std::endl << std::endl;
     }
 
-    PointCloudT::Ptr computeBackgroundCloud (PointCloudPtr& cloud){
+    PointCloudT::Ptr compute_background_cloud (PointCloudPtr& cloud){
       std::cout << "Background acquisition..." << std::flush;
       // Initialization for background subtraction:
       //PointCloudT::Ptr background_cloud = PointCloudT::Ptr (new PointCloudT);
@@ -2096,21 +2097,21 @@ class TVMPoseNode {
       if (pcl::io::loadPCDFile<PointT> ("/tmp/background_" + sensor_name + ".pcd", *background_cloud) == -1)
       {
         // File not found, then background acquisition:
-        //computeBackgroundCloud (max_background_frames, voxel_size, frame_id, rate, background_cloud);
+        //compute_background_cloud (max_background_frames, voxel_size, frame_id, rate, background_cloud);
         std::cout << "could not find background file, begining generation..." << std::endl;
         // Create background cloud:
         background_cloud->header = cloud->header;
         background_cloud->points.clear();
 
         PointCloudT::Ptr cloud_filtered(new PointCloudT);
-        cloud_filtered = preprocessCloud (cloud);
+        cloud_filtered = preprocess_cloud (cloud);
         *background_cloud += *cloud_filtered;
       }
       n_frame+=1;
       return background_cloud;
     }
 
-    PointCloudPtr preprocessCloud (PointCloudPtr& input_cloud)
+    PointCloudPtr preprocess_cloud (PointCloudPtr& input_cloud)
     {
       std::cout << "preprocessing cloud." << std::endl;
       // Downsample of sampling_factor in every dimension:
@@ -2151,8 +2152,8 @@ class TVMPoseNode {
       //creating foreground cloud
       //create_foreground_cloud cloud: 307200
       //preprocessing cloud.
-      //preprocessCloud downsampled size: 19200
-      //preprocessCloud cloud_denoised size: 15652
+      //preprocess_cloud downsampled size: 19200
+      //preprocess_cloud cloud_denoised size: 15652
       //create_foreground_cloud cloud_filtered: 2
       //create_foreground_cloud: removing background
       //create_foreground_cloud no_ground_cloud_: 2
@@ -2172,7 +2173,7 @@ class TVMPoseNode {
           }
         }
       }
-      std::cout << "preprocessCloud downsampled size: " << cloud_downsampled->size() << std::endl;
+      std::cout << "preprocess_cloud downsampled size: " << cloud_downsampled->size() << std::endl;
 
       if (apply_denoising_)
       {
@@ -2186,7 +2187,7 @@ class TVMPoseNode {
         sor.setStddevMulThresh (std_dev_denoising);
         sor.filter (*cloud_denoised);
       }
-      std::cout << "preprocessCloud cloud_denoised size: " << cloud_denoised->size() << std::endl;
+      std::cout << "preprocess_cloud cloud_denoised size: " << cloud_denoised->size() << std::endl;
       
       //  // Denoising viewer
       //  int v1(0);
@@ -2221,12 +2222,12 @@ class TVMPoseNode {
       else
         voxel_grid_filter_object.setFilterLimits(0.0, max_distance);
       voxel_grid_filter_object.filter (*cloud_filtered);
-      std::cout << "preprocessCloud cloud_filtered: " << cloud_filtered->size() << std::endl;
+      std::cout << "preprocess_cloud cloud_filtered: " << cloud_filtered->size() << std::endl;
 
       return cloud_filtered;
     }
 
-    PointCloudPtr rotateCloud(PointCloudPtr cloud, Eigen::Affine3f transform ){
+    PointCloudPtr rotate_cloud(PointCloudPtr cloud, Eigen::Affine3f transform ){
       std::cout << "rotating cloud." << std::endl;
         PointCloudPtr rotated_cloud (new PointCloud);
         pcl::transformPointCloud(*cloud, *rotated_cloud, transform);
@@ -2234,7 +2235,7 @@ class TVMPoseNode {
         return rotated_cloud;
       }
 
-    Eigen::VectorXf rotateGround( Eigen::VectorXf ground_coeffs, Eigen::Affine3f transform){
+    Eigen::VectorXf rotate_ground( Eigen::VectorXf ground_coeffs, Eigen::Affine3f transform){
       std::cout << "rotating ground cloud." << std::endl;
       Eigen::VectorXf the_ground_coeffs_new;
 
@@ -2259,7 +2260,7 @@ class TVMPoseNode {
       }
 
       // Rotate them:
-      dummy = rotateCloud(dummy, transform);
+      dummy = rotate_cloud(dummy, transform);
 
       // Compute new ground coeffs:
       std::vector<int> indices;
@@ -2338,7 +2339,7 @@ class TVMPoseNode {
       std::cout << "create_foreground_cloud cloud: " << cloud->size() << std::endl;
       // Point cloud pre-processing (downsampling and filtering):
       PointCloudPtr cloud_filtered(new PointCloud);
-      cloud_filtered = preprocessCloud(cloud);
+      cloud_filtered = preprocess_cloud(cloud);
       std::cout << "create_foreground_cloud cloud_filtered: " << cloud_filtered->size() << std::endl;
 
       // set background cloud here
@@ -2422,9 +2423,9 @@ class TVMPoseNode {
 
         // Setting also anti_transform for later
         anti_transform_ = transform_.inverse();
-        no_ground_cloud_rotated = rotateCloud(no_ground_cloud_, transform_);
+        no_ground_cloud_rotated = rotate_cloud(no_ground_cloud_, transform_);
         ground_coeffs_new.resize(4);
-        ground_coeffs_new = rotateGround(ground_coeffs, transform_);
+        ground_coeffs_new = rotate_ground(ground_coeffs, transform_);
       }
       else
       {
@@ -2762,9 +2763,9 @@ class TVMPoseNode {
         std::cout << "background frame n: " << n_frame << std::endl;
         PointCloudT::Ptr newcloud(new PointCloudT);
         *newcloud = *cloud_;
-        background_cloud = computeBackgroundCloud(newcloud);
+        background_cloud = compute_background_cloud(newcloud);
         if (n_frame >= n_frames){
-          setBackground(background_cloud);
+          set_background(background_cloud);
           set_background = false;
         }
       }

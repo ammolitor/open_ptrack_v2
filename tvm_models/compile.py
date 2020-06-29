@@ -372,11 +372,16 @@ def compile_nonms_object_detector(use_compiler=False):
     print(target)
     block = yolo3_mobilenet1_0_coco(pretrained=True)
     block.hybridize(static_alloc=True)
-    x = np.random.randn(MODEL_CONFIG["object_detector"]["shape"])
+    x = np.random.randn(*MODEL_CONFIG["object_detector"]["shape"])
     x = mx.nd.array(x)
     x = block(x)
     N_DETS = x.shape[1]
-    print(N_DETS)
+    print("*********")
+    print("*** WARNING ***")
+    print("*********")
+    print("Make sure you add 'n_dets' output in pose_model.json")
+    print("n_dets: {}".format(N_DETS))
+    print("*********")
     mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["nonms_object_detector"]["shape"]}, dtype='float32')
     #net = mod["main"]
     # fused_nn_softmax: num_args should be 4

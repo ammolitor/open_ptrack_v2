@@ -5,5 +5,6 @@
   "device_id":              0,
   "width" :                 512,
   "height" :                512,
-  "gpu" :                   true
+  "gpu" :                   true,
+  "n_dets":                 1290240
 }
