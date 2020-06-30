@@ -2125,7 +2125,6 @@ class PoseFromConfig{
         }
 };
 
-
 class NoNMSPoseFromConfig{
     private:
         //working: void * handle;
@@ -2155,11 +2154,13 @@ class NoNMSPoseFromConfig{
         int pose_out_ndim = 4;
         int detector_out_ndim = 3;
         int max_yolo_boxes = 100;
+        int n_dets = 322560;
         // maybe we can dynamically set all of these
         int64_t tvm_id_and_score_size[3] = {1, 100, 1};
         int64_t tvm_box_size[3] = {1, 100, 4};
         int64_t tvm_heatmap_size[4] = {1, 17, 64, 48};
         int64_t no_nms_output_size[3] = {1, 322560, 6};
+        float thresh = 0.3f;
 
         /**
          * function that reads both the yolo detector and the pose detector
@@ -2189,10 +2190,11 @@ class NoNMSPoseFromConfig{
             pose_width = model_config["pose_width"]; //(256, 192)
             pose_height = model_config["pose_height"]; //(256, 192)
             gpu = model_config["gpu"];
+            n_dets = model_config["n_dets"];
+            no_nms_output_size[1] = n_dets;
             detector_total_input = 1 * 3 * detector_width * detector_height;
             pose_total_input = 1 * 3 * pose_width * pose_height;
-            //no_nms_output_size[3] = {1, 322560, 6};
-            // n_dets = = model_config["n_dets"];
+            thresh = model_config["threshold"];
 
             std::string detector_deploy_lib_path = package_path + detector_lib_path;
             std::string detector_deploy_graph_path = package_path + detector_graph_path;
@@ -2284,7 +2286,7 @@ class NoNMSPoseFromConfig{
             return normalized_image;
         }
 
-        pose_results* forward_full(cv::Mat frame, float thresh)
+        pose_results* forward_full(cv::Mat frame)
         {
             std::cout << "starting function" << std::endl;
             // get height/width dynamically
@@ -2374,8 +2376,8 @@ class NoNMSPoseFromConfig{
             // copy to output
             //ulsMatF(int cols, int rows, int channels)
             //at(int channel, int row, int c
-            MatF yolo_output(6, 322560, 1); //ulsMatF yolo_output(1, 322560, 6);
-            TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* 322560 * 6 * sizeof(float));
+            MatF yolo_output(6, n_dets, 1); //ulsMatF yolo_output(1, n_dets, 6);
+            TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* n_dets * 6 * sizeof(float));
             std::cout << "TVMSynchronize finished" << std::endl;  
             
             std::cout << "starting nms" << std::endl;
@@ -2426,7 +2428,6 @@ class NoNMSPoseFromConfig{
             float fwidth = static_cast<float>(img_width);
             int new_num = 0;
             for (int i = 0; i < tvm_results.size(); ++i) {
-
 
                 float xmin;
                 float ymin;
@@ -2776,6 +2777,8 @@ class NoNMSYoloFromConfig{
         int max_yolo_boxes = 100;
         // maybe we can dynamically set all of these
         int64_t no_nms_output_size[3] = {1, 322560, 6};
+        float thresh = 0.3f;
+        int n_dets;
 
         /**
          * function that reads both the yolo detector and the pose detector
@@ -2799,7 +2802,9 @@ class NoNMSYoloFromConfig{
             detector_width = model_config["detector_width"]; //(512,512)
             detector_height = model_config["detector_height"]; //(512,512)
             gpu = model_config["gpu"];
-            //n_dets = model_config['n_dets'];
+            n_dets = model_config["n_dets"];
+            no_nms_output_size[1] = n_dets;
+            thresh = model_config["threshold"];
             detector_total_input = 1 * 3 * detector_width * detector_height;
 
             std::string detector_deploy_lib_path = package_path + detector_lib_path;
@@ -2866,7 +2871,7 @@ class NoNMSYoloFromConfig{
             return normalized_image;
         }
 
-        yoloresults* forward_full(cv::Mat frame, float thresh)
+        yoloresults* forward_full(cv::Mat frame)
         {
             std::cout << "starting function" << std::endl;
             // get height/width dynamically
@@ -2946,8 +2951,8 @@ class NoNMSYoloFromConfig{
             // copy to output
             //ulsMatF(int cols, int rows, int channels)
             //at(int channel, int row, int c
-            MatF yolo_output(6, 322560, 1); //ulsMatF yolo_output(6, n_dets, 1);
-            TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* 322560 * 6 * sizeof(float));
+            MatF yolo_output(6, n_dets, 1); //ulsMatF yolo_output(6, n_dets, 1);
+            TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* n_dets * 6 * sizeof(float));
             //TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* n_dets * 6 * sizeof(float));
             std::cout << "TVMSynchronize finished" << std::endl;  
             
