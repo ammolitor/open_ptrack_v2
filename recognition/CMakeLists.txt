@@ -177,7 +177,15 @@ add_library(${PROJECT_NAME}
   src/pose_node.cpp
   )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} PUBLIC Threads::Threads ${OpenCV_LIBS} 
+                                          ${catkin_LIBRARIES}
+                                          ${LINKER_LIBS}
+                                          facedetection
+                                          ${CUDA_CUDA_LIBRARY}
+                                          ${CUDA_CUDART_LIBRARY}
+                                          ${CUDA_CURAND_LIBRARY}
+                                          ${CUDA_CUDNN_LIBRARY}
+                                          ${TVM_RUNTIME_LINKER_LIBS})
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 
 
