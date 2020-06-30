@@ -177,7 +177,7 @@ add_library(${PROJECT_NAME}
   src/pose_node.cpp
   )
 
-target_link_libraries(${PROJECT_NAME}  PUBLIC Threads::Threads ${OpenCV_LIBS} 
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES}
                                           ${LINKER_LIBS}
                                           facedetection
@@ -185,11 +185,12 @@ target_link_libraries(${PROJECT_NAME}  PUBLIC Threads::Threads ${OpenCV_LIBS}
                                           ${CUDA_CUDART_LIBRARY}
                                           ${CUDA_CURAND_LIBRARY}
                                           ${CUDA_CUDNN_LIBRARY}
-                                          ${TVM_RUNTIME_LINKER_LIBS})
+                                          ${TVM_RUNTIME_LINKER_LIBS}
+                                          include/open_ptrack/yolo_tvm.hpp)
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
-
-
-
+target_include_directories(face_detection_extraction_node PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(face_detection_extraction_node PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(face_detection_extraction_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 message(STATUS LINKER_LIBS: "${LINKER_LIBS}")
 message(STATUS OPENCV_LIBS: "${OpenCV_LIBS}")
