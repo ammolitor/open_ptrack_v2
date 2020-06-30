@@ -2113,7 +2113,7 @@ class TVMPoseNode {
         std::cout << "running yolo" << std::endl;
         // forward inference of object detector
         begin = ros::Time::now();
-        output = tvm_pose_detector->forward_full(cv_image, .3);
+        output = tvm_pose_detector->forward_full(cv_image);
         duration = ros::Time::now().toSec() - begin.toSec();
         std::cout << "yolo detection time: " << duration << std::endl;
         std::cout << "yolo detections: " << output->num << std::endl;

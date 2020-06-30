@@ -305,7 +305,7 @@ class TVMDetectionNode {
       std::cout << "running yolo" << std::endl;
       // forward inference of object detector
       begin = ros::Time::now();
-      output = tvm_object_detector->forward_full(cv_image, .3);
+      output = tvm_object_detector->forward_full(cv_image);
       duration = ros::Time::now().toSec() - begin.toSec();
       printf("yolo detection time: %f\n", duration);
       printf("yolo detections: %ld\n", output->num);
