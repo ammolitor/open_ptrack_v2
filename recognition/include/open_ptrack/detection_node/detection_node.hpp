@@ -1,8 +1,5 @@
 
 #include <open_ptrack/detection_node/detection_node.h>
-#include<iostream>
-#include<fstream>
-using namespace std;
 
 /**
  * @brief The DetectionNode constructor

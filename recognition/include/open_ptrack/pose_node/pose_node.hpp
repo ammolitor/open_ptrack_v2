@@ -1,8 +1,5 @@
 
 #include <open_ptrack/pose_node/pose_node.h>
-#include<iostream>
-#include<fstream>
-using namespace std;
 
 /**
  * @brief The PoseNode constructor
