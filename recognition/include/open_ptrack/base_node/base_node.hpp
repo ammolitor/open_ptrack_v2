@@ -1,4 +1,3 @@
-
 #include <open_ptrack/base_node/base_node.h>
 #include<iostream>
 #include<fstream>

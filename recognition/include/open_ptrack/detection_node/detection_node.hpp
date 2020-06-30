@@ -1,4 +1,3 @@
-
 #include <open_ptrack/detection_node/detection_node.h>
 
 /**

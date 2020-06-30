@@ -1,7 +1,7 @@
 #include <open_ptrack/base_node/base_node.h>
 
-//#ifndef OPEN_PTRACK_POSE_NODE_POSE_NODE_H_
-//#define OPEN_PTRACK_POSE_NODE_POSE_NODE_H_
+#ifndef OPEN_PTRACK_POSE_NODE_POSE_NODE_H_
+#define OPEN_PTRACK_POSE_NODE_POSE_NODE_H_
 
 namespace open_ptrack
 {

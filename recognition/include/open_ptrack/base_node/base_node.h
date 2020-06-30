@@ -141,8 +141,8 @@ typedef boost::shared_ptr<PointCloud> PointCloudPtr;
 typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
 
-//#ifndef OPEN_PTRACK_BASE_NODE_BASE_NODE_H_
-//#define OPEN_PTRACK_BASE_NODE_BASE_NODE_H_
+#ifndef OPEN_PTRACK_BASE_NODE_BASE_NODE_H_
+#define OPEN_PTRACK_BASE_NODE_BASE_NODE_H_
 
 namespace open_ptrack
 {
