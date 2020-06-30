@@ -24,14 +24,14 @@ void open_ptrack::hand_detection_node::HandDetectionNode::basic_callback(const P
 
   std::cout << "running algorithm callback" << std::endl;
 
-  if (set_background){
+  if (setbackground){
     std::cout << "background frame n: " << n_frame << std::endl;
     PointCloudT::Ptr newcloud(new PointCloudT);
     *newcloud = *cloud_;
     background_cloud = compute_background_cloud(newcloud);
     if (n_frame >= n_frames){
       set_background(background_cloud);
-      set_background = false;
+      setbackground = false;
     }
   } else { 
     // background is set

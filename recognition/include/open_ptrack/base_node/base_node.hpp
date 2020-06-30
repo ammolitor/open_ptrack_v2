@@ -72,7 +72,7 @@ void open_ptrack::base_node::BaseNode::extract_RGB_from_pointcloud (PointCloudPt
   }
 }
 
-void open_ptrack::base_node::BaseNode::set_background (PointCloudPtr& background_cloud){
+void open_ptrack::base_node::BaseNode::setbackground (PointCloudPtr& background_cloud){
   // Voxel grid filtering:
   std::cout << "starting voxel grid filtering: " << std::endl;
   PointCloudT::Ptr cloud_filtered(new PointCloudT);

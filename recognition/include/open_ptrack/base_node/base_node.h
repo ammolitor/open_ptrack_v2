@@ -150,8 +150,7 @@ namespace open_ptrack
   {
 
     /** \brief BaseNode estimates the ground plane equation from a 3D point cloud */
-    class BaseNode
-    {
+    class BaseNode {
       private:
         ros::NodeHandle node_;
         ros::Subscriber point_cloud_approximate_sync_;
@@ -255,7 +254,7 @@ namespace open_ptrack
         bool use_rgb_ = true;
         int n_frame = 0;
         int n_frames = 15;
-        bool set_background = true;
+        bool setbackground = true;
         float sqrt_ground_coeffs;
 
         //###################################
@@ -374,7 +373,7 @@ namespace open_ptrack
          *
          * \param[in]input cloud from camera
          */
-        //void callback(const PointCloudT::ConstPtr& cloud_)
+        // void callback(const PointCloudT::ConstPtr& cloud_)
 
     };
   } /* namespace base_node */
