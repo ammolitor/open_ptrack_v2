@@ -177,7 +177,7 @@ add_library(${PROJECT_NAME}
   src/pose_node.cpp
   )
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} PUBLIC Threads::Threads ${OpenCV_LIBS} 
+target_link_libraries(${PROJECT_NAME}  PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES}
                                           ${LINKER_LIBS}
                                           facedetection
