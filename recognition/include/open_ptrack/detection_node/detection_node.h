@@ -37,6 +37,5 @@ namespace open_ptrack
     };
   } /* namespace base_node */
 } /* namespace open_ptrack */
-#include <open_ptrack/detection_node/detection_node.hpp>
 #endif /* OPEN_PTRACK_DETECTION_NODE_DETECTION_NODE_H_ */
 

@@ -1874,7 +1874,7 @@ class TVMPoseNode {
     //json zone_json;
     int n_frame = 0;
     int n_frames = 15;
-    bool set_background = true;
+    bool setbackground = true;
     float sqrt_ground_coeffs;
     pcl::octree::OctreePointCloud<PointT> *background_octree_;
     // Initialize transforms to be used to correct sensor tilt to identity matrix:
@@ -2759,14 +2759,14 @@ class TVMPoseNode {
 
       std::cout << "running algorithm callback" << std::endl;
 
-      if (set_background){
+      if (setbackground){
         std::cout << "background frame n: " << n_frame << std::endl;
         PointCloudT::Ptr newcloud(new PointCloudT);
         *newcloud = *cloud_;
         background_cloud = compute_background_cloud(newcloud);
         if (n_frame >= n_frames){
           set_background(background_cloud);
-          set_background = false;
+          setbackground = false;
         }
       }
       else

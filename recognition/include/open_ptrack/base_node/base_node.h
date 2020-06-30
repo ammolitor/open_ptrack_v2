@@ -378,6 +378,5 @@ namespace open_ptrack
     };
   } /* namespace base_node */
 } /* namespace open_ptrack */
-#include <open_ptrack/base_node/base_node.hpp>
 #endif /* OPEN_PTRACK_BASE_NODE_BASE_NODE_H_ */
 

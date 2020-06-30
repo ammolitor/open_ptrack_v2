@@ -38,6 +38,5 @@ namespace open_ptrack
     };
   } /* namespace base_node */
 } /* namespace open_ptrack */
-#include <open_ptrack/hand_detection_node/hand_detection_node.hpp>
 #endif /* OPEN_PTRACK_HAND_DETECTION_NODE_HAND_DETECTION_NODE_H_ */
 

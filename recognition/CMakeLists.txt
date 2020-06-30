@@ -168,6 +168,21 @@ ADD_LIBRARY(facedetection
 #ADD_LIBRARY(object_detection
 #        include/open_ptrack/yolo_tvm.hpp)
 
+
+
+add_library(${PROJECT_NAME}
+  src/base_node.cpp
+  src/detection_node.cpp
+  src/hand_detection_node.cpp
+  src/pose_node.cpp
+  )
+
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
+
+
+
+
 message(STATUS LINKER_LIBS: "${LINKER_LIBS}")
 message(STATUS OPENCV_LIBS: "${OpenCV_LIBS}")
 
@@ -342,12 +357,6 @@ target_compile_definitions(tvm_pose_recognition_node PUBLIC TVM_CUDA_RUNTIME=1)
 target_compile_definitions(tvm_pose_recognition_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
-
-
-
-
-
-
 
 
 
