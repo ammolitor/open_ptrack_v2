@@ -368,8 +368,7 @@ namespace open_ptrack
          * \param[in] empty 2d cluster vector
          * \param[in] empty 3d cluster vector
          */
-        void compute_head_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point2f> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d){
-
+        void compute_head_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, std::vector<cv::Point2f> cluster_centroids2d, std::vector<cv::Point3f> cluster_centroids3d);
         /**
          * \brief callback function to perform detection, pose-rec, etc.
          *
