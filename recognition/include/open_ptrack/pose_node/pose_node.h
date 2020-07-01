@@ -15,7 +15,7 @@ namespace open_ptrack
         std::unique_ptr<NoNMSPoseFromConfig> tvm_pose_detector;
         // Publishers
         ros::Publisher detections_pub;
-        ros::Publisher skeletons_pub;
+        ros::Publisher skeleton_pub;
         image_transport::Publisher image_pub;
 
       public:

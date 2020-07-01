@@ -294,7 +294,7 @@ namespace open_ptrack
 
                   //std::vector<cv::Point3f> points = output->boxes[i].points;
                   //int num_parts = points.size();
-                  std::cout << "num_parts: " << num_parts << std::endl;
+                  //std::cout << "num_parts: " << num_parts << std::endl;
 
                   // set the median of the bounding box
                   float median_x = xmin + ((xmax - xmin) / 2.0);

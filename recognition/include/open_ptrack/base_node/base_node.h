@@ -386,6 +386,10 @@ namespace open_ptrack
         // void callback(const PointCloudT::ConstPtr& cloud_)
         bool check_detection_msg(opt_msgs::Detection detection_msg);
 
+
+        void draw_skelaton(cv::Mat cv_image_clone, std::vector<cv::Point3f> points);
+
+
     };
   } /* namespace base_node */
 } /* namespace open_ptrack */
