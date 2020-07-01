@@ -9,7 +9,7 @@ namespace open_ptrack
   {
 
     /** \brief DetectionNode estimates the ground plane equation from a 3D point cloud */
-    class HandDetectionNode: public BaseNode
+    class HandDetectionNode: public open_ptrack::base_node::BaseNode
     {
       private:
         std::unique_ptr<NoNMSYoloFromConfig> tvm_object_detector;
