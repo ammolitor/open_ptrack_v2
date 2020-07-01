@@ -187,7 +187,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads ${OpenCV_LIBS}
                                           ${CUDA_CURAND_LIBRARY}
                                           ${CUDA_CUDNN_LIBRARY}
                                           ${TVM_RUNTIME_LINKER_LIBS}
-                                            )
+                                          ${TORCH_LIBRARIES}
+                                          )
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 
 message(STATUS LINKER_LIBS: "${LINKER_LIBS}")
