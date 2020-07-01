@@ -8,7 +8,7 @@ namespace open_ptrack
     /**
      * @brief The DetectionNode constructor
      */
-    DetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
+    DetectionNode::DetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
       //open_ptrack::base_node::BaseNode(nh, sensor_string, json_zone)
       BaseNode(nh, sensor_string, json_zone)
       {

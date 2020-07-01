@@ -11,7 +11,7 @@ namespace open_ptrack
     /**
      * @brief The TVMPoseNode
      */
-    BaseNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
+    BaseNode::BaseNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
           node_(nh), it(node_)
           {
             try
@@ -47,8 +47,8 @@ namespace open_ptrack
             zone_json = zone;
             rgb_image_ = pcl::PointCloud<pcl::RGB>::Ptr(new pcl::PointCloud<pcl::RGB>);
           }
-
-    BaseNode::camera_info_callback(const CameraInfo::ConstPtr & msg){
+  
+    void BaseNode::camera_info_callback(const CameraInfo::ConstPtr & msg){
       intrinsics_matrix << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
       cam_intrins_ << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
       _cx = msg->K[2];
