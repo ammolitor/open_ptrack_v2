@@ -10,7 +10,7 @@ namespace open_ptrack
      * @brief The PoseNode constructor
      */
     PoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
-      open_ptrack::base_node::BaseNode(nh, sensor_string, json_zone)
+      BaseNode(nh, sensor_string, json_zone)
       {
         // Publish Messages
         detections_pub = node_.advertise<opt_msgs::DetectionArray>("/objects_detector/detections", 3);
