@@ -158,7 +158,9 @@ namespace open_ptrack
         image_transport::Publisher image_pub;
         ros::ServiceServer camera_info_matrix_server;
         ros::Subscriber camera_info_matrix;
-        
+        tf::TransformListener tf_listener;
+        tf::Transform worldToCamTransform;
+
       public:
 
         typedef pcl::PointCloud<PointT> PointCloud;
@@ -262,8 +264,9 @@ namespace open_ptrack
         std::vector<cv::Point3f> cluster_centroids3d;
         std::vector<cv::Point2f> yolo_centroids2d;
         std::vector<cv::Point3f> yolo_centroids3d;
-         pcl::PointCloud<pcl::RGB>::Ptr rgb_image_;
- 
+        pcl::PointCloud<pcl::RGB>::Ptr rgb_image_;
+        float mm_factor = 1000.0f;
+        float median_factor = 0.1;
         //###################################
         //## Detection Variables ##
         //###################################
@@ -326,7 +329,7 @@ namespace open_ptrack
          *
          * \param[in] pointer to the input_cloud point cloud.
          */
-        PointCloudPtr rotate_cloud (PointCloudPtr& input_cloud);
+        PointCloudPtr rotate_cloud(PointCloudPtr cloud, Eigen::Affine3f transform );
 
         /**
          * \brief function to rotate the ground.

@@ -16,7 +16,7 @@ namespace open_ptrack
         // Publish Messages
         detections_pub = node_.advertise<opt_msgs::DetectionArray>("/hand_detector/detections", 3);
         image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
-        tvm_object_detector_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
+        tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
       }
 
 
