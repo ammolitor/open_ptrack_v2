@@ -37,9 +37,9 @@ namespace open_ptrack
             image_pub = it.advertise(sensor_string + "/image", 1);
 
             // Camera callback for intrinsics matrix update
-            camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMPoseNode::camera_info_callback, this);
+            camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &BaseNode::camera_info_callback, this);
 
-            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::mode_1_callback_cloud_only, this);
+            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &BaseNode::mode_1_callback_cloud_only, this);
 
             sensor_name = sensor_string;
             transform = transform.Identity();

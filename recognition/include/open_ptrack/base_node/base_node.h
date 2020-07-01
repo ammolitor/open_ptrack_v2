@@ -151,12 +151,13 @@ namespace open_ptrack
 
     /** \brief BaseNode estimates the ground plane equation from a 3D point cloud */
     class BaseNode {
-      private:
+      public:
         ros::NodeHandle node_;
         ros::Subscriber point_cloud_approximate_sync_;
         image_transport::ImageTransport it;
         image_transport::Publisher image_pub;
         ros::ServiceServer camera_info_matrix_server;
+        ros::Subscriber camera_info_matrix;
         
       public:
 
@@ -261,7 +262,8 @@ namespace open_ptrack
         std::vector<cv::Point3f> cluster_centroids3d;
         std::vector<cv::Point2f> yolo_centroids2d;
         std::vector<cv::Point3f> yolo_centroids3d;
-
+         pcl::PointCloud<pcl::RGB>::Ptr rgb_image_;
+ 
         //###################################
         //## Detection Variables ##
         //###################################

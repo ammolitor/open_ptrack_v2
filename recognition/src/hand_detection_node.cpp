@@ -11,7 +11,7 @@ namespace open_ptrack
      */
     HandDetectionNode::HandDetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
       //open_ptrack::base_node::BaseNode(nh, sensor_string, json_zone)
-      open_ptrack::base_node::BaseNode(nh, sensor_string, json_zone)
+      open_ptrack::base_node::BaseNode(nh, sensor_string, zone)
       {
         // Publish Messages
         detections_pub = node_.advertise<opt_msgs::DetectionArray>("/hand_detector/detections", 3);

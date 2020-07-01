@@ -10,7 +10,7 @@ namespace open_ptrack
      */
     DetectionNode::DetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
       //open_ptrack::base_node::BaseNode(nh, sensor_string, json_zone)
-      open_ptrack::base_node::BaseNode(nh, sensor_string, json_zone)
+      open_ptrack::base_node::BaseNode(nh, sensor_string, zone)
       {
         // Publish Messages
         detections_pub = node_.advertise<opt_msgs::DetectionArray>("/objects_detector/detections", 3);
