@@ -58,7 +58,7 @@
 #include <opt_msgs/SkeletonMsg.h>
 #include <opt_msgs/SkeletonArrayMsg.h>
 
-#include <open_ptrack/yolo_tvm.hpp>
+
 #include <dynamic_reconfigure/server.h>
 // TODO change to proper config
 //#include <recognition/GenDetectionConfig.h>
