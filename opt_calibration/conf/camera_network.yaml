@@ -7,18 +7,32 @@ network:
   - pc: "xps8930-01"
     sensors:
       - type: realsense
-        id: "realsense_l"
-        serial: "919122071456"
+        id: "realsense_1"
+        serial: "935422071314"
         people_detector: hog
       - type: realsense
-        id: "realsense_r"
-        serial: "919122070521"
+        id: "realsense_2"
+        serial: "935322070666"
         people_detector: hog
   - pc: "xps8930-02"
     sensors:
       - type: realsense
-        id: "realsense_f"
-        serial: "919122071628"
+        id: "realsense_3"
+        serial: "935322071978"
+        people_detector: hog
+      - type: realsense
+        id: "realsense_4"
+        serial: "937622072090"
+        people_detector: hog
+  - pc: "xps8930-03"
+    sensors:
+      - type: realsense
+        id: "realsense_5"
+        serial: "935422070107"
+        people_detector: hog
+      - type: realsense
+        id: "realsense_6"
+        serial: "938422076343"
         people_detector: hog
 
 # Checkerboard parameters
