@@ -12,7 +12,6 @@
 #include <thread>
 #include <chrono>
 #include <open_ptrack/pose_node/pose_node.h>
-#include <open_ptrack/base_node/base_node.h>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
