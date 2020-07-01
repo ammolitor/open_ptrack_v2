@@ -494,7 +494,7 @@ namespace open_ptrack
       cv::Mat cv_image_clone;
       
       // set detection variables here
-      pose_results* output;
+      yoloresults* output;
       cv::Size image_size;
       float height;
       float width;
