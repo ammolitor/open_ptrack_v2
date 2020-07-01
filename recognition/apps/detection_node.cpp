@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
   std::cout << "sensor_name: " << sensor_name << std::endl;
-  DetectionNode node(nh, sensor_name, zone_json);
+  open_ptrack::detection_node::DetectionNode node(nh, sensor_name, zone_json);
   std::cout << "pose node initialized " << std::endl;
   ros::spin();
   return 0;
