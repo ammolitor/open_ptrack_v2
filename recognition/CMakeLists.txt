@@ -176,9 +176,6 @@ add_library(${PROJECT_NAME}
   src/detection_node.cpp
   src/hand_detection_node.cpp
   src/pose_node.cpp
-  include/open_ptrack/yolo_tvm.hpp
-  include/open_ptrack/hungarian/Hungarian.cpp
-  include/open_ptrack/hungarian/Hungarian.h
   )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads ${OpenCV_LIBS} 
