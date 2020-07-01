@@ -12,9 +12,10 @@ namespace open_ptrack
     class PoseNode: public open_ptrack::base_node::BaseNode
     {
       private:
-        std::unique_ptr<NoNMSYoloFromConfig> tvm_object_detector;
+        std::unique_ptr<NoNMSPoseFromConfig> tvm_pose_detector;
         // Publishers
         ros::Publisher detections_pub;
+        ros::Publisher skeletons_pub;
         image_transport::Publisher image_pub;
 
       public:
