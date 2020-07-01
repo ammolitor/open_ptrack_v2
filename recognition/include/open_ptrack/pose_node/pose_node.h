@@ -9,7 +9,7 @@ namespace open_ptrack
   {
 
     /** \brief PoseNode estimates the ground plane equation from a 3D point cloud */
-    class PoseNode: public open_ptrack::base_node::BaseNode
+    class PoseNode: public BaseNode
     {
       private:
         std::unique_ptr<NoNMSPoseFromConfig> tvm_pose_detector;
@@ -26,7 +26,7 @@ namespace open_ptrack
         int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
         /** \brief PoseNode Constructor. */
         PoseNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
-            open_ptrack::base_node::BaseNode(ros::NodeHandle& nh, std::string sensor_string, json zone)
+            BaseNode(ros::NodeHandle& nh, std::string sensor_string, json zone)
           {  }
         
         /** \brief Destructor. */
