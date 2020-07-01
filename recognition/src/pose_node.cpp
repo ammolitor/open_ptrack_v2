@@ -17,6 +17,7 @@ namespace open_ptrack
         skeleton_pub = node_.advertise<opt_msgs::SkeletonArrayMsg>("/detector/skeletons", 1);
         image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
         tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
+        point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &PoseNode::callback, this);
       }
 
 

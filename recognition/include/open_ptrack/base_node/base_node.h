@@ -384,6 +384,7 @@ namespace open_ptrack
          * \param[in]input cloud from camera
          */
         // void callback(const PointCloudT::ConstPtr& cloud_)
+        bool check_detection_msg(opt_msgs::Detection detection_msg);
 
     };
   } /* namespace base_node */

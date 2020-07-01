@@ -39,7 +39,7 @@ namespace open_ptrack
             // Camera callback for intrinsics matrix update
             camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &BaseNode::camera_info_callback, this);
 
-            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &BaseNode::mode_1_callback_cloud_only, this);
+            //point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &BaseNode::callback, this);
 
             sensor_name = sensor_string;
             transform = transform.Identity();
@@ -490,6 +490,31 @@ namespace open_ptrack
           cluster_centroids3d.push_back(centroid3d);
 
         }
+    }
+    bool BaseNode::check_detection_msg(opt_msgs::Detection detection_msg){
+      bool send_message = false;
+      if (std::isfinite(detection_msg.box_2D.x) &&
+        std::isfinite(detection_msg.box_2D.y) &&
+        std::isfinite(detection_msg.box_2D.width) &&
+        std::isfinite(detection_msg.box_2D.height) &&
+        std::isfinite(detection_msg.height) &&
+        std::isfinite(detection_msg.confidence) &&
+        std::isfinite(detection_msg.distance) &&
+        std::isfinite(detection_msg.box_3D.p1.x) &&
+        std::isfinite(detection_msg.box_3D.p1.y) &&
+        std::isfinite(detection_msg.box_3D.p1.z) &&
+        std::isfinite(detection_msg.centroid.x) &&
+        std::isfinite(detection_msg.centroid.y) &&
+        std::isfinite(detection_msg.centroid.z) &&
+        std::isfinite(detection_msg.top.x) &&
+        std::isfinite(detection_msg.top.y) &&
+        std::isfinite(detection_msg.top.z) &&
+        std::isfinite(detection_msg.bottom.x) &&
+        std::isfinite(detection_msg.bottom.y) &&
+        std::isfinite(detection_msg.bottom.z)){
+          send_message = true;
+        }
+      return send_message;
     }
 
   } /* namespace base_node */

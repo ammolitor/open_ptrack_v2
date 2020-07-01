@@ -15,7 +15,9 @@ namespace open_ptrack
         // Publish Messages
         detections_pub = node_.advertise<opt_msgs::DetectionArray>("/objects_detector/detections", 3);
         image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
-        tvm_object_detector_detector.reset(new NoNMSYoloFromConfig("/cfg/model.json", "recognition"));
+        tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/model.json", "recognition"));
+        point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &DetectionNode::callback, this);
+
       }
 
 

@@ -17,6 +17,7 @@ namespace open_ptrack
         detections_pub = node_.advertise<opt_msgs::DetectionArray>("/hand_detector/detections", 3);
         image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
         tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
+        point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &HandDetectionNode::callback, this);
       }
 
 
@@ -291,7 +292,7 @@ namespace open_ptrack
                   std::cout << "cast_xmax: " << cast_xmax << std::endl;
                   std::cout << "cast_ymax: " << cast_ymax << std::endl; 
 
-                  std::vector<cv::Point3f> points = output->boxes[i].points;
+                  //std::vector<cv::Point3f> points = output->boxes[i].points;
                   int num_parts = points.size();
                   std::cout << "num_parts: " << num_parts << std::endl;
 
@@ -557,12 +558,14 @@ namespace open_ptrack
         float median_depth;
         float mx;
         float my;
+        float score;
         for (int i = 0; i < output->num; i++) {
           // there's a rare case when all values == 0...
           xmin = output->boxes[i].xmin;
           ymin = output->boxes[i].ymin;
           xmax = output->boxes[i].xmax;
           ymax = output->boxes[i].ymax;
+          score = output->boxes[i].score;
 
           if ((xmin == 0) && (ymin == 0) && (xmax == 0) && (ymax == 0)){
             std::cout << "xmin: " << xmin << std::endl;
@@ -729,7 +732,7 @@ namespace open_ptrack
           // only add to message if no nans exist
           if (check_detection_msg(detection_msg)){
             std::cout << "valid detection!" << std::endl;
-            detection_msg.object_name=object_name;            
+            detection_msg.object_name="hands";            
             detection_array_msg->detections.push_back(detection_msg);
         
           cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
