@@ -7,14 +7,14 @@ namespace open_ptrack
 {
   namespace pose_node
   {
-    /** \brief PoseNode estimates the ground plane equation from a 3D point cloud */
+
+    /** \brief DetectionNode estimates the ground plane equation from a 3D point cloud */
     class PoseNode: public BaseNode
     {
       private:
-        std::unique_ptr<NoNMSPoseFromConfig> tvm_pose_detector;
+        std::unique_ptr<NoNMSYoloFromConfig> tvm_object_detector;
         // Publishers
         ros::Publisher detections_pub;
-        ros::Publisher skeleton_pub;
         image_transport::Publisher image_pub;
 
       public:
@@ -28,7 +28,7 @@ namespace open_ptrack
         void callback(const PointCloudT::ConstPtr& cloud_);
 
     };
-  } /* namespace pose_node */
+  } /* namespace base_node */
 } /* namespace open_ptrack */
 #endif /* OPEN_PTRACK_POSE_NODE_POSE_NODE_H_ */
 
