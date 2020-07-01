@@ -175,6 +175,7 @@ namespace open_ptrack
         double _constant_x;
         double _constant_y;
         float max_capable_depth = 6.25; // 6.25 is what the default is;
+        std::string sensor_name;
     
         //############################
         //## zone information ##
@@ -256,6 +257,10 @@ namespace open_ptrack
         int n_frames = 15;
         bool setbackground = true;
         float sqrt_ground_coeffs;
+        std::vector<cv::Point2f> cluster_centroids2d;
+        std::vector<cv::Point3f> cluster_centroids3d;
+        std::vector<cv::Point2f> yolo_centroids2d;
+        std::vector<cv::Point3f> yolo_centroids3d;
 
         //###################################
         //## Detection Variables ##
