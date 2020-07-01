@@ -20,6 +20,10 @@ namespace open_ptrack
         point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &HandDetectionNode::callback, this);
       }
 
+    HandDetectionNode::~HandDetectionNode()
+    {
+      
+    }
 
     void HandDetectionNode::basic_callback(const PointCloudT::ConstPtr& cloud_) {
 

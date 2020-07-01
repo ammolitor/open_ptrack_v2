@@ -20,6 +20,11 @@ namespace open_ptrack
 
       }
 
+    DetectionNode::~DetectionNode()
+    {
+      
+    }
+
 
     void DetectionNode::callback(const PointCloudT::ConstPtr& cloud_) {
 

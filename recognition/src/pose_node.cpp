@@ -20,6 +20,10 @@ namespace open_ptrack
         point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &PoseNode::callback, this);
       }
 
+    PoseNode::~PoseNode()
+    {
+      
+    }
 
     void PoseNode::callback(const PointCloudT::ConstPtr& cloud_) {
 

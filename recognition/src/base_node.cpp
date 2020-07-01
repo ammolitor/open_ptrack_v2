@@ -48,6 +48,11 @@ namespace open_ptrack
             rgb_image_ = pcl::PointCloud<pcl::RGB>::Ptr(new pcl::PointCloud<pcl::RGB>);
           }
   
+    BaseNode::~BaseNode()
+    {
+      
+    }
+
     void BaseNode::camera_info_callback(const CameraInfo::ConstPtr & msg){
       intrinsics_matrix << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
       cam_intrins_ << msg->K[0], 0, msg->K[2], 0, msg->K[4], msg->K[5], 0, 0, 1;
