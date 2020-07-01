@@ -279,7 +279,7 @@ namespace open_ptrack
                   std::cout << "cleaned ymax: " << ymax << std::endl;                  
 
                   float label = static_cast<float>(output->boxes[i].id);
-                  std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
+                  std::string object_name = "hands";
                   std::cout << "object_name: " << object_name << std::endl;
                   // get the coordinate information
                   int cast_xmin = static_cast<int>(xmin);
@@ -293,7 +293,7 @@ namespace open_ptrack
                   std::cout << "cast_ymax: " << cast_ymax << std::endl; 
 
                   //std::vector<cv::Point3f> points = output->boxes[i].points;
-                  int num_parts = points.size();
+                  //int num_parts = points.size();
                   std::cout << "num_parts: " << num_parts << std::endl;
 
                   // set the median of the bounding box
@@ -736,7 +736,7 @@ namespace open_ptrack
             detection_array_msg->detections.push_back(detection_msg);
         
           cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
-          cv::putText(cv_image_clone, object_name, cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
+          cv::putText(cv_image_clone, "hands", cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
           }
         }
       }

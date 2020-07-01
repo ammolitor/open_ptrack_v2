@@ -77,7 +77,7 @@ namespace open_ptrack
       }
     }
 
-    void BaseNode::setbackground (PointCloudPtr& background_cloud){
+    void BaseNode::set_background (PointCloudPtr& background_cloud){
       // Voxel grid filtering:
       std::cout << "starting voxel grid filtering: " << std::endl;
       PointCloudT::Ptr cloud_filtered(new PointCloudT);
