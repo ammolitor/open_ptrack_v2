@@ -383,7 +383,8 @@ target_link_libraries(pose_node PUBLIC Threads::Threads ${OpenCV_LIBS}
                                           ${CUDA_CUDNN_LIBRARY}
                                           ${TVM_RUNTIME_LINKER_LIBS}
                                           ${TORCH_LIBRARIES}
-                                          ${PCL_LIBRARY_DIRS})
+                                          ${PCL_LIBRARY_DIRS}
+                                          ${PROJECT_NAME})
 
 add_dependencies(pose_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
 target_include_directories(pose_node PUBLIC ${CUDA_INCLUDE_DIRS})
