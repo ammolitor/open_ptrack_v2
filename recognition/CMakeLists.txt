@@ -168,7 +168,7 @@ ADD_LIBRARY(facedetection
 #ADD_LIBRARY(object_detection
 #        include/open_ptrack/yolo_tvm.hpp)
 
-
+include_directories(cfg/cpp)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 add_library(${PROJECT_NAME}
