@@ -276,9 +276,9 @@ namespace open_ptrack
         tf::StampedTransform world_inverse_transform;
     
         /** \brief BaseNode Constructor. */
-        BaseNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
-            node_(nh), it(node_)
-          { }
+        BaseNode(ros::NodeHandle& nh, std::string sensor_string, json zone);//:
+        //    node_(nh), it(node_)
+        //  { }
 
         /** \brief Destructor. */
         virtual ~BaseNode ();
