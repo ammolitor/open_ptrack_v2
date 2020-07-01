@@ -21,9 +21,9 @@ namespace open_ptrack
       public:
         int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
         /** \brief DetectionNode Constructor. */
-        DetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
-          open_ptrack::base_node::BaseNode(nh, sensor_string, zone)
-        {}
+        DetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone);//:
+        //  open_ptrack::base_node::BaseNode(nh, sensor_string, zone)
+        //{}
         
         /** \brief Destructor. */
         virtual ~DetectionNode ();
