@@ -9,7 +9,7 @@ namespace open_ptrack
   {
 
     /** \brief DetectionNode estimates the ground plane equation from a 3D point cloud */
-    class HandDetectionNode: public open_ptrack::base_node::BaseNode
+    class HandDetectionNode: public BaseNode
     {
       private:
         std::unique_ptr<NoNMSYoloFromConfig> tvm_object_detector;
@@ -24,9 +24,7 @@ namespace open_ptrack
       public:
         int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
         /** \brief HandDetectionNode Constructor. */
-        HandDetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
-            open_ptrack::base_node::BaseNode(ros::NodeHandle& nh, std::string sensor_string, json zone)
-          {  }
+        HandDetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone);
         
         /** \brief Destructor. */
         virtual ~HandDetectionNode ();
