@@ -17,10 +17,6 @@ namespace open_ptrack
         ros::Publisher detections_pub;
         image_transport::Publisher image_pub;
 
-        // Subscribers
-        ros::Subscriber rgb_sub;
-        ros::Subscriber camera_info_matrix;
-        ros::Subscriber detector_sub;
       public:
         int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
         /** \brief HandDetectionNode Constructor. */
