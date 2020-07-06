@@ -1,5 +1,7 @@
 
 #include <open_ptrack/hand_detection_node/hand_detection_node.h>
+#include <open_ptrack/yolo_tvm.hpp>
+
 
 namespace open_ptrack
 {

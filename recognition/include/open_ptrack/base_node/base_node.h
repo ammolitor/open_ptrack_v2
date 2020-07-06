@@ -121,7 +121,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <open_ptrack/hungarian/Hungarian.h>
-#include <open_ptrack/yolo_tvm.hpp>
+//#include <open_ptrack/yolo_tvm.hpp>
 
 // not sure if this is the correct json reading code
 // but will be easier than continually recompiling t

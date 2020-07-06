@@ -1,5 +1,7 @@
 
 #include <open_ptrack/pose_node/pose_node.h>
+#include <open_ptrack/yolo_tvm.hpp>
+
 
 namespace open_ptrack
 {
