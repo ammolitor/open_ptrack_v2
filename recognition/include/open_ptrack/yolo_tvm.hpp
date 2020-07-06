@@ -21,9 +21,9 @@
 #include <open_ptrack/nms/nms.h>
 using json = nlohmann::json;
 
-double sum_score, sum_fps;
+//double sum_score, sum_fps;
 
-inline std::vector<std::string> COCO_CLASS_NAMES = {
+std::vector<std::string> COCO_CLASS_NAMES = {
     "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train",
     "truck", "boat", "traffic light", "fire hydrant", "stop sign",
     "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep",
