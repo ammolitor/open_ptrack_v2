@@ -1413,21 +1413,11 @@ class PoseNode {
       free(output);
       }  
     }
-
 };
 
-
-
 int main(int argc, char** argv) {
-  // read from master config
-  // perhaps even simply read from the config in the begining instead of 
-  // constantly polling the dynamic reconfigure? or do both?
-  // I dunno
-  // NOTE: using json in main() is the way to persist across callbacks...
-
   std::string sensor_name;
   double max_distance;
-
   json zone_json;
   std::string area_package_path = ros::package::getPath("recognition");
   std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
@@ -1448,4 +1438,3 @@ int main(int argc, char** argv) {
   ros::spin();
   return 0;
 }
-
