@@ -175,7 +175,7 @@ add_library(${PROJECT_NAME}
   src/base_node.cpp
   src/detection_node.cpp
   src/hand_detection_node.cpp
-  src/pose_node.cpp
+  src/pose_node_test.cpp
   include/open_ptrack/yolo_tvm.hpp
   )
 
@@ -372,9 +372,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 ###############################################################################
 ####  TESTS
 ###############################################################################
-add_executable(pose_node apps/pose_node.cpp)
-SET_TARGET_PROPERTIES(pose_node PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
-target_link_libraries(pose_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
+add_executable(pose apps/pose_node.cpp)
+SET_TARGET_PROPERTIES(pose PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
+target_link_libraries(pose PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES} 
                                           ${LINKER_LIBS}
                                           ${CUDA_CUDA_LIBRARY}
@@ -386,9 +386,9 @@ target_link_libraries(pose_node PUBLIC Threads::Threads ${OpenCV_LIBS}
                                           ${PCL_LIBRARY_DIRS})
                                           #${PROJECT_NAME})
 
-add_dependencies(pose_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-target_include_directories(pose_node PUBLIC ${CUDA_INCLUDE_DIRS})
-target_compile_definitions(pose_node PUBLIC TVM_CUDA_RUNTIME=1)
-target_compile_definitions(pose_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+add_dependencies(pose ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+target_include_directories(pose PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(pose PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(pose PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")

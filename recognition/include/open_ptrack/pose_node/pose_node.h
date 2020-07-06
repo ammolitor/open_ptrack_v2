@@ -33,5 +33,6 @@ namespace open_ptrack
     };
   } /* namespace base_node */
 } /* namespace open_ptrack */
+#include <open_ptrack/pose_node/pose_node.hpp>
 #endif /* OPEN_PTRACK_POSE_NODE_POSE_NODE_H_ */
 
