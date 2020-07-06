@@ -175,9 +175,9 @@ add_library(${PROJECT_NAME}
   src/base_node.cpp
   src/detection_node.cpp
   src/hand_detection_node.cpp
-  src/pose_node_test.cpp
-  include/open_ptrack/yolo_tvm.hpp
   )
+
+#src/pose_node_test.cpp
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES}
