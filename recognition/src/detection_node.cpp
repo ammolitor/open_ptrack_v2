@@ -1,5 +1,5 @@
 #include <open_ptrack/detection_node/detection_node.h>
-
+#include <open_ptrack/yolo_tvm.hpp>
 
 namespace open_ptrack
 {
