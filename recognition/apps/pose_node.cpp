@@ -116,7 +116,6 @@ class PoseNode {
     ros::NodeHandle node_;
     ros::Subscriber point_cloud_approximate_sync_;
     image_transport::ImageTransport it;
-    image_transport::Publisher image_pub;
     ros::ServiceServer camera_info_matrix_server;
     ros::Subscriber camera_info_matrix;
 
@@ -268,9 +267,6 @@ class PoseNode {
         skeleton_pub = node_.advertise<opt_msgs::SkeletonArrayMsg>("/detector/skeletons", 1);
 
         // Subscribe to Messages
-        rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
-        depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
-        cloud_sub.subscribe(node_, sensor_string + "/depth_registered/points", 10);
         image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
 
         // Camera callback for intrinsics matrix update
@@ -279,7 +275,6 @@ class PoseNode {
         tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
         sensor_name = sensor_string;
         max_capable_depth = max_distance;
-        area_thres_["person"] = pair<double, double>(1.8, 0.5);
 
         // maybe...
         transform = transform.Identity();
