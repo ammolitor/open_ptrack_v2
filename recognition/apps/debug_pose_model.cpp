@@ -166,21 +166,6 @@ std::vector<std::string> COCO_CLASS_NAMES = {
     "scissors", "teddy bear", "hair drier", "toothbrush"
 };
 
-std::string format_frame_number(std::string filename, int frame_number) {
-  char buffer[13];
-  std::snprintf(buffer, sizeof(buffer), "%08d.jpg", frame_number);
-  std::string file_name = filename + buffer;
-  return file_name;
-}
-
-cv::Mat image_for_plot(cv::Mat image){
-       
-    cv::Size new_size = cv::Size(640, 480);
-    cv::Mat resized_image;
-    // bgr to rgb
-    cv::resize(image, resized_image, new_size);
-    return resized_image;
-}
 
 struct TensorOutput {
     DLTensor *output_tensor_ids;
