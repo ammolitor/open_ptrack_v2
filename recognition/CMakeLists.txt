@@ -171,25 +171,24 @@ ADD_LIBRARY(facedetection
 include_directories(cfg/cpp)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
-add_library(${PROJECT_NAME}
-  src/base_node.cpp
-  src/detection_node.cpp
-  src/hand_detection_node.cpp
-  )
+#add_library(${PROJECT_NAME}
+#  src/base_node.cpp
+#  src/detection_node.cpp
+#  src/hand_detection_node.cpp
+#  )
 
-#src/pose_node_test.cpp
 
-target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads ${OpenCV_LIBS} 
-                                          ${catkin_LIBRARIES}
-                                          ${LINKER_LIBS}
-                                          ${CUDA_CUDA_LIBRARY}
-                                          ${CUDA_CUDART_LIBRARY}
-                                          ${CUDA_CURAND_LIBRARY}
-                                          ${CUDA_CUDNN_LIBRARY}
-                                          ${TVM_RUNTIME_LINKER_LIBS}
-                                          ${TORCH_LIBRARIES}
-                                          )
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
+#target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads ${OpenCV_LIBS} 
+#                                          ${catkin_LIBRARIES}
+#                                          ${LINKER_LIBS}
+#                                          ${CUDA_CUDA_LIBRARY}
+#                                          ${CUDA_CUDART_LIBRARY}
+#                                          ${CUDA_CURAND_LIBRARY}
+#                                          ${CUDA_CUDNN_LIBRARY}
+#                                          ${TVM_RUNTIME_LINKER_LIBS}
+#                                          ${TORCH_LIBRARIES}
+#                                          )
+#add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 
 message(STATUS LINKER_LIBS: "${LINKER_LIBS}")
 message(STATUS OPENCV_LIBS: "${OpenCV_LIBS}")
