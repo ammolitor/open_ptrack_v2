@@ -1,5 +1,5 @@
 #include <open_ptrack/base_node/base_node.h>
-
+#include <open_ptrack/yolo_tvm.hpp>
 #ifndef OPEN_PTRACK_POSE_NODE_POSE_NODE_H_
 #define OPEN_PTRACK_POSE_NODE_POSE_NODE_H_
 
