@@ -293,7 +293,7 @@ namespace open_ptrack
                   std::cout << "cleaned ymax: " << ymax << std::endl;                  
 
                   float label = static_cast<float>(output->boxes[i].id);
-                  std::string object_name = "person";//COCO_CLASS_NAMES[output->boxes[i].id];
+                  std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
                   std::cout << "object_name: " << object_name << std::endl;
                   // get the coordinate information
                   int cast_xmin = static_cast<int>(xmin);
