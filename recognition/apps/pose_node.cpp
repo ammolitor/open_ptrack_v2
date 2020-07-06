@@ -232,6 +232,7 @@ class PoseNode {
     //## Detection Variables ##
     //###################################
     float thresh = 0.3f;
+    int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
 
     //###################################
     //## Transform Listeners ##
@@ -273,8 +274,8 @@ class PoseNode {
         image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
 
         // Camera callback for intrinsics matrix update
-        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMPoseNode::camera_info_callback, this);
-        point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMPoseNode::callback, this);
+        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &PoseNode::camera_info_callback, this);
+        point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &PoseNode::callback, this);
         tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
         sensor_name = sensor_string;
         max_capable_depth = max_distance;
@@ -1448,7 +1449,7 @@ int main(int argc, char** argv) {
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   PoseNode node(nh, sensor_name, zone_json, max_distance);
-  std::cout << "TVMPoseNode init " << std::endl;
+  std::cout << "PoseNode init " << std::endl;
   ros::spin();
   return 0;
 }
