@@ -120,8 +120,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
 
-#include <open_ptrack/hungarian/Hungarian.h>
-#include <open_ptrack/tvm_detectors.h>
 
 // not sure if this is the correct json reading code
 // but will be easier than continually recompiling t

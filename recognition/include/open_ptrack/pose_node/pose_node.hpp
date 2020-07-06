@@ -1,6 +1,7 @@
 
 #include <open_ptrack/pose_node/pose_node.h>
-
+#include <open_ptrack/hungarian/Hungarian.h>
+#include <open_ptrack/tvm_detectors.h>
 
 namespace open_ptrack
 {
