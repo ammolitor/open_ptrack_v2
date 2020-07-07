@@ -1,0 +1,10 @@
+{
+  "deploy_lib_path":        "/data/small_yolo_nonms/0.7.dev1.256.256.mnet1.0.yolo.nonms.aarch64.gpu.so",
+  "deploy_graph_path":      "/data/small_yolo_nonms/0.7.dev1.256.256.mnet1.0.yolo.nonms.aarch64.gpu.json",
+  "deploy_param_path":      "/data/small_yolo_nonms/0.7.dev1.256.256.mnet1.0.yolo.nonms.aarch64.gpu.params",
+  "device_id":              0,
+  "width" :                 256,
+  "height" :                256,
+  "gpu" :                   true,
+  "n_dets":                 322560
+}
