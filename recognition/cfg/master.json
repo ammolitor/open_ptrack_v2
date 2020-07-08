@@ -1,5 +1,5 @@
 {
-    "sensor_name":                "d415",
+    "sensor_name":                "realsense_4",
     "main_detections_topic":      "/objects_detector/detections",
     "hand_detections_topic":      "/hand_detector/detections",
     "face_detector_topic":        "/face_detector/detections",

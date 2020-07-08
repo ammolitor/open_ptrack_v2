@@ -1,28 +1,29 @@
 enable_people_tracking: true
-enable_pose: true
-enable_object: true
+enable_pose: false
+enable_object: false
+
 # Camera network parameters
 network:
-  - pc: "mic720ai-01"
+  - pc: "xps8930-01"
     sensors:
       - type: realsense
-        id: "realsense01"
-        people_detector: yolo
-  - pc: "mic720ai-02"
+        id: "realsense_2"
+        serial: "919122070521"
+        people_detector: hog
+      - type: realsense
+        id: "realsense_4"
+        serial: "919122070953"
+        people_detector: hog
+  - pc: "xps8930-02"
     sensors:
       - type: realsense
-        id: "realsense02"
-        people_detector: yolo
-  - pc: "mic720ai-03"
-    sensors:
+        id: "realsense_1"
+        serial: "919122071456"
+        people_detector: hog
       - type: realsense
-        id: "realsense03"
-        people_detector: yolo
-  - pc: "mic720ai-04"
-    sensors:
-      - type: realsense
-        id: "realsense04"
-        people_detector: yolo
+        id: "realsense_3"
+        serial: "919122071628"
+        people_detector: hog
 
 # Checkerboard parameters
 checkerboard:

@@ -1,7 +1,7 @@
 {
-  "deploy_lib_path":        "/data/face_embedder/mnet.facerec.aarch64.gpu.so",
-  "deploy_graph_path":      "/data/face_embedder/mnet.facerec.aarch64.gpu.json",
-  "deploy_param_path":      "/data/face_embedder/mnet.facerec.aarch64.gpu.params",
+  "deploy_lib_path":        "/data/face_embedder/0.7.dev1.mnet.facerec.x86.gpu.so",
+  "deploy_graph_path":      "/data/face_embedder/0.7.dev1.mnet.facerec.x86.gpu.json",
+  "deploy_param_path":      "/data/face_embedder/0.7.dev1.mnet.facerec.x86.gpu.params",
   "device_id":              0,
   "width" :                 112,
   "height" :                112,
