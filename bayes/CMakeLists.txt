@@ -6,7 +6,7 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 find_package(catkin REQUIRED COMPONENTS roscpp )
 
-link_libraries(/usr/lib/aarch64-linux-gnu/liblapack.so.3)
+link_libraries(/usr/lib/liblapack.so.3)
 
 include_directories(include include/open_ptrack/bayes include/open_ptrack/bayes/filters)
 
