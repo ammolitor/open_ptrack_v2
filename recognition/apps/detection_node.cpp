@@ -1744,6 +1744,7 @@ class TVMNode {
       std::cout << "setSensorPortraitOrientation finished" << std::endl;
       subclustering.subcluster(clusters);
       std::cout << "subcluster finished" << std::endl;
+      std::cout << "clusters size: " << clusters.size() << std::endl;
 
       for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
         {

@@ -276,7 +276,7 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   }
 
   // Person clusters creation from clusters indices:
-  std::cout << "[HeadBasedSubclustering::subcluster] clusters.size()" << clusters.size() << std::endl;
+  std::cout << "[HeadBasedSubclustering::subcluster] clusters.size: " << clusters.size() << std::endl;
   if (clusters.size() == 0){
     for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_.begin(); it != cluster_indices_.end(); ++it)
     {
