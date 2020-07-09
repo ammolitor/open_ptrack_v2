@@ -377,9 +377,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 ###############################################################################
 ####  DETECTION_NODE TEST
 ###############################################################################
-add_executable(pose apps/detection_node.cpp include/open_ptrack/hungarian/Hungarian.cpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp)
-SET_TARGET_PROPERTIES(pose PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
-target_link_libraries(pose PUBLIC Threads::Threads ${OpenCV_LIBS} 
+add_executable(detector apps/detection_node.cpp include/open_ptrack/hungarian/Hungarian.cpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp)
+SET_TARGET_PROPERTIES(detector PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
+target_link_libraries(detector PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES} 
                                           ${LINKER_LIBS}
                                           ${CUDA_CUDA_LIBRARY}
@@ -390,9 +390,9 @@ target_link_libraries(pose PUBLIC Threads::Threads ${OpenCV_LIBS}
                                           ${TORCH_LIBRARIES}
                                           ${PCL_LIBRARY_DIRS})
 
-add_dependencies(pose ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-target_include_directories(pose PUBLIC ${CUDA_INCLUDE_DIRS})
-target_compile_definitions(pose PUBLIC TVM_CUDA_RUNTIME=1)
-target_compile_definitions(pose PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+add_dependencies(detector ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+target_include_directories(detector PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(detector PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(detector PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
