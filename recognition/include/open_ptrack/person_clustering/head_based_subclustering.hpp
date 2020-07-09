@@ -319,21 +319,26 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)   // for every cluster
   {
     float height = it->getHeight();
+    std::cout << "[HeadBasedSubclustering::subcluster] height: " << height << std::endl;
     int number_of_points = it->getNumberPoints();
+    std::cout << "[HeadBasedSubclustering::subcluster] number_of_points: " << number_of_points << std::endl;
     if(height > min_height_ && height < max_height_)
     {
       if (number_of_points > cluster_min_points_sub) //  && number_of_points < cluster_max_points_sub)
       {
         // Compute height map associated to the current cluster and its local maxima (heads):
         height_map_obj.compute(*it);
+        std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.compute(*it) finsihed" << std::endl;
         if (height_map_obj.getMaximaNumberAfterFiltering() > 1)        // if more than one maximum
         {
           // create new clusters from the current cluster and put corresponding indices into sub_clusters_indices:
           createSubClusters(*it, height_map_obj.getMaximaNumberAfterFiltering(), height_map_obj.getMaximaCloudIndicesFiltered(), subclusters);
+          std::cout << "[HeadBasedSubclustering::subcluster] createSubClusters finsihed" << std::endl;
         }
         else
         {  // Only one maximum --> copy original cluster:
           subclusters.push_back(*it);
+          std::cout << "[HeadBasedSubclustering::subcluster] subclusters.push_back(*it)" << std::endl;
         }
       }
       else
