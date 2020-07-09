@@ -1245,7 +1245,7 @@ class TVMNode {
           tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
         } else {
           point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::yolo_callback, this);
-          tvm_standard_detector.reset(new NoNMSYoloFromConfig("/cfg/model.json", "recognition"));
+          tvm_standard_detector.reset(new NoNMSYoloFromConfig("/cfg/pose_model.json", "recognition"));
         }
       
         sensor_name = sensor_string;
