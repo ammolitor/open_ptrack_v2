@@ -957,7 +957,8 @@ class AreaDefinitionNode {
 
 
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", src_img).toImageMsg();
-    msg->header.stamp = cloud_->header.stamp;
+    std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
+    msg->header = cloud_header;
     image_pub.publish(msg);
     //return rect;    
     // shut down ros node
@@ -993,8 +994,4 @@ int main(int argc, char** argv) {
   std::cout << "area node init " << std::endl;
   ros::spin();
   return 0;
-}
-
-
-
 }
