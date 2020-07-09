@@ -1635,6 +1635,8 @@ class TVMNode {
       //std::cout << "computing clusters" << std::endl;
       compute_subclustering(no_ground_cloud_, clusters);
       if (use_headclusters){
+        std::cout << ground_coeffs << std::endl;
+        std::cout  << ground_coeffs_new << std::endl;
         compute_head_subclustering(clusters);
       }
       //std::cout << "create_foreground_cloud - cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
