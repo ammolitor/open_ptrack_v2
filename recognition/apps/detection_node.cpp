@@ -238,7 +238,7 @@ class NoNMSPoseFromConfig{
             no_nms_output_size[1] = n_dets;
             detector_total_input = 1 * 3 * detector_width * detector_height;
             pose_total_input = 1 * 3 * pose_width * pose_height;
-            thresh = model_config["threshold"];
+            thresh = model_config["thresh"];
 
             std::string detector_deploy_lib_path = package_path + detector_lib_path;
             std::string detector_deploy_graph_path = package_path + detector_graph_path;
@@ -297,6 +297,7 @@ class NoNMSPoseFromConfig{
             pose_params_arr.size = pose_params_data.length();
             tvm::runtime::PackedFunc pose_load_params = pose_mod.GetFunction("load_params");
             pose_load_params(pose_params_arr);
+            std::cout << "model loaded" << std::endl;
         }
        
         /**
@@ -850,7 +851,7 @@ class NoNMSYoloFromConfig{
             gpu = model_config["gpu"];
             n_dets = model_config["n_dets"];
             no_nms_output_size[1] = n_dets;
-            thresh = model_config["threshold"];
+            thresh = model_config["thresh"];
             detector_total_input = 1 * 3 * detector_width * detector_height;
 
             std::string detector_deploy_lib_path = package_path + detector_lib_path;
@@ -1198,7 +1199,7 @@ class TVMNode {
     //###################################
     float thresh = 0.3f;
     int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
-    bool use_pose_model;
+    bool use_pose_model = false;
     //###################################
     //## Transform Listeners ##
     //###################################
