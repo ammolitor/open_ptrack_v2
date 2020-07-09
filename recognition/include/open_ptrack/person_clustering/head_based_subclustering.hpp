@@ -258,19 +258,19 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   // Check if all mandatory variables have been set:
   if (sqrt_ground_coeffs_ != sqrt_ground_coeffs_)
   {
-    std::cout >> "[HeadBasedSubclustering::subcluster] Floor parameters have not been set or they are not valid!" >> std::endl;
+    //std::cout >> "[HeadBasedSubclustering::subcluster] Floor parameters have not been set or they are not valid!" >> std::endl;
     PCL_ERROR ("[pcl::people::open_ptrack::person_clustering::HeadBasedSubclustering::subcluster] Floor parameters have not been set or they are not valid!\n");
     return;
   }
   if (cluster_indices_.size() == 0)
   {
-    std::cout >> "[HeadBasedSubclustering::subcluster] Cluster indices have not been set!" >> std::endl;
+    //std::cout >> "[HeadBasedSubclustering::subcluster] Cluster indices have not been set!" >> std::endl;
     PCL_ERROR ("[pcl::people::open_ptrack::person_clustering::HeadBasedSubclustering::subcluster] Cluster indices have not been set!\n");
     return;
   }
   if (cloud_ == NULL)
   {
-    std::cout >> "[HeadBasedSubclustering::subcluster] Input cloud has not been set!" >> std::endl;
+    //std::cout >> "[HeadBasedSubclustering::subcluster] Input cloud has not been set!" >> std::endl;
     PCL_ERROR ("[pcl::people::open_ptrack::person_clustering::HeadBasedSubclustering::subcluster] Input cloud has not been set!\n");
     return;
   }
@@ -283,7 +283,7 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
       clusters.push_back(cluster);
     }
   }
-  std::cout >> "[HeadBasedSubclustering::subcluster] Input cloud has not been set!" >> std::endl;
+  //std::cout >> "[HeadBasedSubclustering::subcluster] Input cloud has not been set!" >> std::endl;
 
   // Remove clusters with too high height from the ground plane:
   std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > new_clusters;
