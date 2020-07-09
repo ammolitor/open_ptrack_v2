@@ -2689,8 +2689,8 @@ class TVMNode {
                   //std::cout << "cast_xmax: " << cast_xmax << std::endl;
                   //std::cout << "cast_ymax: " << cast_ymax << std::endl; 
 
-                  std::vector<cv::Point3f> points = output->boxes[i].points;
-                  int num_parts = points.size();
+                  //std::vector<cv::Point3f> points = output->boxes[i].points;
+                  //int num_parts = points.size();
                   //std::cout << "num_parts: " << num_parts << std::endl;
 
                   // set the median of the bounding box
