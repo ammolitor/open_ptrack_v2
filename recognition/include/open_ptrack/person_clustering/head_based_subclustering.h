@@ -60,6 +60,7 @@
 #include <pcl/common/transforms.h>
 #include <pcl/console/time.h>
 #include <pcl/filters/passthrough.h>
+#include <iostream>
 
 namespace open_ptrack
 {
