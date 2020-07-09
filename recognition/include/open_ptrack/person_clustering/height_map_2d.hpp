@@ -63,11 +63,13 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
   // Check if all mandatory variables have been set:
   if (sqrt_ground_coeffs_ != sqrt_ground_coeffs_)
   {
+    std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] Floor parameters have not been set or they are not valid!" << std::endl;
     PCL_ERROR ("[open_ptrack::person_clustering::HeightMap2D::compute] Floor parameters have not been set or they are not valid!\n");
     return;
   }
   if (cloud_ == NULL)
   {
+    std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] Input cloud has not been set!" << std::endl;
     PCL_ERROR ("[open_ptrack::person_clustering::HeightMap2D::compute] Input cloud has not been set!\n");
     return;
   }
