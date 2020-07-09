@@ -6,5 +6,6 @@
   "width" :                 256,
   "height" :                256,
   "gpu" :                   true,
-  "n_dets":                 322560
+  "n_dets":                 322560,
+  "threshold":                 0.5
 }

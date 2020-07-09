@@ -6,6 +6,7 @@
 "detector_deploy_graph_path"   : "/data/small_yolo_nonms/0.7.dev1.256.256.mnet1.0.yolo.nonms.aarch64.gpu.json",
 "detector_deploy_param_path"   : "/data/small_yolo_nonms/0.7.dev1.256.256.mnet1.0.yolo.nonms.aarch64.gpu.params",
 "n_dets"                       : 322560,
+"threshold"                    : 0.5,
 "pose_width"                   : 192,         
 "pose_height"                  : 256, 
 "pose_deploy_lib_path"         : "/data/simple_pose/pose_lib_gpu.so",

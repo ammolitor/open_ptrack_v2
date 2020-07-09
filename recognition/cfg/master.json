@@ -10,6 +10,8 @@
     "detector_path" :             "/data/object_detector",
     "max_capable_depth":          10.0,
     "n_zones":                    3,
+    "use_headclusters":           true,
+    "use_pose_model":             false,
     "__n_zones__comment__":       "door, sink, cutting station",
     "__depth__comment__":         "realsense max is 10.0, kinect is 6.25"
 }
