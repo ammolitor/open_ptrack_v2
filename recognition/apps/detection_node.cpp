@@ -1730,9 +1730,9 @@ class TVMNode {
       //std::cout << "compute_head_subclustering: setInputCloud" << std::endl;
       open_ptrack::person_clustering::HeadBasedSubclustering<PointT> subclustering;
 
-      subclustering.setInputCloud(no_ground_cloud_rotated);
+      subclustering.setInputCloud(no_ground_cloud); //no_ground_cloud_rotated
       std::cout << "setInputCloud finished" << std::endl;
-      subclustering.setGround(ground_coeffs);
+      subclustering.setGround(ground_coeffs); //ground_coeffs_new
       std::cout << "setGround finished" << std::endl;
       subclustering.setInitialClusters(cluster_indices);
       std::cout << "setInitialClusters finished" << std::endl;
