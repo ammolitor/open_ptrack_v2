@@ -1727,13 +1727,21 @@ class TVMNode {
       // Head based sub-clustering //
       //std::cout << "compute_head_subclustering: setInputCloud" << std::endl;
       open_ptrack::person_clustering::HeadBasedSubclustering<PointT> subclustering;
+
       subclustering.setInputCloud(no_ground_cloud_rotated);
+      std::cout << "setInputCloud finished" << std::endl;
       subclustering.setGround(ground_coeffs_new);
+      std::cout << "setGround finished" << std::endl;
       subclustering.setInitialClusters(cluster_indices);
+      std::cout << "setInitialClusters finished" << std::endl;
       subclustering.setHeightLimits(min_height_, max_height_);
+      std::cout << "setHeightLimits finished" << std::endl;
       subclustering.setMinimumDistanceBetweenHeads(heads_minimum_distance_);
+      std::cout << "setMinimumDistanceBetweenHeads finished" << std::endl;
       subclustering.setSensorPortraitOrientation(vertical_);
+      std::cout << "setSensorPortraitOrientation finished" << std::endl;
       subclustering.subcluster(clusters);
+      std::cout << "subcluster finished" << std::endl;
 
       for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
         {
@@ -1914,6 +1922,7 @@ class TVMNode {
         cluster_centroids3d = std::vector<cv::Point3f>();
         yolo_centroids2d = std::vector<cv::Point2f>();
         yolo_centroids3d = std::vector<cv::Point3f>();
+        cluster_indices = std::vector<pcl::PointIndices>();
 
         std::vector<int> valid;
         std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   
@@ -2462,6 +2471,7 @@ class TVMNode {
         cluster_centroids3d = std::vector<cv::Point3f>();
         yolo_centroids2d = std::vector<cv::Point2f>();
         yolo_centroids3d = std::vector<cv::Point3f>();
+        cluster_indices = std::vector<pcl::PointIndices>();
 
         std::vector<int> valid;
         std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   
