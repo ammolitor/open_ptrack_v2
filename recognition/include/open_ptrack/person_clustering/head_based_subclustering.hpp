@@ -284,7 +284,6 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
       clusters.push_back(cluster);
     }
   }
-  std::cout << "[HeadBasedSubclustering::subcluster] Input cloud has not been set!" << std::endl;
 
   // Remove clusters with too high height from the ground plane:
   std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > new_clusters;
