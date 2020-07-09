@@ -223,24 +223,24 @@ target_compile_definitions(face_detection_extraction_node PUBLIC TVM_USE_GRAPH_R
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 ###############################################################################
-add_executable(tvm_detection_node apps/tvm_detection_node.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp)
-target_link_libraries(tvm_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
-                                          ${catkin_LIBRARIES} 
-                                          ${LINKER_LIBS}
-                                          ${CUDA_CUDA_LIBRARY}
-                                          ${CUDA_CUDART_LIBRARY}
-                                          ${CUDA_CURAND_LIBRARY}
-                                          ${CUDA_CUDNN_LIBRARY}
-                                          ${TVM_RUNTIME_LINKER_LIBS}
-                                          ${TORCH_LIBRARIES})
+#add_executable(tvm_detection_node apps/tvm_detection_node.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp)
+#target_link_libraries(tvm_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
+#                                          ${catkin_LIBRARIES} 
+#                                          ${LINKER_LIBS}
+#                                          ${CUDA_CUDA_LIBRARY}
+#                                          ${CUDA_CUDART_LIBRARY}
+#                                          ${CUDA_CURAND_LIBRARY}
+#                                          ${CUDA_CUDNN_LIBRARY}
+#                                          ${TVM_RUNTIME_LINKER_LIBS}
+#                                          ${TORCH_LIBRARIES})
+#
+#add_dependencies(tvm_detection_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+#target_include_directories(tvm_detection_node PUBLIC ${CUDA_INCLUDE_DIRS})
+#target_compile_definitions(tvm_detection_node PUBLIC TVM_CUDA_RUNTIME=1)
+#target_compile_definitions(tvm_detection_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
-add_dependencies(tvm_detection_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-target_include_directories(tvm_detection_node PUBLIC ${CUDA_INCLUDE_DIRS})
-target_compile_definitions(tvm_detection_node PUBLIC TVM_CUDA_RUNTIME=1)
-target_compile_definitions(tvm_detection_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
-
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+#
 ###############################################################################
 add_executable(tvm_hand_detection_node apps/tvm_hand_detection_node.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp)
 target_link_libraries(tvm_hand_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
@@ -278,76 +278,74 @@ target_compile_definitions(area_node PUBLIC TVM_CUDA_RUNTIME=1)
 target_compile_definitions(area_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 ###############################################################################
-add_executable(debug_tvm_detector apps/debug_tvm_detector.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/hungarian/Hungarian.cpp)
-target_link_libraries(debug_tvm_detector PUBLIC Threads::Threads ${OpenCV_LIBS} 
-                                          ${catkin_LIBRARIES} 
-                                          ${LINKER_LIBS}
-                                          ${CUDA_CUDA_LIBRARY}
-                                          ${CUDA_CUDART_LIBRARY}
-                                          ${CUDA_CURAND_LIBRARY}
-                                          ${CUDA_CUDNN_LIBRARY}
-                                          ${TVM_RUNTIME_LINKER_LIBS}
-                                          ${TORCH_LIBRARIES})
+#add_executable(debug_tvm_detector apps/debug_tvm_detector.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/hungarian/Hungarian.cpp)
+#target_link_libraries(debug_tvm_detector PUBLIC Threads::Threads ${OpenCV_LIBS} 
+#                                          ${catkin_LIBRARIES} 
+#                                          ${LINKER_LIBS}
+#                                          ${CUDA_CUDA_LIBRARY}
+#                                          ${CUDA_CUDART_LIBRARY}
+#                                          ${CUDA_CURAND_LIBRARY}
+#                                          ${CUDA_CUDNN_LIBRARY}
+#                                          ${TVM_RUNTIME_LINKER_LIBS}
+#                                          ${TORCH_LIBRARIES})
 
-add_dependencies(debug_tvm_detector ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-target_include_directories(debug_tvm_detector PUBLIC ${CUDA_INCLUDE_DIRS})
-target_compile_definitions(debug_tvm_detector PUBLIC TVM_CUDA_RUNTIME=1)
-target_compile_definitions(debug_tvm_detector PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+#add_dependencies(debug_tvm_detector ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+#target_include_directories(debug_tvm_detector PUBLIC ${CUDA_INCLUDE_DIRS})
+#target_compile_definitions(debug_tvm_detector PUBLIC TVM_CUDA_RUNTIME=1)
+#target_compile_definitions(debug_tvm_detector PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 ###############################################################################
-add_executable(debug_pose_model apps/debug_pose_model.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp 
-                                include/open_ptrack/hungarian/Hungarian.cpp 
-                                # this might be redefining the already defined files in _include_
-                                # include/open_ptrack/ground_segmentation/ground_segmentation.h 
-                                # include/open_ptrack/ground_segmentation/ground_segmentation.hpp
-                                # include/open_ptrack/person_clustering/person_cluster.hpp
-                                # include/open_ptrack/person_clustering/person_cluster.h
-                                # include/open_ptrack/person_clustering/head_based_subclustering.hpp
-                                # include/open_ptrack/person_clustering/head_based_subclustering.h
-                                )
+#add_executable(debug_pose_model apps/debug_pose_model.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp 
+#                                include/open_ptrack/hungarian/Hungarian.cpp 
+#                                # this might be redefining the already defined files in _include_
+#                                # include/open_ptrack/ground_segmentation/ground_segmentation.h 
+#                                # include/open_ptrack/ground_segmentation/ground_segmentation.hpp
+#                                # include/open_ptrack/person_clustering/person_cluster.hpp
+#                                # include/open_ptrack/person_clustering/person_cluster.h
+#                                # include/open_ptrack/person_clustering/head_based_subclustering.hpp
+#                                # include/open_ptrack/person_clustering/head_based_subclustering.h
+#                                )
                                 
-SET_TARGET_PROPERTIES(debug_pose_model PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
-target_link_libraries(debug_pose_model PUBLIC Threads::Threads ${OpenCV_LIBS} 
-                                          ${catkin_LIBRARIES} 
-                                          ${LINKER_LIBS}
-                                          ${CUDA_CUDA_LIBRARY}
-                                          ${CUDA_CUDART_LIBRARY}
-                                          ${CUDA_CURAND_LIBRARY}
-                                          ${CUDA_CUDNN_LIBRARY}
-                                          ${TVM_RUNTIME_LINKER_LIBS}
-                                          ${TORCH_LIBRARIES}
-                                          ${PCL_LIBRARY_DIRS})
+#SET_TARGET_PROPERTIES(debug_pose_model PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
+#target_link_libraries(debug_pose_model PUBLIC Threads::Threads ${OpenCV_LIBS} 
+#                                          ${catkin_LIBRARIES} 
+#                                          ${LINKER_LIBS}
+#                                          ${CUDA_CUDA_LIBRARY}
+#                                          ${CUDA_CUDART_LIBRARY}
+#                                          ${CUDA_CURAND_LIBRARY}
+#                                          ${CUDA_CUDNN_LIBRARY}
+#                                          ${TVM_RUNTIME_LINKER_LIBS}
+#                                          ${TORCH_LIBRARIES}
+#                                          ${PCL_LIBRARY_DIRS})
 
-add_dependencies(debug_pose_model ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-target_include_directories(debug_pose_model PUBLIC ${CUDA_INCLUDE_DIRS})
-target_compile_definitions(debug_pose_model PUBLIC TVM_CUDA_RUNTIME=1)
-target_compile_definitions(debug_pose_model PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+#add_dependencies(debug_pose_model ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+#target_include_directories(debug_pose_model PUBLIC ${CUDA_INCLUDE_DIRS})
+#target_compile_definitions(debug_pose_model PUBLIC TVM_CUDA_RUNTIME=1)
+#target_compile_definitions(debug_pose_model PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+#
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 
 ###############################################################################
-add_executable(tvm_pose_recognition_node apps/tvm_pose_recognition_node.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/hungarian/Hungarian.cpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp)
-target_link_libraries(tvm_pose_recognition_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
-                                          ${catkin_LIBRARIES} 
-                                          ${LINKER_LIBS}
-                                          ${CUDA_CUDA_LIBRARY}
-                                          ${CUDA_CUDART_LIBRARY}
-                                          ${CUDA_CURAND_LIBRARY}
-                                          ${CUDA_CUDNN_LIBRARY}
-                                          ${TVM_RUNTIME_LINKER_LIBS}
-                                          ${TORCH_LIBRARIES})
-
-add_dependencies(tvm_pose_recognition_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-target_include_directories(tvm_pose_recognition_node PUBLIC ${CUDA_INCLUDE_DIRS})
-target_compile_definitions(tvm_pose_recognition_node PUBLIC TVM_CUDA_RUNTIME=1)
-target_compile_definitions(tvm_pose_recognition_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
-
-
+#add_executable(tvm_pose_recognition_node apps/tvm_pose_recognition_node.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/hungarian/Hungarian.cpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp)
+#target_link_libraries(tvm_pose_recognition_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
+#                                          ${catkin_LIBRARIES} 
+#                                          ${LINKER_LIBS}
+#                                          ${CUDA_CUDA_LIBRARY}
+#                                          ${CUDA_CUDART_LIBRARY}
+#                                          ${CUDA_CURAND_LIBRARY}
+#                                          ${CUDA_CUDNN_LIBRARY}
+#                                          ${TVM_RUNTIME_LINKER_LIBS}
+#                                          ${TORCH_LIBRARIES})
+#
+#add_dependencies(tvm_pose_recognition_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+#target_include_directories(tvm_pose_recognition_node PUBLIC ${CUDA_INCLUDE_DIRS})
+#target_compile_definitions(tvm_pose_recognition_node PUBLIC TVM_CUDA_RUNTIME=1)
+#target_compile_definitions(tvm_pose_recognition_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+#
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 
 ###############################################################################

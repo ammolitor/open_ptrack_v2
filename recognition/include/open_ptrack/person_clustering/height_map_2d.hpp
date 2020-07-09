@@ -39,6 +39,8 @@
  */
 
 #include <open_ptrack/person_clustering/height_map_2d.h>
+#include <iostream>
+
 
 #ifndef OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_HPP_
 #define OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_HPP_
@@ -107,12 +109,14 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
       }
     }
   }
-
+  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] first iter finished" << std::endl;
   // Compute local maxima of the height map:
   searchLocalMaxima();
+  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] searchLocalMaxima finished" << std::endl;
 
   // Filter maxima by imposing a minimum distance between them (minimum distance between people heads):
   filterMaxima();
+  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] filterMaxima finished" << std::endl;
 }
 
 template <typename PointT> void
