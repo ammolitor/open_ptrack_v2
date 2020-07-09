@@ -1634,7 +1634,7 @@ class TVMNode {
       //std::cout << "computing clusters" << std::endl;
       compute_subclustering(no_ground_cloud_, clusters);
       if (use_headclusters){
-        compute_head_subclustering(clusters)
+        compute_head_subclustering(clusters);
       }
       //std::cout << "create_foreground_cloud - cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
       //std::cout << "create_foreground_cloud - cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
@@ -2437,7 +2437,7 @@ class TVMNode {
         cv::Mat cv_image_clone;
         
         // set detection variables here
-        pose_results* output;
+        yoloresults* output;
         cv::Size image_size;
         float height;
         float width;
