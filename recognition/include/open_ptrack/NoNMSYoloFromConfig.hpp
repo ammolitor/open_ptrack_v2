@@ -279,7 +279,9 @@ class NoNMSYoloFromConfig{
                 new_num+=1;
             };
             results->num = new_num;
-            std::cout << "torch array iter finished" << std::endl;            
+            std::cout << "torch array iter finished" << std::endl;
+            tvm_results = std::vector<sortable_result>();
+            proposals = std::vector<sortable_result>();           
             return results;
         }
 };

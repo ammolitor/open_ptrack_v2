@@ -476,6 +476,9 @@ class NoNMSPoseFromConfig{
             //free(data_x);
             //data_x = nullptr;
             //std::cout << "freeing finished" << std::endl;
+            // free proposals
+            tvm_results = std::vector<sortable_result>();
+            proposals = std::vector<sortable_result>();
             return results;
         }
 
