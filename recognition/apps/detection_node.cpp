@@ -1198,7 +1198,7 @@ class TVMNode {
     //###################################
     float thresh = 0.3f;
     int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
-
+    bool use_pose_model;
     //###################################
     //## Transform Listeners ##
     //###################################
@@ -1222,7 +1222,7 @@ class TVMNode {
           std::cout << "n_zones: " << n_zones << std::endl;
           json_found = true;
           use_headclusters = master_config["use_headclusters"];
-          bool use_pose_model = master_config["use_pose_model"];
+          use_pose_model = master_config["use_pose_model"];
         }
         catch(const std::exception& e)
         {
@@ -1246,7 +1246,7 @@ class TVMNode {
           point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::yolo_callback, this);
           tvm_standard_detector.reset(new NoNMSYoloFromConfig("/cfg/model.json", "recognition"));
         }
-        
+      
         sensor_name = sensor_string;
         max_capable_depth = max_distance;
 
