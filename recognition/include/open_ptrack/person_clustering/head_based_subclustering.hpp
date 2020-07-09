@@ -42,7 +42,7 @@
 #define OPEN_PTRACK_PERSON_CLUSTERING_HEAD_BASED_SUBCLUSTER_HPP_
 
 #include <open_ptrack/person_clustering/head_based_subclustering.h>
-
+#include <iostream>
 
 template <typename PointT>
 open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::HeadBasedSubclustering ()
@@ -258,24 +258,25 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   // Check if all mandatory variables have been set:
   if (sqrt_ground_coeffs_ != sqrt_ground_coeffs_)
   {
-    //std::cout >> "[HeadBasedSubclustering::subcluster] Floor parameters have not been set or they are not valid!" >> std::endl;
+    std::cout << "[HeadBasedSubclustering::subcluster] Floor parameters have not been set or they are not valid!" << std::endl;
     PCL_ERROR ("[pcl::people::open_ptrack::person_clustering::HeadBasedSubclustering::subcluster] Floor parameters have not been set or they are not valid!\n");
     return;
   }
   if (cluster_indices_.size() == 0)
   {
-    //std::cout >> "[HeadBasedSubclustering::subcluster] Cluster indices have not been set!" >> std::endl;
+    std::cout << "[HeadBasedSubclustering::subcluster] Cluster indices have not been set!" << std::endl;
     PCL_ERROR ("[pcl::people::open_ptrack::person_clustering::HeadBasedSubclustering::subcluster] Cluster indices have not been set!\n");
     return;
   }
   if (cloud_ == NULL)
   {
-    //std::cout >> "[HeadBasedSubclustering::subcluster] Input cloud has not been set!" >> std::endl;
+    std::cout << "[HeadBasedSubclustering::subcluster] Input cloud has not been set!" << std::endl;
     PCL_ERROR ("[pcl::people::open_ptrack::person_clustering::HeadBasedSubclustering::subcluster] Input cloud has not been set!\n");
     return;
   }
 
   // Person clusters creation from clusters indices:
+  std::cout << "[HeadBasedSubclustering::subcluster] clusters.size()" << clusters.size() << std::endl;
   if (clusters.size() == 0){
     for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_.begin(); it != cluster_indices_.end(); ++it)
     {
@@ -283,7 +284,7 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
       clusters.push_back(cluster);
     }
   }
-  //std::cout >> "[HeadBasedSubclustering::subcluster] Input cloud has not been set!" >> std::endl;
+  std::cout << "[HeadBasedSubclustering::subcluster] Input cloud has not been set!" << std::endl;
 
   // Remove clusters with too high height from the ground plane:
   std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > new_clusters;
@@ -294,10 +295,12 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   }
   clusters = new_clusters;
   new_clusters.clear();
+  std::cout << "[HeadBasedSubclustering::subcluster] max_height completed" << std::endl;
 
   // Merge clusters close in floor coordinates:
   mergeClustersCloseInFloorCoordinates(clusters, new_clusters);
   clusters = new_clusters;
+  std::cout << "[HeadBasedSubclustering::subcluster] mergeClustersCloseInFloorCoordinates completed" << std::endl;
 
   std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > subclusters;
   int cluster_min_points_sub = int(float(min_points_) * 1.5);
@@ -306,9 +309,13 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   // create HeightMap2D object:
   open_ptrack::person_clustering::HeightMap2D<PointT> height_map_obj;
   height_map_obj.setGround(ground_coeffs_);
+  std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setGround completed" << std::endl;
   height_map_obj.setInputCloud(cloud_);
+  std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setInputCloud completed" << std::endl;
   height_map_obj.setSensorPortraitOrientation(vertical_);
+  std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setSensorPortraitOrientation completed" << std::endl;
   height_map_obj.setMinimumDistanceBetweenMaxima(heads_minimum_distance_);
+  std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setMinimumDistanceBetweenMaxima completed" << std::endl;
   for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)   // for every cluster
   {
     float height = it->getHeight();
@@ -337,6 +344,7 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
     }
   }
   clusters = subclusters;    // substitute clusters with subclusters
+  std::cout << "[HeadBasedSubclustering::subcluster] finished!" << std::endl;
 }
 
 template <typename PointT>

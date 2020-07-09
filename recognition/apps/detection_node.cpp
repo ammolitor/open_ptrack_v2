@@ -2073,6 +2073,8 @@ class TVMNode {
                 cost_matrix.push_back(row);
               }
               
+              // only consider min distances???
+
               // Solve the Hungarian problem to match the distance of the roi centroid
               // to that of the bounding box
               //std::cout << "solving Hungarian problem" << std::endl;
@@ -2617,6 +2619,7 @@ class TVMNode {
                 for (int c = 0; c < yolo_centroids3d.size (); c++) {
                   float dist;
                   dist = cv::norm(cv::Mat(yolo_centroids3d[c]), cv::Mat (cluster_centroids3d[r]));
+                  //std::cout << "c: " << c << " r: " << r << " dist: " << dist << std::endl;
                   row.push_back(dist);
                 }
                 cost_matrix.push_back(row);
