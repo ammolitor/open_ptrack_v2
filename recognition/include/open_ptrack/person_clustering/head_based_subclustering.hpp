@@ -309,6 +309,7 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   open_ptrack::person_clustering::HeightMap2D<PointT> height_map_obj;
   height_map_obj.setGround(ground_coeffs_);
   std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setGround completed" << std::endl;
+  std::cout << "[HeadBasedSubclustering::subcluster] cloud check: " << cloud_.height << std::endl;
   height_map_obj.setInputCloud(cloud_);
   std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setInputCloud completed" << std::endl;
   height_map_obj.setSensorPortraitOrientation(vertical_);

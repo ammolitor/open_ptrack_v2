@@ -297,6 +297,8 @@ template <typename PointT> void
 open_ptrack::person_clustering::HeightMap2D<PointT>::setInputCloud (PointCloudPtr& cloud)
 {
   cloud_ = cloud;
+  std::cout << "[open_ptrack::person_clustering::HeightMap2D::setInputCloud] cloud check: " << cloud_.height << std::endl;
+
 }
 
 template <typename PointT>
