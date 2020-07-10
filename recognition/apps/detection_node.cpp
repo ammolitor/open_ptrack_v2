@@ -1221,7 +1221,6 @@ class TVMNode {
           n_zones = master_config["n_zones"]; //the path to the detector model file
           max_capable_depth = master_config["max_capable_depth"];
           std::cout << "n_zones: " << n_zones << std::endl;
-          json_found = true;
           use_headclusters = master_config["use_headclusters"];
           use_pose_model = master_config["use_pose_model"];
           ground_estimation_mode = master_config["ground_estimation_mode"]; 
@@ -1246,6 +1245,7 @@ class TVMNode {
           mean_k_denoising = master_config["mean_k_denoising"];
           std_dev_denoising = master_config["std_dev_denoising"];
           rate_value = master_config["rate_value"];
+          json_found = true;
         }
         catch(const std::exception& e)
         {
