@@ -1224,6 +1224,28 @@ class TVMNode {
           json_found = true;
           use_headclusters = master_config["use_headclusters"];
           use_pose_model = master_config["use_pose_model"];
+          ground_estimation_mode = master_config["ground_estimation_mode"]; 
+          remote_ground_selection = master_config["remote_ground_selection"];
+          read_ground_from_file = master_config["read_ground_from_file"]; 
+          lock_ground = master_config["lock_ground"]; 
+          valid_points_threshold = master_config["valid_points_threshold"];
+          background_subtraction = master_config["background_subtraction"]; 
+          background_octree_resolution = master_config["background_octree_resolution"];  
+          background_seconds = master_config["background_seconds"]; 
+          ground_based_people_detection_min_confidence = master_config["ground_based_people_detection_min_confidence"]; 
+          minimum_person_height = master_config["minimum_person_height"]; 
+          maximum_person_height = master_config["maximum_person_height"]; 
+          max_distance = master_config["max_distance"]; 
+          sampling_factor = master_config["sampling_factor"]; 
+          minimum_luminance = use_rgb = master_config["use_rgb"]; 
+          minimum_luminance = master_config["minimum_luminance"]; 
+          sensor_tilt_compensation = master_config["sensor_tilt_compensation"]; 
+          heads_minimum_distance = master_config["heads_minimum_distance"]; 
+          voxel_size = master_config["voxel_size"]; 
+          apply_denoising = master_config["apply_denoising"]; 
+          mean_k_denoising = master_config["mean_k_denoising"];
+          std_dev_denoising = master_config["std_dev_denoising"];
+          rate_value = master_config["rate_value"];
         }
         catch(const std::exception& e)
         {
