@@ -2457,7 +2457,7 @@ class TVMNode {
       image_pub.publish(imagemsg);
       free(output->boxes);
       free(output);
-      ros::Time end = ros::Time::now().toSec() - start.toSec();
+      double end = ros::Time::now().toSec() - start.toSec();
       std::cout << "total time: " << end << std::endl;
       }  
     }
@@ -2933,7 +2933,7 @@ class TVMNode {
       image_pub.publish(imagemsg);
       free(output->boxes);
       free(output);
-      ros::Time end = ros::Time::now().toSec() - start.toSec();
+      double end = ros::Time::now().toSec() - start.toSec();
       std::cout << "total time: " << end << std::endl;
       }  
     }
