@@ -14,7 +14,6 @@
     "use_pose_model":             false,
     "__n_zones__comment__":       "door, sink, cutting station",
     "__depth__comment__":         "realsense max is 10.0, kinect is 6.25",
-
     "ground_estimation_mode" : 2, 
     "remote_ground_selection" : true, 
     "read_ground_from_file" : true,
@@ -36,7 +35,5 @@
     "apply_denoising" : true,
     "mean_k_denoising" : 5,
     "std_dev_denoising" : 0.3,
-    "rate_value" : 1.0,
-
-
+    "rate_value" : 1.0
 }
