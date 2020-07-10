@@ -102,7 +102,7 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
 //    // it's failing right here. 
 //    PointT* p = &cloud_->points[*pit];
 //    // make sure point works
-//    std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] x: " << p.x << " y: " << p->y << " z: " << p->z << std::endl;
+//    std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] x: " << p->x << " y: " << p->y << " z: " << p->z << std::endl;
 //    int index;
 //    if (!vertical_)    // camera horizontal
 //      index = int((p->x - cluster.getMin()(0)) / bin_size_);
@@ -129,19 +129,20 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
     std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] pit: " << pit << std::endl;
     // it's failing right here. 
     std::cout << "open_ptrack::person_clustering::HeightMap2D::compute] cloud height: " << cloud_->height << std::endl;
-    PointT p = cloud_->points[pit];
+    std::cout << "open_ptrack::person_clustering::HeightMap2D::compute] cloud height: " << cloud_->width << std::endl;
+    PointT* p = &cloud_->points[pit];
     // make sure point works
-    std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] x: " << p.x << " y: " << p.y << " z: " << p.z << std::endl;
+    std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] x: " << p->x << " y: " << p->y << " z: " << p->z << std::endl;
     int index;
     if (!vertical_)    // camera horizontal
-      index = int((p.x - cluster.getMin()(0)) / bin_size_);
+      index = int((p->x - cluster.getMin()(0)) / bin_size_);
     else        // camera vertical
-      index = int((p.y - cluster.getMin()(1)) / bin_size_);
+      index = int((p->y - cluster.getMin()(1)) / bin_size_);
     if (index > (static_cast<int> (buckets_.size ()) - 1))
       std::cout << "Error: out of array - " << index << " of " << buckets_.size() << std::endl;
     else
     {
-      Eigen::Vector4f new_point(p.x, p.y, p.z, 1.0f);      // select point from cluster
+      Eigen::Vector4f new_point(p->x, p->y, p->z, 1.0f);      // select point from cluster
       float heightp = std::fabs(new_point.dot(ground_coeffs_)); // compute point height from the groundplane
       heightp /= sqrt_ground_coeffs_;
       if ((heightp * 60) > buckets_[index])   // compare the height of the new point with the existing one
