@@ -98,6 +98,7 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
   //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute]  cluster.getIndices().indices.begin()!" <<  cluster.getIndices().indices.begin() << std::endl;
   for(std::vector<int>::const_iterator pit = cluster.getIndices().indices.begin(); pit != cluster.getIndices().indices.end(); pit++)
   {
+     std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] pit: " << *pit << std::endl;
     // it's failing right here. 
     PointT* p = &cloud_->points[*pit];
     // make sure point works
