@@ -297,7 +297,7 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   std::cout << "[HeadBasedSubclustering::subcluster] max_height completed" << std::endl;
 
   // Merge clusters close in floor coordinates:
-  mergeClustersCloseInFloorCoordinates(clusters, new_clusters);
+  mergeClustersCloseInFloorCoordinates(clusters, new_clusters); // failed here in dark
   clusters = new_clusters;
   std::cout << "[HeadBasedSubclustering::subcluster] mergeClustersCloseInFloorCoordinates completed" << std::endl;
 
@@ -339,13 +339,14 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
         else
         {  // Only one maximum --> copy original cluster:
           subclusters.push_back(*it);
-          std::cout << "[HeadBasedSubclustering::subcluster] subclusters.push_back(*it)" << std::endl;
+          std::cout << "[HeadBasedSubclustering::subcluster] Only one maximum --> copy original cluster:" << std::endl;
         }
       }
       else
       {
         // Cluster properties not good for sub-clustering --> copy original cluster:
         subclusters.push_back(*it);
+        std::cout << "[HeadBasedSubclustering::subcluster]  Cluster properties not good for sub-clustering --> copy original cluster" << std::endl;
       }
     }
   }

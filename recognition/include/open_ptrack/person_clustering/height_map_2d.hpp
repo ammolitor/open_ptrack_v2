@@ -89,11 +89,17 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
     buckets_.resize(size_t((cluster.getMax()(1) - cluster.getMin()(1)) / bin_size_) + 1, 0);
   buckets_cloud_indices_.resize(buckets_.size(), 0);
 
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] buckets resized!" << std::endl;
+  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] cluster check: " << std::endl;
+  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] cluster.getMin():" << cluster.getMin() << std::endl;
+  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] cluster.getMax():" << cluster.getMax() << std::endl;
 
+  // make sure cluster works
+  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] buckets resized!" << std::endl;
   for(std::vector<int>::const_iterator pit = cluster.getIndices().indices.begin(); pit != cluster.getIndices().indices.end(); pit++)
   {
     PointT* p = &cloud_->points[*pit];
+    // make sure point works
+    std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] x: " << p->x << " y: " << p->y << " z: " << p->z << std::endl;
     int index;
     if (!vertical_)    // camera horizontal
       index = int((p->x - cluster.getMin()(0)) / bin_size_);
