@@ -1911,6 +1911,8 @@ class TVMNode {
       
     }
 
+    
+
     void pose_callback(const PointCloudT::ConstPtr& cloud_) {
 
       //Calculate direct and inverse transforms between camera and world frame:
@@ -2116,6 +2118,7 @@ class TVMNode {
                   float dist;
                   dist = cv::norm(cv::Mat(yolo_centroids2d[c]), cv::Mat (cluster_centroids2d[r]));
                   row.push_back(dist);
+                  //https://stackoverflow.com/questions/38365900/using-opencv-norm-function-to-get-euclidean-distance-of-two-points
                 }
                 cost_matrix.push_back(row);
               }
@@ -2158,6 +2161,10 @@ class TVMNode {
                   int i = valid[assignment[x]];
                   //std::cout << "cluster: " << x << " to yolo number: " << i << std::endl;
                   open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[x];
+
+                  float dist = cost_matrix[x][i];
+                  std::cout << "dist: " std::endl;
+
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
                   float xmax = output->boxes[i].xmax;
