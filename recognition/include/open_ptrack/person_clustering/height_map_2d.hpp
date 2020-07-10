@@ -146,7 +146,7 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
       if ((heightp * 60) > buckets_[index])   // compare the height of the new point with the existing one
       {
         buckets_[index] = heightp * 60;   // maximum height
-        buckets_cloud_indices_[index] = *pit;     // point cloud index of the point with maximum height
+        buckets_cloud_indices_[index] = pit;     // point cloud index of the point with maximum height
       }
     }
   }
