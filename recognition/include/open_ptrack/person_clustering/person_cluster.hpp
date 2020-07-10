@@ -89,7 +89,7 @@ open_ptrack::person_clustering::PersonCluster<PointT>::init (
   for (std::vector<int>::const_iterator pit = points_indices_.indices.begin(); pit != points_indices_.indices.end(); pit++)
   {
     PointT* p = &input_cloud->points[*pit];
-    pci.push_back(*pit)
+    pci.push_back(*pit);
 
     min_x_ = std::min(p->x, min_x_);
     max_x_ = std::max(p->x, max_x_);
