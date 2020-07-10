@@ -8,7 +8,7 @@
     "embedder_path" :             "/data/face_embedder",
     "face_detector_path" :        "/data/face_detector",
     "detector_path" :             "/data/object_detector",
-    "max_capable_depth":          10.0,
+    "max_capable_depth":          6.25,
     "n_zones":                    3,
     "use_headclusters":           true,
     "use_pose_model":             false,
