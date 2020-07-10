@@ -1919,7 +1919,7 @@ class TVMNode {
                                   world_inverse_transform);
 
       //std::cout << "running algorithm callback" << std::endl;
-
+      ros::Time start = ros::Time::now();
       if (setbackground){
         //std::cout << "background frame n: " << n_frame << std::endl;
         PointCloudT::Ptr newcloud(new PointCloudT);
@@ -2105,14 +2105,14 @@ class TVMNode {
             // compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
             //std::cout << "cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
             // use 3 dimensions
-            if (cluster_centroids3d.size() > 0) {
+            if (cluster_centroids2d.size() > 0) {
               // Initialize cost matrix for the hungarian algorithm
               //std::cout << "initialize cost matrix for the hungarian algorithm" << std::endl;
-              for (int r = 0; r < cluster_centroids3d.size (); r++) {
+              for (int r = 0; r < cluster_centroids2d.size (); r++) {
                 std::vector<double> row;
-                for (int c = 0; c < yolo_centroids3d.size (); c++) {
+                for (int c = 0; c < yolo_centroids2d.size (); c++) {
                   float dist;
-                  dist = cv::norm(cv::Mat(yolo_centroids3d[c]), cv::Mat (cluster_centroids3d[r]));
+                  dist = cv::norm(cv::Mat(yolo_centroids2d[c]), cv::Mat (cluster_centroids2d[r]));
                   row.push_back(dist);
                 }
                 cost_matrix.push_back(row);
@@ -2457,6 +2457,8 @@ class TVMNode {
       image_pub.publish(imagemsg);
       free(output->boxes);
       free(output);
+      ros::Time end = ros::Time::now().toSec() - start.toSec();
+      std::cout << "total time: " << end << std::endl;
       }  
     }
 
@@ -2470,7 +2472,7 @@ class TVMNode {
                                   world_inverse_transform);
 
       std::cout << "running algorithm callback" << std::endl;
-
+      ros::Time start = ros::Time::now();
       if (setbackground){
         //std::cout << "background frame n: " << n_frame << std::endl;
         PointCloudT::Ptr newcloud(new PointCloudT);
@@ -2656,14 +2658,14 @@ class TVMNode {
             // compute_head_subclustering(clusters, cluster_centroids, cluster_centroids3d);
             //std::cout << "cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
             // use 3 dimensions
-            if (cluster_centroids3d.size() > 0) {
+            if (cluster_centroids2d.size() > 0) {
               // Initialize cost matrix for the hungarian algorithm
               //std::cout << "initialize cost matrix for the hungarian algorithm" << std::endl;
-              for (int r = 0; r < cluster_centroids3d.size (); r++) {
+              for (int r = 0; r < cluster_centroids2d.size (); r++) {
                 std::vector<double> row;
-                for (int c = 0; c < yolo_centroids3d.size (); c++) {
+                for (int c = 0; c < yolo_centroids2d.size (); c++) {
                   float dist;
-                  dist = cv::norm(cv::Mat(yolo_centroids3d[c]), cv::Mat (cluster_centroids3d[r]));
+                  dist = cv::norm(cv::Mat(yolo_centroids2d[c]), cv::Mat (cluster_centroids2d[r]));
                   //std::cout << "c: " << c << " r: " << r << " dist: " << dist << std::endl;
                   row.push_back(dist);
                 }
@@ -2931,6 +2933,8 @@ class TVMNode {
       image_pub.publish(imagemsg);
       free(output->boxes);
       free(output);
+      ros::Time end = ros::Time::now().toSec() - start.toSec();
+      std::cout << "total time: " << end << std::endl;
       }  
     }
 
