@@ -152,12 +152,14 @@ namespace open_ptrack
       /** \brief PersonCluster HOG confidence. */
       float person_confidence_;
 
+
     public:
 
       typedef pcl::PointCloud<PointT> PointCloud;
       typedef boost::shared_ptr<PointCloud> PointCloudPtr;
       typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
-
+      std::vector<int> pci;
+      
       /** \brief Constructor. */
       PersonCluster (
           const PointCloudPtr& input_cloud,
