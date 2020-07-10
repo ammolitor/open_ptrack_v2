@@ -1126,7 +1126,7 @@ class TVMNode {
     //# Flag that locks the ground plane update:
     bool lock_ground = true;
     //# Threshold on the ratio of valid points needed for ground estimation:
-    bool valid_points_threshold = 0.0;
+    float valid_points_threshold = 0.0;
     //# Flag enabling/disabling background subtraction:
     bool background_subtraction = true;// #false
     //# Resolution of the octree representing the background:
