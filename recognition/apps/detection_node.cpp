@@ -1332,16 +1332,19 @@ class TVMNode {
       voxel_grid_filter_object.filter (*cloud_filtered);
       background_cloud = cloud_filtered;
 
+      //std::cout << "saving background file to tmp space: " << std::endl;
+      pcl::io::savePCDFileASCII ("/tmp/background_" + sensor_name + ".pcd", *background_cloud);
+      //std::cout << "background cloud done." << std::endl << std::endl;
+    }
+
+    void set_octree(){
       // setting octree
       background_octree_ = new pcl::octree::OctreePointCloud<PointT>(background_octree_resolution);
       background_octree_->defineBoundingBox(-max_distance/2, -max_distance/2, 0.0, max_distance/2, max_distance/2, max_distance);
       background_octree_->setInputCloud (background_cloud);
       background_octree_->addPointsFromInputCloud ();
-
-      //std::cout << "saving background file to tmp space: " << std::endl;
-      pcl::io::savePCDFileASCII ("/tmp/background_" + sensor_name + ".pcd", *background_cloud);
-      //std::cout << "background cloud done." << std::endl << std::endl;
     }
+
     /**
      * \brief extracts the rbg image from the pointcloud.
      *
@@ -1736,12 +1739,10 @@ class TVMNode {
         ground_estimator.setInputCloud(cloud);
         //Eigen::VectorXf ground_coeffs = ground_estimator.computeMulticamera(ground_from_extrinsic_calibration, read_ground_from_file,
         //    pointcloud_topic, sampling_factor, voxel_size);
-        ground_coeffs = ground_estimator.computeMulticamera(false, false,
-                  sensor_name + "/depth_registered/points", 4, 0.06);
+        ground_coeffs = ground_estimator.computeMulticamera(false, false, sensor_name + "/depth_registered/points", 4, 0.06);
         sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
       // maybe not needed
       estimate_ground_plane = false;
-
       }
     }
 
@@ -1927,6 +1928,7 @@ class TVMNode {
         background_cloud = compute_background_cloud(newcloud);
         if (n_frame >= n_frames){
           set_background(background_cloud);
+          set_octree();
           setbackground = false;
         }
       } else { 
@@ -2480,6 +2482,7 @@ class TVMNode {
         background_cloud = compute_background_cloud(newcloud);
         if (n_frame >= n_frames){
           set_background(background_cloud);
+          set_octree();
           setbackground = false;
         }
       } else { 
