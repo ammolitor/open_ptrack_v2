@@ -1692,7 +1692,7 @@ class TVMNode {
       if (use_headclusters){
         //std::cout << ground_coeffs << std::endl;
         //std::cout  << ground_coeffs_new << std::endl; // not being set.. why the f?;
-        compute_head_subclustering(clusters);
+        compute_head_subclustering(no_ground_cloud_, clusters);
       }
       //std::cout << "create_foreground_cloud - cluster_centroids2d size: " << cluster_centroids2d.size() << std::endl;
       //std::cout << "create_foreground_cloud - cluster_centroids3d size: " << cluster_centroids3d.size() << std::endl;
@@ -1761,7 +1761,7 @@ class TVMNode {
      * \param[in] empty 2d cluster vector
      * \param[in] empty 3d cluster vector
      */
-    void compute_head_subclustering(std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters){
+    void compute_head_subclustering(PointCloudPtr no_ground_cloud, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters){
 
       // Person clusters creation from clusters indices:
       //for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_.begin(); it != cluster_indices_.end(); ++it)
@@ -1782,8 +1782,8 @@ class TVMNode {
       // Head based sub-clustering //
       //std::cout << "compute_head_subclustering: setInputCloud" << std::endl;
       open_ptrack::person_clustering::HeadBasedSubclustering<PointT> subclustering;
-      std::cout << "[compute_head_subclustering] no_ground_cloud_ check: " << no_ground_cloud_->size() << std::endl;
-      subclustering.setInputCloud(no_ground_cloud_); //no_ground_cloud_rotated
+      std::cout << "[compute_head_subclustering] no_ground_cloud check: " << no_ground_cloud->size() << std::endl;
+      subclustering.setInputCloud(no_ground_cloud); //no_ground_cloud_rotated
       std::cout << "setInputCloud finished" << std::endl;
       subclustering.setGround(ground_coeffs); //ground_coeffs_new
       std::cout << "[compute_head_subclustering] ground_coeffs check: " << ground_coeffs << std::endl;
