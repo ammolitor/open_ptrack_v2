@@ -1664,9 +1664,11 @@ class TVMNode {
           }
         }
         no_ground_cloud_ = foreground_cloud;
+        std::cout << "[create_foreground_cloud::background_subtraction] foreground_cloud: " << foreground_cloud->size() << std::endl;
+        std::cout << "[create_foreground_cloud::background_subtraction] no_ground_cloud_: " << no_ground_cloud_->size() << std::endl;
       }
-      std::cout << "[create_foreground_cloud] foreground_cloud pose-background subtraction: " << foreground_cloud->size() << std::endl;
-      std::cout << "[create_foreground_cloud] no_ground_cloud_ pose-background subtraction: " << no_ground_cloud_->size() << std::endl;
+      
+      std::cout << "[create_foreground_cloud] no_ground_cloud_ post-background subtraction: " << no_ground_cloud_->size() << std::endl;
       // if (no_ground_cloud_->points.size() > 0)
       // {
         // Euclidean Clustering:
