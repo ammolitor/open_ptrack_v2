@@ -1616,7 +1616,9 @@ class TVMNode {
       // Point cloud pre-processing (downsampling and filtering):
       PointCloudPtr cloud_filtered(new PointCloud);
       cloud_filtered = preprocess_cloud(cloud);
-      //std::cout << "create_foreground_cloud cloud_filtered: " << cloud_filtered->size() << std::endl;
+      std::cout << "[create_foreground_cloud] cloud_filtered size: " << cloud_filtered->size() << std::endl;
+      std::cout << "[create_foreground_cloud] cloud_filtered height: " << cloud_filtered->height() << std::endl;
+
 
       // set background cloud here
 
@@ -1631,6 +1633,8 @@ class TVMNode {
       extract.setIndices(inliers);
       extract.setNegative(true);
       extract.filter(*no_ground_cloud_);
+      std::cout << "[create_foreground_cloud] no_ground_cloud_ size: " << no_ground_cloud_->size() << std::endl;
+      std::cout << "[create_foreground_cloud] no_ground_cloud_ height: " << no_ground_cloud_->height() << std::endl;
       bool debug_flag = false;
       bool sizeCheck = false;
       //if (isZed_) {
