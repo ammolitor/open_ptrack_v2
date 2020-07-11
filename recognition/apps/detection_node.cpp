@@ -2172,7 +2172,7 @@ class TVMNode {
                   open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[x];
 
                   float dist = cost_matrix[x][i];
-                  std::cout << "cluster dist to yolo-det: " << std::endl;
+                  std::cout << "cluster dist to yolo-det: " << dist << std::endl;
 
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
@@ -2729,7 +2729,7 @@ class TVMNode {
                   open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[x];
 
                   float dist = cost_matrix[x][i];
-                  std::cout << "cluster dist to yolo-det: " << std::endl;
+                  std::cout << "cluster dist to yolo-det: " << dist << std::endl;
 
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
