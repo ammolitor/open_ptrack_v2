@@ -1782,23 +1782,23 @@ class TVMNode {
       // Head based sub-clustering //
       //std::cout << "compute_head_subclustering: setInputCloud" << std::endl;
       open_ptrack::person_clustering::HeadBasedSubclustering<PointT> subclustering;
-      std::cout << "[compute_head_subclustering] no_ground_cloud check: " << no_ground_cloud->size() << std::endl;
+      //std::cout << "[compute_head_subclustering] no_ground_cloud check: " << no_ground_cloud->size() << std::endl;
       subclustering.setInputCloud(no_ground_cloud); //no_ground_cloud_rotated
-      std::cout << "setInputCloud finished" << std::endl;
+      //std::cout << "setInputCloud finished" << std::endl;
       subclustering.setGround(ground_coeffs); //ground_coeffs_new
-      std::cout << "[compute_head_subclustering] ground_coeffs check: " << ground_coeffs << std::endl;
-      std::cout << "setGround finished" << std::endl;
+      //std::cout << "[compute_head_subclustering] ground_coeffs check: " << ground_coeffs << std::endl;
+      //std::cout << "setGround finished" << std::endl;
       subclustering.setInitialClusters(cluster_indices);
-      std::cout << "setInitialClusters finished" << std::endl;
+      //std::cout << "setInitialClusters finished" << std::endl;
       subclustering.setHeightLimits(min_height_, max_height_);
-      std::cout << "setHeightLimits finished" << std::endl;
+      //std::cout << "setHeightLimits finished" << std::endl;
       subclustering.setMinimumDistanceBetweenHeads(heads_minimum_distance_);
-      std::cout << "setMinimumDistanceBetweenHeads finished" << std::endl;
+      //std::cout << "setMinimumDistanceBetweenHeads finished" << std::endl;
       subclustering.setSensorPortraitOrientation(vertical_);
-      std::cout << "setSensorPortraitOrientation finished" << std::endl;
+      //std::cout << "setSensorPortraitOrientation finished" << std::endl;
       subclustering.subcluster(clusters);
-      std::cout << "subcluster finished" << std::endl;
-      std::cout << "clusters size: " << clusters.size() << std::endl;
+      //std::cout << "subcluster finished" << std::endl;
+      //std::cout << "clusters size: " << clusters.size() << std::endl;
 
       for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
         {
@@ -2172,7 +2172,7 @@ class TVMNode {
                   open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[x];
 
                   float dist = cost_matrix[x][i];
-                  std::cout << "dist: " << std::endl;
+                  std::cout << "cluster dist to yolo-det: " << std::endl;
 
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
@@ -2727,6 +2727,10 @@ class TVMNode {
                   int i = valid[assignment[x]];
                   //std::cout << "cluster: " << x << " to yolo number: " << i << std::endl;
                   open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[x];
+
+                  float dist = cost_matrix[x][i];
+                  std::cout << "cluster dist to yolo-det: " << std::endl;
+
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
                   float xmax = output->boxes[i].xmax;

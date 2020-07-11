@@ -42,6 +42,7 @@
 #include <iostream>
 
 
+
 #ifndef OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_HPP_
 #define OPEN_PTRACK_PERSON_CLUSTERING_HEIGHT_MAP_2D_HPP_
 
@@ -89,20 +90,20 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
     buckets_.resize(size_t((cluster.getMax()(1) - cluster.getMin()(1)) / bin_size_) + 1, 0);
   buckets_cloud_indices_.resize(buckets_.size(), 0);
 
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] cluster check: " << std::endl;
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] cluster.getMin():" << cluster.getMin() << std::endl;
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] cluster.getMax():" << cluster.getMax() << std::endl;
+  //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] cluster check: " << std::endl;
+  //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] cluster.getMin():" << cluster.getMin() << std::endl;
+  //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] cluster.getMax():" << cluster.getMax() << std::endl;
 
   // make sure cluster works
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] buckets resized!" << std::endl;
-  //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute]  cluster.getIndices().indices.begin()!" <<  cluster.getIndices().indices.begin() << std::endl;
+  //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] buckets resized!" << std::endl;
+  ////std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute]  cluster.getIndices().indices.begin()!" <<  cluster.getIndices().indices.begin() << std::endl;
   for(std::vector<int>::const_iterator pit = cluster.getIndices().indices.begin(); pit != cluster.getIndices().indices.end(); pit++)
   {
-     std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] pit: " << *pit << std::endl;
+     //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] pit: " << *pit << std::endl;
     // it's failing right here. 
     PointT* p = &cloud_->points[*pit];
     // make sure point works
-    std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] x: " << p->x << " y: " << p->y << " z: " << p->z << std::endl;
+    //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] x: " << p->x << " y: " << p->y << " z: " << p->z << std::endl;
     int index;
     if (!vertical_)    // camera horizontal
       index = int((p->x - cluster.getMin()(0)) / bin_size_);
@@ -153,14 +154,14 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
   //}
 
 
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] first iter finished" << std::endl;
+  //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] first iter finished" << std::endl;
   // Compute local maxima of the height map:
   searchLocalMaxima();
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] searchLocalMaxima finished" << std::endl;
+  //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] searchLocalMaxima finished" << std::endl;
 
   // Filter maxima by imposing a minimum distance between them (minimum distance between people heads):
   filterMaxima();
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] filterMaxima finished" << std::endl;
+  //std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] filterMaxima finished" << std::endl;
 }
 
 template <typename PointT> void
@@ -296,7 +297,7 @@ template <typename PointT> void
 open_ptrack::person_clustering::HeightMap2D<PointT>::setInputCloud (PointCloudPtr& cloud)
 {
   cloud_ = cloud;
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::setInputCloud] cloud size check: " << cloud_->size() << std::endl;
+  //std::cout << "[open_ptrack::person_clustering::HeightMap2D::setInputCloud] cloud size check: " << cloud_->size() << std::endl;
 
 }
 

@@ -276,7 +276,7 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   }
 
   // Person clusters creation from clusters indices:
-  std::cout << "[HeadBasedSubclustering::subcluster] clusters.size: " << clusters.size() << std::endl;
+  //std::cout << "[HeadBasedSubclustering::subcluster] clusters.size: " << clusters.size() << std::endl;
   if (clusters.size() == 0){
     for(std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_.begin(); it != cluster_indices_.end(); ++it)
     {
@@ -294,12 +294,12 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   }
   clusters = new_clusters;
   new_clusters.clear();
-  std::cout << "[HeadBasedSubclustering::subcluster] max_height completed" << std::endl;
+  //std::cout << "[HeadBasedSubclustering::subcluster] max_height completed" << std::endl;
 
   // Merge clusters close in floor coordinates:
   mergeClustersCloseInFloorCoordinates(clusters, new_clusters); // failed here in dark
   clusters = new_clusters;
-  std::cout << "[HeadBasedSubclustering::subcluster] mergeClustersCloseInFloorCoordinates completed" << std::endl;
+  //std::cout << "[HeadBasedSubclustering::subcluster] mergeClustersCloseInFloorCoordinates completed" << std::endl;
 
   std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > subclusters;
   int cluster_min_points_sub = int(float(min_points_) * 1.5);
@@ -308,51 +308,51 @@ open_ptrack::person_clustering::HeadBasedSubclustering<PointT>::subcluster (std:
   // create HeightMap2D object:
   open_ptrack::person_clustering::HeightMap2D<PointT> height_map_obj;
   height_map_obj.setGround(ground_coeffs_);
-  std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setGround completed" << std::endl;
-  std::cout << "[HeadBasedSubclustering::subcluster] cloud size check: " << cloud_->size() << std::endl;
+  //std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setGround completed" << std::endl;
+  //std::cout << "[HeadBasedSubclustering::subcluster] cloud size check: " << cloud_->size() << std::endl;
   height_map_obj.setInputCloud(cloud_);
-  std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setInputCloud completed" << std::endl;
+  //std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setInputCloud completed" << std::endl;
   height_map_obj.setSensorPortraitOrientation(vertical_);
-  std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setSensorPortraitOrientation completed" << std::endl;
+  //std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setSensorPortraitOrientation completed" << std::endl;
   height_map_obj.setMinimumDistanceBetweenMaxima(heads_minimum_distance_);
-  std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setMinimumDistanceBetweenMaxima completed" << std::endl;
+  //std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.setMinimumDistanceBetweenMaxima completed" << std::endl;
   for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)   // for every cluster
   {
     float height = it->getHeight();
     int number_of_points = it->getNumberPoints();
-    std::cout << "[HeadBasedSubclustering::subcluster] height: " << height << " number_of_points: " << number_of_points << std::endl;
+    //std::cout << "[HeadBasedSubclustering::subcluster] height: " << height << " number_of_points: " << number_of_points << std::endl;
     
     if(height > min_height_ && height < max_height_)
     {
-      std::cout << "[HeadBasedSubclustering::subcluster] height > min_height_ && height < max_height_" << std::endl;
+      //std::cout << "[HeadBasedSubclustering::subcluster] height > min_height_ && height < max_height_" << std::endl;
       if (number_of_points > cluster_min_points_sub) //  && number_of_points < cluster_max_points_sub)
       {
         // Compute height map associated to the current cluster and its local maxima (heads):
-        std::cout << "[HeadBasedSubclustering::subcluster] number_of_points > cluster_min_points_sub" << std::endl;
+        //std::cout << "[HeadBasedSubclustering::subcluster] number_of_points > cluster_min_points_sub" << std::endl;
         height_map_obj.compute(*it);
-        std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.compute(*it) finsihed" << std::endl;
+        //std::cout << "[HeadBasedSubclustering::subcluster] height_map_obj.compute(*it) finsihed" << std::endl;
         if (height_map_obj.getMaximaNumberAfterFiltering() > 1)        // if more than one maximum
         {
           // create new clusters from the current cluster and put corresponding indices into sub_clusters_indices:
           createSubClusters(*it, height_map_obj.getMaximaNumberAfterFiltering(), height_map_obj.getMaximaCloudIndicesFiltered(), subclusters);
-          std::cout << "[HeadBasedSubclustering::subcluster] createSubClusters finsihed" << std::endl;
+          //std::cout << "[HeadBasedSubclustering::subcluster] createSubClusters finsihed" << std::endl;
         }
         else
         {  // Only one maximum --> copy original cluster:
           subclusters.push_back(*it);
-          std::cout << "[HeadBasedSubclustering::subcluster] Only one maximum --> copy original cluster:" << std::endl;
+          //std::cout << "[HeadBasedSubclustering::subcluster] Only one maximum --> copy original cluster:" << std::endl;
         }
       }
       else
       {
         // Cluster properties not good for sub-clustering --> copy original cluster:
         subclusters.push_back(*it);
-        std::cout << "[HeadBasedSubclustering::subcluster]  Cluster properties not good for sub-clustering --> copy original cluster" << std::endl;
+        //std::cout << "[HeadBasedSubclustering::subcluster]  Cluster properties not good for sub-clustering --> copy original cluster" << std::endl;
       }
     }
   }
   clusters = subclusters;    // substitute clusters with subclusters
-  std::cout << "[HeadBasedSubclustering::subcluster] finished!" << std::endl;
+  //std::cout << "[HeadBasedSubclustering::subcluster] finished!" << std::endl;
 }
 
 template <typename PointT>
