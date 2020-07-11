@@ -1634,7 +1634,7 @@ class TVMNode {
       extract.setNegative(true);
       extract.filter(*no_ground_cloud_);
       std::cout << "[create_foreground_cloud] no_ground_cloud_ size: " << no_ground_cloud_->size() << std::endl;
-      std::cout << "[create_foreground_cloud] no_ground_cloud_ height: " << no_ground_cloud_->height() << std::endl;
+      std::cout << "[create_foreground_cloud] no_ground_cloud_ height: " << no_ground_cloud_->height << std::endl;
       bool debug_flag = false;
       bool sizeCheck = false;
       //if (isZed_) {
