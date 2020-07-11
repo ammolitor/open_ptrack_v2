@@ -1665,7 +1665,8 @@ class TVMNode {
         }
         no_ground_cloud_ = foreground_cloud;
       }
-      //std::cout << "create_foreground_cloud background_subtractionv no_ground_cloud_: " << no_ground_cloud_->size() << std::endl;
+      std::cout << "[create_foreground_cloud] foreground_cloud pose-background subtraction: " << foreground_cloud->size() << std::endl;
+      std::cout << "[create_foreground_cloud] no_ground_cloud_ pose-background subtraction: " << no_ground_cloud_->size() << std::endl;
       // if (no_ground_cloud_->points.size() > 0)
       // {
         // Euclidean Clustering:
@@ -1685,7 +1686,7 @@ class TVMNode {
       //std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
       //std::cout << "computing clusters" << std::endl;
       compute_subclustering(no_ground_cloud_, clusters);
-      std::cout << "[create_foreground_cloud] no_ground_cloud_ check: " << no_ground_cloud_->height << std::endl;
+      std::cout << "[create_foreground_cloud] no_ground_cloud_ post compute_subclustering: " << no_ground_cloud_->size() << std::endl;
       if (use_headclusters){
         //std::cout << ground_coeffs << std::endl;
         //std::cout  << ground_coeffs_new << std::endl; // not being set.. why the f?;
@@ -1779,7 +1780,7 @@ class TVMNode {
       // Head based sub-clustering //
       //std::cout << "compute_head_subclustering: setInputCloud" << std::endl;
       open_ptrack::person_clustering::HeadBasedSubclustering<PointT> subclustering;
-      std::cout << "no_ground_cloud_ check: " << no_ground_cloud_->height << std::endl;
+      std::cout << "[compute_head_subclustering] no_ground_cloud_ check: " << no_ground_cloud_->size() << std::endl;
       subclustering.setInputCloud(no_ground_cloud_); //no_ground_cloud_rotated
       std::cout << "setInputCloud finished" << std::endl;
       subclustering.setGround(ground_coeffs); //ground_coeffs_new

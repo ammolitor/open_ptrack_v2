@@ -128,8 +128,7 @@ open_ptrack::person_clustering::HeightMap2D<PointT>::compute (open_ptrack::perso
     int pit = cluster.pci[i];
     std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] pit: " << pit << std::endl;
     // it's failing right here. 
-    std::cout << "open_ptrack::person_clustering::HeightMap2D::compute] cloud height: " << cloud_->height << std::endl;
-    std::cout << "open_ptrack::person_clustering::HeightMap2D::compute] cloud height: " << cloud_->width << std::endl;
+    std::cout << "open_ptrack::person_clustering::HeightMap2D::compute] cloud size: " << cloud_->size() << std::endl;
     PointT* p = &cloud_->points[pit];
     // make sure point works
     std::cout << "[open_ptrack::person_clustering::HeightMap2D::compute] x: " << p->x << " y: " << p->y << " z: " << p->z << std::endl;
@@ -297,7 +296,7 @@ template <typename PointT> void
 open_ptrack::person_clustering::HeightMap2D<PointT>::setInputCloud (PointCloudPtr& cloud)
 {
   cloud_ = cloud;
-  std::cout << "[open_ptrack::person_clustering::HeightMap2D::setInputCloud] cloud check: " << cloud_->height << std::endl;
+  std::cout << "[open_ptrack::person_clustering::HeightMap2D::setInputCloud] cloud size check: " << cloud_->size() << std::endl;
 
 }
 
