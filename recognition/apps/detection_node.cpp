@@ -1786,6 +1786,7 @@ class TVMNode {
       subclustering.setInputCloud(no_ground_cloud_); //no_ground_cloud_rotated
       std::cout << "setInputCloud finished" << std::endl;
       subclustering.setGround(ground_coeffs); //ground_coeffs_new
+      std::cout << "[compute_head_subclustering] ground_coeffs check: " << ground_coeffs << std::endl;
       std::cout << "setGround finished" << std::endl;
       subclustering.setInitialClusters(cluster_indices);
       std::cout << "setInitialClusters finished" << std::endl;
