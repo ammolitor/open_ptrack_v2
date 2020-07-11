@@ -1617,7 +1617,7 @@ class TVMNode {
       PointCloudPtr cloud_filtered(new PointCloud);
       cloud_filtered = preprocess_cloud(cloud);
       std::cout << "[create_foreground_cloud] cloud_filtered size: " << cloud_filtered->size() << std::endl;
-      std::cout << "[create_foreground_cloud] cloud_filtered height: " << cloud_filtered->height() << std::endl;
+      std::cout << "[create_foreground_cloud] cloud_filtered height: " << cloud_filtered->height << std::endl;
 
 
       // set background cloud here
