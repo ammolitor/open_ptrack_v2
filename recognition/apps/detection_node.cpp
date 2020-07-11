@@ -1681,6 +1681,7 @@ class TVMNode {
       //std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
       //std::cout << "computing clusters" << std::endl;
       compute_subclustering(no_ground_cloud_, clusters);
+      std::cout << "[create_foreground_cloud] no_ground_cloud_ check: " << no_ground_cloud_->height << std::endl;
       if (use_headclusters){
         //std::cout << ground_coeffs << std::endl;
         //std::cout  << ground_coeffs_new << std::endl; // not being set.. why the f?;
