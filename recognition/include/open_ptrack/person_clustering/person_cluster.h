@@ -352,11 +352,7 @@ namespace open_ptrack
   
       float updateSkelHeight (const Eigen::VectorXf& ground_coeffs, float sqrt_ground_coeffs);
 
-      /**
-       * \brief Sets the cluster height.
-       * \param[in] height
-       */
-      void setSkelHeight (float skel_height);
+
       ///**
       // * \brief Draws the theoretical 3D bounding box of the cluster in the PCL visualizer.
       // * \param[in] viewer PCL visualizer.
