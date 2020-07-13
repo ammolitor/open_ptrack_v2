@@ -272,7 +272,7 @@ open_ptrack::person_clustering::PersonCluster<PointT>::resize_from_pose (float c
 
   n_ = 0;
 
-  points_indices_.indices = indices.indices;
+  //points_indices_.indices = indices.indices;
 
   for (std::vector<int>::const_iterator pit = points_indices_.indices.begin(); pit != points_indices_.indices.end(); pit++)
   {

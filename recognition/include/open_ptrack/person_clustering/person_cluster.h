@@ -176,7 +176,13 @@ namespace open_ptrack
       /**
        * \brief resizes cluster object with respect to pose vars
        */
-      void resize_from_pose(float c_x, float c_y, float c_z);
+      void resize_from_pose(float c_x, float c_y, float c_z, 
+                            const PointCloudPtr& input_cloud,
+                            const pcl::PointIndices& indices,
+                            const Eigen::VectorXf& ground_coeffs,
+                            float sqrt_ground_coeffs,
+                            bool head_centroid,
+                            bool vertical);
 
       /**
        * \brief Returns the height of the cluster.
