@@ -255,7 +255,12 @@ open_ptrack::person_clustering::PersonCluster<PointT>::init (
 
 
 template <typename PointT> void
-open_ptrack::person_clustering::PersonCluster<PointT>::resize_from_pose (float c_x, float c_y, float c_z)
+open_ptrack::person_clustering::PersonCluster<PointT>::resize_from_pose (float c_x, float c_y, float c_z, const PointCloudPtr& input_cloud,
+    const pcl::PointIndices& indices,
+    const Eigen::VectorXf& ground_coeffs,
+    float sqrt_ground_coeffs,
+    bool head_centroid,
+    bool vertical)
 {
 
   min_x_ = 1000.0f;
@@ -272,7 +277,7 @@ open_ptrack::person_clustering::PersonCluster<PointT>::resize_from_pose (float c
 
   n_ = 0;
 
-  //points_indices_.indices = indices.indices;
+  points_indices_.indices = indices.indices;
 
   for (std::vector<int>::const_iterator pit = points_indices_.indices.begin(); pit != points_indices_.indices.end(); pit++)
   {
