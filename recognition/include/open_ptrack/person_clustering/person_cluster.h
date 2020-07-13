@@ -159,7 +159,7 @@ namespace open_ptrack
       typedef boost::shared_ptr<PointCloud> PointCloudPtr;
       typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
       std::vector<int> pci;
-      
+
       /** \brief Constructor. */
       PersonCluster (
           const PointCloudPtr& input_cloud,
@@ -171,6 +171,11 @@ namespace open_ptrack
 
       /** \brief Destructor. */
       virtual ~PersonCluster ();
+
+      /**
+       * \brief resizes cluster object with respect to pose vars
+       */
+      void resize_from_pose();
 
       /**
        * \brief Returns the height of the cluster.
@@ -319,6 +324,38 @@ namespace open_ptrack
       void
       setPersonConfidence (float confidence);
 
+      /**
+       * \brief Sets the height from  the pose detection.
+       * \param[in] the height
+       */
+      void setSkelHeight (float skel_height);
+      
+      /**
+       * \brief Gets the height from pose.
+       */      
+      float getSkelHeight ();
+      /**
+       * \brief Update the pose height of the cluster.
+       * \param[in] ground_coeffs The coefficients of the ground plane.
+       * \return the height of the cluster.
+       */
+      float updateSkelHeight (const Eigen::VectorXf& ground_coeffs);
+
+      /**
+       * \brief Update the pose height of the cluster.
+       * \param[in] ground_coeffs The coefficients of the ground plane.
+       * \param[in] sqrt_ground_coeffs The norm of the vector [a, b, c] where a, b and c are the first
+       * three coefficients of the ground plane (ax + by + cz + d = 0).
+       * \return the height of the cluster.
+       */
+  
+      float updateSkelHeight (const Eigen::VectorXf& ground_coeffs, float sqrt_ground_coeffs);
+
+      /**
+       * \brief Sets the cluster height.
+       * \param[in] height
+       */
+      void setSkelHeight (float skel_height);
       ///**
       // * \brief Draws the theoretical 3D bounding box of the cluster in the PCL visualizer.
       // * \param[in] viewer PCL visualizer.

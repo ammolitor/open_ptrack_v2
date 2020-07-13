@@ -253,6 +253,148 @@ open_ptrack::person_clustering::PersonCluster<PointT>::init (
   }
 }
 
+
+template <typename PointT> void
+open_ptrack::person_clustering::PersonCluster<PointT>::resize_from_pose (float c_x, float c_y, float c_z)
+{
+
+  min_x_ = 1000.0f;
+  min_y_ = 1000.0f;
+  min_z_ = 1000.0f;
+
+  max_x_ = -1000.0f;
+  max_y_ = -1000.0f;
+  max_z_ = -1000.0f;
+
+  sum_x_ = 0.0f;
+  sum_y_ = 0.0f;
+  sum_z_ = 0.0f;
+
+  n_ = 0;
+
+  points_indices_.indices = indices.indices;
+
+  for (std::vector<int>::const_iterator pit = points_indices_.indices.begin(); pit != points_indices_.indices.end(); pit++)
+  {
+    PointT* p = &input_cloud->points[*pit];
+    pci.push_back(*pit);
+
+    min_x_ = std::min(p->x, min_x_);
+    max_x_ = std::max(p->x, max_x_);
+    sum_x_ += p->x;
+
+    min_y_ = std::min(p->y, min_y_);
+    max_y_ = std::max(p->y, max_y_);
+    sum_y_ += p->y;
+
+    min_z_ = std::min(p->z, min_z_);
+    max_z_ = std::max(p->z, max_z_);
+    sum_z_ += p->z;
+
+    n_++;
+  }
+
+  c_x_ = sum_x_ / n_;
+  c_y_ = sum_y_ / n_;
+  c_z_ = sum_z_ / n_;
+
+
+  Eigen::Vector4f height_point(c_x, c_y, c_z, 1.0f);
+  if(!vertical_)
+  {
+    height_point(1) = min_y_;
+    distance_ = std::sqrt(c_x * c_x + c_z * c_z);
+  }
+  else
+  {
+    height_point(0) = max_x_;
+    distance_ = std::sqrt(c_y * c_y + c_z * c_z);
+  }
+
+  float height = std::fabs(height_point.dot(ground_coeffs));
+  height /= sqrt_ground_coeffs;
+  height_ = height;
+
+  if(!vertical_)
+  {
+    float min_x = c_x;
+    float min_z = c_z;
+    float max_x = c_x;
+    float max_z = c_z;
+    for (std::vector<int>::const_iterator pit = points_indices_.indices.begin(); pit != points_indices_.indices.end(); pit++)
+    {
+      PointT* p = &input_cloud->points[*pit];
+
+      min_x = std::min(p->x, min_x);
+      max_x = std::max(p->x, max_x);
+      min_z = std::min(p->z, min_z);
+      max_z = std::max(p->z, max_z);
+    }
+
+    angle_ = std::atan2(c_z, c_x);
+    angle_max_ = std::max(std::atan2(min_z, min_x), std::atan2(max_z, min_x));
+    angle_min_ = std::min(std::atan2(min_z, max_x), std::atan2(max_z, max_x));
+
+    Eigen::Vector4f c_point(c_x, c_y, c_z, 1.0f);
+    float t = c_point.dot(ground_coeffs) / std::pow(sqrt_ground_coeffs, 2);
+    float bottom_x = c_x - ground_coeffs(0) * t;
+    float bottom_y = c_y - ground_coeffs(1) * t;
+    float bottom_z = c_z - ground_coeffs(2) * t;
+
+    tbottom_ = Eigen::Vector3f(bottom_x, bottom_y, bottom_z);
+    Eigen::Vector3f v = Eigen::Vector3f(c_x, c_y, c_z) - tbottom_;
+
+    ttop_ = v * height / v.norm() + tbottom_;
+    tcenter_ = v * height * 0.5 / v.norm() + tbottom_;
+    top_ = Eigen::Vector3f(c_x, min_y_, c_z);
+    bottom_ = Eigen::Vector3f(c_x, max_y_, c_z);
+    center_ = Eigen::Vector3f(c_x, c_y, c_z);
+
+    min_ = Eigen::Vector3f(min_x_, min_y_, min_z_);
+
+    max_ = Eigen::Vector3f(max_x_, max_y_, max_z_);
+  }
+  else
+  {
+    float min_y = c_y;
+    float min_z = c_z;
+    float max_y = c_y;
+    float max_z = c_z;
+    for (std::vector<int>::const_iterator pit = points_indices_.indices.begin(); pit != points_indices_.indices.end(); pit++)
+    {
+      PointT* p = &input_cloud->points[*pit];
+
+      min_y = std::min(p->y, min_y);
+      max_y = std::max(p->y, max_y);
+      min_z = std::min(p->z, min_z);
+      max_z = std::max(p->z, max_z);
+    }
+
+    angle_ = std::atan2(c_z, c_y);
+    angle_max_ = std::max(std::atan2(min_z_, min_y_), std::atan2(max_z_, min_y_));
+    angle_min_ = std::min(std::atan2(min_z_, max_y_), std::atan2(max_z_, max_y_));
+
+    Eigen::Vector4f c_point(c_x, c_y, c_z, 1.0f);
+    float t = c_point.dot(ground_coeffs) / std::pow(sqrt_ground_coeffs, 2);
+    float bottom_x = c_x - ground_coeffs(0) * t;
+    float bottom_y = c_y - ground_coeffs(1) * t;
+    float bottom_z = c_z - ground_coeffs(2) * t;
+
+    tbottom_ = Eigen::Vector3f(bottom_x, bottom_y, bottom_z);
+    Eigen::Vector3f v = Eigen::Vector3f(c_x_, c_y_, c_z_) - tbottom_;
+
+    ttop_ = v * height / v.norm() + tbottom_;
+    tcenter_ = v * height * 0.5 / v.norm() + tbottom_;
+    top_ = Eigen::Vector3f(max_x_, c_y, c_z);
+    bottom_ = Eigen::Vector3f(min_x_, c_y, c_z);
+    center_ = Eigen::Vector3f(c_x, c_y, c_z);
+
+    min_ = Eigen::Vector3f(min_x_, min_y_, min_z_);
+
+    max_ = Eigen::Vector3f(max_x_, max_y_, max_z_);
+  }
+}
+
 template <typename PointT> pcl::PointIndices&
 open_ptrack::person_clustering::PersonCluster<PointT>::getIndices ()
 {
@@ -378,9 +520,42 @@ void open_ptrack::person_clustering::PersonCluster<PointT>::setPersonConfidence 
 }
 
 template <typename PointT>
-void open_ptrack::person_clustering::PersonCluster<PointT>::setHeight (float height)
+void open_ptrack::person_clustering::PersonCluster<PointT>::setSkelHeight (float skel_height)
 {
-  height_ = height;
+  skel_height_ = height;
+}
+
+template <typename PointT> float
+open_ptrack::person_clustering::PersonCluster<PointT>::getSkelHeight ()
+{
+  return (skel_height_);
+}
+
+template <typename PointT> float
+open_ptrack::person_clustering::PersonCluster<PointT>::updateSkelHeight (const Eigen::VectorXf& ground_coeffs)
+{
+  float sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
+  return (updateHeight(ground_coeffs, sqrt_ground_coeffs));
+}
+
+template <typename PointT> float
+open_ptrack::person_clustering::PersonCluster<PointT>::updateSkelHeight (const Eigen::VectorXf& ground_coeffs, float sqrt_ground_coeffs)
+{
+  Eigen::Vector4f skel_height_point;
+  if (!vertical_)
+    skel_height_point << c_x_, min_y_, c_z_, 1.0f;
+  else
+    skel_height_point << max_x_, c_y_, c_z_, 1.0f;
+
+  float skel_height = std::fabs(skel_height_point.dot(ground_coeffs));
+  skel_height /= sqrt_ground_coeffs;
+  skel_height_ = skel_height;
+  return (skel_height_);
+}
+template <typename PointT>
+void open_ptrack::person_clustering::PersonCluster<PointT>::setSkelHeight (float skel_height)
+{
+  skel_height_ = skel_height;
 }
 
 //template <typename PointT>

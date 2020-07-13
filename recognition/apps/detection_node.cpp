@@ -1200,6 +1200,7 @@ class TVMNode {
     float thresh = 0.3f;
     int gluon_to_rtpose[17] = {0, -1, -1, -1, -1, 5, 2, 6, 3, 7, 4, 11, 8, 12, 9, 13, 10};
     bool use_pose_model = false;
+    bool use_3D_clusters = false;
     //###################################
     //## Transform Listeners ##
     //###################################
@@ -1267,6 +1268,7 @@ class TVMNode {
           std::cout << "std_dev_denoising: " << std_dev_denoising << std::endl;
           rate_value = master_config["rate_value"];
           std::cout << "rate_value: " << rate_value << std::endl;
+          use_3D_clusters = master_config["use_3D_clusters"];
           json_found = true;
         }
         catch(const std::exception& e)
@@ -1616,8 +1618,8 @@ class TVMNode {
       // Point cloud pre-processing (downsampling and filtering):
       PointCloudPtr cloud_filtered(new PointCloud);
       cloud_filtered = preprocess_cloud(cloud);
-      std::cout << "[create_foreground_cloud] cloud_filtered size: " << cloud_filtered->size() << std::endl;
-      std::cout << "[create_foreground_cloud] cloud_filtered height: " << cloud_filtered->height << std::endl;
+      //std::cout << "[create_foreground_cloud] cloud_filtered size: " << cloud_filtered->size() << std::endl;
+      //std::cout << "[create_foreground_cloud] cloud_filtered height: " << cloud_filtered->height << std::endl;
 
 
       // set background cloud here
@@ -1633,8 +1635,8 @@ class TVMNode {
       extract.setIndices(inliers);
       extract.setNegative(true);
       extract.filter(*no_ground_cloud_);
-      std::cout << "[create_foreground_cloud] no_ground_cloud_ size: " << no_ground_cloud_->size() << std::endl;
-      std::cout << "[create_foreground_cloud] no_ground_cloud_ height: " << no_ground_cloud_->height << std::endl;
+      //std::cout << "[create_foreground_cloud] no_ground_cloud_ size: " << no_ground_cloud_->size() << std::endl;
+      //std::cout << "[create_foreground_cloud] no_ground_cloud_ height: " << no_ground_cloud_->height << std::endl;
       bool debug_flag = false;
       bool sizeCheck = false;
       //if (isZed_) {
@@ -1664,11 +1666,11 @@ class TVMNode {
           }
         }
         no_ground_cloud_ = foreground_cloud;
-        std::cout << "[create_foreground_cloud::background_subtraction] foreground_cloud: " << foreground_cloud->size() << std::endl;
-        std::cout << "[create_foreground_cloud::background_subtraction] no_ground_cloud_: " << no_ground_cloud_->size() << std::endl;
+        //std::cout << "[create_foreground_cloud::background_subtraction] foreground_cloud: " << foreground_cloud->size() << std::endl;
+        //std::cout << "[create_foreground_cloud::background_subtraction] no_ground_cloud_: " << no_ground_cloud_->size() << std::endl;
       }
       
-      std::cout << "[create_foreground_cloud] no_ground_cloud_ post-background subtraction: " << no_ground_cloud_->size() << std::endl;
+      //std::cout << "[create_foreground_cloud] no_ground_cloud_ post-background subtraction: " << no_ground_cloud_->size() << std::endl;
       // if (no_ground_cloud_->points.size() > 0)
       // {
         // Euclidean Clustering:
@@ -1688,7 +1690,7 @@ class TVMNode {
       //std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
       //std::cout << "computing clusters" << std::endl;
       compute_subclustering(no_ground_cloud_, clusters);
-      std::cout << "[create_foreground_cloud] no_ground_cloud_ post compute_subclustering: " << no_ground_cloud_->size() << std::endl;
+      //std::cout << "[create_foreground_cloud] no_ground_cloud_ post compute_subclustering: " << no_ground_cloud_->size() << std::endl;
       if (use_headclusters){
         //std::cout << ground_coeffs << std::endl;
         //std::cout  << ground_coeffs_new << std::endl; // not being set.. why the f?;
@@ -1920,7 +1922,33 @@ class TVMNode {
       
     }
 
-    
+
+
+    std::vector<std::vector<double>> build_cost_matrix (std::vector<cv::Point3f>cluster_centroids3d, std::vector<cv::Point3f> yolo_centroids3d, bool use3d){
+      // both sets are the same size and both will have the same data inside
+      // we can either iter through the 3d set and only use the xy dims
+      // or we can just use the
+      std::vector<std::vector<double>> cost_matrix;
+      for (int r = 0; r < cluster_centroids3d.size (); r++) {
+        std::vector<double> row;
+        cv::Mat cluster2d = cv::Mat(cv::Point3f(cluster_centroids3d[r].x, cluster_centroids3d[r].y));
+        cv::Mat cluster3d = cv::Mat(cluster_centroids3d[r]);
+        for (int c = 0; c < yolo_centroids3d.size (); c++) {
+          double dist;
+          cv::Mat yolo2d = cv::Mat(cv::Point3f(yolo_centroids3d[c].x, yolo_centroids3d[c].y));
+          cv::Mat yolo3d = cv::Mat(yolo_centroids3d[c]);
+          if (use3d){
+            dist = cv::norm(yolo3d, cluster3d);
+          } else {
+            dist = cv::norm(yolo2d, cluster2d);
+          }
+          row.push_back(dist);
+          //https://stackoverflow.com/questions/38365900/using-opencv-norm-function-to-get-euclidean-distance-of-two-points
+        }
+        cost_matrix.push_back(row);
+      }
+      return cost_matrix;
+    }
 
     void pose_callback(const PointCloudT::ConstPtr& cloud_) {
 
@@ -2121,16 +2149,17 @@ class TVMNode {
             if (cluster_centroids2d.size() > 0) {
               // Initialize cost matrix for the hungarian algorithm
               //std::cout << "initialize cost matrix for the hungarian algorithm" << std::endl;
-              for (int r = 0; r < cluster_centroids2d.size (); r++) {
-                std::vector<double> row;
-                for (int c = 0; c < yolo_centroids2d.size (); c++) {
-                  float dist;
-                  dist = cv::norm(cv::Mat(yolo_centroids2d[c]), cv::Mat (cluster_centroids2d[r]));
-                  row.push_back(dist);
-                  //https://stackoverflow.com/questions/38365900/using-opencv-norm-function-to-get-euclidean-distance-of-two-points
-                }
-                cost_matrix.push_back(row);
-              }
+              //for (int r = 0; r < cluster_centroids2d.size (); r++) {
+              //  std::vector<double> row;
+              //  for (int c = 0; c < yolo_centroids2d.size (); c++) {
+              //    float dist;
+              //    dist = cv::norm(cv::Mat(yolo_centroids2d[c]), cv::Mat (cluster_centroids2d[r]));
+              //    row.push_back(dist);
+              //    //https://stackoverflow.com/questions/38365900/using-opencv-norm-function-to-get-euclidean-distance-of-two-points
+              //  }
+              //  cost_matrix.push_back(row);
+              //}
+              cost_matrix = build_cost_matrix(cluster_centroids3d, yolo_centroids3d, use_3D_clusters);
               
               // only consider min distances???
 
@@ -2264,6 +2293,12 @@ class TVMNode {
                   // Create detection message: -- literally tatken ground_based_people_detector_node
                   float skeleton_distance;
                   float skeleton_height;
+
+                  //update skeleton positioning in cluster object
+
+
+
+
                   opt_msgs::Detection detection_msg;
                   converter.Vector3fToVector3(anti_transform * person_cluster.getMin(), detection_msg.box_3D.p1);
                   converter.Vector3fToVector3(anti_transform * person_cluster.getMax(), detection_msg.box_3D.p2);
@@ -2680,16 +2715,17 @@ class TVMNode {
             if (cluster_centroids2d.size() > 0) {
               // Initialize cost matrix for the hungarian algorithm
               //std::cout << "initialize cost matrix for the hungarian algorithm" << std::endl;
-              for (int r = 0; r < cluster_centroids2d.size (); r++) {
-                std::vector<double> row;
-                for (int c = 0; c < yolo_centroids2d.size (); c++) {
-                  float dist;
-                  dist = cv::norm(cv::Mat(yolo_centroids2d[c]), cv::Mat (cluster_centroids2d[r]));
-                  //std::cout << "c: " << c << " r: " << r << " dist: " << dist << std::endl;
-                  row.push_back(dist);
-                }
-                cost_matrix.push_back(row);
-              }
+              //for (int r = 0; r < cluster_centroids2d.size (); r++) {
+              //  std::vector<double> row;
+              //  for (int c = 0; c < yolo_centroids2d.size (); c++) {
+              //    float dist;
+              //    dist = cv::norm(cv::Mat(yolo_centroids2d[c]), cv::Mat (cluster_centroids2d[r]));
+              //    row.push_back(dist);
+              //    //https://stackoverflow.com/questions/38365900/using-opencv-norm-function-to-get-euclidean-distance-of-two-points
+              //  }
+              //  cost_matrix.push_back(row);
+              //}
+              cost_matrix = build_cost_matrix(cluster_centroids3d, yolo_centroids3d, use_3D_clusters);
               
               // Solve the Hungarian problem to match the distance of the roi centroid
               // to that of the bounding box
@@ -2730,7 +2766,12 @@ class TVMNode {
 
                   float dist = cost_matrix[x][i];
                   std::cout << "cluster dist to yolo-det: " << dist << std::endl;
-
+                  //figure out some way to do like dismiss detections here
+                  // perhaps do some calc of ways to distinguish a threshold of 
+                  // when the detection is errant
+                  // if (dist > 0.20) {
+                  //  continue;
+                  //}
                   float xmin = output->boxes[i].xmin;
                   float ymin = output->boxes[i].ymin;
                   float xmax = output->boxes[i].xmax;

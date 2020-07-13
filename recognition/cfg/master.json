@@ -35,5 +35,6 @@
     "apply_denoising" : true,
     "mean_k_denoising" : 5,
     "std_dev_denoising" : 0.3,
-    "rate_value" : 1.0
+    "rate_value" : 1.0,
+    "use_3D_clusters" : false
 }
