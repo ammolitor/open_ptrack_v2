@@ -152,6 +152,7 @@ namespace open_ptrack
       /** \brief PersonCluster HOG confidence. */
       float person_confidence_;
 
+      float skel_height_;
 
     public:
 
@@ -328,7 +329,7 @@ namespace open_ptrack
        * \brief Sets the height from  the pose detection.
        * \param[in] the height
        */
-      void setSkelHeight (float skel_height);
+      void setSkelHeight (float height);
       
       /**
        * \brief Gets the height from pose.

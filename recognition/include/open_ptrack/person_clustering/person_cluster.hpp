@@ -520,9 +520,9 @@ void open_ptrack::person_clustering::PersonCluster<PointT>::setPersonConfidence 
 }
 
 template <typename PointT>
-void open_ptrack::person_clustering::PersonCluster<PointT>::setSkelHeight (float skel_height)
+void open_ptrack::person_clustering::PersonCluster<PointT>::setSkelHeight (float height)
 {
-  skel_height_ = skel_height;
+  skel_height_ = height;
 }
 
 template <typename PointT> float
