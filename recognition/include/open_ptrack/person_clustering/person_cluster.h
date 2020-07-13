@@ -175,7 +175,7 @@ namespace open_ptrack
       /**
        * \brief resizes cluster object with respect to pose vars
        */
-      void resize_from_pose();
+      void resize_from_pose(float c_x, float c_y, float c_z);
 
       /**
        * \brief Returns the height of the cluster.

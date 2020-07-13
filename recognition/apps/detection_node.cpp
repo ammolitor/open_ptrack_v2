@@ -1931,11 +1931,11 @@ class TVMNode {
       std::vector<std::vector<double>> cost_matrix;
       for (int r = 0; r < cluster_centroids3d.size (); r++) {
         std::vector<double> row;
-        cv::Mat cluster2d = cv::Mat(cv::Point3f(cluster_centroids3d[r].x, cluster_centroids3d[r].y));
+        cv::Mat cluster2d = cv::Mat(cv::Point2f(cluster_centroids3d[r].x, cluster_centroids3d[r].y));
         cv::Mat cluster3d = cv::Mat(cluster_centroids3d[r]);
         for (int c = 0; c < yolo_centroids3d.size (); c++) {
           double dist;
-          cv::Mat yolo2d = cv::Mat(cv::Point3f(yolo_centroids3d[c].x, yolo_centroids3d[c].y));
+          cv::Mat yolo2d = cv::Mat(cv::Point2f(yolo_centroids3d[c].x, yolo_centroids3d[c].y));
           cv::Mat yolo3d = cv::Mat(yolo_centroids3d[c]);
           if (use3d){
             dist = cv::norm(yolo3d, cluster3d);
