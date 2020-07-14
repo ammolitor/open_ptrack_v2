@@ -88,7 +88,7 @@
 #include <opencv2/opencv.hpp>
 #include <open_ptrack/hungarian/Hungarian.h>
 #include <nlohmann/json.hpp>
-
+#include <recognition/GenDetectionConfig.h>
 
 /// yolo specific args
 #include <dlpack/dlpack.h>
@@ -331,7 +331,7 @@ class NoNMSPoseFromConfig{
             return normalized_image;
         }
 
-        pose_results* forward_full(cv::Mat frame)
+        pose_results* forward_full(cv::Mat frame, float override_threshold)
         {
             std::cout << "starting function" << std::endl;
             // get height/width dynamically
@@ -430,7 +430,7 @@ class NoNMSPoseFromConfig{
             std::vector<sortable_result> tvm_results;
             std::vector<sortable_result> proposals;
             proposals.clear();
-            tvm_nms_cpu(proposals, yolo_output, thresh, thresh, tvm_results);
+            tvm_nms_cpu(proposals, yolo_output, override_threshold, override_threshold, tvm_results);
             //std::cout << "ending nms" << std::endl;
 
             // dynamically set?
@@ -918,7 +918,8 @@ class NoNMSYoloFromConfig{
             return normalized_image;
         }
 
-        yoloresults* forward_full(cv::Mat frame)
+        // we can set it externally with dynamic reconfigure
+        yoloresults* forward_full(cv::Mat frame, float override_threshold)
         {
             //std::cout << "starting function" << std::endl;
             // get height/width dynamically
@@ -1008,7 +1009,7 @@ class NoNMSYoloFromConfig{
             std::vector<sortable_result> tvm_results;
             std::vector<sortable_result> proposals;
             proposals.clear();
-            tvm_nms_cpu(proposals, yolo_output, thresh, thresh, tvm_results);
+            tvm_nms_cpu(proposals, yolo_output, override_threshold, override_threshold, tvm_results);
             //std::cout << "ending nms" << std::endl;
 
             TVMArrayFree(input);
@@ -1062,14 +1063,6 @@ class NoNMSYoloFromConfig{
 };
 
 
-
-
-
-
-
-
-
-
 /** \brief BaseNode estimates the ground plane equation from a 3D point cloud */
 class TVMNode {
   private:
@@ -1084,6 +1077,7 @@ class TVMNode {
     image_transport::ImageTransport it;
     ros::ServiceServer camera_info_matrix_server;
     ros::Subscriber camera_info_matrix;
+    dynamic_reconfigure::Server<recognition::GenDetectionConfig> cfg_server;
 
   public:
     tf::TransformListener tf_listener;
@@ -1160,6 +1154,7 @@ class TVMNode {
     // Standard deviation for denoising (the lower it is, the stronger is the filtering) =
     float std_dev_denoising = 0.3;
     double rate_value = 1.0;
+    float override_threshold = 0.5;
 
     //###################################
     //## Ground + Clustering Variables ##
@@ -1269,6 +1264,7 @@ class TVMNode {
           rate_value = master_config["rate_value"];
           std::cout << "rate_value: " << rate_value << std::endl;
           use_3D_clusters = master_config["use_3D_clusters"];
+          override_threshold = master_config["override_threshold"];
           json_found = true;
         }
         catch(const std::exception& e)
@@ -1293,7 +1289,8 @@ class TVMNode {
           point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::yolo_callback, this);
           tvm_standard_detector.reset(new NoNMSYoloFromConfig("/cfg/pose_model.json", "recognition"));
         }
-      
+
+        cfg_server.setCallback(boost::bind(&TVMNode::cfg_callback, this, _1, _2)); 
         sensor_name = sensor_string;
         max_capable_depth = max_distance;
 
@@ -2061,7 +2058,7 @@ class TVMNode {
         std::cout << "running inference" << std::endl;
         // forward inference of object detector
         begin = ros::Time::now();
-        output = tvm_pose_detector->forward_full(cv_image);
+        output = tvm_pose_detector->forward_full(cv_image, override_threshold);
         duration = ros::Time::now().toSec() - begin.toSec();
         std::cout << "inference detection time: " << duration << std::endl;
         std::cout << "inference detections: " << output->num << std::endl;
@@ -2627,7 +2624,7 @@ class TVMNode {
         std::cout << "running inference" << std::endl;
         // forward inference of object detector
         begin = ros::Time::now();
-        output = tvm_standard_detector->forward_full(cv_image);
+        output = tvm_standard_detector->forward_full(cv_image, override_threshold);
         duration = ros::Time::now().toSec() - begin.toSec();
         std::cout << "inference detection time: " << duration << std::endl;
         std::cout << "inference detections: " << output->num << std::endl;
@@ -3002,6 +2999,67 @@ class TVMNode {
       }  
     }
 
+    // THIS IS INSIDE THE DETECTOR
+    /**
+     * @brief callback for dynamic reconfigure
+     * @param config  configure parameters
+     * @param level   configure level
+     */
+    void cfg_callback(recognition::GenDetectionConfig& config, uint32_t level) {
+      std::cout << "--- cfg_callback ---" << std::endl;
+      //std::string package_path = ros::package::getPath("recognition");
+      std::cout << "Updating detector configuration!!!" << std::endl;
+      max_capable_depth = master_config.max_capable_depth;
+      std::cout << "max_capable_depth: " << max_capable_depth << std::endl;
+      use_headclusters = master_config.use_headclusters;
+      std::cout << "use_headclusters: " << use_headclusters << std::endl;
+      use_pose_model = master_config.use_pose_model;
+      std::cout << "use_pose_model: " << use_pose_model << std::endl;
+      ground_estimation_mode = master_config.ground_estimation_mode;
+      std::cout << "ground_estimation_mode: " << ground_estimation_mode << std::endl;
+      remote_ground_selection = master_config.remote_ground_selection;
+      std::cout << "remote_ground_selection: " << remote_ground_selection << std::endl;
+      read_ground_from_file = master_config.read_ground_from_file;
+      std::cout << "read_ground_from_file: " << read_ground_from_file << std::endl; 
+      lock_ground = master_config.lock_ground; 
+      std::cout << "lock_ground: " << lock_ground << std::endl;
+      valid_points_threshold = master_config.valid_points_threshold;
+      std::cout << "valid_points_threshold: " << valid_points_threshold << std::endl;
+      background_subtraction = master_config.background_subtraction;
+      std::cout << "background_subtraction: " << background_subtraction << std::endl; 
+      background_octree_resolution = master_config.background_octree_resolution;
+      std::cout << "background_octree_resolution: " << background_octree_resolution << std::endl;  
+      background_seconds = master_config.background_seconds; 
+      std::cout << "background_seconds: " << background_seconds << std::endl;
+      ground_based_people_detection_min_confidence = master_config.ground_based_people_detection_min_confidence; 
+      std::cout << "ground_based_people_detection_min_confidence: " << ground_based_people_detection_min_confidence << std::endl;
+      minimum_person_height = master_config.minimum_person_height;
+      std::cout << "minimum_person_height: " << minimum_person_height << std::endl; 
+      maximum_person_height = master_config.maximum_person_height;
+      std::cout << "maximum_person_height: " << maximum_person_height << std::endl; 
+      max_distance = master_config.max_distance; 
+      std::cout << "max_distance: " << max_distance << std::endl;
+      sampling_factor = master_config.sampling_factor;
+      std::cout << "sampling_factor: " << sampling_factor << std::endl; 
+      use_rgb = master_config.use_rgb;
+      std::cout << "use_rgb: " << use_rgb << std::endl; 
+      minimum_luminance = master_config.minimum_luminance;
+      std::cout << "minimum_luminance: " << minimum_luminance << std::endl; 
+      sensor_tilt_compensation = master_config.sensor_tilt_compensation;
+      std::cout << "sensor_tilt_compensation: " << sensor_tilt_compensation << std::endl; 
+      heads_minimum_distance = master_config.heads_minimum_distance; 
+      std::cout << "heads_minimum_distance: " << heads_minimum_distance << std::endl;
+      voxel_size = master_config.voxel_size; 
+      std::cout << "voxel_size: " << voxel_size << std::endl;
+      apply_denoising = master_config.apply_denoising; 
+      std::cout << "apply_denoising: " << apply_denoising << std::endl;
+      std_dev_denoising = master_config.std_dev_denoising;
+      std::cout << "std_dev_denoising: " << std_dev_denoising << std::endl;
+      rate_value = master_config.rate_value;
+      std::cout << "rate_value: " << rate_value << std::endl;
+      use_3D_clusters = master_config.use_3D_clusters;
+      override_threshold = master_config.override_threshold;
+    }
 };
 
 int main(int argc, char** argv) {

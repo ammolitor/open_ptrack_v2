@@ -36,5 +36,6 @@
     "mean_k_denoising" : 5,
     "std_dev_denoising" : 0.3,
     "rate_value" : 1.0,
-    "use_3D_clusters" : false
+    "use_3D_clusters" : false,
+    "override_threshold" : 0.5
 }
