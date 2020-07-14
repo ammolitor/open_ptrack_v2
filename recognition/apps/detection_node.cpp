@@ -1204,7 +1204,7 @@ class TVMNode {
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
 
-    TVMNode(ros::NodeHandle& nh, std::string sensor_string, json zone, double max_distance):
+    TVMNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
       node_(nh), it(node_)
       {
         try
@@ -1242,9 +1242,7 @@ class TVMNode {
           minimum_person_height = master_config["minimum_person_height"];
           std::cout << "minimum_person_height: " << minimum_person_height << std::endl; 
           maximum_person_height = master_config["maximum_person_height"];
-          std::cout << "maximum_person_height: " << maximum_person_height << std::endl; 
-          max_distance = master_config["max_distance"]; 
-          std::cout << "max_distance: " << max_distance << std::endl;
+          std::cout << "maximum_person_height: " << maximum_person_height << std::endl;
           sampling_factor = master_config["sampling_factor"];
           std::cout << "sampling_factor: " << sampling_factor << std::endl; 
           use_rgb = master_config["use_rgb"];
@@ -1292,7 +1290,6 @@ class TVMNode {
 
         cfg_server.setCallback(boost::bind(&TVMNode::cfg_callback, this, _1, _2)); 
         sensor_name = sensor_string;
-        max_capable_depth = max_distance;
 
         // maybe...
         transform = transform.Identity();
@@ -3011,10 +3008,6 @@ class TVMNode {
       std::cout << "Updating detector configuration!!!" << std::endl;
       max_capable_depth = config.max_capable_depth;
       std::cout << "max_capable_depth: " << max_capable_depth << std::endl;
-      use_headclusters = config.use_headclusters;
-      std::cout << "use_headclusters: " << use_headclusters << std::endl;
-      use_pose_model = config.use_pose_model;
-      std::cout << "use_pose_model: " << use_pose_model << std::endl;
       ground_estimation_mode = config.ground_estimation_mode;
       std::cout << "ground_estimation_mode: " << ground_estimation_mode << std::endl;
       remote_ground_selection = config.remote_ground_selection;
@@ -3037,8 +3030,6 @@ class TVMNode {
       std::cout << "minimum_person_height: " << minimum_person_height << std::endl; 
       maximum_person_height = config.maximum_person_height;
       std::cout << "maximum_person_height: " << maximum_person_height << std::endl; 
-      max_distance = config.max_distance; 
-      std::cout << "max_distance: " << max_distance << std::endl;
       sampling_factor = config.sampling_factor;
       std::cout << "sampling_factor: " << sampling_factor << std::endl; 
       use_rgb = config.use_rgb;
@@ -3057,7 +3048,7 @@ class TVMNode {
       std::cout << "std_dev_denoising: " << std_dev_denoising << std::endl;
       rate_value = config.rate_value;
       std::cout << "rate_value: " << rate_value << std::endl;
-      use_3D_clusters = config.use_3D_clusters;
+
       override_threshold = config.override_threshold;
     }
 };
@@ -3077,10 +3068,9 @@ int main(int argc, char** argv) {
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
-  pnh.param("max_distance", max_distance, 6.25);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMNode node(nh, sensor_name, zone_json, max_distance);
+  TVMNode node(nh, sensor_name, zone_json);
   std::cout << "TVMNode init " << std::endl;
   ros::spin();
   return 0;

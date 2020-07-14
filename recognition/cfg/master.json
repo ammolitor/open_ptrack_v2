@@ -25,7 +25,6 @@
     "ground_based_people_detection_min_confidence" : -5.0, 
     "minimum_person_height" : 0.6,
     "maximum_person_height" : 2.3,
-    "max_distance" : 10.0 ,
     "sampling_factor" : 4,
     "use_rgb" : true,
     "minimum_luminance" : 0,
