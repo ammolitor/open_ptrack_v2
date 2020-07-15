@@ -10,7 +10,7 @@
     "detector_path" :             "/data/object_detector",
     "max_capable_depth":          6.25,
     "n_zones":                    3,
-    "use_headclusters":           true,
+    "use_headclusters":           false,
     "use_pose_model":             false,
     "__n_zones__comment__":       "door, sink, cutting station",
     "__depth__comment__":         "realsense max is 10.0, kinect is 6.25",
@@ -37,5 +37,6 @@
     "rate_value" : 1.0,
     "use_3D_clusters" : false,
     "override_threshold" : 0.5,
-    "filter_height"     : false
+    "filter_height"     : true,
+    "_filter_height_comment": "filter height is so that we can get the height of clusters and just only take the ones that are relatively ppl sized"
 }
