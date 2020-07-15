@@ -1204,7 +1204,7 @@ class TVMNode {
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
 
-    TVMNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
+    TVMNode(ros::NodeHandle& nh, std::string sensor_string, json zone, bool use_dynamic_reconfigure):
       node_(nh), it(node_)
       {
         try
@@ -1288,7 +1288,11 @@ class TVMNode {
           tvm_standard_detector.reset(new NoNMSYoloFromConfig("/cfg/pose_model.json", "recognition"));
         }
 
-        cfg_server.setCallback(boost::bind(&TVMNode::cfg_callback, this, _1, _2)); 
+        // dynamic reconfigure eats cpu cycles; so it's good for testing, 
+        // but on an already constrained device, it's not really a good option
+        if (use_dynamic_reconfigure){
+          cfg_server.setCallback(boost::bind(&TVMNode::cfg_callback, this, _1, _2)); 
+        }
         sensor_name = sensor_string;
 
         // maybe...
@@ -3057,6 +3061,7 @@ int main(int argc, char** argv) {
   std::string sensor_name;
   double max_distance;
   json zone_json;
+  bool use_dynamic_reconfigure;
   std::string area_package_path = ros::package::getPath("recognition");
   std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
   std::ifstream area_json_read(area_hard_coded_path);
@@ -3068,9 +3073,10 @@ int main(int argc, char** argv) {
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
+  pnh.param("use_dynamic_reconfigure", use_dynamic_reconfigure, false);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMNode node(nh, sensor_name, zone_json);
+  TVMNode node(nh, sensor_name, zone_json, use_dynamic_reconfigure);
   std::cout << "TVMNode init " << std::endl;
   ros::spin();
   return 0;
