@@ -1189,6 +1189,7 @@ class TVMNode {
     float mm_factor = 1000.0f;
     float median_factor = 0.1;
     bool use_headclusters = false;
+    bool filter_height = false; // var is auto set if you're not using head clusters
     //###################################
     //## Detection Variables ##
     //###################################
@@ -1263,6 +1264,7 @@ class TVMNode {
           std::cout << "rate_value: " << rate_value << std::endl;
           use_3D_clusters = master_config["use_3D_clusters"];
           override_threshold = master_config["override_threshold"];
+          filter_height = master_config["filter_height"];
           json_found = true;
         }
         catch(const std::exception& e)
@@ -1282,6 +1284,7 @@ class TVMNode {
         if (use_pose_model) {
           point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::pose_callback, this);
           use_headclusters = false;
+          filter_height = true;
           tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
         } else {
           point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::yolo_callback, this);
@@ -1559,7 +1562,7 @@ class TVMNode {
      * \param[in] no ground pointcloud
      * \param[in] PersonClusers to be filled by this function
      */
-    void compute_subclustering(PointCloudPtr no_ground_cloud, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters){
+    void compute_subclustering(PointCloudPtr no_ground_cloud, std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >& clusters, bool compute_height){
       //PointCloudT::Ptr cloud(new PointCloudT);
       //*cloud = *cloud_;      
       //std::cout << "creating people clusters from compute_subclustering" << std::endl;
@@ -1581,6 +1584,12 @@ class TVMNode {
       cv::Point3f centroid3d;
       for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
         {
+          
+          float height = it->getHeight();
+          if (compute_height && height > min_height_ && height < max_height_){
+            // only take blobs that are person sized.
+            continue;
+          }
           it->setPersonConfidence(-100.0);
           Eigen::Vector3f eigen_centroid3d = it->getTCenter();
           x = eigen_centroid3d(0);
@@ -1687,7 +1696,7 @@ class TVMNode {
       //std::cout << "no_ground_cloud_ final:  " << no_ground_cloud_->size() << std::endl;
       //std::cout << "initial clusters size: " << cluster_indices.size() << std::endl;
       //std::cout << "computing clusters" << std::endl;
-      compute_subclustering(no_ground_cloud_, clusters);
+      compute_subclustering(no_ground_cloud_, clusters, filter_height);
       //std::cout << "[create_foreground_cloud] no_ground_cloud_ post compute_subclustering: " << no_ground_cloud_->size() << std::endl;
       if (use_headclusters){
         //std::cout << ground_coeffs << std::endl;
