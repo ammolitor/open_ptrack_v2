@@ -514,7 +514,7 @@ def load_raw_model(path_base):
     return loaded_json, loaded_lib, loaded_params
 
 if __name__ == '__main__':
-    AVAILABLE_MODELS = {'object_detector', 'simple_pose', 'face_detector', 'face_embedder', 'hand_detector','nonms_object_detector'}
+    AVAILABLE_MODELS = {'object_detector', 'simple_pose', 'face_detector', 'face_embedder', 'hand_detector', 'nonms_hand_detector','nonms_object_detector'}
     PARSER = argparse.ArgumentParser(description='')
     PARSER.add_argument('--network', type=str, default='nonms_object_detector', help='Network Architecture')
     PARSER.add_argument('--target', type=str, default='cuda', help='Deploy Target')
