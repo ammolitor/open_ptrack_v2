@@ -2665,6 +2665,7 @@ class TVMNode {
           float median_depth;
           float mx;
           float my;
+          std::vector<cv::Point3f> points;
           for (int i = 0; i < output->num; i++) {
             //std::cout << "building inference centroid: " << i+1 << std::endl;
             // there's a rare case when all values == 0...
@@ -2672,6 +2673,8 @@ class TVMNode {
             ymin = output->boxes[i].ymin;
             xmax = output->boxes[i].xmax;
             ymax = output->boxes[i].ymax;
+            points = output->boxes[i].points;
+            int num_parts = points.size();
 
             if ((xmin == 0) && (ymin == 0) && (xmax == 0) && (ymax == 0)){
               //std::cout << "xmin: " << xmin << std::endl;
