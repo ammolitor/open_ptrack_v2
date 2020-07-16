@@ -360,7 +360,7 @@ def compile_nonms_hand_detector(use_compiler=False):
     print("*********")
     print("*** WARNING ***")
     print("*********")
-    print("Make sure you add 'n_dets' output in pose_model.json")
+    print("Make sure you add 'n_dets' output in hand_detector.json")
     print("n_dets: {}".format(N_DETS))
     print("*********")
 

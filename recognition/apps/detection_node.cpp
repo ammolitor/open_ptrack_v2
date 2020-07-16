@@ -2466,8 +2466,8 @@ class TVMNode {
                       tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
                       tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
                       
-                      min_point = world_transform(min_point);
-                      max_point = world_transform(max_point);
+                      min_point = world_inverse_transform(min_point);
+                      max_point = world_inverse_transform(max_point);
 
                       x_min = min_point.getX();
                       y_min = min_point.getY();
@@ -2961,8 +2961,8 @@ class TVMNode {
                       tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
                       tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
                       
-                      min_point = world_transform(min_point);
-                      max_point = world_transform(max_point);
+                      min_point = world_inverse_transform(min_point);
+                      max_point = world_inverse_transform(max_point);
 
                       x_min = min_point.getX();
                       y_min = min_point.getY();
@@ -3578,8 +3578,8 @@ class TVMNode {
                   tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
                   tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
                   
-                  min_point = world_transform(min_point);
-                  max_point = world_transform(max_point);
+                  min_point = world_inverse_transform(min_point);
+                  max_point = world_inverse_transform(max_point);
 
                   x_min = min_point.getX();
                   y_min = min_point.getY();

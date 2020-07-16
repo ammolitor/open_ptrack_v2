@@ -134,6 +134,74 @@ trackingCallback(const opt_msgs::TrackArray::ConstPtr& tracking_msg)
 }
 
 
+void
+handsCallback(const opt_msgs::DetectionArray::ConstPtr& hands_msg)
+{
+  if (facetracksflag == 1)
+  {
+    return;
+  }
+  /// Create JSON-formatted message:
+  Jzon::Object root, header, stamp;
+
+  /// Add header (84 characters):
+  header.Add("seq", int(hands_msg->header.seq));
+  stamp.Add("sec", int(hands_msg->header.stamp.sec));
+  stamp.Add("nsec", int(hands_msg->header.stamp.nsec));
+  header.Add("stamp", stamp);
+  std::string camera_name = hands_msg->header.frame_id;
+    if (strcmp(camera_name.substr(0,1).c_str(), "/") == 0)  // Remove bar at the beginning
+    {
+      camera_name = camera_name.substr(1, camera_name.size() - 1);
+    }
+  header.Add("frame_id", camera_name);
+  root.Add("header", header);
+
+  /// Add tracks array:
+  // >50 characters for every track
+  Jzon::Array hands;
+  for (unsigned int i = 0; i < hands_msg->detections.size(); i++)
+  {
+    Jzon::Object current_detection;
+    //current_detection.Add("id", hands_msg->detections[i].id);
+    current_detection.Add("x", hands_msg->detections[i].box_2D.x);
+    current_detection.Add("y", hands_msg->detections[i].box_2D.y);
+    current_detection.Add("z", hands_msg->detections[i].box_2D.distance);
+    current_detection.Add("confidence", hands_msg->detections[i].confidence);
+    // should we add this???
+    // the hand detection model will ONLY be run from the camera monitoring the sink
+    current_detection.Add("zone_id", hands_msg->detections[i].zone_id);
+
+    hands.Add(current_detection);
+  }
+  root.Add("hand_detections", hands);
+
+  /// Convert JSON object to string:
+  Jzon::Format message_format = Jzon::StandardFormat;
+  message_format.indentSize = json_indent_size;
+  message_format.newline = json_newline;
+  message_format.spacing = json_spacing;
+  message_format.useTabs = json_use_tabs;
+  Jzon::Writer writer(root, message_format);
+  writer.Write();
+  std::string json_string = writer.GetResult();
+  //  std::cout << "String sent: " << json_string << std::endl;
+
+  /// Copy string to message buffer:
+  udp_data.si_num_byte_ = json_string.length()+1;
+  char buf[udp_data.si_num_byte_];
+  for (unsigned int i = 0; i < udp_data.si_num_byte_; i++)
+  {
+    buf[i] = 0;
+  }
+  sprintf(buf, "%s", json_string.c_str());
+  udp_data.pc_pck_ = buf;         // buffer where the message is written
+
+  /// Send message:
+  udp_messaging.sendFromSocketUDP(&udp_data);
+}
+
+
 void peopleTracksCallback(const opt_msgs::TrackArray::ConstPtr& association_message)
 {
   Jzon::Array tracks;
@@ -323,6 +391,9 @@ main(int argc, char **argv)
       ("alive_ids_topic", 1, aliveIDsCallback);
   ros::Subscriber people_tracks_sub = nh.subscribe<opt_msgs::TrackArray>("people_tracks_topic", 1, peopleTracksCallback);
   ros::Subscriber people_names_sub = nh.subscribe<opt_msgs::NameArray>("people_names_topic", 1, peoplenamesCallback);
+
+  ros::Subscriber hand_sub = nh.subscribe<opt_msgs::DetectionArray>
+      ("hands_topic", 1, handsCallback);
 
   // Initialize UDP parameters:
   char buf[0];

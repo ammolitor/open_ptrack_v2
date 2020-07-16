@@ -391,6 +391,8 @@ class AreaDefinitionNode {
 
     // name of the given sensor
     std::string sensor_name;
+    std::string json_save_name;
+    
 
     // HARDCODED AREA THRESHOLDS
     std::map<std::string, std::pair<double, double>> area_thres_;
@@ -416,7 +418,7 @@ class AreaDefinitionNode {
      * @param sensor_string converts to the sensor_name variable
      * @param detections_topic the name of the detections topic to subscribe to
      */
-    AreaDefinitionNode(ros::NodeHandle& nh, std::string sensor_string, int N_zones):
+    AreaDefinitionNode(ros::NodeHandle& nh, std::string sensor_string, int N_zones, std::string file_save_name):
         node_(nh)
     {
       result_pub = node_.advertise<opt_msgs::DetectionArray>("/results/results", 3);
@@ -439,6 +441,7 @@ class AreaDefinitionNode {
       worldToCamTransform = read_poses_from_json(sensor_name);
       n_zones = N_zones;
       int zone_id = 0;
+      json_save_name = file_save_name;
     }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
@@ -939,7 +942,7 @@ class AreaDefinitionNode {
     cv::imshow("disp", src_img);
       
     // saving image
-    std::string filename = "/area.jpg";
+    std::string filename = //"/area.jpg";
     std::string home_dir = getEnvVar("HOME");
     //std::string home_dir = std::string(env);
     std::string filepath = home_dir + filename;
@@ -951,7 +954,7 @@ class AreaDefinitionNode {
 
     // save area cube to file
     std::string area_path = ros::package::getPath("recognition");
-    std::string zone_json_path = area_path + "/cfg/area.json";
+    std::string zone_json_path = area_path + "/cfg/" + json_save_name;
     std::ofstream areafile(zone_json_path);
     areafile << std::setw(4) << zone_json << std::endl;
 
@@ -972,6 +975,7 @@ int main(int argc, char** argv) {
   // read json parameters
   std::string sensor_name;
   std::string detections_topic;
+  std::string json_save_name;
   json master_config;
   int n_zones;
   std::string package_path = ros::package::getPath("recognition");
@@ -988,9 +992,10 @@ int main(int argc, char** argv) {
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
+  pnh.param("json_save_name", json_save_name, "area.json");
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  AreaDefinitionNode node(nh, sensor_name, n_zones);
+  AreaDefinitionNode node(nh, sensor_name, n_zones, json_save_name);
   std::cout << "area node init " << std::endl;
   ros::spin();
   return 0;

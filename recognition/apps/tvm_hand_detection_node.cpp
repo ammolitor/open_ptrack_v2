@@ -135,6 +135,7 @@ class TVMHandDetectionNode {
     std::string model_folder_path;
     // the threshold for confidence of face detection
     double confidence_thresh;
+    json zone_json;
 
   public:
     // Set camera matrix transforms
@@ -154,7 +155,7 @@ class TVMHandDetectionNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMHandDetectionNode(ros::NodeHandle& nh, std::string sensor_string):
+    TVMHandDetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
       node_(nh), it(node_)
       {
         // Publish Messages
@@ -180,6 +181,7 @@ class TVMHandDetectionNode {
         //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
         tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
         sensor_name = sensor_string;
+        zone_json = zone;
       }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
@@ -202,7 +204,11 @@ class TVMHandDetectionNode {
                   const sensor_msgs::Image::ConstPtr& depth_image) {
         
       std::cout << "running algorithm callback" << std::endl;
-    
+      //Calculate direct and inverse transforms between camera and world frame:
+      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
+                                  world_transform);
+      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
+                                  world_inverse_transform);
       // set message vars here
       cv_bridge::CvImagePtr cv_ptr_rgb;
       cv_bridge::CvImage::Ptr  cv_ptr_depth;
@@ -258,13 +264,14 @@ class TVMHandDetectionNode {
         for (int i = 0; i < output->num; i++) {
           // get the label and the object name
           float label = static_cast<float>(output->boxes[i].id);
-          std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
+          //std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
 
           // get the coordinate information
           float xmin = output->boxes[i].xmin;
           float ymin = output->boxes[i].ymin;
           float xmax = output->boxes[i].xmax;
           float ymax = output->boxes[i].ymax;
+          float score = output->boxes[i].score;
 
           // set the median of the bounding box
           float median_x = xmin + ((xmax - xmin) / 2.0);
@@ -313,7 +320,7 @@ class TVMHandDetectionNode {
             detection_msg.box_2D.width = 0;
             detection_msg.box_2D.height = 0;
             detection_msg.height = 0;
-            detection_msg.confidence = 10;
+            detection_msg.confidence = score;
             detection_msg.distance = median_depth;
             
             detection_msg.centroid.x = mx;
@@ -327,8 +334,92 @@ class TVMHandDetectionNode {
             detection_msg.bottom.x = 0;
             detection_msg.bottom.y = 0;
             detection_msg.bottom.z = 0;
-            
-            detection_msg.object_name=object_name;            
+
+            if (json_found){
+              bool inside_area_cube = false;
+              int zone_id;
+              std::string zone_string;                  
+              double x_min;
+              double y_min;
+              double z_min;
+              double x_max;
+              double y_max;
+              double z_max;
+              double world_x_min;
+              double world_y_min;
+              double world_z_min;
+              double world_x_max;
+              double world_y_max;
+              double world_z_max;
+              for (zone_id = 0; zone_id < n_zones; zone_id++)
+              {
+                // need a world view here bc each detection was transformed
+                // this will work for a singular cam, but would mean each cam would have to tune
+                // to the specific area; which I think would be fine. // but will need
+                // to test to be sure
+                // a given detection can be in only one place at one time, thus it can't be in
+                // multiple zones
+                zone_string = std::to_string(zone_id);
+                //std::cout << "zone_string: " << zone_string << std::endl;
+                // type must be number but is null...
+                //https://github.com/nlohmann/json/issues/1593
+
+                // translate between world and frame
+                world_x_min = zone_json[zone_string]["min"]["world"]["x"];
+                world_y_min = zone_json[zone_string]["min"]["world"]["y"];
+                world_z_min = zone_json[zone_string]["min"]["world"]["z"];
+                world_x_max = zone_json[zone_string]["max"]["world"]["x"];
+                world_y_max = zone_json[zone_string]["max"]["world"]["y"];
+                world_z_max = zone_json[zone_string]["max"]["world"]["z"];
+
+                //std::cout << "world_x_min: " << world_x_min << std::endl;
+                //std::cout << "world_y_min: " << world_y_min << std::endl;
+                //std::cout << "world_z_min: " << world_z_min << std::endl;
+                //std::cout << "world_x_max: " << world_x_max << std::endl;
+                //std::cout << "world_y_max: " << world_y_max << std::endl;
+                //std::cout << "world_z_max: " << world_z_max << std::endl;
+
+                Eigen::Vector3d min_vec;
+                Eigen::Vector3d max_vec;
+                tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
+                tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
+                
+                min_point = world_inverse_transform(min_point);
+                max_point = world_inverse_transform(max_point);
+
+                x_min = min_point.getX();
+                y_min = min_point.getY();
+                z_min = min_point.getZ();
+                x_max = min_point.getX();
+                y_max = min_point.getY();
+                z_max = min_point.getZ();
+
+                //std::cout << "x_min: " << x_min << std::endl;
+                //std::cout << "y_min: " << y_min << std::endl;
+                //std::cout << "z_min: " << z_min << std::endl;
+                //std::cout << "x_max: " << x_max << std::endl;
+                //std::cout << "y_max: " << y_max << std::endl;
+                //std::cout << "z_max: " << z_max << std::endl;
+                //std::cout << "mx: " << mx << std::endl;
+                //std::cout << "my: " << my << std::endl;
+                //std::cout << "median_depth: " << median_depth << std::endl;
+
+                inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
+                //std::cout << "inside_cube: " << inside_area_cube << std::endl;
+                if (inside_area_cube) {
+                  break;
+                }
+              }
+
+              if (inside_area_cube) {
+                detection_msg.zone_id = zone_id;
+                //std::cout << "DEBUG -- INSIDE ZONE: " << zone_id << std::endl;
+              } else {
+                detection_msg.zone_id = 1000;
+              } 
+            }
+
+            detection_msg.object_name="hand";            
             detection_array_msg->detections.push_back(detection_msg);
 
             // sensor_msgs::ImagePtr image_msg_aligned = cv_bridge::CvImage(std_msgs::Header(), "bgr8", aligned_clone).toImageMsg();
@@ -392,7 +483,13 @@ int main(int argc, char** argv) {
   //std::ifstream json_read(master_hard_coded_path);
   //json_read >> master_config;
   //sensor_name = master_config["sensor_name"]; //the path to the detector model file
- 
+  json zone_json;
+  bool use_dynamic_reconfigure;
+  std::string area_package_path = ros::package::getPath("recognition");
+  std::string area_hard_coded_path = area_package_path + "/cfg/sink.json";
+  std::ifstream area_json_read(area_hard_coded_path);
+  area_json_read >> zone_json;
+
   std::cout << "--- tvm_hand_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_hand_detection_node");
   // something is off here... with the private namespace
@@ -404,7 +501,7 @@ int main(int argc, char** argv) {
   //nh.getParam("sensor_name", sensor_name);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMHandDetectionNode node(nh, sensor_name);
+  TVMHandDetectionNode node(nh, sensor_name, zone_json);
   std::cout << "TVMHandDetectionNode init " << std::endl;
   ros::spin();
   return 0;
