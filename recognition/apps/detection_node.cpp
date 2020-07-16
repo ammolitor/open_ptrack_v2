@@ -1155,6 +1155,7 @@ class TVMNode {
     float std_dev_denoising = 0.3;
     double rate_value = 1.0;
     float override_threshold = 0.5;
+    bool fast_no_clustering = false;
 
     //###################################
     //## Ground + Clustering Variables ##
@@ -1265,6 +1266,8 @@ class TVMNode {
           use_3D_clusters = master_config["use_3D_clusters"];
           override_threshold = master_config["override_threshold"];
           filter_height = master_config["filter_height"];
+          fast_no_clustering = master_config["fast_no_clustering"];
+          std::cout << "Fast Mode: " << fast_no_clustering << std::endl;
           json_found = true;
         }
         catch(const std::exception& e)
@@ -1282,8 +1285,16 @@ class TVMNode {
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMNode::camera_info_callback, this);
         if (use_pose_model) {
-          point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::pose_callback, this);
-          use_headclusters = false;
+          
+          if (fast_no_clustering){
+            
+            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::pose_callback_no_clustering, this);
+          } else {
+            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::pose_callback, this);
+            use_headclusters = false;
+          }
+          
+      
           filter_height = true;
           tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
         } else {
@@ -3009,6 +3020,625 @@ class TVMNode {
       }  
     }
 
+
+    void pose_callback_no_clustering(const PointCloudT::ConstPtr& cloud_) {
+
+      //Calculate direct and inverse transforms between camera and world frame:
+      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
+                                  world_transform);
+      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
+                                  world_inverse_transform);
+
+      //std::cout << "running algorithm callback" << std::endl;
+      ros::Time start = ros::Time::now();
+      if (setbackground){
+        //std::cout << "background frame n: " << n_frame << std::endl;
+        PointCloudT::Ptr newcloud(new PointCloudT);
+        *newcloud = *cloud_;
+        background_cloud = compute_background_cloud(newcloud);
+        if (n_frame >= n_frames){
+          set_background(background_cloud);
+          set_octree();
+          setbackground = false;
+        }
+      } else { 
+        // background is set
+        // estimate ground plane and continue with detection process
+        if (estimate_ground_plane) {
+          set_ground_variables(cloud_);
+          estimate_ground_plane = false;
+        }
+
+        // set message vars here
+        open_ptrack::opt_utils::Conversions converter; 
+        std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
+        cv_bridge::CvImagePtr cv_ptr_rgb;
+        cv_bridge::CvImage::Ptr  cv_ptr_depth;
+        cv::Mat cv_image_clone;
+        
+        // set detection variables here
+        pose_results* output;
+        cv::Size image_size;
+        float height;
+        float width;
+        ros::Time begin;
+        double duration;
+
+        // set detection vars here
+        int r, c;
+        HungarianAlgorithm HungAlgo;
+        std::vector<std::vector<double>> cost_matrix;
+        cv::Point2f output_centroid;
+        cv::Point3f output_centroid3d;
+        std::vector<int> assignment;
+        yolo_centroids2d.clear();
+        yolo_centroids3d.clear();
+        cluster_centroids2d.clear();
+        cluster_centroids3d.clear();
+
+        // deallocate and clear
+        cluster_centroids2d = std::vector<cv::Point2f>();
+        cluster_centroids3d = std::vector<cv::Point3f>();
+        yolo_centroids2d = std::vector<cv::Point2f>();
+        yolo_centroids3d = std::vector<cv::Point3f>();
+        cluster_indices = std::vector<pcl::PointIndices>();
+
+        std::vector<int> valid;
+        std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   
+
+        // set publication messages vars here
+        // generate new detection array message with the header from the rbg image
+        opt_msgs::DetectionArray::Ptr detection_array_msg(new opt_msgs::DetectionArray);
+        detection_array_msg->header = cloud_header;
+        detection_array_msg->confidence_type = std::string("yolo");
+        detection_array_msg->image_type = std::string("rgb");
+        // set detection intrinsic matrix from camera variables
+        for(int i = 0; i < 3; i++){
+          for(int j = 0; j < 3; j++){
+            detection_array_msg->intrinsic_matrix.push_back(intrinsics_matrix(i, j));
+          }
+        }
+        opt_msgs::SkeletonArrayMsg::Ptr skeleton_array(new opt_msgs::SkeletonArrayMsg);
+        skeleton_array->header = cloud_header;
+        skeleton_array->rgb_header = cloud_header;
+        // set detection intrinsic matrix from camera variables
+        for(int i = 0; i < 3; i++){
+          for(int j = 0; j < 3; j++){
+            skeleton_array->intrinsic_matrix.push_back(intrinsics_matrix(i, j));
+          }
+        }
+
+        cv::Mat cv_image (cloud_->height, cloud_->width, CV_8UC3);
+        cv::Mat cv_depth_image (cloud_->height, cloud_->width, CV_32FC1);
+        for (int i=0;i<cloud_->height;i++)
+        {
+            for (int j=0;j<cloud_->width;j++)
+            {
+            cv_image.at<cv::Vec3b>(i,j)[2] = cloud_->at(j,i).r;
+            cv_image.at<cv::Vec3b>(i,j)[1] = cloud_->at(j,i).g;
+            cv_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
+            cv_depth_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).z;
+            }
+        }
+        // Fill rgb image:
+        //rgb_image_->points.clear();                            // clear RGB pointcloud
+        //extractRGBFromPointCloud(cloud_, rgb_image_);          // fill RGB pointcloud
+
+        cv_image_clone = cv_image.clone();
+        image_size = cv_image.size();
+        height = static_cast<float>(image_size.height);
+        width = static_cast<float>(image_size.width);
+
+        std::cout << "running inference" << std::endl;
+        // forward inference of object detector
+        begin = ros::Time::now();
+        output = tvm_pose_detector->forward_full(cv_image, override_threshold);
+        duration = ros::Time::now().toSec() - begin.toSec();
+        std::cout << "inference detection time: " << duration << std::endl;
+        std::cout << "inference detections: " << output->num << std::endl;
+          
+        // build cost matrix
+        if (output->num >= 1) {
+          float xmin;
+          float ymin;
+          float xmax;
+          float ymax;
+          float score;
+          int cast_xmin;
+          int cast_ymin;
+          int cast_xmax;
+          int cast_ymax;
+          float median_x;
+          float median_y;
+          float median_depth;
+          float mx;
+          float my;
+          for (int i = 0; i < output->num; i++) {
+            //std::cout << "building inference centroid: " << i+1 << std::endl;
+            // there's a rare case when all values == 0...
+            xmin = output->boxes[i].xmin;
+            ymin = output->boxes[i].ymin;
+            xmax = output->boxes[i].xmax;
+            ymax = output->boxes[i].ymax;
+            score = output->boxes[i].score;
+
+            if ((xmin == 0) && (ymin == 0) && (xmax == 0) && (ymax == 0)){
+              //std::cout << "xmin: " << xmin << std::endl;
+              //std::cout << "ymin: " << ymin << std::endl;
+              //std::cout << "xmax: " << xmax << std::endl;
+              //std::cout << "ymax: " << ymax << std::endl;
+              std::cout << "all values zero. passing" << std::endl;
+              continue;
+            }
+
+            cast_xmin = static_cast<int>(xmin);
+            cast_ymin = static_cast<int>(ymin);
+            cast_xmax = static_cast<int>(xmax);
+            cast_ymax = static_cast<int>(ymax);
+            // set the median of the bounding box
+            median_x = xmin + ((xmax - xmin) / 2.0);
+            median_y = ymin + ((ymax - ymin) / 2.0);
+            
+            if ( median_x < width*0.02) {
+              median_x = width*0.02;
+            }
+            if (median_x > width*0.98) {
+              median_x = width*0.98;
+            }
+
+            if ( median_y < height*0.02) {
+              median_y = height*0.02;
+            }
+            if ( median_y > height*0.98) {
+              median_y = height*0.98;
+            }
+
+            // get x, y, z points
+            mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x;
+            my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
+            median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
+
+            //std::cout << "yolo centroid - x:" << mx << ", y: " << my << ", z: " << median_depth << std::endl;
+            if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
+
+              // Create detection message: -- literally tatken ground_based_people_detector_node
+              float skeleton_distance;
+              float skeleton_height;
+
+              //update skeleton positioning in cluster object
+              opt_msgs::Detection detection_msg;
+
+              ///////////////////// head/top
+              Point3f top;
+              cv::Point3f head = points[0];
+              int head_x = static_cast<int>(head.x);
+              int head_y = static_cast<int>(head.y);
+
+              float top_x = cloud_->at(head_x, head_y).x;
+              float top_y = cloud_->at(head_x, head_y).y;
+              float top_z = cloud_->at(head_x, head_y).z;
+
+              Eigen::Vector3f top_vec = Eigen::Vector3f(top_x, top_y, top_z);
+              top.x = top_x;
+              top.y = top_y;
+              top.z = top_z;
+              
+              //////////////////// middle point/center
+              Point3f middle;
+              cv::Point3f point_left_hip = points[11];
+              cv::Point3f point_right_hip = points[12];
+
+              float hip_midpoint_x = (point_left_hip.x + point_right_hip.x) / 2.0f;
+              float hip_midpoint_y = (point_left_hip.y + point_right_hip.y) / 2.0f;
+
+              float middle_x = cloud_->at(hip_midpoint_x, hip_midpoint_y).x;
+              float middle_y = cloud_->at(hip_midpoint_x, hip_midpoint_y).y;
+              float middle_z = cloud_->at(hip_midpoint_x, hip_midpoint_y).z;
+
+              Eigen::Vector3f middle_vec = Eigen::Vector3f(middle_x, middle_y, middle_z);
+              middle.x = middle_x;
+              middle.y = middle_y;
+              middle.z = middle_z;
+
+              ////////////////////////// bottom/ mid-ankle point
+              Point3f bottom;
+              cv::Point3f right_ankle = points[10];
+              cv::Point3f left_ankle = points[13];
+              float midpoint_x = (right_ankle.x + left_ankle.x) / 2.0f;
+              float midpoint_y = (right_ankle.y + left_ankle.y) / 2.0f;
+              //float midpoint_z = (right_ankle.z + left_ankle.z) / 2.0f;
+              float bottom_x = cloud_->at(midpoint_x, midpoint_y).x;
+              float bottom_y = cloud_->at(midpoint_x, midpoint_y).y;
+              
+              // because this point me between the feet and at the floor,
+              // given the perspective, it might actually be further away
+              // so we'll take whichever ankle is further forward!
+              float right_ankle_z = cloud_->at(static_cast<int>(right_ankle.x), static_cast<int>(right_ankle.y)).z;
+              float left_ankle_z = cloud_->at(static_cast<int>(left_ankle.x), static_cast<int>(left_ankle.y)).z;
+              float bottom_z = std::max(right_ankle_z, left_ankle_z);
+
+              bottom.x = bottom_x;
+              bottom.y = bottom_y;
+              bottom.z = bottom_z;
+              Eigen::Vector3f bottom_vec = Eigen::Vector3f(bottom_x, bottom_y, bottom_z);
+
+              /////////////////////////////// taken from person clustering application
+              /** \brief Minimum x coordinate of the cluster points. */
+              float min_x_;
+              /** \brief Minimum y coordinate of the cluster points. */
+              /** \brief Number of cluster points. */
+              int n_;
+
+              /** \brief x coordinate of the cluster centroid. */
+              float c_x_;
+              /** \brief y coordinate of the cluster centroid. */
+              float c_y_;
+              /** \brief z coordinate of the cluster centroid. */
+              float c_z_;
+
+              /** \brief Cluster height from the ground plane. */
+              float height_;
+
+              /** \brief Cluster distance from the sensor. */
+              float distance_;
+              /** \brief Cluster centroid horizontal angle with respect to z axis. */
+              float angle_;
+
+              /** \brief Maximum angle of the cluster points. */
+              float angle_max_;
+              /** \brief Minimum angle of the cluster points. */
+              float angle_min_;    float min_y_;
+              /** \brief Minimum z coordinate of the cluster points. */
+              float min_z_;
+
+              /** \brief Maximum x coordinate of the cluster points. */
+              float max_x_;
+              /** \brief Maximum y coordinate of the cluster points. */
+              float max_y_;
+              /** \brief Maximum z coordinate of the cluster points. */
+              float max_z_;
+
+              /** \brief Sum of x coordinates of the cluster points. */
+              float sum_x_;
+              /** \brief Sum of y coordinates of the cluster points. */
+              float sum_y_;
+              /** \brief Sum of z coordinates of the cluster points. */
+              float sum_z_;
+
+              /** \brief Cluster top point. */
+              Eigen::Vector3f top_;
+              /** \brief Cluster bottom point. */
+              Eigen::Vector3f bottom_;
+              /** \brief Cluster centroid. */
+              Eigen::Vector3f center_;
+              
+              /** \brief Theoretical cluster top. */
+              Eigen::Vector3f ttop_;
+              /** \brief Theoretical cluster bottom (lying on the ground plane). */
+              Eigen::Vector3f tbottom_;
+              /** \brief Theoretical cluster center (between ttop_ and tbottom_). */
+              Eigen::Vector3f tcenter_;
+
+              /** \brief Vector containing the minimum coordinates of the cluster. */
+              Eigen::Vector3f min_;
+              /** \brief Vector containing the maximum coordinates of the cluster. */
+              Eigen::Vector3f max_;
+              // height and distance calculation taken from person_cluster.hpp
+              Eigen::Vector4f height_point(top.x, top.y, top.z, 1.0f);
+              if(!vertical_)
+              {
+                height_point(1) = bottom_y;
+                distance_ = std::sqrt(top.x * top.x + top.z * top.z);
+              }
+              else
+              {
+                height_point(0) = top_x;
+                distance_ = std::sqrt(top.y * top.y + top.z * top.z);
+              }
+
+              float height = std::fabs(height_point.dot(ground_coeffs_new));
+              height /= sqrt_ground_coeffs;
+
+              if(!vertical_)
+              {
+
+                angle_ = std::atan2(top.z, top.x);
+                angle_max_ = std::max(std::atan2(bottom.z, bottom.x), std::atan2(top.z, bottom.x));
+                angle_min_ = std::min(std::atan2(bottom.z, top.x), std::atan2(top.z, top.x));
+
+                Eigen::Vector4f c_point(top.x, c_y, top.z, 1.0f);
+                float t = c_point.dot(ground_coeffs) / std::pow(sqrt_ground_coeffs, 2);
+                float bottom_x = top.x - ground_coeffs(0) * t;
+                float bottom_y = top.y - ground_coeffs(1) * t;
+                float bottom_z = top.z - ground_coeffs(2) * t;
+
+                tbottom_ = Eigen::Vector3f(bottom_x, bottom_y, bottom_z);
+                Eigen::Vector3f v = Eigen::Vector3f(top.x, top.y, top.z) - tbottom_;
+
+                ttop_ = v * height / v.norm() + tbottom_;
+                tcenter_ = v * height * 0.5 / v.norm() + tbottom_;
+                top_ = Eigen::Vector3f(top.x, bottom.y, top.z);
+                bottom_ = Eigen::Vector3f(top.x, top.y, top.z);
+                center_ = Eigen::Vector3f(top.x, top.y, top.z);
+
+                min_ = Eigen::Vector3f(bottom.x, bottom.y, bottom.z);
+
+                max_ = Eigen::Vector3f(top.x, top.y, top.z);
+              }
+              else
+              {
+                //flipped
+                angle_ = std::atan2(bottom.z, bottom.y);
+                angle_max_ = std::max(std::atan2(bottom.z, bottom.y), std::atan2(top.z, bottom.y));
+                angle_min_ = std::min(std::atan2(bottom.z, top.y), std::atan2(top.z, top.y));
+
+                Eigen::Vector4f c_point(bottom.x, bottom.y, bottom.z, 1.0f);
+                float t = c_point.dot(ground_coeffs) / std::pow(sqrt_ground_coeffs, 2);
+                float bottom_x = bottom.x - ground_coeffs(0) * t;
+                float bottom_y = bottom.y - ground_coeffs(1) * t;
+                float bottom_z = bottom.z - ground_coeffs(2) * t;
+
+                tbottom_ = Eigen::Vector3f(bottom_x, bottom_y, bottom_z);
+                Eigen::Vector3f v = Eigen::Vector3f(bottom.x, bottom.y, bottom.z) - tbottom_;
+
+                ttop_ = v * height / v.norm() + tbottom_;
+                tcenter_ = v * height * 0.5 / v.norm() + tbottom_;
+                top_ = Eigen::Vector3f(top.x, bottom.y, bottom.z);
+                bottom_ = Eigen::Vector3f(bottom.x, bottom.y, bottom.z);
+                center_ = Eigen::Vector3f(bottom.x, bottom.y, bottom.z);
+
+                min_ = Eigen::Vector3f(bottom.x, bottom.y, bottom.z);
+
+                max_ = Eigen::Vector3f(top.x, top.y, top.z);
+              }
+            
+              converter.Vector3fToVector3(anti_transform * min_, detection_msg.box_3D.p1);
+              converter.Vector3fToVector3(anti_transform * max_, detection_msg.box_3D.p2);
+                  
+              float head_centroid_compensation = 0.05;
+              // theoretical person centroid:
+              Eigen::Vector3f centroid3d = anti_transform * tcenter_;
+              Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
+              // theoretical person top point:
+              Eigen::Vector3f top3d = anti_transform * ttop_;
+              Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
+              // theoretical person bottom point:
+              Eigen::Vector3f bottom3d = anti_transform * bottom_;
+              Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
+              float enlarge_factor = 1.1;
+              float pixel_xc = centroid2d(0);
+              float pixel_yc = centroid2d(1);
+              float pixel_height = (bottom2d(1) - top2d(1)) * enlarge_factor;
+              float pixel_width = pixel_height / 2;
+              detection_msg.box_2D.x = int(centroid2d(0) - pixel_width/2.0);
+              detection_msg.box_2D.y = int(centroid2d(1) - pixel_height/2.0);
+              detection_msg.box_2D.width = int(pixel_width);
+              detection_msg.box_2D.height = int(pixel_height);
+              detection_msg.height = height;
+              detection_msg.confidence = score;//use yolo score, not pcl //person_cluster.getPersonConfidence();
+              detection_msg.distance = distance_;
+              converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
+              converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
+              converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
+
+
+              // perform point transforms on person's stats similar to 
+              /////Eigen::Vector3f centroid3d = anti_transform * middle_vec;
+              /////Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
+              /////Eigen::Vector3f top3d = anti_transform * top_vec;
+              /////Eigen::Vector3f top2d = converter.world2cam(top3d, intrinsics_matrix);
+              /////Eigen::Vector3f bottom3d = anti_transform * bottom_vec;
+              /////Eigen::Vector3f bottom2d = converter.world2cam(bottom3d, intrinsics_matrix);
+
+              /////// default params
+              /////float distance_;
+              /////float head_centroid_compensation = 0.05;
+              /////float enlarge_factor = 1.1;
+              /////float pixel_xc = centroid2d(0);
+              /////float pixel_yc = centroid2d(1);
+              /////float pixel_height = (bottom2d(1) - top2d(1)) * enlarge_factor;
+              /////float pixel_width = pixel_height / 2;
+              /////detection_msg.box_2D.x = mx;
+              /////detection_msg.box_2D.y = my;
+              /////detection_msg.box_2D.width = int(pixel_width);
+              /////detection_msg.box_2D.height = int(pixel_height);
+
+              /////detection_msg.height = height;
+              /////detection_msg.confidence = score;
+              /////detection_msg.distance = distance_;
+              /////converter.Vector3fToVector3(middle_vec, detection_msg.centroid);
+              /////converter.Vector3fToVector3(top_vec, detection_msg.top);
+              /////converter.Vector3fToVector3(bottom_vec, detection_msg.bottom);
+
+              skeleton_distance = distance_;
+              skeleton_height = height;
+
+              // 3d bounding box
+              converter.Vector3fToVector3(anti_transform * min_, detection_msg.box_3D.p1);
+              converter.Vector3fToVector3(anti_transform * max_, detection_msg.box_3D.p2);
+
+              opt_msgs::SkeletonMsg skeleton;
+              skeleton.skeleton_type = opt_msgs::SkeletonMsg::COCO;
+              skeleton.joints.resize(num_parts);
+
+              for (size_t i = 0; i < num_parts; i++){
+                opt_msgs::Joint3DMsg joint3D;
+                int rtpose_part_index = gluon_to_rtpose[i];
+          
+                // IGNORE eyes/ears
+                if (rtpose_part_index == -1){
+                  continue;
+                } else {
+                  cv::Point3f point = points[i];
+                  float confidence = point.z;
+                  int cast_x = static_cast<int>(point.x);
+                  int cast_y = static_cast<int>(point.y);
+                  joint3D.x = cloud_->at(static_cast<int>(cast_x), static_cast<int>(cast_y)).x;
+                  joint3D.y = cloud_->at(static_cast<int>(cast_x), static_cast<int>(cast_y)).y;
+                  joint3D.z = cloud_->at(static_cast<int>(cast_x), static_cast<int>(cast_y)).z;
+                  joint3D.max_height = image_size.height;
+                  joint3D.max_width = image_size.width;
+                  joint3D.confidence = confidence;
+                  joint3D.header = cloud_header;
+                  skeleton.joints[rtpose_part_index] = joint3D;
+                }
+              }
+              float confidence = 0.9f;
+              cv::Point3f point_left_shoulder = points[5];
+              cv::Point3f point_right_shoulder = points[6];
+              cv::Point3f point_left_hip = points[11];
+              cv::Point3f point_right_hip = points[12];
+
+              // ******* NECK == joint location 1
+              opt_msgs::Joint3DMsg joint3D_neck;
+              // center of each shoulder == chest
+              float x = (point_left_shoulder.x + point_right_shoulder.x) / 2;
+              float y = (point_left_shoulder.y + point_right_shoulder.y) / 2;
+              int cast_point_x = static_cast<int>(x);
+              int cast_point_y = static_cast<int>(y);
+              joint3D_neck.x = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).x;
+              joint3D_neck.y = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).y;
+              joint3D_neck.z = cloud_->at(static_cast<int>(cast_point_x), static_cast<int>(cast_point_y)).z;
+              joint3D_neck.confidence = confidence;
+              joint3D_neck.header = cloud_header;
+              joint3D_neck.max_height = image_size.height;
+              joint3D_neck.max_width = image_size.width;              
+              // NECK == joint location 1
+              skeleton.joints[1] = joint3D_neck;
+              
+              // ******** CHEST
+              opt_msgs::Joint3DMsg joint3D_chest;
+              // weighted mean from rtpose
+              float cx = (point_left_hip.x + point_right_hip.x) * 0.4 + (point_left_shoulder.x + point_right_shoulder.x) * 0.1;
+              float cy = (point_left_hip.y + point_right_hip.y) * 0.4 + (point_left_shoulder.y + point_right_shoulder.y) * 0.1;
+              int cast_cx = static_cast<int>(cx);
+              int cast_cy = static_cast<int>(cy);
+              joint3D_chest.x = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).x;
+              joint3D_chest.y = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).y;
+              joint3D_chest.z = cloud_->at(static_cast<int>(cast_cx), static_cast<int>(cast_cy)).z;
+              joint3D_chest.confidence = confidence; //use confidence from previous
+              joint3D_chest.header = cloud_header;
+              joint3D_chest.max_height = image_size.height;
+              joint3D_chest.max_width = image_size.width; 
+              // CHEST == joint location 15, index 14
+              skeleton.joints[14] = joint3D_chest;
+              draw_skelaton(cv_image_clone, points);
+
+              if (json_found){                
+                bool inside_area_cube = false;
+                int zone_id;
+                std::string zone_string;                  
+                double x_min;
+                double y_min;
+                double z_min;
+                double x_max;
+                double y_max;
+                double z_max;
+                double world_x_min;
+                double world_y_min;
+                double world_z_min;
+                double world_x_max;
+                double world_y_max;
+                double world_z_max;
+                for (zone_id = 0; zone_id < n_zones; zone_id++)
+                {
+                  // need a world view here bc each detection was transformed
+                  // this will work for a singular cam, but would mean each cam would have to tune
+                  // to the specific area; which I think would be fine. // but will need
+                  // to test to be sure
+                  // a given detection can be in only one place at one time, thus it can't be in
+                  // multiple zones
+                  zone_string = std::to_string(zone_id);
+                  //std::cout << "zone_string: " << zone_string << std::endl;
+                  // type must be number but is null...
+                  //https://github.com/nlohmann/json/issues/1593
+
+                  // translate between world and frame
+                  world_x_min = zone_json[zone_string]["min"]["world"]["x"];
+                  world_y_min = zone_json[zone_string]["min"]["world"]["y"];
+                  world_z_min = zone_json[zone_string]["min"]["world"]["z"];
+                  world_x_max = zone_json[zone_string]["max"]["world"]["x"];
+                  world_y_max = zone_json[zone_string]["max"]["world"]["y"];
+                  world_z_max = zone_json[zone_string]["max"]["world"]["z"];
+
+                  //std::cout << "world_x_min: " << world_x_min << std::endl;
+                  //std::cout << "world_y_min: " << world_y_min << std::endl;
+                  //std::cout << "world_z_min: " << world_z_min << std::endl;
+                  //std::cout << "world_x_max: " << world_x_max << std::endl;
+                  //std::cout << "world_y_max: " << world_y_max << std::endl;
+                  //std::cout << "world_z_max: " << world_z_max << std::endl;
+
+                  Eigen::Vector3d min_vec;
+                  Eigen::Vector3d max_vec;
+                  tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
+                  tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
+                  
+                  min_point = world_transform(min_point);
+                  max_point = world_transform(max_point);
+
+                  x_min = min_point.getX();
+                  y_min = min_point.getY();
+                  z_min = min_point.getZ();
+                  x_max = min_point.getX();
+                  y_max = min_point.getY();
+                  z_max = min_point.getZ();
+
+                  //std::cout << "x_min: " << x_min << std::endl;
+                  //std::cout << "y_min: " << y_min << std::endl;
+                  //std::cout << "z_min: " << z_min << std::endl;
+                  //std::cout << "x_max: " << x_max << std::endl;
+                  //std::cout << "y_max: " << y_max << std::endl;
+                  //std::cout << "z_max: " << z_max << std::endl;
+                  //std::cout << "mx: " << mx << std::endl;
+                  //std::cout << "my: " << my << std::endl;
+                  //std::cout << "median_depth: " << median_depth << std::endl;
+
+                  inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
+                  //std::cout << "inside_cube: " << inside_area_cube << std::endl;
+                  if (inside_area_cube) {
+                    break;
+                  }
+                }
+
+                if (inside_area_cube) {
+                  detection_msg.zone_id = zone_id;
+                  //std::cout << "DEBUG -- INSIDE ZONE: " << zone_id << std::endl;
+                } else {
+                  detection_msg.zone_id = 1000;
+                } 
+              }
+              skeleton.confidence = 100;
+              skeleton.height = skeleton_height;
+              skeleton.distance = skeleton_distance;
+              skeleton.occluded = false;
+            
+              // final check here 
+              // only add to message if no nans exist
+              if (check_detection_msg(detection_msg)){
+                std::cout << "valid detection!" << std::endl;
+                skeleton_array->skeletons.push_back(skeleton);
+                detection_msg.object_name=object_name;            
+                detection_array_msg->detections.push_back(detection_msg);
+            
+              cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
+              cv::putText(cv_image_clone, object_name, cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
+            }
+          }
+        }
+      }
+      // this will publish empty detections if nothing is found
+      sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
+      detections_pub.publish(detection_array_msg);
+      skeleton_pub.publish(skeleton_array);
+      image_pub.publish(imagemsg);
+      free(output->boxes);
+      free(output);
+      double end = ros::Time::now().toSec() - start.toSec();
+      std::cout << "total time: " << end << std::endl;
+      }  
+    }
+
+
     // THIS IS INSIDE THE DETECTOR
     /**
      * @brief callback for dynamic reconfigure
@@ -3061,6 +3691,9 @@ class TVMNode {
       std::cout << "std_dev_denoising: " << std_dev_denoising << std::endl;
       rate_value = config.rate_value;
       std::cout << "rate_value: " << rate_value << std::endl;
+      // can only turn on when first starting... can't redeclare a callback
+      //fast_no_clustering = config["fast_no_clustering"];
+      //std::cout << "Fast Mode: " << fast_no_clustering << std::endl;
 
       override_threshold = config.override_threshold;
     }
