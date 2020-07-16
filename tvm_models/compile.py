@@ -352,6 +352,18 @@ def compile_nonms_hand_detector(use_compiler=False):
     block = yolo3_mobilenet1_0_custom(classes=['hands'])
     block.load_parameters('models/yolo3_mobilenet1.0_hands.params')
     block.hybridize(static_alloc=True)
+
+    x = np.random.randn(*MODEL_CONFIG["nonms_hand_detector"]["shape"])
+    x = mx.nd.array(x)
+    x = block(x)
+    N_DETS = x.shape[1]
+    print("*********")
+    print("*** WARNING ***")
+    print("*********")
+    print("Make sure you add 'n_dets' output in pose_model.json")
+    print("n_dets: {}".format(N_DETS))
+    print("*********")
+
     mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["nonms_hand_detector"]["shape"]}, dtype='float32')
     #net = mod["main"]
     #net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
