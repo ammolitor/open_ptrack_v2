@@ -2665,7 +2665,7 @@ class TVMNode {
           float median_depth;
           float mx;
           float my;
-          std::vector<cv::Point3f> points;
+          
           for (int i = 0; i < output->num; i++) {
             //std::cout << "building inference centroid: " << i+1 << std::endl;
             // there's a rare case when all values == 0...
@@ -2673,8 +2673,7 @@ class TVMNode {
             ymin = output->boxes[i].ymin;
             xmax = output->boxes[i].xmax;
             ymax = output->boxes[i].ymax;
-            points = output->boxes[i].points;
-            int num_parts = points.size();
+
 
             if ((xmin == 0) && (ymin == 0) && (xmax == 0) && (ymax == 0)){
               //std::cout << "xmin: " << xmin << std::endl;
@@ -3156,6 +3155,7 @@ class TVMNode {
           float median_depth;
           float mx;
           float my;
+          std::vector<cv::Point3f> points;
           for (int i = 0; i < output->num; i++) {
             //std::cout << "building inference centroid: " << i+1 << std::endl;
             // there's a rare case when all values == 0...
@@ -3164,7 +3164,9 @@ class TVMNode {
             xmax = output->boxes[i].xmax;
             ymax = output->boxes[i].ymax;
             score = output->boxes[i].score;
-
+            points = output->boxes[i].points;
+            int num_parts = points.size();
+            std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
             if ((xmin == 0) && (ymin == 0) && (xmax == 0) && (ymax == 0)){
               //std::cout << "xmin: " << xmin << std::endl;
               //std::cout << "ymin: " << ymin << std::endl;
@@ -3349,7 +3351,7 @@ class TVMNode {
                 angle_max_ = std::max(std::atan2(bottom.z, bottom.x), std::atan2(top.z, bottom.x));
                 angle_min_ = std::min(std::atan2(bottom.z, top.x), std::atan2(top.z, top.x));
 
-                Eigen::Vector4f c_point(top.x, c_y, top.z, 1.0f);
+                Eigen::Vector4f c_point(top.x, top.y, top.z, 1.0f);
                 float t = c_point.dot(ground_coeffs) / std::pow(sqrt_ground_coeffs, 2);
                 float bottom_x = top.x - ground_coeffs(0) * t;
                 float bottom_y = top.y - ground_coeffs(1) * t;
@@ -3489,8 +3491,8 @@ class TVMNode {
               float confidence = 0.9f;
               cv::Point3f point_left_shoulder = points[5];
               cv::Point3f point_right_shoulder = points[6];
-              cv::Point3f point_left_hip = points[11];
-              cv::Point3f point_right_hip = points[12];
+              //cv::Point3f point_left_hip = points[11];
+              //cv::Point3f point_right_hip = points[12];
 
               // ******* NECK == joint location 1
               opt_msgs::Joint3DMsg joint3D_neck;
