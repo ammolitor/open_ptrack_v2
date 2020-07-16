@@ -136,6 +136,8 @@ class TVMHandDetectionNode {
     // the threshold for confidence of face detection
     double confidence_thresh;
     json zone_json;
+    bool json_found;
+    int n_zones;
 
   public:
     // Set camera matrix transforms
@@ -182,6 +184,17 @@ class TVMHandDetectionNode {
         tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
         sensor_name = sensor_string;
         zone_json = zone;
+
+
+        json master_config;
+        std::string package_path = ros::package::getPath("recognition");
+        std::string master_hard_coded_path = package_path + "/cfg/master.json";
+        std::ifstream json_read(master_hard_coded_path);
+        n_zones = master_config["n_zones"];
+        json_read >> master_config;
+        //sensor_name = master_config["sensor_name"]; //the path to the detector model file
+        json_found = true;
+
       }
 
     void camera_info_callback(const CameraInfo::ConstPtr & msg){
@@ -215,7 +228,6 @@ class TVMHandDetectionNode {
       cv::Mat cv_image;
       cv::Mat cv_depth_image;
       
-
       // set detection variables here
       yoloresults* output;
       cv::Size image_size;

@@ -40,6 +40,7 @@
 #include <opt_msgs/TrackArray.h>
 #include <opt_msgs/IDArray.h>
 #include <opt_msgs/NameArray.h>
+#include <opt_msgs/DetectionArray.h>
 #include <opt_msgs/SkeletonTrackArray.h>
 #include <opt_msgs/StandardSkeletonTrackArray.h>
 #include <opt_msgs/PoseRecognitionArray.h>
@@ -392,8 +393,7 @@ main(int argc, char **argv)
   ros::Subscriber people_tracks_sub = nh.subscribe<opt_msgs::TrackArray>("people_tracks_topic", 1, peopleTracksCallback);
   ros::Subscriber people_names_sub = nh.subscribe<opt_msgs::NameArray>("people_names_topic", 1, peoplenamesCallback);
 
-  ros::Subscriber hand_sub = nh.subscribe<opt_msgs::DetectionArray>
-      ("hands_topic", 1, handsCallback);
+  ros::Subscriber hand_sub = nh.subscribe<opt_msgs::DetectionArray>("hands_topic", 1, handsCallback);
 
   // Initialize UDP parameters:
   char buf[0];

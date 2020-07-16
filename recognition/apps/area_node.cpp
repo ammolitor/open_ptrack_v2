@@ -942,7 +942,7 @@ class AreaDefinitionNode {
     cv::imshow("disp", src_img);
       
     // saving image
-    std::string filename = //"/area.jpg";
+    std::string filename = "/area.jpg";
     std::string home_dir = getEnvVar("HOME");
     //std::string home_dir = std::string(env);
     std::string filepath = home_dir + filename;
@@ -992,7 +992,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
-  pnh.param("json_save_name", json_save_name, "area.json");
+  pnh.param("json_save_name", json_save_name, std::string(("area.json"));
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   AreaDefinitionNode node(nh, sensor_name, n_zones, json_save_name);
