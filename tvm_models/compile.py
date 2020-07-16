@@ -18,7 +18,7 @@ from tvm.autotvm.tuner import XGBTuner, GATuner, RandomTuner, GridSearchTuner
 from tvm.autotvm.graph_tuner import DPTuner, PBQPTuner
 from tvm import autotvm
 # git checkout 38118befc0a7e8a3db87d652b30a9369abb60363 for pre-thrust, non slowness. 
-from non_nms_yolo import yolo3_mobilenet1_0_coco
+from non_nms_yolo import yolo3_mobilenet1_0_coco, yolo3_mobilenet1_0_custom
 
 import logging
 logging.getLogger('autotvm').setLevel(logging.DEBUG)
