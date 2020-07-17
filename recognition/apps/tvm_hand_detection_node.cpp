@@ -43,6 +43,30 @@
 #include <dynamic_reconfigure/server.h>
 #include <recognition/GenDetectionConfig.h>
 
+
+
+#include <dynamic_reconfigure/server.h>
+#include <pcl/segmentation/organized_multi_plane_segmentation.h>
+#include <pcl/features/integral_image_normal.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/conversions.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/common/transforms.h>
+#include <pcl/console/time.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/common/transforms.h>
+#include <pcl/segmentation/extract_clusters.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/octree/octree.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+
 // not sure if this is the correct json reading code
 // but will be easier than continually recompiling t
 // import header files
@@ -52,7 +76,11 @@ using json = nlohmann::json;
 typedef sensor_msgs::Image Image;
 typedef sensor_msgs::CameraInfo CameraInfo;
 using namespace message_filters::sync_policies;
-
+typedef pcl::PointXYZRGB PointT;
+typedef pcl::PointCloud<PointT> PointCloudT;
+typedef pcl::PointCloud<PointT> PointCloud;
+typedef boost::shared_ptr<PointCloud> PointCloudPtr;
+typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 // positions pointer
 struct positionxy {
   int x;
@@ -119,6 +147,7 @@ class TVMHandDetectionNode {
     // Message Filters
     message_filters::Subscriber<sensor_msgs::Image> rgb_image_sub;
     message_filters::Subscriber<sensor_msgs::Image> depth_image_sub;
+    ros::Subscriber point_cloud_approximate_sync_;
 
     // Message Synchronizers 
     typedef ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> ApproximatePolicy;
@@ -166,33 +195,7 @@ class TVMHandDetectionNode {
     TVMHandDetectionNode(ros::NodeHandle& nh, std::string sensor_string, bool use_dynamic_reconfigure):
       node_(nh), it(node_)
       {
-        // Publish Messages
-        detections_pub = node_.advertise<opt_msgs::DetectionArray>("/hand_detector/detections", 3);
-
-        // Subscribe to Messages
-        rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
-        depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
         
-        image_pub = it.advertise(sensor_string + "/hand_detector/image", 1);
-
-        // Camera callback for intrinsics matrix update
-        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMHandDetectionNode::camera_info_callback, this);
-
-        //Time sync policies for the subscribers
-        approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(10), rgb_image_sub, depth_image_sub));
-        approximate_sync_->registerCallback(boost::bind(&TVMHandDetectionNode::callback, this, _1, _2));
-
-        // create callback config 
-        if (use_dynamic_reconfigure){
-          cfg_server.setCallback(boost::bind(&TVMHandDetectionNode::cfg_callback, this, _1, _2));      
-        }
-
-        // create object-detector pointer
-        //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
-        tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
-        sensor_name = sensor_string;
-        std::cout << "detector loaded!" << std::endl;
-
         try
         {
           json master_config;
@@ -213,7 +216,37 @@ class TVMHandDetectionNode {
         catch(const std::exception& e)
         {
           std::cerr << "json master/area not found: "<< e.what() << '\n';
+        }        
+        
+        // Publish Messages
+        detections_pub = node_.advertise<opt_msgs::DetectionArray>("/hand_detector/detections", 3);
+
+        // Subscribe to Messages
+        if (use_pointcloud){
+          point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::cloud_callback, this);
+        } else {
+          rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
+          depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
+          //Time sync policies for the subscribers
+          approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(10), rgb_image_sub, depth_image_sub));
+          approximate_sync_->registerCallback(boost::bind(&TVMHandDetectionNode::callback, this, _1, _2));
         }
+        
+        image_pub = it.advertise(sensor_string + "/hand_detector/image", 1);
+
+        // Camera callback for intrinsics matrix update
+        camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMHandDetectionNode::camera_info_callback, this);
+
+        // create callback config 
+        if (use_dynamic_reconfigure){
+          cfg_server.setCallback(boost::bind(&TVMHandDetectionNode::cfg_callback, this, _1, _2));      
+        }
+
+        // create object-detector pointer
+        //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
+        tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
+        sensor_name = sensor_string;
+        std::cout << "detector loaded!" << std::endl;
 
       }
 
@@ -334,6 +367,272 @@ class TVMHandDetectionNode {
           // set the mx/my wtr the intrinsic camera matrix
           float mx = (median_x - _cx) * median_depth * _constant_x;
           float my = (median_y - _cy) * median_depth * _constant_y;
+
+          // publish the messages
+          if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
+        
+            opt_msgs::Detection detection_msg;
+            detection_msg.box_3D.p1.x = mx;
+            detection_msg.box_3D.p1.y = my;
+            detection_msg.box_3D.p1.z = median_depth;
+            
+            detection_msg.box_3D.p2.x = mx;
+            detection_msg.box_3D.p2.y = my;
+            detection_msg.box_3D.p2.z = median_depth;
+            
+            detection_msg.box_2D.x = median_x;
+            detection_msg.box_2D.y = median_y;
+            detection_msg.box_2D.width = 0;
+            detection_msg.box_2D.height = 0;
+            detection_msg.height = 0;
+            detection_msg.confidence = score;
+            detection_msg.distance = median_depth;
+            
+            detection_msg.centroid.x = mx;
+            detection_msg.centroid.y = my;
+            detection_msg.centroid.z = median_depth;
+            
+            detection_msg.top.x = 0;
+            detection_msg.top.y = 0;
+            detection_msg.top.z = 0;
+            
+            detection_msg.bottom.x = 0;
+            detection_msg.bottom.y = 0;
+            detection_msg.bottom.z = 0;
+
+            if (json_found){
+              bool inside_area_cube = false;
+              int zone_id;
+              std::string zone_string;                  
+              double x_min;
+              double y_min;
+              double z_min;
+              double x_max;
+              double y_max;
+              double z_max;
+              double world_x_min;
+              double world_y_min;
+              double world_z_min;
+              double world_x_max;
+              double world_y_max;
+              double world_z_max;
+              for (zone_id = 0; zone_id < n_zones; zone_id++)
+              {
+                // need a world view here bc each detection was transformed
+                // this will work for a singular cam, but would mean each cam would have to tune
+                // to the specific area; which I think would be fine. // but will need
+                // to test to be sure
+                // a given detection can be in only one place at one time, thus it can't be in
+                // multiple zones
+                zone_string = std::to_string(zone_id);
+                //std::cout << "zone_string: " << zone_string << std::endl;
+                // type must be number but is null...
+                //https://github.com/nlohmann/json/issues/1593
+
+                // translate between world and frame
+                world_x_min = zone_json[zone_string]["min"]["world"]["x"];
+                world_y_min = zone_json[zone_string]["min"]["world"]["y"];
+                world_z_min = zone_json[zone_string]["min"]["world"]["z"];
+                world_x_max = zone_json[zone_string]["max"]["world"]["x"];
+                world_y_max = zone_json[zone_string]["max"]["world"]["y"];
+                world_z_max = zone_json[zone_string]["max"]["world"]["z"];
+
+                //std::cout << "world_x_min: " << world_x_min << std::endl;
+                //std::cout << "world_y_min: " << world_y_min << std::endl;
+                //std::cout << "world_z_min: " << world_z_min << std::endl;
+                //std::cout << "world_x_max: " << world_x_max << std::endl;
+                //std::cout << "world_y_max: " << world_y_max << std::endl;
+                //std::cout << "world_z_max: " << world_z_max << std::endl;
+
+                Eigen::Vector3d min_vec;
+                Eigen::Vector3d max_vec;
+                tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
+                tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
+                
+                min_point = world_inverse_transform(min_point);
+                max_point = world_inverse_transform(max_point);
+
+                x_min = min_point.getX();
+                y_min = min_point.getY();
+                z_min = min_point.getZ();
+                x_max = min_point.getX();
+                y_max = min_point.getY();
+                z_max = min_point.getZ();
+
+                //std::cout << "x_min: " << x_min << std::endl;
+                //std::cout << "y_min: " << y_min << std::endl;
+                //std::cout << "z_min: " << z_min << std::endl;
+                //std::cout << "x_max: " << x_max << std::endl;
+                //std::cout << "y_max: " << y_max << std::endl;
+                //std::cout << "z_max: " << z_max << std::endl;
+                //std::cout << "mx: " << mx << std::endl;
+                //std::cout << "my: " << my << std::endl;
+                //std::cout << "median_depth: " << median_depth << std::endl;
+
+                inside_area_cube = (mx <= x_max && mx >= x_min) && (my <= y_max && my >= y_min) && (median_depth <= z_max && median_depth >= z_min);
+                //std::cout << "inside_cube: " << inside_area_cube << std::endl;
+                if (inside_area_cube) {
+                  break;
+                }
+              }
+
+              if (inside_area_cube) {
+                detection_msg.zone_id = zone_id;
+                //std::cout << "DEBUG -- INSIDE ZONE: " << zone_id << std::endl;
+              } else {
+                detection_msg.zone_id = 1000;
+              } 
+            }
+
+            detection_msg.object_name="hand";            
+            detection_array_msg->detections.push_back(detection_msg);
+
+            // sensor_msgs::ImagePtr image_msg_aligned = cv_bridge::CvImage(std_msgs::Header(), "bgr8", aligned_clone).toImageMsg();
+            cv::rectangle(cv_image_clone, cv::Point(xmin, ymin), cv::Point(xmax, ymax), cv::Scalar( 255, 0, 255 ), 10);
+            cv::putText(cv_image_clone, "hand", cv::Point(xmin + 10, ymin + 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(200,200,250), 1, CV_AA);
+            // cv::imwrite("/home/nvidia/OUTPUTIMAGE.JPG", cv_image);
+
+          }
+        }
+      }
+    // this will publish empty detections if nothing is found
+    sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
+    detections_pub.publish(detection_array_msg);
+    image_pub.publish(imagemsg);
+    free(output->boxes);
+    free(output);
+    }
+
+
+    /**
+     * @brief callback for camera information that does detection on images
+     *  and publishes the detections to specific topics
+     * @param rgb_image  the rgb image message
+     * @param depth_image  the depth/stereo image message
+     */
+    void cloud_callback(const PointCloudT::ConstPtr& cloud_) {
+        
+      std::cout << "running algorithm callback" << std::endl;
+      //Calculate direct and inverse transforms between camera and world frame:
+      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
+                                  world_transform);
+      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
+                                  world_inverse_transform);
+      // set message vars here
+      //cv_bridge::CvImagePtr cv_ptr_rgb;
+      //cv_bridge::CvImage::Ptr  cv_ptr_depth;
+      //cv::Mat cv_image;
+      //cv::Mat cv_depth_image;
+      
+      // set message vars here
+      //open_ptrack::opt_utils::Conversions converter; 
+      std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
+      cv_bridge::CvImagePtr cv_ptr_rgb;
+      cv_bridge::CvImage::Ptr  cv_ptr_depth;
+      cv::Mat cv_image_clone;
+
+      // set detection variables here
+      yoloresults* output;
+      cv::Size image_size;
+      float height;
+      float width;
+      ros::Time begin;
+      double duration;
+
+      // set publication messages vars here
+      // generate new detection array message with the header from the rbg image
+      opt_msgs::DetectionArray::Ptr detection_array_msg(new opt_msgs::DetectionArray);
+      detection_array_msg->header = cloud_header;
+      detection_array_msg->confidence_type = std::string("yolo");
+      detection_array_msg->image_type = std::string("rgb");
+      // set detection intrinsic matrix from camera variables
+      for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+          detection_array_msg->intrinsic_matrix.push_back(intrinsics_matrix(i, j));
+        }
+      }
+
+      cv::Mat cv_image (cloud_->height, cloud_->width, CV_8UC3);
+      cv::Mat cv_depth_image (cloud_->height, cloud_->width, CV_32FC1);
+      for (int i=0;i<cloud_->height;i++)
+      {
+          for (int j=0;j<cloud_->width;j++)
+          {
+          cv_image.at<cv::Vec3b>(i,j)[2] = cloud_->at(j,i).r;
+          cv_image.at<cv::Vec3b>(i,j)[1] = cloud_->at(j,i).g;
+          cv_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
+          cv_depth_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).z;
+          }
+      }
+
+      cv_image_clone = cv_image.clone();
+      image_size = cv_image.size();
+      height = static_cast<float>(image_size.height);
+      width = static_cast<float>(image_size.width);
+
+      // forward inference of object detector
+      begin = ros::Time::now();
+      output = tvm_object_detector->forward_full(cv_image, override_threshold);
+      duration = ros::Time::now().toSec() - begin.toSec();
+      printf("yolo detection time: %f\n", duration);
+      printf("yolo detections: %ld\n", output->num);
+
+      if (output->num >= 1) {
+        for (int i = 0; i < output->num; i++) {
+          // get the label and the object name
+          float label = static_cast<float>(output->boxes[i].id);
+          //std::string object_name = COCO_CLASS_NAMES[output->boxes[i].id];
+
+          // get the coordinate information
+          float xmin = output->boxes[i].xmin;
+          float ymin = output->boxes[i].ymin;
+          float xmax = output->boxes[i].xmax;
+          float ymax = output->boxes[i].ymax;
+          float score = output->boxes[i].score;
+
+          // set the median of the bounding box
+          float median_x = xmin + ((xmax - xmin) / 2.0);
+          float median_y = ymin + ((ymax - ymin) / 2.0);
+
+          // If the detect box coordinat is near edge of image, it will return a error 'Out of im.size().'
+          if ( median_x < width*0.02) {
+            median_x = width*0.02;
+          }
+          if (median_x > width*0.98) {
+            median_x = width*0.98;
+          }
+
+          if ( median_y < height*0.02) {
+            median_y = height*0.02;
+          }
+          if ( median_y > height*0.98) {
+            median_y = height*0.98;
+          }
+          
+          // set the new coordinates of the image so that the boxes are set
+          int new_x = static_cast<int>(median_x - (median_factor * (median_x - xmin)));
+          int new_y = static_cast<int>(median_y - (median_factor * (median_y - ymin)));
+          int new_width = static_cast<int>(2 * (median_factor * (median_x - xmin)));
+          int new_height = static_cast<int>(2 * (median_factor * (median_y - ymin)));
+        
+          // TODO we'll have to vet this strategy but for now, we're trying it
+          // this will get the median depth of the object at the center of the object,
+          // however, we're moving towards the median depth as where the box hits the ground/
+          // where the feet are..
+          //float median_depth = cv_depth_image.at<float>(median_y, median_x) / 1000.0f;
+          //float median_depth = cv_depth_image.at<float>(new_y, median_x) / mm_factor;
+          mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x;
+          my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
+          median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
+
+          if (median_depth <= 0 || median_depth > 6.25) {
+            std::cout << "median_depth " << median_depth << " rejecting" << std::endl;
+            continue;
+            }			
+            
+          // set the mx/my wtr the intrinsic camera matrix
+          //float mx = (median_x - _cx) * median_depth * _constant_x;
+          //float my = (median_y - _cy) * median_depth * _constant_y;
 
           // publish the messages
           if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
