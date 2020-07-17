@@ -171,6 +171,7 @@ class TVMHandDetectionNode {
     int n_zones;
     float override_threshold = 0.5;
     float max_capable_depth = 6.25;
+    bool use_pointcloud;
 
 
     double rate_value = 1.0;
@@ -205,6 +206,7 @@ class TVMHandDetectionNode {
           master_json_read >> master_config;
           n_zones = master_config["n_zones"]; //the path to the detector model file
           max_capable_depth = master_config["max_capable_depth"];
+          use_pointcloud = master_config["use_pointcloud"];
           std::cout << "max_capable_depth: " << max_capable_depth << std::endl;
           override_threshold = master_config["override_threshold"];
           std::string zone_json_path = master_config["zone_json_path"];
@@ -621,9 +623,9 @@ class TVMHandDetectionNode {
           // where the feet are..
           //float median_depth = cv_depth_image.at<float>(median_y, median_x) / 1000.0f;
           //float median_depth = cv_depth_image.at<float>(new_y, median_x) / mm_factor;
-          mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x;
-          my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
-          median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
+          float mx = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).x;
+          float my = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).y;
+          float median_depth = cloud_->at(static_cast<int>(median_x), static_cast<int>(median_y)).z;
 
           if (median_depth <= 0 || median_depth > 6.25) {
             std::cout << "median_depth " << median_depth << " rejecting" << std::endl;
