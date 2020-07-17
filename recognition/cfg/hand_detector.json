@@ -6,5 +6,6 @@
   "width" :                 320,
   "height" :                320,
   "gpu" :                   true,
-  "n_dets" :                6300
+  "n_dets" :                6300,
+  "thresh":                 0.5
 }
