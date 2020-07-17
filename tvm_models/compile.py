@@ -294,7 +294,20 @@ def tune_and_evaluate(tuning_option, target_host, cc=None):
         tvm_compiler(tuning_option['model']['name'], mod, params, target)
         print("exported")
 
-def tvm_compiler(name, mod, params, target):
+def build_save_dict():
+    pass
+
+def export(save_dict):
+    confg = save_dict['config']
+    graph = save_dict['graph']
+    lib = save_dict['lib']
+    params = save_dict['params']
+    opt_path = save_dict['opt_path']
+    pose_pipe = save_dict['pose_pipe']
+    config_path = os.path.join(opt_path)
+
+
+def tvm_compiler(name, mod, params, target, n_dets=None):
     print('[*] Compile To Target {}'.format(target))
     #with relay.build_config(opt_level=ARGS.opt_level):
     #    graph, lib, params = relay.build(mod, target, params=params)
@@ -514,7 +527,7 @@ def load_raw_model(path_base):
     return loaded_json, loaded_lib, loaded_params
 
 if __name__ == '__main__':
-    AVAILABLE_MODELS = {'object_detector', 'simple_pose', 'face_detector', 'face_embedder', 'hand_detector', 'nonms_hand_detector','nonms_object_detector'}
+    AVAILABLE_MODELS = {'object_detector', 'simple_pose', 'face_detector', 'face_embedder', 'hand_detector', 'nonms_hand_detector','nonms_object_detector', 'pose_pipeline_nonms', 'pose_pipeline'}
     PARSER = argparse.ArgumentParser(description='')
     PARSER.add_argument('--network', type=str, default='nonms_object_detector', help='Network Architecture')
     PARSER.add_argument('--target', type=str, default='cuda', help='Deploy Target')

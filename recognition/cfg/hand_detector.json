@@ -1,9 +1,10 @@
 {
-  "deploy_lib_path":        "/data/hand_detector/mnet.1.aarch64.cuda.hands.so",
-  "deploy_graph_path":      "/data/hand_detector/mnet.1.aarch64.cuda.hands.json",
-  "deploy_param_path":      "/data/hand_detector/mnet.1.aarch64.cuda.hands.params",
+  "deploy_lib_path":        "/data/hand_detector_nonms/0.7.dev1.mnet.1.nonms.aarch64.hands.gpu.so",
+  "deploy_graph_path":      "/data/hand_detector_nonms/0.7.dev1.mnet.1.nonms.aarch64.hands.gpu.json",
+  "deploy_param_path":      "/data/hand_detector_nonms/0.7.dev1.mnet.1.nonms.aarch64.hands.gpu.params",
   "device_id":              0,
   "width" :                 320,
   "height" :                320,
-  "gpu" :                   true
+  "gpu" :                   true,
+  "n_dets" :                6300
 }
