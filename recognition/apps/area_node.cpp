@@ -939,7 +939,7 @@ class AreaDefinitionNode {
     
     cv::destroyAllWindows(); 
     std::cout << "DEBUG: about to show image" << std::endl;
-    cv::imshow("disp", src_img);
+    //cv::imshow("disp", src_img);
       
     // saving image
     std::string filename = "/area.jpg";
