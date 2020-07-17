@@ -978,13 +978,6 @@ int main(int argc, char** argv) {
   std::string json_save_name;
   json master_config;
   int n_zones;
-  std::string package_path = ros::package::getPath("recognition");
-  std::string master_hard_coded_path = package_path + "/cfg/master.json";
-  std::ifstream json_read(master_hard_coded_path);
-  json_read >> master_config;
-  sensor_name = master_config["sensor_name"]; //the path to the detector model file
-  detections_topic = master_config["main_detections_topic"];
-  n_zones = master_config["n_zones"];
 
   std::cout << "--- area_node ---" << std::endl;
   ros::init(argc, argv, "area_node");
@@ -993,6 +986,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
   pnh.param("json_save_name", json_save_name, std::string("area.json"));
+  pnh.param("n_zones", n_zones, 1);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   AreaDefinitionNode node(nh, sensor_name, n_zones, json_save_name);
