@@ -22,6 +22,7 @@
 using json = nlohmann::json;
 
 
+
 class NoNMSYoloFromConfig{
     private:
         //working: void * handle;
@@ -76,7 +77,7 @@ class NoNMSYoloFromConfig{
             gpu = model_config["gpu"];
             n_dets = model_config["n_dets"];
             no_nms_output_size[1] = n_dets;
-            thresh = model_config["threshold"];
+            thresh = model_config["thresh"];
             detector_total_input = 1 * 3 * detector_width * detector_height;
 
             std::string detector_deploy_lib_path = package_path + detector_lib_path;
@@ -143,9 +144,10 @@ class NoNMSYoloFromConfig{
             return normalized_image;
         }
 
-        yoloresults* forward_full(cv::Mat frame)
+        // we can set it externally with dynamic reconfigure
+        yoloresults* forward_full(cv::Mat frame, float override_threshold)
         {
-            std::cout << "starting function" << std::endl;
+            //std::cout << "starting function" << std::endl;
             // get height/width dynamically
             cv::Size image_size = frame.size();
             float img_height = static_cast<float>(image_size.height);
@@ -161,14 +163,14 @@ class NoNMSYoloFromConfig{
             //int64_t in_shape[4] = {1, in_c, in_h, in_w};
             int64_t in_shape[4] = {1, 3, detector_height, detector_width};
             int total_input = 3 * detector_width * detector_height;
-            std::cout << "width: " << detector_width << std::endl;
-            std::cout << "height: " << detector_height << std::endl;
-            std::cout << "total_input: " << total_input << std::endl;
-            std::cout << "device_id: " << device_id << std::endl;
-            std::cout << "dtype_code: " << dtype_code << std::endl;
-            std::cout << "dtype_bits: " << dtype_bits << std::endl;
-            std::cout << "dtype_lanes: " << dtype_lanes << std::endl;
-            std::cout << "device_type: " << device_type << std::endl;
+            //std::cout << "width: " << detector_width << std::endl;
+            //std::cout << "height: " << detector_height << std::endl;
+            //std::cout << "total_input: " << total_input << std::endl;
+            //std::cout << "device_id: " << device_id << std::endl;
+            //std::cout << "dtype_code: " << dtype_code << std::endl;
+            //std::cout << "dtype_bits: " << dtype_bits << std::endl;
+            //std::cout << "dtype_lanes: " << dtype_lanes << std::endl;
+            //std::cout << "device_type: " << device_type << std::endl;
 
             DLTensor *output_for_nms;
             DLTensor *input;
@@ -179,16 +181,16 @@ class NoNMSYoloFromConfig{
             results->num = 100;
             results->boxes = (bbox_result*)calloc(100, sizeof(bbox_result));
 
-            std::cout << "about to allocate info" << std::endl;
+            //std::cout << "about to allocate info" << std::endl;
             // allocate DLTensor memory on device for all the vars needed
             TVMArrayAlloc(in_shape, in_ndim, dtype_code, dtype_bits, dtype_lanes, device_type, device_id, &input);
             TVMArrayAlloc(no_nms_output_size, detector_out_ndim, dtype_code, dtype_bits, dtype_lanes, device_type, device_id, &output_for_nms);
-            std::cout << "allocate info finished" << std::endl;
+            //std::cout << "allocate info finished" << std::endl;
 
             //copy processed image to DLTensor
-            std::cout << "about to preprocess" << std::endl;
+            //std::cout << "about to preprocess" << std::endl;
             cv::Mat processed_image = preprocess_image(frame, detector_width, detector_height, true);
-            std::cout << "preprocess finished" << std::endl;
+            //std::cout << "preprocess finished" << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
             memcpy(data_x, split_mat[2].ptr<float>(), processed_image.cols * processed_image.rows * sizeof(float));
@@ -197,7 +199,7 @@ class NoNMSYoloFromConfig{
             memcpy(data_x + processed_image.cols * processed_image.rows * 2, split_mat[0].ptr<float>(),
                    processed_image.cols * processed_image.rows * sizeof(float));
             TVMArrayCopyFromBytes(input, data_x, total_input * sizeof(float));
-            std::cout << "TVMArrayCopyFromBytes finished" << std::endl;           
+            //std::cout << "TVMArrayCopyFromBytes finished" << std::endl;           
  
             // standard tvm module run
             // get the module, set the module-input, and run the function
@@ -208,7 +210,7 @@ class NoNMSYoloFromConfig{
             tvm::runtime::PackedFunc run = mod->GetFunction("run");
             run();
             tvm::runtime::PackedFunc get_output = mod->GetFunction("get_output");
-            std::cout << "run/getoutput/setinput finished" << std::endl;
+            //std::cout << "run/getoutput/setinput finished" << std::endl;
   
             // https://github.com/apache/incubator-tvm/issues/979?from=timeline
             //"This may give you some ideas to start with.
@@ -218,7 +220,7 @@ class NoNMSYoloFromConfig{
             //current thing while you are downloading the last thing."
             TVMSynchronize(device_type, device_id, nullptr);
             get_output(0, output_for_nms);
-            std::cout << "TVMSynchronize finished" << std::endl;  
+            //std::cout << "TVMSynchronize finished" << std::endl;  
 
             // copy to output
             //ulsMatF(int cols, int rows, int channels)
@@ -226,15 +228,15 @@ class NoNMSYoloFromConfig{
             MatF yolo_output(6, n_dets, 1); //ulsMatF yolo_output(6, n_dets, 1);
             TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* n_dets * 6 * sizeof(float));
             //TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* n_dets * 6 * sizeof(float));
-            std::cout << "TVMSynchronize finished" << std::endl;  
+            //std::cout << "TVMSynchronize finished" << std::endl;  
             
-            std::cout << "starting nms" << std::endl;
+            //std::cout << "starting nms" << std::endl;
             //auto tick = Clock::now();
             std::vector<sortable_result> tvm_results;
             std::vector<sortable_result> proposals;
             proposals.clear();
-            tvm_nms_cpu(proposals, yolo_output, thresh, thresh, tvm_results);
-            std::cout << "ending nms" << std::endl;
+            tvm_nms_cpu(proposals, yolo_output, override_threshold, override_threshold, tvm_results);
+            //std::cout << "ending nms" << std::endl;
 
             TVMArrayFree(input);
             TVMArrayFree(output_for_nms); // may have to move this to the bottom.
@@ -279,7 +281,7 @@ class NoNMSYoloFromConfig{
                 new_num+=1;
             };
             results->num = new_num;
-            std::cout << "torch array iter finished" << std::endl;
+            //std::cout << "torch array iter finished" << std::endl;
             tvm_results = std::vector<sortable_result>();
             proposals = std::vector<sortable_result>();           
             return results;
