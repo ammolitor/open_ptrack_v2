@@ -372,11 +372,15 @@ class TVMHandDetectionNode {
 
           // publish the messages
           if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
-        
+            
+            tf::Vector3 point_3D(mx, my, median_depth);
+            
+            world_transformed_point = world_inverse_transform(point_3D);
+
             opt_msgs::Detection detection_msg;
-            detection_msg.box_3D.p1.x = mx;
-            detection_msg.box_3D.p1.y = my;
-            detection_msg.box_3D.p1.z = median_depth;
+            detection_msg.box_3D.p1.x = world_transformed_point.x;
+            detection_msg.box_3D.p1.y = world_transformed_point.y;
+            detection_msg.box_3D.p1.z = world_transformed_point.z;
             
             detection_msg.box_3D.p2.x = mx;
             detection_msg.box_3D.p2.y = my;
@@ -486,7 +490,7 @@ class TVMHandDetectionNode {
               } 
             }
 
-            detection_msg.object_name="hand";            
+            detection_msg.object_name="hand";              
             detection_array_msg->detections.push_back(detection_msg);
 
             // sensor_msgs::ImagePtr image_msg_aligned = cv_bridge::CvImage(std_msgs::Header(), "bgr8", aligned_clone).toImageMsg();
