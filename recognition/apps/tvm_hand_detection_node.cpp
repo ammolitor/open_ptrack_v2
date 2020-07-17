@@ -66,6 +66,7 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/octree/octree.h>
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <open_ptrack/opt_utils/conversions.h>
 
 // not sure if this is the correct json reading code
 // but will be easier than continually recompiling t
@@ -290,7 +291,7 @@ class TVMHandDetectionNode {
       float width;
       ros::Time begin;
       double duration;
-
+      open_ptrack::opt_utils::Conversions converter; 
       // set publication messages vars here
       // generate new detection array message with the header from the rbg image
       opt_msgs::DetectionArray::Ptr detection_array_msg(new opt_msgs::DetectionArray);
