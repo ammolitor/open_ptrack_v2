@@ -375,7 +375,7 @@ class TVMHandDetectionNode {
             
             tf::Vector3 point_3D(mx, my, median_depth);
             
-            world_transformed_point = world_transform(point_3D);
+            point_3D = world_transform(point_3D);
 
             opt_msgs::Detection detection_msg;
             detection_msg.box_3D.p1.x = world_transformed_point.x;
