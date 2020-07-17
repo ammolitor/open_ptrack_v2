@@ -41,7 +41,7 @@
 
 #include <open_ptrack/yolo_tvm.hpp>
 #include <dynamic_reconfigure/server.h>
-#include <recognition/HandDetectionConfig.h>
+#include <recognition/GenDetectionConfig.h>
 
 // not sure if this is the correct json reading code
 // but will be easier than continually recompiling t
