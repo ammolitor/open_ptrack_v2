@@ -379,7 +379,7 @@ class TVMHandDetectionNode {
             point_3D = world_transform(point_3D);
 
             opt_msgs::Detection detection_msg;
-            converter.Vector3fToVector3(point_3D, detection_msg.box_3D.p1);
+            detection_msg.box_3D.p1 = point_3D
             
             detection_msg.box_3D.p2.x = mx;
             detection_msg.box_3D.p2.y = my;
@@ -647,7 +647,7 @@ class TVMHandDetectionNode {
             point_3D = world_transform(point_3D);
 
             opt_msgs::Detection detection_msg;
-            converter.Vector3fToVector3(point_3D, detection_msg.box_3D.p1);
+            detection_msg.box_3D.p1 = point_3D;
                       
             detection_msg.box_3D.p2.x = mx;
             detection_msg.box_3D.p2.y = my;
