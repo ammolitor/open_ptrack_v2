@@ -103,6 +103,8 @@ class TVMHandDetectionNode {
     // ROS
     //dynamic_reconfigure::Server<recognition::HandDetectionConfig> cfg_server;
     ros::ServiceServer camera_info_matrix_server;
+    dynamic_reconfigure::Server<recognition::GenDetectionConfig> cfg_server;
+
 
     // Publishers
     ros::Publisher detections_pub;
@@ -139,11 +141,10 @@ class TVMHandDetectionNode {
     bool json_found;
     int n_zones;
     float override_threshold = 0.5;
-    float max_capable_depth;
+    float max_capable_depth = 6.25;
 
 
     double rate_value = 1.0;
-    float override_threshold = 0.5;
   public:
     // Set camera matrix transforms
     Eigen::Matrix3f intrinsics_matrix;
@@ -195,8 +196,8 @@ class TVMHandDetectionNode {
         try
         {
           json master_config;
-          std::string master_package_path = ros::package::getPath("recognition");
-          std::string master_hard_coded_path = master_package_path + "/cfg/hand_detector.json";
+          std::string package_path = ros::package::getPath("recognition");
+          std::string master_hard_coded_path = package_path + "/cfg/hand_detector.json";
           std::ifstream master_json_read(master_hard_coded_path);
           master_json_read >> master_config;
           n_zones = master_config["n_zones"]; //the path to the detector model file
@@ -204,7 +205,7 @@ class TVMHandDetectionNode {
           std::cout << "max_capable_depth: " << max_capable_depth << std::endl;
           override_threshold = master_config["override_threshold"];
           std::string zone_json_path = master_config["zone_json_path"];
-          std::string area_hard_coded_path = area_package_path + zone_json_path;
+          std::string area_hard_coded_path = package_path + zone_json_path;
           std::ifstream area_json_read(area_hard_coded_path);
           area_json_read >> zone_json;
           json_found = true;
