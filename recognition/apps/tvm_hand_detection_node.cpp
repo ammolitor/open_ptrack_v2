@@ -498,7 +498,7 @@ int main(int argc, char** argv) {
   json zone_json;
   bool use_dynamic_reconfigure;
   std::string area_package_path = ros::package::getPath("recognition");
-  std::string area_hard_coded_path = area_package_path + "/cfg/sink.json";
+  std::string area_hard_coded_path = area_package_path + "/cfg/sink_area.json";
   std::ifstream area_json_read(area_hard_coded_path);
   area_json_read >> zone_json;
 

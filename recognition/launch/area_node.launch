@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="sensor_name" default="camera" />
+  <!-- if you are doing sink/hand specific area that is being use EXCLUSIVELY on the hand camera,
+  make sure your save name is sink_area.json -->
+  <arg name="json_save_name" default="area.json" />
+  <arg name="n_zones" default="1" />
+
+  <group if="$(arg standalone)" >
+    <!-- Start the realsense -->
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+        <arg name="camera" value="$(arg sensor_name)" />
+        <arg name="enable_pointcloud" value="true" />
+    </include>
+  </group>
+
+  <!-- Launch object detection node -->
+  <node pkg="recognition" type="area_node"
+        name="$(arg sensor_name)_area_node" output="screen" respawn="false">
+
+    <param name="sensor_name"                 value="$(arg sensor_name)" />
+    <param name="json_save_name"              value="$(arg json_save_name)" />
+    <param name="n_zones"                     value="$(arg n_zones)" />
+
+  </node>
+
+</launch>
