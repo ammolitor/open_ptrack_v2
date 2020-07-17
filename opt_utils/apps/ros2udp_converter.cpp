@@ -167,7 +167,7 @@ handsCallback(const opt_msgs::DetectionArray::ConstPtr& hands_msg)
     //current_detection.Add("id", hands_msg->detections[i].id);
     current_detection.Add("x", hands_msg->detections[i].box_2D.x);
     current_detection.Add("y", hands_msg->detections[i].box_2D.y);
-    current_detection.Add("z", hands_msg->detections[i].box_2D.distance);
+    current_detection.Add("z", hands_msg->detections[i].distance);
     current_detection.Add("confidence", hands_msg->detections[i].confidence);
     // should we add this???
     // the hand detection model will ONLY be run from the camera monitoring the sink

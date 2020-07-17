@@ -992,7 +992,7 @@ int main(int argc, char** argv) {
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
-  pnh.param("json_save_name", json_save_name, std::string(("area.json"));
+  pnh.param("json_save_name", json_save_name, std::string("area.json"));
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   AreaDefinitionNode node(nh, sensor_name, n_zones, json_save_name);
