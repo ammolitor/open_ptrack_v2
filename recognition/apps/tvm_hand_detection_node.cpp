@@ -184,6 +184,7 @@ class TVMHandDetectionNode {
         tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
         sensor_name = sensor_string;
         zone_json = zone;
+        std::cout << "detector loaded!" << std::endl;
 
 
         json master_config;
