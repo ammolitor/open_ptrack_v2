@@ -351,23 +351,23 @@ target_compile_definitions(area_node PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 ###############################################################################
 ####  TESTS
 ###############################################################################
-add_executable(pose apps/pose_node.cpp include/open_ptrack/hungarian/Hungarian.cpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp include/open_ptrack/NoNMSPoseFromConfig.hpp)
-SET_TARGET_PROPERTIES(pose PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
-target_link_libraries(pose PUBLIC Threads::Threads ${OpenCV_LIBS} 
-                                          ${catkin_LIBRARIES} 
-                                          ${LINKER_LIBS}
-                                          ${CUDA_CUDA_LIBRARY}
-                                          ${CUDA_CUDART_LIBRARY}
-                                          ${CUDA_CURAND_LIBRARY}
-                                          ${CUDA_CUDNN_LIBRARY}
-                                          ${TVM_RUNTIME_LINKER_LIBS}
-                                          ${TORCH_LIBRARIES}
-                                          ${PCL_LIBRARY_DIRS})
+#add_executable(pose apps/pose_node.cpp include/open_ptrack/hungarian/Hungarian.cpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp include/open_ptrack/NoNMSPoseFromConfig.hpp)
+#SET_TARGET_PROPERTIES(pose PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
+#target_link_libraries(pose PUBLIC Threads::Threads ${OpenCV_LIBS} 
+#                                          ${catkin_LIBRARIES} 
+#                                          ${LINKER_LIBS}
+#                                          ${CUDA_CUDA_LIBRARY}
+#                                          ${CUDA_CUDART_LIBRARY}
+#                                          ${CUDA_CURAND_LIBRARY}
+#                                          ${CUDA_CUDNN_LIBRARY}
+#                                          ${TVM_RUNTIME_LINKER_LIBS}
+#                                          ${TORCH_LIBRARIES}
+#                                          ${PCL_LIBRARY_DIRS})
 
-add_dependencies(pose ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
-target_include_directories(pose PUBLIC ${CUDA_INCLUDE_DIRS})
-target_compile_definitions(pose PUBLIC TVM_CUDA_RUNTIME=1)
-target_compile_definitions(pose PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+#add_dependencies(pose ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+#target_include_directories(pose PUBLIC ${CUDA_INCLUDE_DIRS})
+#target_compile_definitions(pose PUBLIC TVM_CUDA_RUNTIME=1)
+#target_compile_definitions(pose PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 

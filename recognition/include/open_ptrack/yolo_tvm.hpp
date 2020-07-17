@@ -2108,7 +2108,6 @@ class PoseFromConfig{
             return points;
         }
 };
-
 class NoNMSPoseFromConfig{
     private:
         //working: void * handle;
@@ -2178,7 +2177,7 @@ class NoNMSPoseFromConfig{
             no_nms_output_size[1] = n_dets;
             detector_total_input = 1 * 3 * detector_width * detector_height;
             pose_total_input = 1 * 3 * pose_width * pose_height;
-            thresh = model_config["threshold"];
+            thresh = model_config["thresh"];
 
             std::string detector_deploy_lib_path = package_path + detector_lib_path;
             std::string detector_deploy_graph_path = package_path + detector_graph_path;
@@ -2237,6 +2236,7 @@ class NoNMSPoseFromConfig{
             pose_params_arr.size = pose_params_data.length();
             tvm::runtime::PackedFunc pose_load_params = pose_mod.GetFunction("load_params");
             pose_load_params(pose_params_arr);
+            std::cout << "model loaded" << std::endl;
         }
        
         /**
@@ -2270,7 +2270,7 @@ class NoNMSPoseFromConfig{
             return normalized_image;
         }
 
-        pose_results* forward_full(cv::Mat frame)
+        pose_results* forward_full(cv::Mat frame, float override_threshold)
         {
             std::cout << "starting function" << std::endl;
             // get height/width dynamically
@@ -2288,14 +2288,14 @@ class NoNMSPoseFromConfig{
             //int64_t in_shape[4] = {1, in_c, in_h, in_w};
             int64_t in_shape[4] = {1, 3, detector_height, detector_width};
             int total_input = 3 * detector_width * detector_height;
-            std::cout << "width: " << detector_width << std::endl;
-            std::cout << "height: " << detector_height << std::endl;
-            std::cout << "total_input: " << total_input << std::endl;
-            std::cout << "device_id: " << device_id << std::endl;
-            std::cout << "dtype_code: " << dtype_code << std::endl;
-            std::cout << "dtype_bits: " << dtype_bits << std::endl;
-            std::cout << "dtype_lanes: " << dtype_lanes << std::endl;
-            std::cout << "device_type: " << device_type << std::endl;
+            //std::cout << "width: " << detector_width << std::endl;
+            //std::cout << "height: " << detector_height << std::endl;
+            //std::cout << "total_input: " << total_input << std::endl;
+            //std::cout << "device_id: " << device_id << std::endl;
+            //std::cout << "dtype_code: " << dtype_code << std::endl;
+            //std::cout << "dtype_bits: " << dtype_bits << std::endl;
+            //std::cout << "dtype_lanes: " << dtype_lanes << std::endl;
+            //std::cout << "device_type: " << device_type << std::endl;
 
             DLTensor *output_for_nms;
             //DLTensor *output_tensor_ids;
@@ -2319,9 +2319,9 @@ class NoNMSPoseFromConfig{
             std::cout << "allocate info finished" << std::endl;
 
             //copy processed image to DLTensor
-            std::cout << "about to preprocess" << std::endl;
+            //std::cout << "about to preprocess" << std::endl;
             cv::Mat processed_image = preprocess_image(frame, detector_width, detector_height, true);
-            std::cout << "preprocess finished" << std::endl;
+            //std::cout << "preprocess finished" << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
             memcpy(data_x, split_mat[2].ptr<float>(), processed_image.cols * processed_image.rows * sizeof(float));
@@ -2330,7 +2330,7 @@ class NoNMSPoseFromConfig{
             memcpy(data_x + processed_image.cols * processed_image.rows * 2, split_mat[0].ptr<float>(),
                    processed_image.cols * processed_image.rows * sizeof(float));
             TVMArrayCopyFromBytes(input, data_x, total_input * sizeof(float));
-            std::cout << "TVMArrayCopyFromBytes finished" << std::endl;           
+            //std::cout << "TVMArrayCopyFromBytes finished" << std::endl;           
  
             // standard tvm module run
             // get the module, set the module-input, and run the function
@@ -2341,7 +2341,7 @@ class NoNMSPoseFromConfig{
             tvm::runtime::PackedFunc run = mod->GetFunction("run");
             run();
             tvm::runtime::PackedFunc get_output = mod->GetFunction("get_output");
-            std::cout << "run/getoutput/setinput finished" << std::endl;
+            //std::cout << "run/getoutput/setinput finished" << std::endl;
   
             // https://github.com/apache/incubator-tvm/issues/979?from=timeline
             //"This may give you some ideas to start with.
@@ -2354,7 +2354,7 @@ class NoNMSPoseFromConfig{
             //get_output(0, output_tensor_ids);
             //get_output(1, output_tensor_scores);
             //get_output(2, output_tensor_bboxes);
-            std::cout << "TVMSynchronize finished" << std::endl;  
+            ////std::cout << "TVMSynchronize finished" << std::endl;  
 
 
             // copy to output
@@ -2362,15 +2362,15 @@ class NoNMSPoseFromConfig{
             //at(int channel, int row, int c
             MatF yolo_output(6, n_dets, 1); //ulsMatF yolo_output(1, n_dets, 6);
             TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* n_dets * 6 * sizeof(float));
-            std::cout << "TVMSynchronize finished" << std::endl;  
+            ////std::cout << "TVMSynchronize finished" << std::endl;  
             
-            std::cout << "starting nms" << std::endl;
+            ////std::cout << "starting nms" << std::endl;
             //auto tick = Clock::now();
             std::vector<sortable_result> tvm_results;
             std::vector<sortable_result> proposals;
             proposals.clear();
-            tvm_nms_cpu(proposals, yolo_output, thresh, thresh, tvm_results);
-            std::cout << "ending nms" << std::endl;
+            tvm_nms_cpu(proposals, yolo_output, override_threshold, override_threshold, tvm_results);
+            //std::cout << "ending nms" << std::endl;
 
             // dynamically set?
             //torch::Tensor ndarray_ids = torch::zeros({1, 100, 1}, at::kFloat);
@@ -2384,7 +2384,7 @@ class NoNMSPoseFromConfig{
             //auto ndarray_scores_a = ndarray_scores.accessor<float,3>();
             //auto ndarray_ids_a = ndarray_ids.accessor<float,3>();
             //auto ndarray_bboxes_a = ndarray_bboxes.accessor<float,3>();
-            //std::cout << "torch part finished" << std::endl; 
+            ////std::cout << "torch part finished" << std::endl; 
 
             // we can probably free outputs right here...
             TVMArrayFree(input);
@@ -2563,12 +2563,15 @@ class NoNMSPoseFromConfig{
             //free(data_x);
             //data_x = nullptr;
             //std::cout << "freeing finished" << std::endl;
+            // free proposals
+            tvm_results = std::vector<sortable_result>();
+            proposals = std::vector<sortable_result>();
             return results;
         }
 
         std::vector<cv::Point3f> pose_forward(cv::Mat bbox_mask, float xmin, float ymin, float xmax, float ymax)
         {
-            std::cout << "running pose forward" << std::endl;
+            //std::cout << "running pose forward" << std::endl;
             // get height/width dynamically
             cv::Size image_size = bbox_mask.size();
             float img_height = static_cast<float>(image_size.height);
@@ -2580,19 +2583,19 @@ class NoNMSPoseFromConfig{
             DLTensor *input;
             float *data_x = (float *) malloc(total_input * sizeof(float));
            
-            std::cout << "about to allocate info" << std::endl;
+            //std::cout << "about to allocate info" << std::endl;
             // allocate DLTensor memory on device for all the vars needed
             TVMArrayAlloc(in_shape, in_ndim, dtype_code, dtype_bits, dtype_lanes, device_type, device_id, &input);
             TVMArrayAlloc(tvm_heatmap_size, pose_out_ndim, dtype_code, dtype_bits, dtype_lanes, device_type, device_id, &output_tensor_heatmap);
-            std::cout << "allocate info finished" << std::endl;
+            //std::cout << "allocate info finished" << std::endl;
 
             //copy processed image to DLTensor
-            std::cout << "about to preprocess" << std::endl;
+            //std::cout << "about to preprocess" << std::endl;
             cv::Mat processed_image = preprocess_image(bbox_mask, pose_width, pose_height, true);
             cv::Size processed_image_size = processed_image.size();
-            std::cout << "preprocess finished: " << std::endl;
-            std::cout << "preprocess height: " << processed_image_size.height << std::endl;
-            std::cout << "preprocess width: " << processed_image_size.width << std::endl;
+            //std::cout << "preprocess finished: " << std::endl;
+            //std::cout << "preprocess height: " << processed_image_size.height << std::endl;
+            //std::cout << "preprocess width: " << processed_image_size.width << std::endl;
             cv::Mat split_mat[3];
             cv::split(processed_image, split_mat);
             memcpy(data_x, split_mat[2].ptr<float>(), processed_image.cols * processed_image.rows * sizeof(float));
@@ -2601,7 +2604,7 @@ class NoNMSPoseFromConfig{
             memcpy(data_x + processed_image.cols * processed_image.rows * 2, split_mat[0].ptr<float>(),
                    processed_image.cols * processed_image.rows * sizeof(float));
             TVMArrayCopyFromBytes(input, data_x, total_input * sizeof(float));
-            std::cout << "TVMArrayCopyFromBytes finished" << std::endl;           
+            //std::cout << "TVMArrayCopyFromBytes finished" << std::endl;           
  
             // standard tvm module run
             // get the module, set the module-input, and run the function
@@ -2612,7 +2615,7 @@ class NoNMSPoseFromConfig{
             tvm::runtime::PackedFunc run = mod->GetFunction("run");
             run();
             tvm::runtime::PackedFunc get_output = mod->GetFunction("get_output");
-            std::cout << "run/getoutput/setinput finished" << std::endl;
+            //std::cout << "run/getoutput/setinput finished" << std::endl;
   
             // https://github.com/apache/incubator-tvm/issues/979?from=timeline
             //"This may give you some ideas to start with.
@@ -2622,12 +2625,12 @@ class NoNMSPoseFromConfig{
             //current thing while you are downloading the last thing."
             TVMSynchronize(device_type, device_id, nullptr);
             get_output(0, output_tensor_heatmap);
-            std::cout << "TVMSynchronize finished" << std::endl;  
+            //std::cout << "TVMSynchronize finished" << std::endl;  
 
             torch::Tensor ndarray_heat_map_full = torch::zeros({1, 17, 64, 48}, at::kFloat);
 
             TVMArrayCopyToBytes(output_tensor_heatmap, ndarray_heat_map_full.data_ptr(), 1*17*64*48 * sizeof(float));
-            //std::cout << "saving array output " << std::endl;
+            ////std::cout << "saving array output " << std::endl;
             //auto bytes = torch::pickle_save(ndarray_heat_map_full);
             //std::ofstream fout("/home/nvidia/pose.zip", std::ios::out | std::ios::binary);
             //fout.write(bytes.data(), bytes.size());
@@ -2639,13 +2642,13 @@ class NoNMSPoseFromConfig{
             // pytorch view vs. reshape; use of auto?
             auto ndarray_heat_map = ndarray_heat_map_full.view({17, 3072});
             //std::vector<int64_t> heatsize = ndarray_heat_map.sizes();
-            //std::cout << "ndarray_heat_map reshape finished: " << ndarray_heat_map.sizes().size() << std::endl;
+            ////std::cout << "ndarray_heat_map reshape finished: " << ndarray_heat_map.sizes().size() << std::endl;
             
             // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L173
             // idx = nd.argmax(heatmaps_reshaped, 2)
             torch::Tensor idx = torch::argmax(ndarray_heat_map, 1);
             //std::vector<int64_t> idxsize = idx.sizes().size();
-            //std::cout << "argmax finished: " << idx.sizes().size() << std::endl;
+            ////std::cout << "argmax finished: " << idx.sizes().size() << std::endl;
             
             // creat empty pred container
             torch::Tensor preds = torch::zeros({17, 2}, at::kFloat);
@@ -2666,17 +2669,17 @@ class NoNMSPoseFromConfig{
             float h = (ymax - ymin) / 2.0f;
             float center_x = xmin + w; 
             float center_y = ymin + h;
-            //std::cout << "pose_forward w: " << w << std::endl;
-            //std::cout << "pose_forward h: " << h << std::endl;
-            //std::cout << "pose_forward center_x: " << center_x << std::endl;
-            //std::cout << "pose_forward center_y: " << center_y << std::endl;
+            ////std::cout << "pose_forward w: " << w << std::endl;
+            ////std::cout << "pose_forward h: " << h << std::endl;
+            ////std::cout << "pose_forward center_x: " << center_x << std::endl;
+            ////std::cout << "pose_forward center_y: " << center_y << std::endl;
             // https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L168
             // might have to use a diff var name
             for (size_t i = 0; i < 17; i++){
               float index = idx_accessor[i];
-              //std::cout << "index: " << index << std::endl;
+              ////std::cout << "index: " << index << std::endl;
               float probability = heat_map_accessor[i][static_cast<int>(index)];
-              //std::cout << "probability: " << probability << std::endl;
+              ////std::cout << "probability: " << probability << std::endl;
               
               //// python modulo vs c++ is dfff
               ////https://stackoverflow.com/questions/1907565/c-and-python-different-behaviour-of-the-modulo-operation
@@ -2686,13 +2689,13 @@ class NoNMSPoseFromConfig{
               // float modulo_pred = ((index % heatmap_width) + heatmap_width) % heatmap_width;
               // float floor_pred = std::floor(index / heatmap_width);
               int modulo_int = static_cast<int>(index) % static_cast<int>(heatmap_width);
-              //std::cout << "modulo_int: " << modulo_int << std::endl;
+              ////std::cout << "modulo_int: " << modulo_int << std::endl;
               float modulo_pred = static_cast<float>(modulo_int);
-              //std::cout << "modulo_pred: " << modulo_pred << std::endl;
+              ////std::cout << "modulo_pred: " << modulo_pred << std::endl;
               float floor = index / heatmap_width;
-              //std::cout << "floor: " << floor << std::endl;
+              ////std::cout << "floor: " << floor << std::endl;
               float floor_pred = std::floor(floor);
-              //std::cout << "floor_pred: " << floor_pred << std::endl;
+              ////std::cout << "floor_pred: " << floor_pred << std::endl;
               if (probability <= 0.0) {
                 // zero out the pred if the prob is bad...
                 //pred_mask = nd.tile(nd.greater(maxvals, 0.0), (1, 1, 2))
@@ -2701,13 +2704,13 @@ class NoNMSPoseFromConfig{
                 modulo_pred = 0.0f;
                 floor_pred = 0.0f;
               }
-              //std::cout << "modulo_pred_end: " << modulo_pred << std::endl;
-              //std::cout << "floor_pred_end: " << floor_pred << std::endl;
+              ////std::cout << "modulo_pred_end: " << modulo_pred << std::endl;
+              ////std::cout << "floor_pred_end: " << floor_pred << std::endl;
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L289-L290
               float w_ratio = modulo_pred / heatmap_width;
               float h_ratio = floor_pred / heatmap_height;
-              //std::cout << "w_ratio: " << w_ratio << std::endl;
-              //std::cout << "h_ratio: " << h_ratio << std::endl;              
+              ////std::cout << "w_ratio: " << w_ratio << std::endl;
+              ////std::cout << "h_ratio: " << h_ratio << std::endl;              
               cv::Point3f point;
               //https://github.com/dmlc/gluon-cv/blob/master/gluoncv/data/transforms/pose.py#L291-L292
               //scale = np.array([w, h])
@@ -2716,8 +2719,8 @@ class NoNMSPoseFromConfig{
               point.x = w * 2.0f * w_ratio + center_x - w;
               point.y = h * 2.0f * h_ratio + center_y - h;
               point.z = probability;
-              //std::cout << "point.x: " << point.x << std::endl;
-              //std::cout << "point.y: " << point.y << std::endl;
+              ////std::cout << "point.x: " << point.x << std::endl;
+              ////std::cout << "point.y: " << point.y << std::endl;
               points.push_back(point);
             }
             // free outputs
@@ -2727,7 +2730,7 @@ class NoNMSPoseFromConfig{
             output_tensor_heatmap = nullptr;
             free(data_x);
             data_x = nullptr;
-            //std::cout << "freeing finished" << std::endl;
+            ////std::cout << "freeing finished" << std::endl;
             return points;
         }
 };
