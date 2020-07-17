@@ -138,7 +138,12 @@ class TVMHandDetectionNode {
     json zone_json;
     bool json_found;
     int n_zones;
+    float override_threshold = 0.5;
+    float max_capable_depth;
 
+
+    double rate_value = 1.0;
+    float override_threshold = 0.5;
   public:
     // Set camera matrix transforms
     Eigen::Matrix3f intrinsics_matrix;
@@ -157,7 +162,7 @@ class TVMHandDetectionNode {
      * @brief constructor
      * @param nh node handler
      */
-    TVMHandDetectionNode(ros::NodeHandle& nh, std::string sensor_string, json zone):
+    TVMHandDetectionNode(ros::NodeHandle& nh, std::string sensor_string, bool use_dynamic_reconfigure):
       node_(nh), it(node_)
       {
         // Publish Messages
@@ -177,24 +182,37 @@ class TVMHandDetectionNode {
         approximate_sync_->registerCallback(boost::bind(&TVMHandDetectionNode::callback, this, _1, _2));
 
         // create callback config 
-        //cfg_server.setCallback(boost::bind(&TVMHandDetectionNode::cfg_callback, this, _1, _2));      
+        if (use_dynamic_reconfigure){
+          cfg_server.setCallback(boost::bind(&TVMHandDetectionNode::cfg_callback, this, _1, _2));      
+        }
 
         // create object-detector pointer
         //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
         tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
         sensor_name = sensor_string;
-        zone_json = zone;
         std::cout << "detector loaded!" << std::endl;
 
-
-        json master_config;
-        std::string package_path = ros::package::getPath("recognition");
-        std::string master_hard_coded_path = package_path + "/cfg/master.json";
-        std::ifstream json_read(master_hard_coded_path);
-        n_zones = master_config["n_zones"];
-        json_read >> master_config;
-        //sensor_name = master_config["sensor_name"]; //the path to the detector model file
-        json_found = true;
+        try
+        {
+          json master_config;
+          std::string master_package_path = ros::package::getPath("recognition");
+          std::string master_hard_coded_path = master_package_path + "/cfg/hand_detector.json";
+          std::ifstream master_json_read(master_hard_coded_path);
+          master_json_read >> master_config;
+          n_zones = master_config["n_zones"]; //the path to the detector model file
+          max_capable_depth = master_config["max_capable_depth"];
+          std::cout << "max_capable_depth: " << max_capable_depth << std::endl;
+          override_threshold = master_config["override_threshold"];
+          std::string zone_json_path = master_config["zone_json_path"];
+          std::string area_hard_coded_path = area_package_path + zone_json_path;
+          std::ifstream area_json_read(area_hard_coded_path);
+          area_json_read >> zone_json;
+          json_found = true;
+        }
+        catch(const std::exception& e)
+        {
+          std::cerr << "json master/area not found: "<< e.what() << '\n';
+        }
 
       }
 
@@ -268,7 +286,7 @@ class TVMHandDetectionNode {
 
       // forward inference of object detector
       begin = ros::Time::now();
-      output = tvm_object_detector->forward_full(cv_image);
+      output = tvm_object_detector->forward_full(cv_image, override_threshold);
       duration = ros::Time::now().toSec() - begin.toSec();
       printf("yolo detection time: %f\n", duration);
       printf("yolo detections: %ld\n", output->num);
@@ -451,21 +469,6 @@ class TVMHandDetectionNode {
     free(output);
     }
 
-    // // TODO - remove all callbacks
-    /**
-     * @brief callback for dynamic reconfigure
-     * @param config  configure parameters
-     * @param level   configure level
-     */
-    void cfg_callback(recognition::HandDetectionConfig& config, uint32_t level) {
-      std::cout << "--- cfg_callback ---" << std::endl;
-      std::string package_path = ros::package::getPath("recognition");
-      std::cout << package_path << std::endl;
-      model_folder_path = package_path + config.hand_detector_path; //the path to the face detector model file
-      std::cout << model_folder_path << std::endl;
-      std::cout << "overwriting default model_folder_path" << std::endl;
-      confidence_thresh = config.confidence_thresh; // the threshold for confidence of detection
-    }
 
     // THIS IS INSIDE THE DETECTOR
     /**
@@ -473,35 +476,26 @@ class TVMHandDetectionNode {
      * @param config  configure parameters
      * @param level   configure level
      */
-    void json_cfg_callback(uint32_t level) {
-      json model_config;
-      std::string hard_coded_path = "/cfg/master.json";
-      std::cout << "--- detector cfg_callback ---" << std::endl;
-      std::string package_path = ros::package::getPath("recognition");
-      std::string full_path = package_path + hard_coded_path;
-      std::ifstream json_read(full_path);
-      json_read >> model_config;
-
-      model_folder_path = model_config["hand_detector_path"]; //the path to the detector model file
-      confidence_thresh = model_config["confidence_thresh"]; // the threshold for confidence of detection
+    void cfg_callback(recognition::GenDetectionConfig& config, uint32_t level) {
+      std::cout << "--- cfg_callback ---" << std::endl;
+      //std::string package_path = ros::package::getPath("recognition");
+      std::cout << "Updating detector configuration!!!" << std::endl;
+      max_capable_depth = config.max_capable_depth;
+      override_threshold = config.override_threshold;
     }
 };
 
 int main(int argc, char** argv) {
   // read json to get the master config file
   std::string sensor_name;
+  bool use_dynamic_reconfigure;
   //json master_config;
   //std::string package_path = ros::package::getPath("recognition");
   //std::string master_hard_coded_path = package_path + "/cfg/master.json";
   //std::ifstream json_read(master_hard_coded_path);
   //json_read >> master_config;
   //sensor_name = master_config["sensor_name"]; //the path to the detector model file
-  json zone_json;
-  bool use_dynamic_reconfigure;
-  std::string area_package_path = ros::package::getPath("recognition");
-  std::string area_hard_coded_path = area_package_path + "/cfg/sink_area.json";
-  std::ifstream area_json_read(area_hard_coded_path);
-  area_json_read >> zone_json;
+
 
   std::cout << "--- tvm_hand_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_hand_detection_node");
@@ -509,12 +503,13 @@ int main(int argc, char** argv) {
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
+  pnh.param("use_dynamic_reconfigure", use_dynamic_reconfigure, false);
   // odd private v. public structure. lame.
   // one config, no need for multiple config layers
   //nh.getParam("sensor_name", sensor_name);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMHandDetectionNode node(nh, sensor_name, zone_json);
+  TVMHandDetectionNode node(nh, sensor_name, use_dynamic_reconfigure);
   std::cout << "TVMHandDetectionNode init " << std::endl;
   ros::spin();
   return 0;
