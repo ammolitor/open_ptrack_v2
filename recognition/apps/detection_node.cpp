@@ -1288,9 +1288,9 @@ class TVMNode {
           
           if (fast_no_clustering){
             
-            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::pose_callback_no_clustering, this);
+            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 1, &TVMNode::pose_callback_no_clustering, this);
           } else {
-            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::pose_callback, this);
+            point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 1, &TVMNode::pose_callback, this);
             use_headclusters = false;
           }
           
@@ -1298,7 +1298,7 @@ class TVMNode {
           filter_height = true;
           tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
         } else {
-          point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::yolo_callback, this);
+          point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 1, &TVMNode::yolo_callback, this);
           tvm_standard_detector.reset(new NoNMSYoloFromConfig("/cfg/pose_model.json", "recognition"));
         }
 

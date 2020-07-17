@@ -225,7 +225,7 @@ class TVMHandDetectionNode {
 
         // Subscribe to Messages
         if (use_pointcloud){
-          point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 10, &TVMNode::cloud_callback, this);
+          point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 1, &TVMHandDetectionNode::cloud_callback, this);
         } else {
           rgb_image_sub.subscribe(node_, sensor_string +"/color/image_rect_color", 1);
           depth_image_sub.subscribe(node_, sensor_string+"/depth/image_rect_raw", 1);
