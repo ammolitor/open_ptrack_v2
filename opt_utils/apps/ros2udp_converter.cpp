@@ -165,9 +165,12 @@ handsCallback(const opt_msgs::DetectionArray::ConstPtr& hands_msg)
   {
     Jzon::Object current_detection;
     //current_detection.Add("id", hands_msg->detections[i].id);
-    current_detection.Add("x", hands_msg->detections[i].box_2D.x);
-    current_detection.Add("y", hands_msg->detections[i].box_2D.y);
-    current_detection.Add("z", hands_msg->detections[i].distance);
+    current_detection.Add("x_2D", hands_msg->detections[i].box_2D.x);
+    current_detection.Add("y_2D", hands_msg->detections[i].box_2D.y);
+    current_detection.Add("z_2D", hands_msg->detections[i].distance);
+    current_detection.Add("x_3D", hands_msg->detections[i].box_3D.p1.x);
+    current_detection.Add("y_3D", hands_msg->detections[i].box_3D.p1.y);
+    current_detection.Add("z_3D", hands_msg->detections[i].box_3D.pt.z);
     current_detection.Add("confidence", hands_msg->detections[i].confidence);
     // should we add this???
     // the hand detection model will ONLY be run from the camera monitoring the sink
