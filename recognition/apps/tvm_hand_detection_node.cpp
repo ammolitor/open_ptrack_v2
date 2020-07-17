@@ -379,7 +379,10 @@ class TVMHandDetectionNode {
             point_3D = world_transform(point_3D);
 
             opt_msgs::Detection detection_msg;
-            detection_msg.box_3D.p1 = point_3D
+
+            detection_msg.box_3D.p1.x = point_3D.getX();
+            detection_msg.box_3D.p1.y = point_3D.getY();
+            detection_msg.box_3D.p1.z = point_3D.getZ();
             
             detection_msg.box_3D.p2.x = mx;
             detection_msg.box_3D.p2.y = my;
@@ -647,7 +650,9 @@ class TVMHandDetectionNode {
             point_3D = world_transform(point_3D);
 
             opt_msgs::Detection detection_msg;
-            detection_msg.box_3D.p1 = point_3D;
+            detection_msg.box_3D.p1.x = point_3D.getX();
+            detection_msg.box_3D.p1.y = point_3D.getY();
+            detection_msg.box_3D.p1.z = point_3D.getZ();
                       
             detection_msg.box_3D.p2.x = mx;
             detection_msg.box_3D.p2.y = my;
