@@ -378,9 +378,7 @@ class TVMHandDetectionNode {
             point_3D = world_transform(point_3D);
 
             opt_msgs::Detection detection_msg;
-            detection_msg.box_3D.p1.x = point_3D.x;
-            detection_msg.box_3D.p1.y = point_3D.y;
-            detection_msg.box_3D.p1.z = point_3D.z;
+            converter.Vector3fToVector3(point_3D, detection_msg.box_3D.p1);
             
             detection_msg.box_3D.p2.x = mx;
             detection_msg.box_3D.p2.y = my;
@@ -544,7 +542,7 @@ class TVMHandDetectionNode {
       float width;
       ros::Time begin;
       double duration;
-
+      open_ptrack::opt_utils::Conversions converter; 
       // set publication messages vars here
       // generate new detection array message with the header from the rbg image
       opt_msgs::DetectionArray::Ptr detection_array_msg(new opt_msgs::DetectionArray);
@@ -642,16 +640,14 @@ class TVMHandDetectionNode {
 
           // publish the messages
           if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
-        
+            
             tf::Vector3 point_3D(mx, my, median_depth);
             
             point_3D = world_transform(point_3D);
 
             opt_msgs::Detection detection_msg;
-            detection_msg.box_3D.p1.x = point_3D.x;
-            detection_msg.box_3D.p1.y = point_3D.y;
-            detection_msg.box_3D.p1.z = point_3D.z;
-            
+            converter.Vector3fToVector3(point_3D, detection_msg.box_3D.p1);
+                      
             detection_msg.box_3D.p2.x = mx;
             detection_msg.box_3D.p2.y = my;
             detection_msg.box_3D.p2.z = median_depth;
