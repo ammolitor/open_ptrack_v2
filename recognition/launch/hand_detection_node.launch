@@ -7,7 +7,7 @@
   <!-- Start the realsense -->
   <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
       <arg name="camera" value="$(arg sensor_name)" />
-      <arg name="enable_pointcloud" alue="$(arg use_pointcloud)" />
+      <arg name="enable_pointcloud" value="$(arg use_pointcloud)" />
   </include>
 
 
