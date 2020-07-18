@@ -11,7 +11,7 @@
     "max_capable_depth":          6.25,
     "n_zones":                    3,
     "use_headclusters":           false,
-    "use_pose_model":             false,
+    "use_pose_model":             true,
     "__n_zones__comment__":       "door, sink, cutting station",
     "__depth__comment__":         "realsense max is 10.0, kinect is 6.25",
     "ground_estimation_mode" : 2, 

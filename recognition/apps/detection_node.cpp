@@ -1284,6 +1284,12 @@ class TVMNode {
 
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMNode::camera_info_callback, this);
+
+        // fast_no_cluster means you HAVE to use pose to be able to get the height of an object == use_pose_model
+        if (fast_no_cluster && !use_pose_model){
+          use_pose_model = true;
+        }
+
         if (use_pose_model) {
           
           if (fast_no_clustering){
@@ -1293,7 +1299,8 @@ class TVMNode {
             point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 1, &TVMNode::pose_callback, this);
             use_headclusters = false;
           }
-          
+          // idea: we have a separate callback that does detections ONLY in the areas where the ground is visible...
+          // can set this via some kind of depth command????
       
           filter_height = true;
           tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));

@@ -939,6 +939,7 @@ class AreaDefinitionNode {
     
     cv::destroyAllWindows(); 
     std::cout << "DEBUG: about to show image" << std::endl;
+    // this was causing errors when the camera was glitching
     //cv::imshow("disp", src_img);
       
     // saving image
