@@ -1285,8 +1285,8 @@ class TVMNode {
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMNode::camera_info_callback, this);
 
-        // fast_no_cluster means you HAVE to use pose to be able to get the height of an object == use_pose_model
-        if (fast_no_cluster && !use_pose_model){
+        // fast_no_clustering means you HAVE to use pose to be able to get the height of an object == use_pose_model
+        if (fast_no_clustering && !use_pose_model){
           use_pose_model = true;
         }
 
