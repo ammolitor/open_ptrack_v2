@@ -3348,7 +3348,7 @@ class TVMNode {
                 distance_ = std::sqrt(top.y * top.y + top.z * top.z);
               }
 
-              float height = std::fabs(height_point.dot(ground_coeffs_new));
+              float height = std::fabs(height_point.dot(ground_coeffs));
               height /= sqrt_ground_coeffs;
 
               if(!vertical_)
