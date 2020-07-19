@@ -2850,7 +2850,7 @@ class TVMNode {
                 viewer.addText(f_str,off_set,20,f_str,0);
 
                 //Evaluate confidence for the current PersonCluster:
-                Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_());
+                Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_;
                 centroid /= centroid(2);
                 Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * ttop_);
                 top /= top(2);
