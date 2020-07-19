@@ -17,7 +17,7 @@
 #include <random>
 #include <cstdio>
 #include <nlohmann/json.hpp>
-#include <open_ptrack/nms/nms.h>
+#include <open_ptrack/nms_utils/nms.h>
 #include "tvm_detection_helpers.hpp"
 #include <torch/torch.h>
 using json = nlohmann::json;
@@ -280,16 +280,16 @@ namespace open_ptrack
               // copy to output
               //ulsMatF(int cols, int rows, int channels)
               //at(int channel, int row, int c
-              MatF yolo_output(6, n_dets, 1); //ulsMatF yolo_output(1, n_dets, 6);
+              open_ptrack::nms_utils::MatF yolo_output(6, n_dets, 1); //ulsMatF yolo_output(1, n_dets, 6);
               TVMArrayCopyToBytes(output_for_nms, yolo_output.m_data, 1* n_dets * 6 * sizeof(float));
               ////std::cout << "TVMSynchronize finished" << std::endl;  
               
               ////std::cout << "starting nms" << std::endl;
               //auto tick = Clock::now();
-              std::vector<sortable_result> tvm_results;
-              std::vector<sortable_result> proposals;
+              std::vector<open_ptrack::nms_utils::sortable_result> tvm_results;
+              std::vector<open_ptrack::nms_utils::sortable_result> proposals;
               proposals.clear();
-              tvm_nms_cpu(proposals, yolo_output, override_threshold, override_threshold, tvm_results);
+              open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, override_threshold, tvm_results);
               //std::cout << "ending nms" << std::endl;
 
               // dynamically set?
@@ -484,8 +484,8 @@ namespace open_ptrack
               //data_x = nullptr;
               //std::cout << "freeing finished" << std::endl;
               // free proposals
-              tvm_results = std::vector<sortable_result>();
-              proposals = std::vector<sortable_result>();
+              tvm_results = std::vector<open_ptrack::nms_utils::sortable_result>();
+              proposals = std::vector<open_ptrack::nms_utils::sortable_result>();
               return results;
           }
 
