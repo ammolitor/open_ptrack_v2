@@ -1,5 +1,8 @@
 #include <open_ptrack/nms_utils/nms.h>
 
+#ifndef OPEN_PTRACK_NMS_UTILS_NMS_HPP_
+#define OPEN_PTRACK_NMS_UTILS_NMS_HPP_
+
 void open_ptrack::nms_utils::tvm_nms_cpu(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes) {
 
     //ulsMatF(int cols, int rows, int channels)
@@ -61,3 +64,4 @@ void open_ptrack::nms_utils::tvm_nms_cpu(std::vector<sortable_result>& boxes, Ma
         }
     }
 }
+#endif /* OPEN_PTRACK_NMS_UTILS_NMS_HPP_ */

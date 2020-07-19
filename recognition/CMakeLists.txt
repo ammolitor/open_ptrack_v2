@@ -398,7 +398,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 ###############################################################################
 ####  DETECTION_NODE TEST
 ###############################################################################
-add_executable(detector_test apps/detection_node_test.cpp include/open_ptrack/hungarian/Hungarian.cpp include/open_ptrack/nms_utils/nms.h include/open_ptrack/nms_utils/nms.cpp include/open_ptrack/NoNMSPoseFromConfig.hpp include/open_ptrack/NoNMSYoloFromConfig.hpp include/open_ptrack/tvm_detection_helpers.hpp)
+add_executable(detector_test apps/detection_node_test.cpp include/open_ptrack/hungarian/Hungarian.cpp include/open_ptrack/nms_utils/nms.h include/open_ptrack/nms_utils/nms.hpp include/open_ptrack/NoNMSPoseFromConfig.hpp include/open_ptrack/NoNMSYoloFromConfig.hpp include/open_ptrack/tvm_detection_helpers.hpp)
 SET_TARGET_PROPERTIES(detector_test PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
 target_link_libraries(detector_test PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES} 
