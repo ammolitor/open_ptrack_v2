@@ -563,7 +563,7 @@ void open_ptrack::person_clustering::PersonCluster<PointT>::drawTBoundingBox (pc
 {
   // draw theoretical person bounding box in the PCL viewer:
   pcl::ModelCoefficients coeffs;
-   translation
+  // translation
   coeffs.values.push_back (tcenter_[0]);
   coeffs.values.push_back (tcenter_[1]);
   coeffs.values.push_back (tcenter_[2]);
