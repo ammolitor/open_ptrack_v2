@@ -2850,7 +2850,7 @@ class TVMNode {
                 viewer.addText(f_str,off_set,20,f_str,0);
 
                 //Evaluate confidence for the current PersonCluster:
-                Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_;
+                Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_);
                 centroid /= centroid(2);
                 Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * ttop_);
                 top /= top(2);
@@ -2980,7 +2980,7 @@ class TVMNode {
       rate_value = config.rate_value;
       std::cout << "rate_value: " << rate_value << std::endl;
       // can only turn on when first starting... can't redeclare a callback
-      view_pointcloud = config["view_pointcloud"];
+      view_pointcloud = config.view_pointcloud;
       //std::cout << "Fast Mode: " << fast_no_clustering << std::endl;
 
       override_threshold = config.override_threshold;
