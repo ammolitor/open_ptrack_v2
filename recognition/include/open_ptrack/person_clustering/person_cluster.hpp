@@ -558,49 +558,49 @@ open_ptrack::person_clustering::PersonCluster<PointT>::updateSkelHeight (const E
   return (skel_height_);
 }
 
-//template <typename PointT>
-//void open_ptrack::person_clustering::PersonCluster<PointT>::drawTBoundingBox (pcl::visualization::PCLVisualizer& viewer, int person_number)
-//{
-//  // draw theoretical person bounding box in the PCL viewer:
-//  pcl::ModelCoefficients coeffs;
-//  // translation
-//  coeffs.values.push_back (tcenter_[0]);
-//  coeffs.values.push_back (tcenter_[1]);
-//  coeffs.values.push_back (tcenter_[2]);
-//  // rotation
-//  coeffs.values.push_back (0.0);
-//  coeffs.values.push_back (0.0);
-//  coeffs.values.push_back (0.0);
-//  coeffs.values.push_back (1.0);
-//  // size
-//  if (vertical_)
-//  {
-//    coeffs.values.push_back (height_);
-//    coeffs.values.push_back (0.5);
-//    coeffs.values.push_back (0.5);
-//  }
-//  else
-//  {
-//    coeffs.values.push_back (0.5);
-//    coeffs.values.push_back (height_);
-//    coeffs.values.push_back (0.5);
-//  }
+template <typename PointT>
+void open_ptrack::person_clustering::PersonCluster<PointT>::drawTBoundingBox (pcl::visualization::PCLVisualizer& viewer, int person_number)
+{
+  // draw theoretical person bounding box in the PCL viewer:
+  pcl::ModelCoefficients coeffs;
+   translation
+  coeffs.values.push_back (tcenter_[0]);
+  coeffs.values.push_back (tcenter_[1]);
+  coeffs.values.push_back (tcenter_[2]);
+  // rotation
+  coeffs.values.push_back (0.0);
+  coeffs.values.push_back (0.0);
+  coeffs.values.push_back (0.0);
+  coeffs.values.push_back (1.0);
+  // size
+  if (vertical_)
+  {
+    coeffs.values.push_back (height_);
+    coeffs.values.push_back (0.5);
+    coeffs.values.push_back (0.5);
+  }
+  else
+  {
+    coeffs.values.push_back (0.5);
+    coeffs.values.push_back (height_);
+    coeffs.values.push_back (0.5);
+  }
 
-//  std::stringstream bbox_name;
-//  bbox_name << "bbox_person_" << person_number;
-//  viewer.removeShape (bbox_name.str());
-//  viewer.addCube (coeffs, bbox_name.str());
-//  viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 1.0, 0.0, bbox_name.str());
-//  viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, bbox_name.str());
+  std::stringstream bbox_name;
+  bbox_name << "bbox_person_" << person_number;
+  viewer.removeShape (bbox_name.str());
+  viewer.addCube (coeffs, bbox_name.str());
+  viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 1.0, 0.0, bbox_name.str());
+  viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, bbox_name.str());
 
-//  //      std::stringstream confid;
-//  //      confid << person_confidence_;
-//  //      PointT position;
-//  //      position.x = tcenter_[0]- 0.2;
-//  //      position.y = ttop_[1];
-//  //      position.z = tcenter_[2];
-//  //      viewer.addText3D(confid.str().substr(0, 4), position, 0.1);
-//}
+  //      std::stringstream confid;
+  //      confid << person_confidence_;
+  //      PointT position;
+  //      position.x = tcenter_[0]- 0.2;
+  //      position.y = ttop_[1];
+  //      position.z = tcenter_[2];
+  //      viewer.addText3D(confid.str().substr(0, 4), position, 0.1);
+}
 
 template <typename PointT>
 open_ptrack::person_clustering::PersonCluster<PointT>::~PersonCluster ()
