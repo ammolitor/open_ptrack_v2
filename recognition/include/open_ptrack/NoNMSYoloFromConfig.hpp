@@ -18,7 +18,7 @@
 #include <cstdio>
 #include <nlohmann/json.hpp>
 #include <open_ptrack/nms_utils/nms.h>
-#include "tvm_detection_helpers.hpp"
+//#include "tvm_detection_helpers.hpp"
 using json = nlohmann::json;
 
 //#ifndef OPEN_PTRACK_MODELS_BASED_SUBCLUSTER_H_
@@ -28,6 +28,45 @@ namespace open_ptrack
 {
   namespace models
   {
+
+    std::vector<std::string> COCO_CLASS_NAMES = {
+        "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train",
+        "truck", "boat", "traffic light", "fire hydrant", "stop sign",
+        "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep",
+        "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella",
+        "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard",
+        "sports ball", "kite", "baseball bat", "baseball glove", "skateboard",
+        "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork",
+        "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange",
+        "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair",
+        "couch", "potted plant", "bed", "dining table", "toilet", "tv",
+        "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave",
+        "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase",
+        "scissors", "teddy bear", "hair drier", "toothbrush"
+    };
+
+    // box
+    struct box{
+        float xmin;
+        float ymin;
+        float xmax;
+        float ymax;
+    };
+
+    // adjBox
+    struct bbox_result{
+        int id;
+        float score;
+        float xmin;
+        float ymin;
+        float xmax;
+        float ymax;
+    };
+    // boxInfo
+    struct yoloresults{
+        bbox_result* boxes;
+        int num;
+    };
 
     class NoNMSYoloFromConfig{
         private:
@@ -151,7 +190,7 @@ namespace open_ptrack
             }
 
             // we can set it externally with dynamic reconfigure
-            yoloresults* forward_full(cv::Mat frame, float override_threshold)
+            open_ptrack::models::yoloresults* forward_full(cv::Mat frame, float override_threshold)
             {
                 //std::cout << "starting function" << std::endl;
                 // get height/width dynamically
@@ -241,7 +280,7 @@ namespace open_ptrack
                 std::vector<open_ptrack::nms_utils::sortable_result> tvm_results;
                 std::vector<open_ptrack::nms_utils::sortable_result> proposals;
                 proposals.clear();
-                open_ptrack::nms_utils::tvm_nms_cputvm_nms_cpu(proposals, yolo_output, override_threshold, override_threshold, tvm_results);
+                open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, override_threshold, tvm_results);
                 //std::cout << "ending nms" << std::endl;
 
                 TVMArrayFree(input);
