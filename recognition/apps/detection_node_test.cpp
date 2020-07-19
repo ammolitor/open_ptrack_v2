@@ -1147,8 +1147,8 @@ class TVMNode {
         off_set = off_set + 145;
       }
   
-      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud);
-      viewer.addPointCloud<PointT> (cloud, rgb, "temp_cloud");
+      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_);
+      viewer.addPointCloud<PointT> (cloud_, rgb, "temp_cloud");
       
       viewer.addCoordinateSystem (0.5, "axis", 0); 
       viewer.setBackgroundColor (0, 0, 0, 0); 
@@ -2350,9 +2350,9 @@ class TVMNode {
           viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "plane_", 0); 
           viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "plane_", 0); 
 
-          int off_set = 20;
+          //int off_set = 20;
         }
-
+        int off_set = 20;
         // build cost matrix
         if (output->num >= 1) {
           float xmin;
@@ -2844,9 +2844,9 @@ class TVMNode {
                 viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "sphere_", 0); 
                 viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sphere_", 0); 
 
-                drawTBoundingBox (viewer, tcenter_, ttop_, height_, score, i, true)
+                drawTBoundingBox (viewer, tcenter_, ttop_, height_, score, i, true);
 
-                std::string f_str = "PersonConfidence : " + std::to_string(person_cluster.getPersonConfidence());
+                std::string f_str = "PersonConfidence : " + std::to_string(score);
                 viewer.addText(f_str,off_set,20,f_str,0);
 
                 //Evaluate confidence for the current PersonCluster:
