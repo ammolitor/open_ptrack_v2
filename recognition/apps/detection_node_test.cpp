@@ -253,7 +253,7 @@ class TVMNode {
     tf::StampedTransform world2rgb_transform;
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
-    pcl::visualization::PCLVisualizer viewer ("PCL visualizer"); 
+    pcl::visualization::PCLVisualizer viewer(std::string("PCL visualizer")); 
 
     TVMNode(ros::NodeHandle& nh, std::string sensor_string, json zone, bool use_dynamic_reconfigure):
       node_(nh), it(node_)
