@@ -1074,7 +1074,7 @@ class TVMNode {
       }
     }
 
-    void point_cloud_visulizer (PointCloudPtr& cloud, Eigen::VectorXf& ground_coeffs_ ,pcl::visualization::PCLVisualizer& viewer, std::vector<open_ptrack::person_clustering::PersonCluster<PointT>>& clusters, std::vector<int> viz_indicies)
+    void point_cloud_visulizer (const PointCloudT::ConstPtr& cloud_, Eigen::VectorXf& ground_coeffs_ ,pcl::visualization::PCLVisualizer& viewer, std::vector<open_ptrack::person_clustering::PersonCluster<PointT>>& clusters, std::vector<int> viz_indicies)
     {
       pcl::ModelCoefficients::Ptr plane_ (new pcl::ModelCoefficients); 
       plane_->values.resize (10); 
@@ -2844,7 +2844,7 @@ class TVMNode {
                 viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "sphere_", 0); 
                 viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sphere_", 0); 
 
-                person_cluster.drawTBoundingBox(viewer, 1);
+                drawTBoundingBox (viewer, tcenter_, ttop_, height_, score, i, true)
 
                 std::string f_str = "PersonConfidence : " + std::to_string(person_cluster.getPersonConfidence());
                 viewer.addText(f_str,off_set,20,f_str,0);
