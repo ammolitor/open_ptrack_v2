@@ -113,8 +113,8 @@ typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 /** \brief BaseNode estimates the ground plane equation from a 3D point cloud */
 class TVMNode {
   private:
-    std::unique_ptr<NoNMSPoseFromConfig> tvm_pose_detector;
-    std::unique_ptr<NoNMSYoloFromConfig> tvm_standard_detector;
+    std::unique_ptr<open_ptrack::models::NoNMSPoseFromConfig> tvm_pose_detector;
+    std::unique_ptr<open_ptrack::models::NoNMSYoloFromConfig> tvm_standard_detector;
     // Publishers
     ros::Publisher detections_pub;
     ros::Publisher skeleton_pub;
@@ -350,10 +350,10 @@ class TVMNode {
           // can set this via some kind of depth command????
       
           filter_height = true;
-          tvm_pose_detector.reset(new NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
+          tvm_pose_detector.reset(new open_ptrack::models::NoNMSPoseFromConfig("/cfg/pose_model.json", "recognition"));
         } else {
           point_cloud_approximate_sync_ = node_.subscribe(sensor_string + "/depth_registered/points", 1, &TVMNode::yolo_callback, this);
-          tvm_standard_detector.reset(new NoNMSYoloFromConfig("/cfg/pose_model.json", "recognition"));
+          tvm_standard_detector.reset(new open_ptrack::models::NoNMSYoloFromConfig("/cfg/pose_model.json", "recognition"));
         }
 
         // dynamic reconfigure eats cpu cycles; so it's good for testing, 
