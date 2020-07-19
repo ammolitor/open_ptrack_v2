@@ -59,7 +59,7 @@
 #include <pcl/filters/passthrough.h>
 
 // removing pcl_visualizer because it clashes with torch
-//#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/visualization/pcl_visualizer.h>
 //https://stackoverflow.com/questions/15870967/boost-error-reference-to-detail-is-ambiguous
 //https://github.com/opencv/opencv/issues/6661
 
@@ -84,25 +84,7 @@ namespace open_ptrack
       /** \brief Minimum x coordinate of the cluster points. */
       float min_x_;
       /** \brief Minimum y coordinate of the cluster points. */
-      float min_y_;
-      /** \brief Minimum z coordinate of the cluster points. */
-      float min_z_;
-
-      /** \brief Maximum x coordinate of the cluster points. */
-      float max_x_;
-      /** \brief Maximum y coordinate of the cluster points. */
-      float max_y_;
-      /** \brief Maximum z coordinate of the cluster points. */
-      float max_z_;
-
-      /** \brief Sum of x coordinates of the cluster points. */
-      float sum_x_;
-      /** \brief Sum of y coordinates of the cluster points. */
-      float sum_y_;
-      /** \brief Sum of z coordinates of the cluster points. */
-      float sum_z_;
-
-      /** \brief Number of cluster points. */
+  /** \brief Number of cluster points. */
       int n_;
 
       /** \brief x coordinate of the cluster centroid. */
@@ -123,7 +105,25 @@ namespace open_ptrack
       /** \brief Maximum angle of the cluster points. */
       float angle_max_;
       /** \brief Minimum angle of the cluster points. */
-      float angle_min_;
+      float angle_min_;    float min_y_;
+      /** \brief Minimum z coordinate of the cluster points. */
+      float min_z_;
+
+      /** \brief Maximum x coordinate of the cluster points. */
+      float max_x_;
+      /** \brief Maximum y coordinate of the cluster points. */
+      float max_y_;
+      /** \brief Maximum z coordinate of the cluster points. */
+      float max_z_;
+
+      /** \brief Sum of x coordinates of the cluster points. */
+      float sum_x_;
+      /** \brief Sum of y coordinates of the cluster points. */
+      float sum_y_;
+      /** \brief Sum of z coordinates of the cluster points. */
+      float sum_z_;
+
+      
       
       /** \brief Cluster top point. */
       Eigen::Vector3f top_;
@@ -364,8 +364,8 @@ namespace open_ptrack
       // * \param[in] viewer PCL visualizer.
       // * \param[in] person_number progressive number representing the person.
       // */
-      //void
-      //drawTBoundingBox (pcl::visualization::PCLVisualizer& viewer, int person_number);
+      void
+      drawTBoundingBox (pcl::visualization::PCLVisualizer& viewer, int person_number);
 
       /**
        * \brief For sorting purpose: sort by distance.
