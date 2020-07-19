@@ -91,7 +91,7 @@
 #include <recognition/GenDetectionConfig.h>
 
 /// yolo specific args
-#include <open_ptrack/tvm_detection_helpers.hpp>
+//#include <open_ptrack/tvm_detection_helpers.hpp>
 #include <open_ptrack/NoNMSPoseFromConfig.hpp>
 #include <open_ptrack/NoNMSYoloFromConfig.hpp>
 #include <pcl/visualization/pcl_visualizer.h>
@@ -1041,7 +1041,7 @@ class TVMNode {
 
     int off_set = 20;
     
-    for(typename std::vector<pcl::people::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
+    for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
     {
 
       pcl::ModelCoefficients::Ptr sphere_ (new pcl::ModelCoefficients); 
