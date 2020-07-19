@@ -203,6 +203,7 @@ class TVMNode {
     double rate_value = 1.0;
     float override_threshold = 0.5;
     bool fast_no_clustering = false;
+    bool view_pointcloud = false;
 
     //###################################
     //## Ground + Clustering Variables ##
@@ -252,6 +253,7 @@ class TVMNode {
     tf::StampedTransform world2rgb_transform;
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
+    pcl::visualization::PCLVisualizer viewer ("PCL visualizer"); 
 
     TVMNode(ros::NodeHandle& nh, std::string sensor_string, json zone, bool use_dynamic_reconfigure):
       node_(nh), it(node_)
@@ -315,6 +317,8 @@ class TVMNode {
           filter_height = master_config["filter_height"];
           fast_no_clustering = master_config["fast_no_clustering"];
           std::cout << "Fast Mode: " << fast_no_clustering << std::endl;
+          view_pointcloud = master_config["view_pointcloud"];
+          std::cout << "view_pointcloud: " << view_pointcloud << std::endl;
           json_found = true;
         }
         catch(const std::exception& e)
@@ -1024,90 +1028,136 @@ class TVMNode {
       return cost_matrix;
     }
 
-
-  void point_cloud_visulizer (PointCloudPtr& cloud, Eigen::VectorXf& ground_coeffs_ ,pcl::visualization::PCLVisualizer& viewer, std::vector<open_ptrack::person_clustering::PersonCluster<PointT>>& clusters)
-  {
-    pcl::ModelCoefficients::Ptr plane_ (new pcl::ModelCoefficients); 
-    plane_->values.resize (10); 
-    plane_->values[0] = ground_coeffs_(0); 
-    plane_->values[1] = ground_coeffs_(1); 
-    plane_->values[2] = ground_coeffs_(2); 
-    plane_->values[3] = ground_coeffs_(3); 
-
-    viewer.addPlane (*plane_, "plane_", 0); 
-    viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.9, 0.1, 0.1 /*R,G,B*/, "plane_", 0); 
-    viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "plane_", 0); 
-    viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "plane_", 0); 
-
-    int off_set = 20;
-    
-    for(typename std::vector<open_ptrack::person_clustering::PersonCluster<PointT> >::iterator it = clusters.begin(); it != clusters.end(); ++it)
+    // this is going to be for non-pcl-clusters
+    void drawTBoundingBox (pcl::visualization::PCLVisualizer& viewer, Eigen::Vector3f tcenter_, Eigen::Vector3f ttop_, float  height_, float person_confidence_, int person_number, bool add_info)
     {
-
-      pcl::ModelCoefficients::Ptr sphere_ (new pcl::ModelCoefficients); 
-      sphere_->values.resize (1); 
-      sphere_->values[0] = it->getTCenter()(0); 
-      sphere_->values[1] = it->getTCenter()(1); 
-      sphere_->values[2] = it->getTCenter()(2); 
-      sphere_->values[3] = 0.05; 
-
-      viewer.addSphere (*sphere_, "sphere_", 0); 
-      viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.9, 0.1, 0.1 /*R,G,B*/, "sphere_", 0); 
-      viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "sphere_", 0); 
-      viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sphere_", 0); 
-
-      it->drawTBoundingBox(viewer, 1);
-
-      std::string f_str = "PersonConfidence : " + std::to_string(it->getPersonConfidence());
-      viewer.addText(f_str,off_set,20,f_str,0);
-
-          //Evaluate confidence for the current PersonCluster:
-          Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * it->getTCenter());
-          centroid /= centroid(2);
-          Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * it->getTTop());
-          top /= top(2);
-          Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * it->getTBottom());
-          bottom /= bottom(2);
-
-          // Eigen::Vector3f centroid = it->getTCenter();
-          // // centroid /= centroid(2);
-          // Eigen::Vector3f top = it->getTTop();
-          // // top /= top(2);
-          // Eigen::Vector3f bottom = it->getTBottom();
-          // // bottom /= bottom(2);
-
-
-      float pixel_height;
-      float pixel_width;
-
-      if (!vertical_)
+      // draw theoretical person bounding box in the PCL viewer:
+      pcl::ModelCoefficients coeffs;
+      // translation
+      coeffs.values.push_back (tcenter_[0]);
+      coeffs.values.push_back (tcenter_[1]);
+      coeffs.values.push_back (tcenter_[2]);
+      // rotation
+      coeffs.values.push_back (0.0);
+      coeffs.values.push_back (0.0);
+      coeffs.values.push_back (0.0);
+      coeffs.values.push_back (1.0);
+      // size
+      if (vertical_)
       {
-        pixel_height = bottom(1) - top(1);
-        pixel_width = pixel_height / 2.0f;
-        std::string f_str_1 = "person_height : " + std::to_string(fabs(pixel_height));
-        viewer.addText(f_str_1,off_set,40,f_str_1,0);
+        coeffs.values.push_back (height_);
+        coeffs.values.push_back (0.5);
+        coeffs.values.push_back (0.5);
       }
       else
       {
-        pixel_width = top(0) - bottom(0);
-        pixel_height = pixel_width / 2.0f;
-        std::string f_str_1 = "person_height : " + std::to_string(fabs(pixel_width));
-        viewer.addText(f_str_1,off_set,40,f_str_1,0);
+        coeffs.values.push_back (0.5);
+        coeffs.values.push_back (height_);
+        coeffs.values.push_back (0.5);
       }
-      off_set = off_set + 145;
+
+      std::stringstream bbox_name;
+      bbox_name << "bbox_person_" << person_number;
+      viewer.removeShape (bbox_name.str());
+      viewer.addCube (coeffs, bbox_name.str());
+      viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 1.0, 0.0, bbox_name.str());
+      viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, bbox_name.str());
+      
+      if (add_info){
+        std::stringstream confid;
+        confid << person_confidence_;
+        PointT position;
+        position.x = tcenter_[0]- 0.2;
+        position.y = ttop_[1];
+        position.z = tcenter_[2];
+        viewer.addText3D(confid.str().substr(0, 4), position, 0.1);
+      }
     }
 
-    pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud);
-    viewer.addPointCloud<PointT> (cloud, rgb, "temp_cloud");
-    
-    viewer.addCoordinateSystem (0.5, "axis", 0); 
-    viewer.setBackgroundColor (0, 0, 0, 0); 
-    viewer.setPosition (800, 400); 
-    viewer.setCameraPosition(-9, 0, -5,     10, 0, 5,     0, -1, 0,      0);
-    viewer.spinOnce ();
-    viewer.removeAllShapes();
-    viewer.removeAllPointClouds();
-  }
+    void point_cloud_visulizer (PointCloudPtr& cloud, Eigen::VectorXf& ground_coeffs_ ,pcl::visualization::PCLVisualizer& viewer, std::vector<open_ptrack::person_clustering::PersonCluster<PointT>>& clusters, std::vector<int> viz_indicies)
+    {
+      pcl::ModelCoefficients::Ptr plane_ (new pcl::ModelCoefficients); 
+      plane_->values.resize (10); 
+      plane_->values[0] = ground_coeffs_(0); 
+      plane_->values[1] = ground_coeffs_(1); 
+      plane_->values[2] = ground_coeffs_(2); 
+      plane_->values[3] = ground_coeffs_(3); 
+
+      viewer.addPlane (*plane_, "plane_", 0); 
+      viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.9, 0.1, 0.1 /*R,G,B*/, "plane_", 0); 
+      viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "plane_", 0); 
+      viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "plane_", 0); 
+
+      int off_set = 20;
+      
+      for (size_t i = 0; i < viz_indicies.size(); i++)
+      {
+        int x = viz_indicies[i];
+        open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[x];
+        pcl::ModelCoefficients::Ptr sphere_ (new pcl::ModelCoefficients); 
+        sphere_->values.resize (1); 
+        sphere_->values[0] = person_cluster.getTCenter()(0); 
+        sphere_->values[1] = person_cluster.getTCenter()(1); 
+        sphere_->values[2] = person_cluster.getTCenter()(2); 
+        sphere_->values[3] = 0.05; 
+
+        viewer.addSphere (*sphere_, "sphere_", 0); 
+        viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.9, 0.1, 0.1 /*R,G,B*/, "sphere_", 0); 
+        viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "sphere_", 0); 
+        viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sphere_", 0); 
+
+        person_cluster.drawTBoundingBox(viewer, 1);
+
+        std::string f_str = "PersonConfidence : " + std::to_string(person_cluster.getPersonConfidence());
+        viewer.addText(f_str,off_set,20,f_str,0);
+
+            //Evaluate confidence for the current PersonCluster:
+            Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * person_cluster.getTCenter());
+            centroid /= centroid(2);
+            Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * person_cluster.getTTop());
+            top /= top(2);
+            Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * person_cluster.getTBottom());
+            bottom /= bottom(2);
+
+            // Eigen::Vector3f centroid = person_cluster.getTCenter();
+            // // centroid /= centroid(2);
+            // Eigen::Vector3f top = person_cluster.getTTop();
+            // // top /= top(2);
+            // Eigen::Vector3f bottom = person_cluster.getTBottom();
+            // // bottom /= bottom(2);
+
+
+        float pixel_height;
+        float pixel_width;
+
+        if (!vertical_)
+        {
+          pixel_height = bottom(1) - top(1);
+          pixel_width = pixel_height / 2.0f;
+          std::string f_str_1 = "person_height : " + std::to_string(fabs(pixel_height));
+          viewer.addText(f_str_1,off_set,40,f_str_1,0);
+        }
+        else
+        {
+          pixel_width = top(0) - bottom(0);
+          pixel_height = pixel_width / 2.0f;
+          std::string f_str_1 = "person_height : " + std::to_string(fabs(pixel_width));
+          viewer.addText(f_str_1,off_set,40,f_str_1,0);
+        }
+        off_set = off_set + 145;
+      }
+  
+      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud);
+      viewer.addPointCloud<PointT> (cloud, rgb, "temp_cloud");
+      
+      viewer.addCoordinateSystem (0.5, "axis", 0); 
+      viewer.setBackgroundColor (0, 0, 0, 0); 
+      viewer.setPosition (800, 400); 
+      viewer.setCameraPosition(-9, 0, -5,     10, 0, 5,     0, -1, 0,      0);
+      viewer.spinOnce ();
+      viewer.removeAllShapes();
+      viewer.removeAllPointClouds();
+    }
 
     void pose_callback(const PointCloudT::ConstPtr& cloud_) {
 
@@ -1738,7 +1788,8 @@ class TVMNode {
         cluster_indices = std::vector<pcl::PointIndices>();
 
         std::vector<int> valid;
-        std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;   
+        std::vector<open_ptrack::person_clustering::PersonCluster<PointT> > clusters;
+        std::vector<int> viz_indicies;
 
         // set publication messages vars here
         // generate new detection array message with the header from the rbg image
@@ -1924,6 +1975,7 @@ class TVMNode {
                   int i = valid[assignment[x]];
                   //std::cout << "cluster: " << x << " to yolo number: " << i << std::endl;
                   open_ptrack::person_clustering::PersonCluster<PointT> person_cluster = clusters[x];
+                  viz_indicies.push_back(x);
 
                   float dist = cost_matrix[x][i];
                   std::cout << "cluster dist to yolo-det: " << dist << std::endl;
@@ -2152,6 +2204,11 @@ class TVMNode {
           }
         }
       }
+      // visualize detections from yolo
+      //debug flag
+      if (view_pointcloud){
+        point_cloud_visulizer(cloud_, ground_coeffs, viewer, clusters, viz_indicies);
+      }
       // this will publish empty detections if nothing is found
       sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
       detections_pub.publish(detection_array_msg);
@@ -2162,7 +2219,6 @@ class TVMNode {
       std::cout << "total time: " << end << std::endl;
       }  
     }
-
 
     void pose_callback_no_clustering(const PointCloudT::ConstPtr& cloud_) {
 
@@ -2280,6 +2336,23 @@ class TVMNode {
         std::cout << "inference detection time: " << duration << std::endl;
         std::cout << "inference detections: " << output->num << std::endl;
           
+
+        if (view_pointcloud){
+          pcl::ModelCoefficients::Ptr plane_ (new pcl::ModelCoefficients); 
+          plane_->values.resize (10); 
+          plane_->values[0] = ground_coeffs(0); 
+          plane_->values[1] = ground_coeffs(1); 
+          plane_->values[2] = ground_coeffs(2); 
+          plane_->values[3] = ground_coeffs(3); 
+
+          viewer.addPlane (*plane_, "plane_", 0); 
+          viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.9, 0.1, 0.1 /*R,G,B*/, "plane_", 0); 
+          viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "plane_", 0); 
+          viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "plane_", 0); 
+
+          int off_set = 20;
+        }
+
         // build cost matrix
         if (output->num >= 1) {
           float xmin;
@@ -2758,6 +2831,59 @@ class TVMNode {
               skeleton.distance = skeleton_distance;
               skeleton.occluded = false;
             
+              if (view_pointcloud){
+                pcl::ModelCoefficients::Ptr sphere_ (new pcl::ModelCoefficients); 
+                sphere_->values.resize (1); 
+                sphere_->values[0] = tcenter_(0); 
+                sphere_->values[1] = tcenter_(1); 
+                sphere_->values[2] = tcenter_(2); 
+                sphere_->values[3] = 0.05; 
+
+                viewer.addSphere (*sphere_, "sphere_", 0); 
+                viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.9, 0.1, 0.1 /*R,G,B*/, "sphere_", 0); 
+                viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "sphere_", 0); 
+                viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sphere_", 0); 
+
+                person_cluster.drawTBoundingBox(viewer, 1);
+
+                std::string f_str = "PersonConfidence : " + std::to_string(person_cluster.getPersonConfidence());
+                viewer.addText(f_str,off_set,20,f_str,0);
+
+                //Evaluate confidence for the current PersonCluster:
+                Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_());
+                centroid /= centroid(2);
+                Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * ttop_);
+                top /= top(2);
+                Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * tbottom_);
+                bottom /= bottom(2);
+
+                // Eigen::Vector3f centroid = tcenter_();
+                // // centroid /= centroid(2);
+                // Eigen::Vector3f top = ttop_;
+                // // top /= top(2);
+                // Eigen::Vector3f bottom = tbottom_;
+                // // bottom /= bottom(2);
+
+                float pix_height;
+                float pix_width;
+
+                if (!vertical_)
+                {
+                  pix_height = bottom(1) - top(1);
+                  pix_width = pix_height / 2.0f;
+                  std::string f_str_1 = "person_height : " + std::to_string(fabs(pix_height));
+                  viewer.addText(f_str_1,off_set,40,f_str_1,0);
+                }
+                else
+                {
+                  pix_width = top(0) - bottom(0);
+                  pix_height = pix_width / 2.0f;
+                  std::string f_str_1 = "person_height : " + std::to_string(fabs(pix_width));
+                  viewer.addText(f_str_1,off_set,40,f_str_1,0);
+                }
+                off_set = off_set + 145;
+              }
+
               // final check here 
               // only add to message if no nans exist
               if (check_detection_msg(detection_msg)){
@@ -2772,6 +2898,22 @@ class TVMNode {
           }
         }
       }
+
+      if (view_pointcloud){
+  
+        pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_);
+        viewer.addPointCloud<PointT> (cloud_, rgb, "temp_cloud");
+        
+        viewer.addCoordinateSystem (0.5, "axis", 0); 
+        viewer.setBackgroundColor (0, 0, 0, 0); 
+        viewer.setPosition (800, 400); 
+        viewer.setCameraPosition(-9, 0, -5,     10, 0, 5,     0, -1, 0,      0);
+        viewer.spinOnce ();
+        viewer.removeAllShapes();
+        viewer.removeAllPointClouds();
+      }
+
+
       // this will publish empty detections if nothing is found
       sensor_msgs::ImagePtr imagemsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_image_clone).toImageMsg();
       detections_pub.publish(detection_array_msg);
@@ -2838,7 +2980,7 @@ class TVMNode {
       rate_value = config.rate_value;
       std::cout << "rate_value: " << rate_value << std::endl;
       // can only turn on when first starting... can't redeclare a callback
-      //fast_no_clustering = config["fast_no_clustering"];
+      view_pointcloud = config["view_pointcloud"];
       //std::cout << "Fast Mode: " << fast_no_clustering << std::endl;
 
       override_threshold = config.override_threshold;

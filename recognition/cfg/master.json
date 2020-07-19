@@ -39,5 +39,6 @@
     "override_threshold" : 0.5,
     "filter_height"     : true,
     "_filter_height_comment": "filter height is so that we can get the height of clusters and just only take the ones that are relatively ppl sized",
-    "fast_no_clustering" : true
+    "fast_no_clustering" : true,
+    "view_pointcloud" : true
 }
