@@ -810,7 +810,7 @@ class TVMNode {
       anti_transform_ = anti_transform_pre;
       transform_ = transform_pre;
       ground_coeffs_new = ground_coeffs_new_pre;
-      no_ground_cloud_rotated_ = no_ground_cloud_rotated_pre;
+      no_ground_cloud_rotated = no_ground_cloud_rotated_pre;
     }
 
     /**
