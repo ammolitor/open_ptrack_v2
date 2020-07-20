@@ -2667,6 +2667,9 @@ class TVMNode {
               converter.Vector3fToVector3((1+head_centroid_compensation/centroid3d.norm())*centroid3d, detection_msg.centroid);
               converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
               converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
+              // 3d bounding box
+              converter.Vector3fToVector3(anti_transform * min_, detection_msg.box_3D.p1);
+              converter.Vector3fToVector3(anti_transform * max_, detection_msg.box_3D.p2);
 
               std::cout << "DEBUG detection information : " << std::endl;
               std::cout << "DEBUG centroid3d : " << centroid3d << std::endl;
@@ -2681,7 +2684,6 @@ class TVMNode {
               std::cout << "DEBUG detection_msg.box_2D : " << detection_msg.box_2D << std::endl;
               std::cout << "DEBUG detection_msg.box_3D : " << detection_msg.box_3D << std::endl;
 
-              
               // perform point transforms on person's stats similar to 
               /////Eigen::Vector3f centroid3d = anti_transform * middle_vec;
               /////Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
@@ -2714,8 +2716,8 @@ class TVMNode {
               skeleton_height = height;
 
               // 3d bounding box
-              converter.Vector3fToVector3(anti_transform * min_, detection_msg.box_3D.p1);
-              converter.Vector3fToVector3(anti_transform * max_, detection_msg.box_3D.p2);
+              //converter.Vector3fToVector3(anti_transform * min_, detection_msg.box_3D.p1);
+              //converter.Vector3fToVector3(anti_transform * max_, detection_msg.box_3D.p2);
 
               opt_msgs::SkeletonMsg skeleton;
               skeleton.skeleton_type = opt_msgs::SkeletonMsg::COCO;
