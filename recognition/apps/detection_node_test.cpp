@@ -1080,10 +1080,10 @@ class TVMNode {
         position.z = tcenter_[2];
         viewer.addText3D(confid.str().substr(0, 4), position, 0.1);
       }
-      std::cout << "debug stats:" << std::endl;
-      std::cout << "tcenter_: " << tcenter_ << std::endl;
-      std::cout << "height_: " << height_ << std::endl;
-      std::cout << "ttop_: " << ttop_ << std::endl;
+      //std::cout << "debug stats:" << std::endl;
+      //std::cout << "tcenter_: " << tcenter_ << std::endl;
+      //std::cout << "height_: " << height_ << std::endl;
+      //std::cout << "ttop_: " << ttop_ << std::endl;
 
     }
 
@@ -1124,20 +1124,20 @@ class TVMNode {
         std::string f_str = "PersonConfidence : " + std::to_string(person_cluster.getPersonConfidence());
         viewer.addText(f_str,off_set,20,f_str,0);
 
-            //Evaluate confidence for the current PersonCluster:
-            Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * person_cluster.getTCenter());
-            centroid /= centroid(2);
-            Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * person_cluster.getTTop());
-            top /= top(2);
-            Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * person_cluster.getTBottom());
-            bottom /= bottom(2);
+        //Evaluate confidence for the current PersonCluster:
+        Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * person_cluster.getTCenter());
+        centroid /= centroid(2);
+        Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * person_cluster.getTTop());
+        top /= top(2);
+        Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * person_cluster.getTBottom());
+        bottom /= bottom(2);
 
-            // Eigen::Vector3f centroid = person_cluster.getTCenter();
-            // // centroid /= centroid(2);
-            // Eigen::Vector3f top = person_cluster.getTTop();
-            // // top /= top(2);
-            // Eigen::Vector3f bottom = person_cluster.getTBottom();
-            // // bottom /= bottom(2);
+        // Eigen::Vector3f centroid = person_cluster.getTCenter();
+        // // centroid /= centroid(2);
+        // Eigen::Vector3f top = person_cluster.getTTop();
+        // // top /= top(2);
+        // Eigen::Vector3f bottom = person_cluster.getTBottom();
+        // // bottom /= bottom(2);
 
 
         float pixel_height;
@@ -2454,7 +2454,7 @@ class TVMNode {
               top.x = top_x;
               top.y = top_y;
               top.z = top_z;
-              
+              std::cout << "DEBUG pose top_vec: " << top_vec << std::endl;
               //////////////////// middle point/center
               Point3f middle;
               cv::Point3f point_left_hip = points[11];
@@ -2471,7 +2471,7 @@ class TVMNode {
               middle.x = middle_x;
               middle.y = middle_y;
               middle.z = middle_z;
-
+              std::cout << "DEBUG pose middle_vec: " << middle_vec << std::endl;
               ////////////////////////// bottom/ mid-ankle point
               Point3f bottom;
               cv::Point3f right_ankle = points[10];
@@ -2493,7 +2493,7 @@ class TVMNode {
               bottom.y = bottom_y;
               bottom.z = bottom_z;
               Eigen::Vector3f bottom_vec = Eigen::Vector3f(bottom_x, bottom_y, bottom_z);
-
+              std::cout << "DEBUG pose bottom_vec: " << bottom_vec << std::endl;
               /////////////////////////////// taken from person clustering application
               /** \brief Minimum x coordinate of the cluster points. */
               float min_x_;
@@ -2557,6 +2557,7 @@ class TVMNode {
               Eigen::Vector3f max_;
               // height and distance calculation taken from person_cluster.hpp
               Eigen::Vector4f height_point(top.x, top.y, top.z, 1.0f);
+              std::cout << "DEBUG pose height_point pre: " << height_point << std::endl;
               if(!vertical_)
               {
                 height_point(1) = bottom_y;
@@ -2567,9 +2568,12 @@ class TVMNode {
                 height_point(0) = top_x;
                 distance_ = std::sqrt(top.y * top.y + top.z * top.z);
               }
-
+              std::cout << "DEBUG pose height_point post: " << height_point << std::endl;
               float height = std::fabs(height_point.dot(ground_coeffs));
+              std::cout << "DEBUG std::fabs(height_point.dot(ground_coeffs)) : " << height << std::endl;
               height /= sqrt_ground_coeffs;
+              std::cout << "DEBUG height /= sqrt_ground_coeffs : " << height << std::endl;
+
 
               if(!vertical_)
               {
@@ -2620,10 +2624,21 @@ class TVMNode {
                 center_ = Eigen::Vector3f(bottom.x, bottom.y, bottom.z);
 
                 min_ = Eigen::Vector3f(bottom.x, bottom.y, bottom.z);
-
                 max_ = Eigen::Vector3f(top.x, top.y, top.z);
               }
-            
+              std::cout << "DEBUG post vars: " << std::endl;
+              std::cout << "DEBUG angle_ : " << angle_ << std::endl;
+              std::cout << "DEBUG angle_max_ : " << angle_max_ << std::endl;
+              std::cout << "DEBUG angle_min_ : " << angle_min_ << std::endl;
+              std::cout << "DEBUG tbottom_ : " << tbottom_ << std::endl;
+              std::cout << "DEBUG ttop_ : " << ttop_ << std::endl;
+              std::cout << "DEBUG tcenter_ : " << tcenter_ << std::endl;
+              std::cout << "DEBUG bottom_ : " << bottom_ << std::endl;
+              std::cout << "DEBUG center_ : " << center_ << std::endl;
+              std::cout << "DEBUG min_ : " << min_ << std::endl;
+              std::cout << "DEBUG max_ : " << max_ << std::endl;
+
+
               converter.Vector3fToVector3(anti_transform * min_, detection_msg.box_3D.p1);
               converter.Vector3fToVector3(anti_transform * max_, detection_msg.box_3D.p2);
                   
@@ -2863,30 +2878,26 @@ class TVMNode {
                 viewer.addText(f_str,off_set,20,f_str,0);
 
                 //Evaluate confidence for the current PersonCluster:
-                //Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_);
-                Eigen::Vector3f centroid = anti_transform_ * tcenter_;
-                //if (centroid(0) == 0) {
-                //  std::cout << "centroid: " << centroid << std::endl;
-                //  centroid = intrinsics_matrix * tcenter_;
-                //}
-                std::cout << "centroid: " << centroid << std::endl;
+                std::cout << "centroid pre-transform: " << tcenter_ << std::endl;
+                Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_);
+                //Eigen::Vector3f centroid = anti_transform_ * tcenter_;
+                std::cout << "centroid post-transform: " << centroid << std::endl;
                 centroid /= centroid(2);
-                //Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * ttop_);
-                Eigen::Vector3f top = anti_transform_ * ttop_;
-                //if (top(0) == 0) {
-                //  std::cout << "top: " << top << std::endl;
-                //  top = intrinsics_matrix * ttop_;
-                //}
-                std::cout << "top: " << top << std::endl;
+                std::cout << "centroid /= centroid(2): " << centroid << std::endl;
+                
+                std::cout << "top pre-transform: " << ttop_ << std::endl;
+                Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * ttop_);
+                //Eigen::Vector3f top = anti_transform_ * ttop_;
+                std::cout << "top post-transform: " << top << std::endl;
                 top /= top(2);
-                //Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * tbottom_);
-                Eigen::Vector3f bottom = anti_transform_ * tbottom_;
-                //if (bottom(0) == 0) {
-                //  std::cout << "bottom: " << bottom << std::endl;
-                //  bottom = intrinsics_matrix * tbottom_;
-                //}
+                std::cout << "top /= top(2): " << top << std::endl;
+
+                std::cout << "bottom pre-transform: " << tbottom_ << std::endl;
+                Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * tbottom_);
+                //Eigen::Vector3f bottom = anti_transform_ * tbottom_;
+                std::cout << "bottom post-transform: " << bottom << std::endl;
                 bottom /= bottom(2);
-                std::cout << "bottom: " << bottom << std::endl;
+                std::cout << "bottom /= bottom(2): " << bottom << std::endl;
 
                 // Eigen::Vector3f centroid = tcenter_;
                 // // centroid /= centroid(2);
@@ -2902,14 +2913,14 @@ class TVMNode {
                 {
                   pix_height = bottom(1) - top(1);
                   pix_width = pix_height / 2.0f;
-                  std::string f_str_1 = "person_height : " + std::to_string(fabs(pix_height));
+                  std::string f_str_1 = "person_height_pixels : " + std::to_string(fabs(pix_height));
                   viewer.addText(f_str_1,off_set,40,f_str_1,0);
                 }
                 else
                 {
                   pix_width = top(0) - bottom(0);
                   pix_height = pix_width / 2.0f;
-                  std::string f_str_1 = "person_height : " + std::to_string(fabs(pix_width));
+                  std::string f_str_1 = "person_height_pixels : " + std::to_string(fabs(pix_width));
                   viewer.addText(f_str_1,off_set,40,f_str_1,0);
                 }
                 off_set = off_set + 145;
