@@ -2857,7 +2857,7 @@ class TVMNode {
                 Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * tbottom_);
                 bottom /= bottom(2);
 
-                // Eigen::Vector3f centroid = tcenter_();
+                // Eigen::Vector3f centroid = tcenter_;
                 // // centroid /= centroid(2);
                 // Eigen::Vector3f top = ttop_;
                 // // top /= top(2);
