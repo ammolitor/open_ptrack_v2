@@ -202,6 +202,7 @@ class TVMNode {
     float std_dev_denoising = 0.3;
     double rate_value = 1.0;
     float override_threshold = 0.5;
+    float nms_threshold = 0.5;
     bool fast_no_clustering = false;
     bool view_pointcloud = false;
 
@@ -314,6 +315,7 @@ class TVMNode {
           std::cout << "rate_value: " << rate_value << std::endl;
           use_3D_clusters = master_config["use_3D_clusters"];
           override_threshold = master_config["override_threshold"];
+          nms_threshold = master_config["nms_threshold"];
           filter_height = master_config["filter_height"];
           fast_no_clustering = master_config["fast_no_clustering"];
           std::cout << "Fast Mode: " << fast_no_clustering << std::endl;
@@ -1283,7 +1285,7 @@ class TVMNode {
         std::cout << "running inference" << std::endl;
         // forward inference of object detector
         begin = ros::Time::now();
-        output = tvm_pose_detector->forward_full(cv_image, override_threshold);
+        output = tvm_pose_detector->forward_full(cv_image, override_threshold, nms_threshold);
         duration = ros::Time::now().toSec() - begin.toSec();
         std::cout << "inference detection time: " << duration << std::endl;
         std::cout << "inference detections: " << output->num << std::endl;
@@ -1850,7 +1852,7 @@ class TVMNode {
         std::cout << "running inference" << std::endl;
         // forward inference of object detector
         begin = ros::Time::now();
-        output = tvm_standard_detector->forward_full(cv_image, override_threshold);
+        output = tvm_standard_detector->forward_full(cv_image, override_threshold, nms_threshold);
         duration = ros::Time::now().toSec() - begin.toSec();
         std::cout << "inference detection time: " << duration << std::endl;
         std::cout << "inference detections: " << output->num << std::endl;
@@ -2344,7 +2346,7 @@ class TVMNode {
         std::cout << "running inference" << std::endl;
         // forward inference of object detector
         begin = ros::Time::now();
-        output = tvm_pose_detector->forward_full(cv_image, override_threshold);
+        output = tvm_pose_detector->forward_full(cv_image, override_threshold, nms_threshold);
         duration = ros::Time::now().toSec() - begin.toSec();
         std::cout << "inference detection time: " << duration << std::endl;
         std::cout << "inference detections: " << output->num << std::endl;
@@ -3041,6 +3043,7 @@ class TVMNode {
       //std::cout << "Fast Mode: " << fast_no_clustering << std::endl;
 
       override_threshold = config.override_threshold;
+      nms_threshold = config.nms_threshold;
     }
 };
 

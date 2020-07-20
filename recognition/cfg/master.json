@@ -37,6 +37,7 @@
     "rate_value" : 1.0,
     "use_3D_clusters" : false,
     "override_threshold" : 0.5,
+    "nms_threshold" : 0.5,
     "filter_height"     : true,
     "_filter_height_comment": "filter height is so that we can get the height of clusters and just only take the ones that are relatively ppl sized",
     "fast_no_clustering" : true,

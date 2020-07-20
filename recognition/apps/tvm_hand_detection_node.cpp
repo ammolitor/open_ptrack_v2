@@ -171,6 +171,7 @@ class TVMHandDetectionNode {
     bool json_found;
     int n_zones;
     float override_threshold = 0.5;
+    float nms_threshold = 0.5;
     float max_capable_depth = 6.25;
     bool use_pointcloud;
 
@@ -210,6 +211,7 @@ class TVMHandDetectionNode {
           use_pointcloud = master_config["use_pointcloud"];
           std::cout << "max_capable_depth: " << max_capable_depth << std::endl;
           override_threshold = master_config["override_threshold"];
+          nms_threshold = master_config["nms_threshold"];
           std::string zone_json_path = master_config["zone_json_path"];
           std::string area_hard_coded_path = package_path + zone_json_path;
           std::ifstream area_json_read(area_hard_coded_path);
@@ -323,7 +325,7 @@ class TVMHandDetectionNode {
 
       // forward inference of object detector
       begin = ros::Time::now();
-      output = tvm_object_detector->forward_full(cv_image, override_threshold);
+      output = tvm_object_detector->forward_full(cv_image, override_threshold, nms_threshold);
       duration = ros::Time::now().toSec() - begin.toSec();
       printf("yolo detection time: %f\n", duration);
       printf("yolo detections: %ld\n", output->num);
@@ -580,7 +582,7 @@ class TVMHandDetectionNode {
 
       // forward inference of object detector
       begin = ros::Time::now();
-      output = tvm_object_detector->forward_full(cv_image, override_threshold);
+      output = tvm_object_detector->forward_full(cv_image, override_threshold, nms_threshold);
       duration = ros::Time::now().toSec() - begin.toSec();
       printf("yolo detection time: %f\n", duration);
       printf("yolo detections: %ld\n", output->num);
@@ -794,6 +796,7 @@ class TVMHandDetectionNode {
       std::cout << "Updating detector configuration!!!" << std::endl;
       max_capable_depth = config.max_capable_depth;
       override_threshold = config.override_threshold;
+      nms_threshold = config.nms_threshold;
     }
 };
 

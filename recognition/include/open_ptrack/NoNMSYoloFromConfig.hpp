@@ -190,7 +190,7 @@ namespace open_ptrack
             }
 
             // we can set it externally with dynamic reconfigure
-            open_ptrack::models::yoloresults* forward_full(cv::Mat frame, float override_threshold)
+            open_ptrack::models::yoloresults* forward_full(cv::Mat frame, float override_threshold, float nms_threshold)
             {
                 //std::cout << "starting function" << std::endl;
                 // get height/width dynamically
@@ -280,7 +280,7 @@ namespace open_ptrack
                 std::vector<open_ptrack::nms_utils::sortable_result> tvm_results;
                 std::vector<open_ptrack::nms_utils::sortable_result> proposals;
                 proposals.clear();
-                open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, override_threshold, tvm_results);
+                open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, nms_threshold, tvm_results);
                 //std::cout << "ending nms" << std::endl;
 
                 TVMArrayFree(input);
