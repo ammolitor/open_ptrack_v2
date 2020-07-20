@@ -778,7 +778,10 @@ class TVMNode {
       // moving to global PointCloudPtr no_ground_cloud_rotated(new PointCloud);
       // moving to global Eigen::VectorXf ground_coeffs_new;
       //ground_coeffs
+      PointCloudPtr no_ground_cloud_rotated_pre(new PointCloud);
       Eigen::VectorXf ground_coeffs_;
+      Eigen::VectorXf ground_coeffs_new_pre;
+      Eigen::Affine3f transform, transform_pre, anti_transform_pre;
       if(sensor_tilt_compensation)
       {
         // We want to rotate the point cloud so that the ground plane is parallel to the xOz plane of the sensor:
@@ -788,21 +791,26 @@ class TVMNode {
 
         Eigen::Vector3f axis = input_plane.cross(output_plane);
         float angle = acos( input_plane.dot(output_plane)/ ( input_plane.norm()/output_plane.norm() ) );
-        transform_ = Eigen::AngleAxisf(angle, axis);
+        transform_pre = Eigen::AngleAxisf(angle, axis);
 
         // Setting also anti_transform for later
-        anti_transform_ = transform_.inverse();
-        no_ground_cloud_rotated = rotate_cloud(no_ground_cloud_, transform_);
-        ground_coeffs_new.resize(4);
-        ground_coeffs_new = rotate_ground(ground_coeffs, transform_);
+        anti_transform_pre = transform_pre.inverse();
+        no_ground_cloud_rotated_pre = rotate_cloud(no_ground_cloud_, transform_pre);
+        ground_coeffs_new_pre.resize(4);
+        ground_coeffs_new_pre = rotate_ground(ground_coeffs, transform_pre);
       }
       else
       {
         transform_ = transform_.Identity();
-        anti_transform_ = transform_.inverse();
-        no_ground_cloud_rotated = no_ground_cloud_;
-        ground_coeffs_new = ground_coeffs;
+        anti_transform_pre = transform_.inverse();
+        no_ground_cloud_rotated_pre = no_ground_cloud_;
+        ground_coeffs_new_pre = ground_coeffs;
       }
+      // now do them at the global level...
+      anti_transform_ = anti_transform_pre;
+      transform_ = transform_pre;
+      ground_coeffs_new = ground_coeffs_new_pre;
+      no_ground_cloud_rotated_ = no_ground_cloud_rotated_pre;
     }
 
     /**
@@ -1072,6 +1080,11 @@ class TVMNode {
         position.z = tcenter_[2];
         viewer.addText3D(confid.str().substr(0, 4), position, 0.1);
       }
+      std::cout << "debug stats:" << std::endl;
+      std::cout << "tcenter_: " << tcenter_ << std::endl;
+      std::cout << "height_: " << height_ << std::endl;
+      std::cout << "ttop_: " << ttop_ << std::endl;
+
     }
 
     void point_cloud_visulizer (const PointCloudT::ConstPtr& cloud_, Eigen::VectorXf& ground_coeffs_ ,pcl::visualization::PCLVisualizer& viewer, std::vector<open_ptrack::person_clustering::PersonCluster<PointT>>& clusters, std::vector<int> viz_indicies)
@@ -2833,7 +2846,7 @@ class TVMNode {
             
               if (view_pointcloud){
                 pcl::ModelCoefficients::Ptr sphere_ (new pcl::ModelCoefficients); 
-                sphere_->values.resize (1); 
+                sphere_->values.resize (1);
                 sphere_->values[0] = tcenter_(0); 
                 sphere_->values[1] = tcenter_(1); 
                 sphere_->values[2] = tcenter_(2); 
@@ -2851,11 +2864,26 @@ class TVMNode {
 
                 //Evaluate confidence for the current PersonCluster:
                 Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_);
+                if (centroid(0) == 0) {
+                  std::cout << "centroid: " << centroid << std::endl;
+                  centroid = intrinsics_matrix * tcenter_;
+                }
+                std::cout << "centroid: " << centroid << std::endl;
                 centroid /= centroid(2);
                 Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * ttop_);
+                if (top(0) == 0) {
+                  std::cout << "top: " << top << std::endl;
+                  top = intrinsics_matrix * ttop_;
+                }
+                std::cout << "top: " << top << std::endl;
                 top /= top(2);
                 Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * tbottom_);
+                if (bottom(0) == 0) {
+                  std::cout << "bottom: " << bottom << std::endl;
+                  bottom = intrinsics_matrix * tbottom_;
+                }
                 bottom /= bottom(2);
+                std::cout << "bottom: " << bottom << std::endl;
 
                 // Eigen::Vector3f centroid = tcenter_;
                 // // centroid /= centroid(2);
