@@ -2857,20 +2857,22 @@ class TVMNode {
                 viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.6, "sphere_", 0); 
                 viewer.setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "sphere_", 0); 
 
-                drawTBoundingBox (viewer, tcenter_, ttop_, height_, score, i, true);
+                drawTBoundingBox (viewer, tcenter_, ttop_, height, score, i, true);
 
                 std::string f_str = "PersonConfidence : " + std::to_string(score);
                 viewer.addText(f_str,off_set,20,f_str,0);
 
                 //Evaluate confidence for the current PersonCluster:
-                Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_);
+                //Eigen::Vector3f centroid = intrinsics_matrix * (anti_transform_ * tcenter_);
+                Eigen::Vector3f centroid = intrinsics_matrix * tcenter_;
                 if (centroid(0) == 0) {
                   std::cout << "centroid: " << centroid << std::endl;
                   centroid = intrinsics_matrix * tcenter_;
                 }
                 std::cout << "centroid: " << centroid << std::endl;
                 centroid /= centroid(2);
-                Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * ttop_);
+                //Eigen::Vector3f top = intrinsics_matrix * (anti_transform_ * ttop_);
+                Eigen::Vector3f top = intrinsics_matrix * ttop_;
                 if (top(0) == 0) {
                   std::cout << "top: " << top << std::endl;
                   top = intrinsics_matrix * ttop_;
@@ -2878,6 +2880,7 @@ class TVMNode {
                 std::cout << "top: " << top << std::endl;
                 top /= top(2);
                 Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * tbottom_);
+                //Eigen::Vector3f bottom = intrinsics_matrix * tbottom_;
                 if (bottom(0) == 0) {
                   std::cout << "bottom: " << bottom << std::endl;
                   bottom = intrinsics_matrix * tbottom_;
