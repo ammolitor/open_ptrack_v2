@@ -2879,8 +2879,8 @@ class TVMNode {
                 }
                 std::cout << "top: " << top << std::endl;
                 top /= top(2);
-                Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * tbottom_);
-                //Eigen::Vector3f bottom = intrinsics_matrix * tbottom_;
+                //Eigen::Vector3f bottom = intrinsics_matrix * (anti_transform_ * tbottom_);
+                Eigen::Vector3f bottom = intrinsics_matrix * tbottom_;
                 if (bottom(0) == 0) {
                   std::cout << "bottom: " << bottom << std::endl;
                   bottom = intrinsics_matrix * tbottom_;
