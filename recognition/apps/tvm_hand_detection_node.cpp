@@ -39,7 +39,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 
-#include <open_ptrack/yolo_tvm.hpp>
+#include <open_ptrack/NoNMSYoloFromConfig.hpp>
 #include <dynamic_reconfigure/server.h>
 #include <recognition/GenDetectionConfig.h>
 
@@ -122,7 +122,7 @@ class TVMHandDetectionNode {
     ros::NodeHandle node_;
     //std::unique_ptr<YoloTVMGPU256> tvm_object_detector;
     //std::unique_ptr<YoloTVMGPU320> tvm_object_detector;
-    std::unique_ptr<NoNMSYoloFromConfig> tvm_object_detector;
+    std::unique_ptr<open_ptrack::models::NoNMSYoloFromConfig> tvm_object_detector;
 
     // TF listener
     tf::TransformListener tf_listener;
@@ -249,7 +249,7 @@ class TVMHandDetectionNode {
 
         // create object-detector pointer
         //tvm_object_detector.reset(new YoloTVMGPU256(model_folder_path));
-        tvm_object_detector.reset(new NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
+        tvm_object_detector.reset(new open_ptrack::models::NoNMSYoloFromConfig("/cfg/hand_detector.json", "recognition"));
         sensor_name = sensor_string;
         std::cout << "detector loaded!" << std::endl;
 
@@ -287,7 +287,7 @@ class TVMHandDetectionNode {
       cv::Mat cv_depth_image;
       
       // set detection variables here
-      yoloresults* output;
+      open_ptrack::models::yoloresults* output;
       cv::Size image_size;
       float height;
       float width;
@@ -542,7 +542,7 @@ class TVMHandDetectionNode {
       cv::Mat cv_image_clone;
 
       // set detection variables here
-      yoloresults* output;
+      open_ptrack::models::yoloresults* output;
       cv::Size image_size;
       float height;
       float width;

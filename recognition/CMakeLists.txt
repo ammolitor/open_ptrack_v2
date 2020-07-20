@@ -242,7 +242,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 #
 ###############################################################################
-add_executable(tvm_hand_detection_node apps/tvm_hand_detection_node.cpp include/open_ptrack/yolo_tvm.hpp include/open_ptrack/nms/nms.h include/open_ptrack/nms/nms.cpp)
+add_executable(tvm_hand_detection_node apps/tvm_hand_detection_node.cpp include/open_ptrack/hungarian/Hungarian.cpp include/open_ptrack/nms_utils/nms.h include/open_ptrack/nms_utils/nms.hpp include/open_ptrack/NoNMSPoseFromConfig.hpp include/open_ptrack/NoNMSYoloFromConfig.hpp include/open_ptrack/tvm_detection_helpers.hpp)
 target_link_libraries(tvm_hand_detection_node PUBLIC Threads::Threads ${OpenCV_LIBS} 
                                           ${catkin_LIBRARIES} 
                                           ${LINKER_LIBS}
