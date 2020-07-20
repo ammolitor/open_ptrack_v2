@@ -2668,7 +2668,20 @@ class TVMNode {
               converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
               converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
 
+              std::cout << "DEBUG detection information : " << std::endl;
+              std::cout << "DEBUG centroid3d : " << centroid3d << std::endl;
+              std::cout << "DEBUG centroid2d : " << centroid2d << std::endl;
+              std::cout << "DEBUG top3d : " << top3d << std::endl;
+              std::cout << "DEBUG top2d : " << top2d << std::endl;
+              std::cout << "DEBUG bottom3d : " << bottom3d << std::endl;
+              std::cout << "DEBUG bottom2d : " << bottom2d << std::endl;
+              std::cout << "DEBUG detection_msg.centroid : " << detection_msg.centroid << std::endl;
+              std::cout << "DEBUG detection_msg.top : " << detection_msg.top << std::endl;
+              std::cout << "DEBUG detection_msg.bottom : " << detection_msg.bottom << std::endl;
+              std::cout << "DEBUG detection_msg.box_2D : " << detection_msg.box_2D << std::endl;
+              std::cout << "DEBUG detection_msg.box_3D : " << detection_msg.box_3D << std::endl;
 
+              
               // perform point transforms on person's stats similar to 
               /////Eigen::Vector3f centroid3d = anti_transform * middle_vec;
               /////Eigen::Vector3f centroid2d = converter.world2cam(centroid3d, intrinsics_matrix);
