@@ -2263,6 +2263,7 @@ class TVMNode {
           estimate_ground_plane = false;
         }
         std::cout << "DEBUG sqrt_ground_coeffs : " << sqrt_ground_coeffs << std::endl;
+        std::cout << "DEBUGground_coeffs : " <<ground_coeffs << std::endl;
 
         // set message vars here
         open_ptrack::opt_utils::Conversions converter; 
