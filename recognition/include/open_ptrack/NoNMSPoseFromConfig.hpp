@@ -323,7 +323,7 @@ namespace open_ptrack
               std::vector<open_ptrack::nms_utils::sortable_result> proposals;
               proposals.clear();
               //open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, nms_threshold, tvm_results);
-              open_ptrack::nms_utils::opencv_nms(tvm_results, yolo_output, override_threshold, nms_threshold);
+              open_ptrack::nms_utils::opencv_nms(yolo_output, override_threshold, nms_threshold, tvm_results);
               
               
               //std::cout << "ending nms" << std::endl;
