@@ -134,7 +134,7 @@ namespace open_ptrack
                             const float score_threshold, const float nms_threshold,
                             std::vector<int>& indices);
 
-    void opencv_nms(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes) {
+    void opencv_nms(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes);
 
 
   } /* namespace nms_utils */
