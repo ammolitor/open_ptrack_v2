@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <assert.h>     /* assert */
+#include <opencv2/opencv.hpp>
 
 #ifndef OPEN_PTRACK_NMS_UTILS_NMS_
 #define OPEN_PTRACK_NMS_UTILS_NMS_
@@ -101,9 +102,40 @@ namespace open_ptrack
         float xmax;
         float ymax;
 
+        float area(){
+            return (xmax - xmin) * (ymax - ymin);
+        }
+
     };
 
     void tvm_nms_cpu(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes);
+
+    template<typename _Tp> static inline
+    double jaccardDistance(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b);
+
+    template <typename T>
+    static inline float rectOverlap(const T& a, const T& b);
+
+    template <typename T>
+    static inline bool SortScorePairDescend(const std::pair<float, T>& pair1,
+                            const std::pair<float, T>& pair2);
+
+    inline void GetMaxScoreIndex(const std::vector<float>& scores, const float threshold, const int top_k,
+                        std::vector<std::pair<float, int> >& score_index_vec);
+
+    template <typename BoxType>
+    inline void NMSFast_(const std::vector<BoxType>& bboxes,
+        const std::vector<float>& scores, const float score_threshold,
+        const float nms_threshold, const float eta, const int top_k,
+        std::vector<int>& indices, float (*computeOverlap)(const BoxType&, const BoxType&));
+
+
+    void NMSBoxes(const std::vector<Rect>& bboxes, const std::vector<float>& scores,
+                            const float score_threshold, const float nms_threshold,
+                            std::vector<int>& indices);
+
+    void opencv_nms(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes) {
+
 
   } /* namespace nms_utils */
 } /* namespace open_ptrack */
