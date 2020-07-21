@@ -159,7 +159,7 @@ inline void open_ptrack::nms_utils::NMSFast_(const std::vector<BoxType>& bboxes,
 
 
 template <typename T>
-static inline float rectOverlap(const T& a, const T& b)
+static inline float open_ptrack::nms_utils::rectOverlap(const T& a, const T& b)
 {
     return 1.f - static_cast<float>(cv::jaccardDistance(a, b));
 }
