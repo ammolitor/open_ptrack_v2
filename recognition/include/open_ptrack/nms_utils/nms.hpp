@@ -177,7 +177,7 @@ void open_ptrack::nms_utils::NMSBoxes(const std::vector<cv::Rect>& bboxes, const
     NMSFast_(bboxes, scores, score_threshold, nms_threshold, eta, top_k, indices, rectOverlap);
 }
 
-void open_ptrack::nms_utils::opencv_nms(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes) {
+void open_ptrack::nms_utils::opencv_nms( MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& boxes) {
 
     //ulsMatF(int cols, int rows, int channels)
     //at(int channel, int row, int col)

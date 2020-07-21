@@ -278,9 +278,10 @@ namespace open_ptrack
                 //std::cout << "starting nms" << std::endl;
                 //auto tick = Clock::now();
                 std::vector<open_ptrack::nms_utils::sortable_result> tvm_results;
-                std::vector<open_ptrack::nms_utils::sortable_result> proposals;
-                proposals.clear();
-                open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, nms_threshold, tvm_results);
+                //std::vector<open_ptrack::nms_utils::sortable_result> proposals;
+                //proposals.clear();
+                //open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, nms_threshold, tvm_results);
+                open_ptrack::nms_utils::opencv_nms(tvm_results, yolo_output, override_threshold, nms_threshold);
                 //std::cout << "ending nms" << std::endl;
 
                 TVMArrayFree(input);
