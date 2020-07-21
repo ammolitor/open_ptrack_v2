@@ -10,7 +10,8 @@ void open_ptrack::nms_utils::tvm_nms_cpu(std::vector<sortable_result>& boxes, Ma
     //6, 322560, 1
     int valid_count = 0;
     for(int i = 0; i < tvm_output.getRows(); ++i){
-      if (*tvm_output.at(0, i, 1) >= cls_threshold){
+      // we ONLY get people detections.
+      if (*tvm_output.at(0, i, 1) >= cls_threshold && *tvm_output.at(0, i, 0) == 0){
         sortable_result res;
         res.index = valid_count;
         res.cls = *tvm_output.at(0, i, 0);//tvm_output.at(0, i, 0);
@@ -191,7 +192,7 @@ void open_ptrack::nms_utils::opencv_nms( MatF tvm_output, float cls_threshold, f
 
     int valid_count = 0;
     for(int i = 0; i < tvm_output.getRows(); ++i){
-      if (*tvm_output.at(0, i, 1) >= cls_threshold){
+      (*tvm_output.at(0, i, 1) >= cls_threshold && *tvm_output.at(0, i, 0) == 0){
         //sortable_result res;
         //res.index = valid_count;
         //res.cls = *tvm_output.at(0, i, 0);//tvm_output.at(0, i, 0);
