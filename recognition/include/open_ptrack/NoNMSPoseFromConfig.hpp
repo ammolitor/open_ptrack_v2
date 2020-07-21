@@ -324,8 +324,8 @@ namespace open_ptrack
               proposals.clear();
 
               // do a timig test to pick the fastest version...
-              open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, nms_threshold, tvm_results);
-              //open_ptrack::nms_utils::opencv_nms(yolo_output, override_threshold, nms_threshold, tvm_results);
+              //open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, nms_threshold, tvm_results);
+              open_ptrack::nms_utils::opencv_nms(yolo_output, override_threshold, nms_threshold, tvm_results);
               
               
               //std::cout << "ending nms" << std::endl;
