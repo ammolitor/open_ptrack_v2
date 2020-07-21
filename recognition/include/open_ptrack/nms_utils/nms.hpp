@@ -80,7 +80,7 @@ static inline bool open_ptrack::nms_utils::SortScorePairDescend(const std::pair<
 inline void  open_ptrack::nms_utils::GetMaxScoreIndex(const std::vector<float>& scores, const float threshold, const int top_k,
                       std::vector<std::pair<float, int> >& score_index_vec)
 {
-    cv::CV_DbgAssert(score_index_vec.empty());
+    assert(score_index_vec.empty());
     // Generate index score pairs.
     for (size_t i = 0; i < scores.size(); ++i)
     {
@@ -117,7 +117,7 @@ inline void open_ptrack::nms_utils::NMSFast_(const std::vector<BoxType>& bboxes,
       const float nms_threshold, const float eta, const int top_k,
       std::vector<int>& indices, float (*computeOverlap)(const BoxType&, const BoxType&))
 {
-    cv::CV_Assert(bboxes.size() == scores.size());
+    assert(bboxes.size() == scores.size());
 
     // Get top_k scores (with corresponding indices).
     std::vector<std::pair<float, int> > score_index_vec;
@@ -170,8 +170,10 @@ void open_ptrack::nms_utils::NMSBoxes(const std::vector<cv::Rect>& bboxes, const
 {
     const float eta = 1.0f;
     const int top_k = 0;
-    cv::CV_Assert_N(bboxes.size() == scores.size(), score_threshold >= 0,
-        nms_threshold >= 0, eta > 0);
+    assert(bboxes.size() == scores.size());
+    assert(score_threshold >= 0);
+    assert(nms_threshold >= 0);
+    assert(eta > 0);
     NMSFast_(bboxes, scores, score_threshold, nms_threshold, eta, top_k, indices, rectOverlap);
 }
 
