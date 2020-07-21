@@ -110,12 +110,12 @@ namespace open_ptrack
 
     void tvm_nms_cpu(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes);
 
-    template<typename _Tp> static inline
-    double jaccardDistance(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b);
+    //template<typename _Tp> static inline
+    //double jaccardDistance(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b);
 
     template <typename T>
     static inline float rectOverlap(const T& a, const T& b);
-    
+
     template <typename T>
     static inline bool SortScorePairDescend(const std::pair<float, T>& pair1,
                             const std::pair<float, T>& pair2);
@@ -134,7 +134,7 @@ namespace open_ptrack
                             const float score_threshold, const float nms_threshold,
                             std::vector<int>& indices);
 
-    void opencv_nms(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes);
+    void opencv_nms(MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& boxes);
 
 
   } /* namespace nms_utils */
