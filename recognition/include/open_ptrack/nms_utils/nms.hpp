@@ -142,26 +142,26 @@ inline void open_ptrack::nms_utils::NMSFast_(const std::vector<BoxType>& bboxes,
     }
 }
 
-template<typename _Tp> static inline
-double open_ptrack::nms_utils::jaccardDistance(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b) {
-    _Tp Aa = a.area();
-    _Tp Ab = b.area();
+//template<typename _Tp> static inline
+//double open_ptrack::nms_utils::jaccardDistance(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b) {
+//    _Tp Aa = a.area();
+//    _Tp Ab = b.area();
+//
+//    if ((Aa + Ab) <= std::numeric_limits<_Tp>::epsilon()) {
+//        // jaccard_index = 1 -> distance = 0
+//        return 0.0;
+//    }
+//
+//    double Aab = (a & b).area();
+//    // distance = 1 - jaccard_index
+//    return 1.0 - Aab / (Aa + Ab - Aab);
+//}
 
-    if ((Aa + Ab) <= std::numeric_limits<_Tp>::epsilon()) {
-        // jaccard_index = 1 -> distance = 0
-        return 0.0;
-    }
 
-    double Aab = (a & b).area();
-    // distance = 1 - jaccard_index
-    return 1.0 - Aab / (Aa + Ab - Aab);
-}
-
-
-template <typename _Tp>
-static inline float open_ptrack::nms_utils::rectOverlap(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b)
+template <typename T>
+static inline float rectOverlap(const T& a, const T& b)
 {
-    return 1.f - static_cast<float>(jaccardDistance(a, b));
+    return 1.f - static_cast<float>(cv::jaccardDistance(a, b));
 }
 
 void open_ptrack::nms_utils::NMSBoxes(const std::vector<cv::Rect>& bboxes, const std::vector<float>& scores,
