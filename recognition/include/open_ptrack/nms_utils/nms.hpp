@@ -213,7 +213,7 @@ void open_ptrack::nms_utils::opencv_nms( MatF tvm_output, float cls_threshold, f
       }
     }
 
-    filterOutBoxes.clear();
+    boxes.clear();
     if(localBoxes.size() == 0)
         return;
 
