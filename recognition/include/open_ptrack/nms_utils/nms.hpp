@@ -143,7 +143,7 @@ inline void open_ptrack::nms_utils::NMSFast_(const std::vector<BoxType>& bboxes,
 }
 
 template<typename _Tp> static inline
-double open_ptrack::nms_utils::jaccardDistance(const Rect_<_Tp>& a, const Rect_<_Tp>& b) {
+double open_ptrack::nms_utils::jaccardDistance(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b) {
     _Tp Aa = a.area();
     _Tp Ab = b.area();
 
@@ -164,7 +164,7 @@ static inline float open_ptrack::nms_utils::rectOverlap(const T& a, const T& b)
     return 1.f - static_cast<float>(jaccardDistance(a, b));
 }
 
-void open_ptrack::nms_utils::NMSBoxes(const std::vector<Rect>& bboxes, const std::vector<float>& scores,
+void open_ptrack::nms_utils::NMSBoxes(const std::vector<cv::Rect>& bboxes, const std::vector<float>& scores,
                           const float score_threshold, const float nms_threshold,
                           std::vector<int>& indices)
 {
@@ -181,11 +181,8 @@ void open_ptrack::nms_utils::opencv_nms(std::vector<sortable_result>& boxes, Mat
     //at(int channel, int row, int col)
     //6, 322560, 1
 
-    std::vector<Rect> nmsBoxes;
-    std::vector<float> nmsConfidences;
-    std::vector<int> nmsClassIds;
 
-    std::vector<Rect> localBoxes;
+    std::vector<cv::Rect> localBoxes;
     std::vector<float> localConfidences;
     std::vector<size_t> classIndices;
     std::vector<int> nmsIndices;
@@ -234,3 +231,4 @@ void open_ptrack::nms_utils::opencv_nms(std::vector<sortable_result>& boxes, Mat
     }
 }
 //https://docs.opencv.org/master/d4/db9/samples_2dnn_2object_detection_8cpp-example.html
+#endif /* OPEN_PTRACK_NMS_UTILS_NMS_HPP_ */

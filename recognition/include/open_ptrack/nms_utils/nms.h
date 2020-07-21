@@ -130,7 +130,7 @@ namespace open_ptrack
         std::vector<int>& indices, float (*computeOverlap)(const BoxType&, const BoxType&));
 
 
-    void NMSBoxes(const std::vector<Rect>& bboxes, const std::vector<float>& scores,
+    void NMSBoxes(const std::vector<cv::Rect>& bboxes, const std::vector<float>& scores,
                             const float score_threshold, const float nms_threshold,
                             std::vector<int>& indices);
 
