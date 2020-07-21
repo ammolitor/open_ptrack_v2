@@ -324,9 +324,16 @@ namespace open_ptrack
               proposals.clear();
 
               // do a timig test to pick the fastest version...
+              
+              using Clock = std::chrono::high_resolution_clock;
+              using Timepoint = Clock::time_point;
+              using Duration = std::chrono::duration<double>;
+              auto start = Clock::now();
               //open_ptrack::nms_utils::tvm_nms_cpu(proposals, yolo_output, override_threshold, nms_threshold, tvm_results);
               open_ptrack::nms_utils::opencv_nms(yolo_output, override_threshold, nms_threshold, tvm_results);
-              
+              auto end = Clock::now();
+              auto nms_time = Duration(end - start).count();
+              std::cout << "NMS time elapsed: " << nms_time << std::endl;
               
               //std::cout << "ending nms" << std::endl;
 
