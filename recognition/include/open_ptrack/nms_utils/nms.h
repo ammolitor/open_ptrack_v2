@@ -113,8 +113,8 @@ namespace open_ptrack
     template<typename _Tp> static inline
     double jaccardDistance(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b);
 
-    template <typename T>
-    static inline float rectOverlap(const T& a, const T& b);
+    template <typename _Tp>
+    static inline float open_ptrack::nms_utils::rectOverlap(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b);
 
     template <typename T>
     static inline bool SortScorePairDescend(const std::pair<float, T>& pair1,
