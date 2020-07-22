@@ -205,6 +205,7 @@ class TVMNode {
     float nms_threshold = 0.5;
     bool fast_no_clustering = false;
     bool view_pointcloud = false;
+    bool ground_from_extrinsic_calibration = false;
 
     //###################################
     //## Ground + Clustering Variables ##
@@ -321,6 +322,7 @@ class TVMNode {
           std::cout << "Fast Mode: " << fast_no_clustering << std::endl;
           view_pointcloud = master_config["view_pointcloud"];
           std::cout << "view_pointcloud: " << view_pointcloud << std::endl;
+          ground_from_extrinsic_calibration = master_config["ground_from_extrinsic_calibration"];
           json_found = true;
         }
         catch(const std::exception& e)
@@ -833,11 +835,11 @@ class TVMNode {
         int max_points = 5000;
 
         // Ground estimation:
-        //std::cout << "Ground plane initialization starting..." << std::endl;
+        std::cout << "Ground plane initialization starting..." << std::endl;
         ground_estimator.setInputCloud(cloud);
         //Eigen::VectorXf ground_coeffs = ground_estimator.computeMulticamera(ground_from_extrinsic_calibration, read_ground_from_file,
         //    pointcloud_topic, sampling_factor, voxel_size);
-        ground_coeffs = ground_estimator.computeMulticamera(false, false, sensor_name + "/depth_registered/points", 4, 0.06);
+        ground_coeffs = ground_estimator.computeMulticamera(ground_from_extrinsic_calibration, false, sensor_name + "/depth_registered/points", 4, 0.06);
         sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
       // maybe not needed
       estimate_ground_plane = false;
@@ -1188,11 +1190,13 @@ class TVMNode {
         //std::cout << "background frame n: " << n_frame << std::endl;
         PointCloudT::Ptr newcloud(new PointCloudT);
         *newcloud = *cloud_;
-        background_cloud = compute_background_cloud(newcloud);
-        if (n_frame >= n_frames){
-          set_background(background_cloud);
-          set_octree();
-          setbackground = false;
+        if (!ground_estimator.tooManyNaN(newcloud, 1 - valid_points_threshold)){
+          background_cloud = compute_background_cloud(newcloud);
+          if (n_frame >= n_frames){
+            set_background(background_cloud);
+            set_octree();
+            setbackground = false;
+          }
         }
       } else { 
         // background is set
@@ -1754,11 +1758,13 @@ class TVMNode {
         //std::cout << "background frame n: " << n_frame << std::endl;
         PointCloudT::Ptr newcloud(new PointCloudT);
         *newcloud = *cloud_;
-        background_cloud = compute_background_cloud(newcloud);
-        if (n_frame >= n_frames){
-          set_background(background_cloud);
-          set_octree();
-          setbackground = false;
+        if (!ground_estimator.tooManyNaN(newcloud, 1 - valid_points_threshold)){
+          background_cloud = compute_background_cloud(newcloud);
+          if (n_frame >= n_frames){
+            set_background(background_cloud);
+            set_octree();
+            setbackground = false;
+          }
         }
       } else { 
         // background is set
@@ -2249,11 +2255,13 @@ class TVMNode {
         //std::cout << "background frame n: " << n_frame << std::endl;
         PointCloudT::Ptr newcloud(new PointCloudT);
         *newcloud = *cloud_;
-        background_cloud = compute_background_cloud(newcloud);
-        if (n_frame >= n_frames){
-          set_background(background_cloud);
-          set_octree();
-          setbackground = false;
+        if (!ground_estimator.tooManyNaN(newcloud, 1 - valid_points_threshold)){
+          background_cloud = compute_background_cloud(newcloud);
+          if (n_frame >= n_frames){
+            set_background(background_cloud);
+            set_octree();
+            setbackground = false;
+          }
         }
       } else { 
         // background is set
@@ -2262,7 +2270,7 @@ class TVMNode {
           set_ground_variables(cloud_);
           estimate_ground_plane = false;
           std::cout << "DEBUG sqrt_ground_coeffs : " << sqrt_ground_coeffs << std::endl;
-          std::cout << "DEBUGground_coeffs : " <<ground_coeffs << std::endl;
+          std::cout << "DEBUG ground_coeffs : " <<ground_coeffs << std::endl;
         }
 
         // set message vars here
