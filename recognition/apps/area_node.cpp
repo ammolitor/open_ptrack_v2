@@ -286,6 +286,7 @@ struct cvcallback_args_image {
   bool isDrawing;
   std::vector<cv::Point> clicked_points_2d;
   int count;
+  int n_zones;
 };
 
 void opencv_mouse_callback(int event, int x, int y,  int flags, void* args){
@@ -294,6 +295,11 @@ void opencv_mouse_callback(int event, int x, int y,  int flags, void* args){
   switch( event ){
     // update the selected bounding box
     case EVENT_MOUSEMOVE:
+      if (data->count >= data->n_zones){
+        data->selection_finished = true;
+        break;
+      }
+
       if( data->isDrawing ){
         //if(data->drawFromCenter){
         //  data->box.width = 2*(x-data->center.x)/*data->box.x*/;
@@ -309,6 +315,10 @@ void opencv_mouse_callback(int event, int x, int y,  int flags, void* args){
 
     // start to select the bounding box
     case EVENT_LBUTTONDOWN:
+      if (data->count >= data->n_zones){
+        data->selection_finished = true;
+        break;
+      }
       data->isDrawing = true;
       data->box = cv::Rect( x, y, 0, 0 );
       //data->center = Point2f((float)x,(float)y);
@@ -316,6 +326,11 @@ void opencv_mouse_callback(int event, int x, int y,  int flags, void* args){
 
     // cleaning up the selected bounding box
     case EVENT_LBUTTONUP:
+      if (data->count >= data->n_zones){
+        data->selection_finished = true;
+        break;
+      }
+
       data->isDrawing = false;
       if( data->box.width < 0 ){
         data->box.x += data->box.width;
@@ -847,9 +862,10 @@ class AreaDefinitionNode {
       cb_args.cropRect = cropRect;
       cb_args.clicked = clicked;
       cb_args.count = 0;
+      cb_args.n_zones = n_zones;
       curr_image_clone = curr_image.clone();
       cv::namedWindow("Draw a box around the area of interest");
-      cv::setMouseCallback("Draw a box around the area of interest", click_callback, (void*)&cb_args);
+      cv::setMouseCallback("Draw a box around the area of interest", opencv_mouse_callback, (void*)&cb_args);
       cv::imshow("Draw a box around the area of interest", curr_image_clone);
       cv::waitKey(1);
 
