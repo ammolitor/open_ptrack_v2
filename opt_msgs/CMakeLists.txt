@@ -39,6 +39,7 @@ add_message_files(FILES
   SkeletonMsg.msg
   Joint2DMsg.msg
   Joint3DMsg.msg
+  GroundCoeffs.msg
   )
 
 add_service_files(FILES OPTSensor.srv OPTTransform.srv)

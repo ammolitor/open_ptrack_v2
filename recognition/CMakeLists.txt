@@ -417,3 +417,27 @@ target_compile_definitions(detector_test PUBLIC TVM_CUDA_RUNTIME=1)
 target_compile_definitions(detector_test PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+
+###############################################################################
+####  DETECTION_NODE TEST
+###############################################################################
+add_executable(ground_segmentation_app apps/ground_segmentation_app.cpp)
+SET_TARGET_PROPERTIES(ground_segmentation_app PROPERTIES LINK_FLAGS -L${PCL_LIBRARY_DIRS})
+target_link_libraries(ground_segmentation_app PUBLIC Threads::Threads ${OpenCV_LIBS} 
+                                          ${catkin_LIBRARIES} 
+                                          ${LINKER_LIBS}
+                                          ${CUDA_CUDA_LIBRARY}
+                                          ${CUDA_CUDART_LIBRARY}
+                                          ${CUDA_CURAND_LIBRARY}
+                                          ${CUDA_CUDNN_LIBRARY}
+                                          ${TVM_RUNTIME_LINKER_LIBS}
+                                          ${TORCH_LIBRARIES}
+                                          ${PCL_LIBRARY_DIRS})
+
+add_dependencies(ground_segmentation_app ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_gencpp)
+target_include_directories(ground_segmentation_app PUBLIC ${CUDA_INCLUDE_DIRS})
+target_compile_definitions(ground_segmentation_app PUBLIC TVM_CUDA_RUNTIME=1)
+target_compile_definitions(ground_segmentation_app PUBLIC TVM_USE_GRAPH_RUNTIME_DEBUG=1)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
