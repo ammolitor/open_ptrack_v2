@@ -252,7 +252,7 @@ class GroundEstimationNode {
     tf::StampedTransform world_inverse_transform;
     pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
 
-    GroundEstimationNode(ros::NodeHandle& nh, std::string sensor_string, json zone, bool use_dynamic_reconfigure):
+    GroundEstimationNode(ros::NodeHandle& nh, std::string sensor_string):
       node_(nh), it(node_)
       {
         try
@@ -325,7 +325,7 @@ class GroundEstimationNode {
           std::cerr << "json master/area not found: "<< e.what() << '\n';
         }
         coeffs_pub = node_.advertise<opt_msgs::GroundCoeffs>(sensor_string + "/ground_coeffs/", 1);
-        sensor_name = sensor_string;
+        
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &GroundEstimationNode::camera_info_callback, this);
 
@@ -334,6 +334,7 @@ class GroundEstimationNode {
         transform = transform.Identity();
         anti_transform = transform.inverse();
         zone_json = zone;
+        sensor_name = sensor_string;
         rgb_image_ = pcl::PointCloud<pcl::RGB>::Ptr(new pcl::PointCloud<pcl::RGB>);
         // reset here after vars have been called...
         ground_estimator = open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
@@ -1128,7 +1129,7 @@ int main(int argc, char** argv) {
   pnh.param("use_dynamic_reconfigure", use_dynamic_reconfigure, false);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  GroundEstimationNode node(nh, sensor_name, zone_json, use_dynamic_reconfigure);
+  GroundEstimationNode node(nh, sensor_name);
   std::cout << "GroundEstimationNode init " << std::endl;
   ros::spin();
   return 0;
