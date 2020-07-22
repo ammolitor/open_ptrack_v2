@@ -184,8 +184,8 @@ namespace open_ptrack
          * \brief Callback listening to point clicking on PCL visualizer.
          *
          */
-        //static void
-        //pp_callback (const pcl::visualization::PointPickingEvent& event, void* args);
+        static void
+        pp_callback (const pcl::visualization::PointPickingEvent& event, void* args);
 
         /**
          * \brief Mouse clicking callback on OpenCV images.
@@ -229,16 +229,16 @@ namespace open_ptrack
         
         // rid all viz
         /** \brief structure used to pass arguments to the callback function */
-        //struct callback_args{
-        //    pcl::PointCloud<pcl::PointXYZ>::Ptr clicked_points_3d;
-        //    pcl::visualization::PCLVisualizer* viewerPtr;
-        //};
+        struct callback_args{
+            pcl::PointCloud<pcl::PointXYZ>::Ptr clicked_points_3d;
+            pcl::visualization::PCLVisualizer* viewerPtr;
+        };
 
         /** \brief structure used to pass arguments to the callback function */
-        //struct callback_args_color{
-        //    pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d;
-        //    pcl::visualization::PCLVisualizer* viewerPtr;
-        //};
+        struct callback_args_color{
+            pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d;
+            pcl::visualization::PCLVisualizer* viewerPtr;
+        };
 
         /** \brief structure used to pass arguments to the callback function associated to an image */
         struct callback_args_image{
