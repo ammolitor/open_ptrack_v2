@@ -1036,14 +1036,14 @@ class GroundEstimationNode {
           std::cout << "DEBUG ground_coeffs : " <<ground_coeffs << std::endl;
         }
       
-      if (!estimate_ground_plane)
-        opt_msgs::GroundCoeffs::Ptr coeffs_msg(new opt_msgs::GroundCoeffs);
-        coeffs_msg->ground_coeffs.x = ground_coeffs(0);
-        coeffs_msg->ground_coeffs.y = ground_coeffs(1);
-        coeffs_msg->ground_coeffs.z = ground_coeffs(2);
-        coeffs_msg->ground_coeffs.w = ground_coeffs(3);
-        coeffs_pub.publish(coeffs_msg);
-
+        if (!estimate_ground_plane){
+          opt_msgs::GroundCoeffs::Ptr coeffs_msg(new opt_msgs::GroundCoeffs);
+          coeffs_msg->ground_coeffs.x = ground_coeffs(0);
+          coeffs_msg->ground_coeffs.y = ground_coeffs(1);
+          coeffs_msg->ground_coeffs.z = ground_coeffs(2);
+          coeffs_msg->ground_coeffs.w = ground_coeffs(3);
+          coeffs_pub.publish(coeffs_msg);
+        }
       }
     }
 
@@ -1111,13 +1111,13 @@ class GroundEstimationNode {
 
 int main(int argc, char** argv) {
   std::string sensor_name;
-  double max_distance;
-  json zone_json;
+  //double max_distance;
+  //json zone_json;
   bool use_dynamic_reconfigure;
-  std::string area_package_path = ros::package::getPath("recognition");
-  std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
-  std::ifstream area_json_read(area_hard_coded_path);
-  area_json_read >> zone_json;
+  //std::string area_package_path = ros::package::getPath("recognition");
+  //std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
+  //std::ifstream area_json_read(area_hard_coded_path);
+  //area_json_read >> zone_json;
 
   std::cout << "--- tvm_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_detection_node");
