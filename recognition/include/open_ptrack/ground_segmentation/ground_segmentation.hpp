@@ -302,6 +302,7 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
       std::vector<cv::Point> clicked_points_2d;
       bool selection_finished = false;
       struct callback_args_image cb_args;
+      cb_args.count = 0;
       cb_args.clicked_points_2d = clicked_points_2d;
       cb_args.selection_finished = selection_finished;
       cv::namedWindow("Pick 3 points");
@@ -689,8 +690,14 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::click_cb(int ev
   case CV_EVENT_LBUTTONUP:
   {
     //TODO control if depth is nan
+    if (data->count == 3){
+      data->selection_finished = true;
+      break
+    }
+
     cv::Point p(x, y);
     data->clicked_points_2d.push_back(p);
+    data->count+=1;
     break;
   }
   }
