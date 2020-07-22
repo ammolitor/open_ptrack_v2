@@ -832,7 +832,7 @@ class AreaDefinitionNode {
         curr_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
         }
     }
-    src_image = curr_image.clone();
+    src_img = curr_image.clone();
     std::cout << "N Zones: "<< n_zones << std::endl;
     std::string zone_string;
    
