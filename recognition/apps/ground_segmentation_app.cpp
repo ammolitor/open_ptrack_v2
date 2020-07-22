@@ -1007,13 +1007,13 @@ class GroundEstimationNode {
     void ground_plane_callback(const PointCloudT::ConstPtr& cloud_) {
 
       //Calculate direct and inverse transforms between camera and world frame:
-      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
-                                  world_transform);
-      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
-                                  world_inverse_transform);
+      //tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
+      //                            world_transform);
+      //tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
+      //                            world_inverse_transform);
 
       //std::cout << "running algorithm callback" << std::endl;
-      ros::Time start = ros::Time::now();
+      //ros::Time start = ros::Time::now();
       if (setbackground){
         //std::cout << "background frame n: " << n_frame << std::endl;
         PointCloudT::Ptr newcloud(new PointCloudT);
