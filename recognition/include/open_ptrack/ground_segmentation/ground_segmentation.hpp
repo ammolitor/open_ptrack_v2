@@ -220,18 +220,17 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::readTFFromFile 
 }
 
 template <typename PointT> Eigen::VectorXf
-open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::::compute ()
 {
   Eigen::VectorXf ground_coeffs;
   ground_coeffs.resize(4);
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
 
   // Manual mode:
   if (ground_estimation_mode_ == 0)
   {
     std::cout << "Manual mode for ground plane estimation." << std::endl;
 
-    //  // Create XYZ cloud:
+    // Create XYZ cloud:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_xyzrgb(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointXYZRGB xyzrgb_point;
     cloud_xyzrgb->points.resize(cloud_->width * cloud_->height, xyzrgb_point);
@@ -248,43 +247,84 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
       }
     }
 
-    cv::Mat curr_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_8UC3);
-    for (int i=0;i<cloud_->height;i++)
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
+
+    if (remote_ground_selection_ == false)
     {
-      for (int j=0;j<cloud_->width;j++)
-      {
-        curr_image.at<cv::Vec3b>(i,j)[2] = cloud_->at(j,i).r;
-        curr_image.at<cv::Vec3b>(i,j)[1] = cloud_->at(j,i).g;
-        curr_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
-      }
+      // Initialize viewer:
+      pcl::visualization::PCLVisualizer viewer("Pick 3 points");
+
+      //#if (XYZRGB_CLOUDS)
+      //    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud_);
+      //    viewer.addPointCloud<pcl::PointXYZRGB> (cloud_, rgb, "input_cloud");
+      //#else
+      //    viewer.addPointCloud<pcl::PointXYZ> (cloud_, "input_cloud");
+      //#endif
+
+      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> rgb(cloud_xyzrgb, 255, 255, 255);
+      viewer.addPointCloud<pcl::PointXYZRGB> (cloud_xyzrgb, rgb, "input_cloud");
+      viewer.setCameraPosition(0,0,-2,0,-1,0,0);
+
+      // Add point picking callback to viewer:
+      struct callback_args_color cb_args;
+
+      //#if (XYZRGB_CLOUDS)
+      //    PointCloudPtr clicked_points_3d (new PointCloud);
+      //#else
+      //    pcl::PointCloud<pcl::PointXYZ>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZ>);
+      //#endif
+
+      cb_args.clicked_points_3d = clicked_points_3d;
+      cb_args.viewerPtr = &viewer;
+      viewer.registerPointPickingCallback (GroundplaneEstimation::pp_callback, (void*)&cb_args);
+
+      // Spin until 'Q' is pressed:
+      viewer.spin();
+      viewer.setSize(1,1);  // resize viewer in order to make it disappear
+      viewer.spinOnce();
+      viewer.close();       // close method does not work
+      std::cout << "done." << std::endl;
     }
-
-    // Add point picking callback to viewer:
-    std::vector<cv::Point> clicked_points_2d;
-    bool selection_finished = false;
-    struct callback_args_image cb_args;
-    cb_args.clicked_points_2d = clicked_points_2d;
-    cb_args.selection_finished = selection_finished;
-    cv::namedWindow("Pick 3 points");
-    cv::setMouseCallback("Pick 3 points", click_cb, (void*)&cb_args);
-
-    // Select three points from the image:
-    while(!cb_args.selection_finished)
+    else
     {
+      cv::Mat curr_image (cloud_xyzrgb->height, cloud_xyzrgb->width, CV_8UC3);
+      for (int i=0;i<cloud_->height;i++)
+      {
+        for (int j=0;j<cloud_->width;j++)
+        {
+          curr_image.at<cv::Vec3b>(i,j)[2] = cloud_->at(j,i).r;
+          curr_image.at<cv::Vec3b>(i,j)[1] = cloud_->at(j,i).g;
+          curr_image.at<cv::Vec3b>(i,j)[0] = cloud_->at(j,i).b;
+        }
+      }
+
+      // Add point picking callback to viewer:
+      std::vector<cv::Point> clicked_points_2d;
+      bool selection_finished = false;
+      struct callback_args_image cb_args;
+      cb_args.clicked_points_2d = clicked_points_2d;
+      cb_args.selection_finished = selection_finished;
+      cv::namedWindow("Pick 3 points");
+      cv::setMouseCallback("Pick 3 points", click_cb, (void*)&cb_args);
+
+      // Select three points from the image:
+      while(!cb_args.selection_finished)
+      {
+        for(unsigned int i = 0; i < cb_args.clicked_points_2d.size(); i++)
+        {
+          cv::Point p = cb_args.clicked_points_2d[i];
+          cv::circle(curr_image, p, 5, cv::Scalar(0, 0, 255), -1);
+        }
+        cv::imshow("Pick 3 points", curr_image);
+        cv::waitKey(1);
+      }
+
+      // Select the corresponding 3D points from the point cloud:
       for(unsigned int i = 0; i < cb_args.clicked_points_2d.size(); i++)
       {
         cv::Point p = cb_args.clicked_points_2d[i];
-        cv::circle(curr_image, p, 5, cv::Scalar(0, 0, 255), -1);
+        clicked_points_3d->points.push_back (cloud_->at(p.x,p.y));
       }
-      cv::imshow("Pick 3 points", curr_image);
-      cv::waitKey(1);
-    }
-
-    // Select the corresponding 3D points from the point cloud:
-    for(unsigned int i = 0; i < cb_args.clicked_points_2d.size(); i++)
-    {
-      cv::Point p = cb_args.clicked_points_2d[i];
-      clicked_points_3d->points.push_back (cloud_->at(p.x,p.y));
     }
 
     // Keep only the last three clicked points:
@@ -295,10 +335,9 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
 
     // Ground plane estimation:
     std::vector<int> clicked_points_indices;
-    for (unsigned int i = 0; i < clicked_points_3d->points.size(); i++){
+    for (unsigned int i = 0; i < clicked_points_3d->points.size(); i++)
       clicked_points_indices.push_back(i);
-    }
-    //    pcl::SampleConsensusModelPlane<PointT> model_plane(clicked_points_3d);
+//    pcl::SampleConsensusModelPlane<PointT> model_plane(clicked_points_3d);
     pcl::SampleConsensusModelPlane<pcl::PointXYZRGB> model_plane(clicked_points_3d);
     model_plane.computeModelCoefficients(clicked_points_indices,ground_coeffs);
     std::cout << "Ground plane coefficients: " << ground_coeffs(0) << ", " << ground_coeffs(1) << ", " << ground_coeffs(2) <<
@@ -308,88 +347,88 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
   // Semi-automatic mode:
   if (ground_estimation_mode_ == 1)
   {
-    std::cout << "Semi-automatic mode for ground plane estimation not enabled." << std::endl;
+    std::cout << "Semi-automatic mode for ground plane estimation." << std::endl;
 
-    //// Normals computation:
-    //pcl::IntegralImageNormalEstimation<PointT, pcl::Normal> ne;
-    //ne.setNormalEstimationMethod (ne.COVARIANCE_MATRIX);
-    //ne.setMaxDepthChangeFactor (0.03f);
-    //ne.setNormalSmoothingSize (20.0f);
-    //pcl::PointCloud<pcl::Normal>::Ptr normal_cloud (new pcl::PointCloud<pcl::Normal>);
-    //ne.setInputCloud (cloud_);
-    //ne.compute (*normal_cloud);
+    // Normals computation:
+    pcl::IntegralImageNormalEstimation<PointT, pcl::Normal> ne;
+    ne.setNormalEstimationMethod (ne.COVARIANCE_MATRIX);
+    ne.setMaxDepthChangeFactor (0.03f);
+    ne.setNormalSmoothingSize (20.0f);
+    pcl::PointCloud<pcl::Normal>::Ptr normal_cloud (new pcl::PointCloud<pcl::Normal>);
+    ne.setInputCloud (cloud_);
+    ne.compute (*normal_cloud);
 
-    //// Multi plane segmentation initialization:
-    //std::vector<pcl::PlanarRegion<PointT>, Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > > regions;
-    //pcl::OrganizedMultiPlaneSegmentation<PointT, pcl::Normal, pcl::Label> mps;
-    //mps.setMinInliers (500);
-    //mps.setAngularThreshold (2.0 * M_PI / 180);
-    //mps.setDistanceThreshold (0.2);
-    //mps.setInputNormals (normal_cloud);
-    //mps.setInputCloud (cloud_);
-    //mps.segmentAndRefine (regions);
+    // Multi plane segmentation initialization:
+    std::vector<pcl::PlanarRegion<PointT>, Eigen::aligned_allocator<pcl::PlanarRegion<PointT> > > regions;
+    pcl::OrganizedMultiPlaneSegmentation<PointT, pcl::Normal, pcl::Label> mps;
+    mps.setMinInliers (500);
+    mps.setAngularThreshold (2.0 * M_PI / 180);
+    mps.setDistanceThreshold (0.2);
+    mps.setInputNormals (normal_cloud);
+    mps.setInputCloud (cloud_);
+    mps.segmentAndRefine (regions);
 
-    //std::cout << "Found " << regions.size() << " planar regions." << std::endl;
+    std::cout << "Found " << regions.size() << " planar regions." << std::endl;
 
     // Color planar regions with different colors:
-    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr colored_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    //colored_cloud = colorRegions(regions);
-    //if (regions.size()>0)
-    //{
-    //  // Viewer initialization:
-    //  pcl::visualization::PCLVisualizer viewer("PCL Viewer");
-    //  pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(colored_cloud);
-    //  viewer.addPointCloud<pcl::PointXYZRGB> (colored_cloud, rgb, "input_cloud");
-    //  viewer.setCameraPosition(0,0,-2,0,-1,0,0);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr colored_cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    colored_cloud = colorRegions(regions);
+    if (regions.size()>0)
+    {
+      // Viewer initialization:
+      pcl::visualization::PCLVisualizer viewer("PCL Viewer");
+      pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(colored_cloud);
+      viewer.addPointCloud<pcl::PointXYZRGB> (colored_cloud, rgb, "input_cloud");
+      viewer.setCameraPosition(0,0,-2,0,-1,0,0);
 
-    //  // Add point picking callback to viewer:
-    //  struct callback_args_color cb_args;
-    //  typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
-    //  cb_args.clicked_points_3d = clicked_points_3d;
-    //  cb_args.viewerPtr = &viewer;
-    //  //viewer.registerPointPickingCallback (GroundplaneEstimation::pp_callback, (void*)&cb_args);
-    //  std::cout << "Shift+click on a floor point, then press 'Q'..." << std::endl;
+      // Add point picking callback to viewer:
+      struct callback_args_color cb_args;
+      typename pcl::PointCloud<pcl::PointXYZRGB>::Ptr clicked_points_3d (new pcl::PointCloud<pcl::PointXYZRGB>);
+      cb_args.clicked_points_3d = clicked_points_3d;
+      cb_args.viewerPtr = &viewer;
+      viewer.registerPointPickingCallback (GroundplaneEstimation::pp_callback, (void*)&cb_args);
+      std::cout << "Shift+click on a floor point, then press 'Q'..." << std::endl;
 
-      //// Spin until 'Q' is pressed:
-      //viewer.spin();
-      //viewer.setSize(1,1);  // resize viewer in order to make it disappear
-      //viewer.spinOnce();
-      //viewer.close();      // // close method does not work
-      //std::cout << "done." << std::endl;
+      // Spin until 'Q' is pressed:
+      viewer.spin();
+      viewer.setSize(1,1);  // resize viewer in order to make it disappear
+      viewer.spinOnce();
+      viewer.close();       // close method does not work
+      std::cout << "done." << std::endl;
 
-      //// Find plane closest to clicked point:
-      //unsigned int index = 0;
-      //float min_distance = FLT_MAX;
-      //float distance;
+      // Find plane closest to clicked point:
+      unsigned int index = 0;
+      float min_distance = FLT_MAX;
+      float distance;
 
-      //float X = cb_args.clicked_points_3d->points[clicked_points_3d->points.size() - 1].x;
-      //float Y = cb_args.clicked_points_3d->points[clicked_points_3d->points.size() - 1].y;
-      //float Z = cb_args.clicked_points_3d->points[clicked_points_3d->points.size() - 1].z;
+      float X = cb_args.clicked_points_3d->points[clicked_points_3d->points.size() - 1].x;
+      float Y = cb_args.clicked_points_3d->points[clicked_points_3d->points.size() - 1].y;
+      float Z = cb_args.clicked_points_3d->points[clicked_points_3d->points.size() - 1].z;
 
-      //for(unsigned int i = 0; i < regions.size(); i++)
-      //{
-      //  float a = regions[i].getCoefficients()[0];
-      //  float b = regions[i].getCoefficients()[1];
-      //  float c = regions[i].getCoefficients()[2];
-      //  float d = regions[i].getCoefficients()[3];
+      for(unsigned int i = 0; i < regions.size(); i++)
+      {
+        float a = regions[i].getCoefficients()[0];
+        float b = regions[i].getCoefficients()[1];
+        float c = regions[i].getCoefficients()[2];
+        float d = regions[i].getCoefficients()[3];
 
-      //  distance = (float) (fabs((a*X + b*Y + c*Z + d)))/(sqrtf(a*a+b*b+c*c));
+        distance = (float) (fabs((a*X + b*Y + c*Z + d)))/(sqrtf(a*a+b*b+c*c));
 
-      //  if(distance < min_distance)
-      //  {
-      //    min_distance = distance;
-      //    index = i;
-      //  }
-      //}
+        if(distance < min_distance)
+        {
+          min_distance = distance;
+          index = i;
+        }
+      }
 
-      //ground_coeffs[0] = regions[index].getCoefficients()[0];
-      //ground_coeffs[1] = regions[index].getCoefficients()[1];
-      //ground_coeffs[2] = regions[index].getCoefficients()[2];
-      //ground_coeffs[3] = regions[index].getCoefficients()[3];
+      ground_coeffs[0] = regions[index].getCoefficients()[0];
+      ground_coeffs[1] = regions[index].getCoefficients()[1];
+      ground_coeffs[2] = regions[index].getCoefficients()[2];
+      ground_coeffs[3] = regions[index].getCoefficients()[3];
 
-      //std::cout << "Ground plane coefficients: " << regions[index].getCoefficients()[0] << ", " << regions[index].getCoefficients()[1] << ", " <<
-      //    regions[index].getCoefficients()[2] << ", " << regions[index].getCoefficients()[3] << "." << std::endl;
-    //}
+      std::cout << "Ground plane coefficients: " << regions[index].getCoefficients()[0] << ", " << regions[index].getCoefficients()[1] << ", " <<
+          regions[index].getCoefficients()[2] << ", " << regions[index].getCoefficients()[3] << "." << std::endl;
+    }
   }
 
   // Automatic mode:
@@ -472,21 +511,21 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
       std::cout << "Ground plane coefficients: " << regions[0].getCoefficients()[0] << ", " << regions[0].getCoefficients()[1] << ", " <<
           regions[0].getCoefficients()[2] << ", " << regions[0].getCoefficients()[3] << "." << std::endl;
 
-      //// Result visualization:
-      //if (ground_estimation_mode_ == 2)
-      //{
-      //  // Viewer initialization:
-      //  pcl::visualization::PCLVisualizer viewer("PCL Viewer");
-      //  pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(colored_cloud);
-      //  viewer.addPointCloud<pcl::PointXYZRGB> (colored_cloud, rgb, "input_cloud");
-      //  viewer.setCameraPosition(0,0,-2,0,-1,0,0);
+      // Result visualization:
+      if (ground_estimation_mode_ == 2)
+      {
+        // Viewer initialization:
+        pcl::visualization::PCLVisualizer viewer("PCL Viewer");
+        pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(colored_cloud);
+        viewer.addPointCloud<pcl::PointXYZRGB> (colored_cloud, rgb, "input_cloud");
+        viewer.setCameraPosition(0,0,-2,0,-1,0,0);
 
-      //  // Spin until 'Q' is pressed:
-      //  viewer.spin();
-      //  viewer.setSize(1,1);  // resize viewer in order to make it disappear
-      //  viewer.spinOnce();
-      //  viewer.close();       // close method does not work
-      //}
+        // Spin until 'Q' is pressed:
+        viewer.spin();
+        viewer.setSize(1,1);  // resize viewer in order to make it disappear
+        viewer.spinOnce();
+        viewer.close();       // close method does not work
+      }
     }
     else
     {
@@ -496,6 +535,7 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
 
   return ground_coeffs;
 }
+
 
 template <typename PointT> Eigen::VectorXf
 open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::computeMulticamera (bool ground_from_extrinsic_calibration, bool read_ground_from_file,
@@ -622,22 +662,22 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::refineGround (i
   return updated;
 }
 
-//template <typename PointT> void
-//open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::pp_callback (const pcl::visualization::PointPickingEvent& event, void* args)
-//{
-//  struct callback_args_color* data = (struct callback_args_color *)args;
-//  if (event.getPointIndex () == -1)
-//    return;
-//  pcl::PointXYZRGB current_point;
-//  event.getPoint(current_point.x, current_point.y, current_point.z);
-//  data->clicked_points_3d->points.push_back(current_point);
-//  // Draw clicked points in red:
-//  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> red (data->clicked_points_3d, 255, 0, 0);
-//  data->viewerPtr->removePointCloud("clicked_points");
-//  data->viewerPtr->addPointCloud(data->clicked_points_3d, red, "clicked_points");
-//  data->viewerPtr->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "clicked_points");
-//  std::cout << current_point.x << " " << current_point.y << " " << current_point.z << std::endl;
-//}
+template <typename PointT> void
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::pp_callback (const pcl::visualization::PointPickingEvent& event, void* args)
+{
+  struct callback_args_color* data = (struct callback_args_color *)args;
+  if (event.getPointIndex () == -1)
+    return;
+  pcl::PointXYZRGB current_point;
+  event.getPoint(current_point.x, current_point.y, current_point.z);
+  data->clicked_points_3d->points.push_back(current_point);
+  // Draw clicked points in red:
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> red (data->clicked_points_3d, 255, 0, 0);
+  data->viewerPtr->removePointCloud("clicked_points");
+  data->viewerPtr->addPointCloud(data->clicked_points_3d, red, "clicked_points");
+  data->viewerPtr->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "clicked_points");
+  std::cout << current_point.x << " " << current_point.y << " " << current_point.z << std::endl;
+}
 
 template <typename PointT> void
 open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::click_cb(int event, int x, int y, int flags, void* args)
