@@ -220,7 +220,7 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::readTFFromFile 
 }
 
 template <typename PointT> Eigen::VectorXf
-open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::::compute ()
+open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::compute ()
 {
   Eigen::VectorXf ground_coeffs;
   ground_coeffs.resize(4);
