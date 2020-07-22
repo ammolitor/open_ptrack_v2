@@ -376,6 +376,8 @@ class TVMNode {
         anti_transform = transform.inverse();
         zone_json = zone;
         rgb_image_ = pcl::PointCloud<pcl::RGB>::Ptr(new pcl::PointCloud<pcl::RGB>);
+        // reset here after vars have been called...
+        open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
       }
 
     /**
