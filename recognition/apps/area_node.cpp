@@ -285,6 +285,7 @@ struct cvcallback_args_image {
   bool selection_finished;
   bool isDrawing;
   std::vector<cv::Point> clicked_points_2d;
+  int count;
 };
 
 void opencv_mouse_callback(int event, int x, int y,  int flags, void* args){
@@ -324,6 +325,7 @@ void opencv_mouse_callback(int event, int x, int y,  int flags, void* args){
         data->box.y += data->box.height;
         data->box.height *= -1;
       }
+      data.count+=1;
     break;
   }
   switch (flags){
@@ -456,6 +458,77 @@ class AreaDefinitionNode {
         //might have to do it here?
         //cam_intrins_.transposeInPlace();
     }
+
+
+    void click_callback(int event, int x, int y,  int flags, void* args){
+      //handlerT * data = (handlerT*)param;
+      cvcallback_args_image* data = (cvcallback_args_image *)args;
+      switch( event ){
+        // update the selected bounding box
+        case EVENT_MOUSEMOVE:
+          if (data->count >= n_zones){
+            data->selection_finished = true;
+            break;
+          }
+
+          if( data->isDrawing ){
+            //if(data->drawFromCenter){
+            //  data->box.width = 2*(x-data->center.x)/*data->box.x*/;
+            //  data->box.height = 2*(y-data->center.y)/*data->box.y*/;
+            //  data->box.x = data->center.x-data->box.width/2.0;
+            //  data->box.y = data->center.y-data->box.height/2.0;
+            //}else{
+              data->box.width = x-data->box.x;
+              data->box.height = y-data->box.y;
+            //}
+          }
+        break;
+
+        // start to select the bounding box
+        case EVENT_LBUTTONDOWN:
+          if (data->count >= n_zones){
+            data->selection_finished = true;
+            break;
+          }
+          data->isDrawing = true;
+          data->box = cv::Rect( x, y, 0, 0 );
+          //data->center = Point2f((float)x,(float)y);
+        break;
+
+        // cleaning up the selected bounding box
+        case EVENT_LBUTTONUP:
+          if (data->count >= n_zones){
+            data->selection_finished = true;
+            break;
+          }
+
+          data->isDrawing = false;
+          if( data->box.width < 0 ){
+            data->box.x += data->box.width;
+            data->box.width *= -1;
+          }
+          if( data->box.height < 0 ){
+            data->box.y += data->box.height;
+            data->box.height *= -1;
+          }
+          data.count+=1;
+        break;
+      }
+      switch (flags){
+        case CV_EVENT_FLAG_SHIFTKEY: //EVENT_FLAG_SHIFTKEY
+        {
+          data->selection_finished = true;
+          break;
+        }
+        case CV_EVENT_FLAG_CTRLKEY: //EVENT_FLAG_CTRLKEY
+        {
+          data->selection_finished = true;
+          break;
+        }
+      }
+    }
+
+
     void cloud_cb (const PointCloudT::ConstPtr& callback_cloud)
     {
     printf("running cloud_cb\n");
@@ -773,9 +846,10 @@ class AreaDefinitionNode {
       cb_args.P2 = P2;
       cb_args.cropRect = cropRect;
       cb_args.clicked = clicked;
+      cb_args.count = 0;
       curr_image_clone = curr_image.clone();
       cv::namedWindow("Draw a box around the area of interest");
-      cv::setMouseCallback("Draw a box around the area of interest", opencv_mouse_callback, (void*)&cb_args);
+      cv::setMouseCallback("Draw a box around the area of interest", click_callback, (void*)&cb_args);
       cv::imshow("Draw a box around the area of interest", curr_image_clone);
       cv::waitKey(1);
 
