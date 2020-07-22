@@ -244,6 +244,7 @@ namespace open_ptrack
         struct callback_args_image{
             std::vector<cv::Point> clicked_points_2d;
             bool selection_finished;
+            int count;
         };
     };
   } /* namespace ground_segmentation */

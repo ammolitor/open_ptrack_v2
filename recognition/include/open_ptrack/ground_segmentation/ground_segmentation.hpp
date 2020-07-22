@@ -691,7 +691,7 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::click_cb(int ev
   {
     //TODO control if depth is nan
     if (data->count == 3){
-      data->selection_finished = true;
+      data->selection_finished = tr;ue;
       break
     }
 
