@@ -333,7 +333,6 @@ class GroundEstimationNode {
         // maybe...
         transform = transform.Identity();
         anti_transform = transform.inverse();
-        zone_json = zone;
         sensor_name = sensor_string;
         rgb_image_ = pcl::PointCloud<pcl::RGB>::Ptr(new pcl::PointCloud<pcl::RGB>);
         // reset here after vars have been called...
