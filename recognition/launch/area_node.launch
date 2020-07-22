@@ -6,14 +6,16 @@
   make sure your save name is sink_area.json -->
   <arg name="json_save_name" default="area.json" />
   <arg name="n_zones" default="1" />
+  <arg name="standalone" default="true" />
 
   
-  <!-- Start the realsense -->
-  <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
-      <arg name="camera" value="$(arg sensor_name)" />
-      <arg name="enable_pointcloud" value="true" />
-  </include>
-
+  <group if="$(arg standalone)" >
+    <!-- Start the realsense -->
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+        <arg name="camera" value="$(arg sensor_name)" />
+        <arg name="enable_pointcloud" value="true" />
+    </include>
+  </group>
 
   <!-- Launch object detection node -->
   <node pkg="recognition" type="area_node"
