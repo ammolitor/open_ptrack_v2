@@ -325,7 +325,7 @@ void opencv_mouse_callback(int event, int x, int y,  int flags, void* args){
         data->box.y += data->box.height;
         data->box.height *= -1;
       }
-      data.count+=1;
+      data->count+=1;
     break;
   }
   switch (flags){
@@ -511,7 +511,7 @@ class AreaDefinitionNode {
             data->box.y += data->box.height;
             data->box.height *= -1;
           }
-          data.count+=1;
+          data->count+=1;
         break;
       }
       switch (flags){
