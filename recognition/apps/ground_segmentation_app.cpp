@@ -156,7 +156,7 @@ class GroundEstimationNode {
     //bool background_subtraction = true;
     int ground_estimation_mode = 0; // manual by default//2; // automatic
     //# Flag enabling manual grond selection via ssh:
-    bool remote_ground_selection = false;// false == using opencv as the viewer  //true; //#false
+    bool remote_ground_selection = true;// false == using opencv as the viewer  //true; //#false
     //# Flag stating if the ground should be read from file, if present:
     bool read_ground_from_file = true;
     //# Flag that locks the ground plane update:
