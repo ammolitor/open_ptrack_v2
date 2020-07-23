@@ -412,7 +412,7 @@ class TVMNode {
               getline (ground_file, line);
               std::cout << std::atof(line.c_str()) << std::endl;
               float value = std::atof(line.c_str());
-              ground_coeffs(row_ind) = value;
+              ground_coeffs(static_cast<int>(row_ind)) = value;
             }
             ground_file.close();
 
