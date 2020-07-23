@@ -154,9 +154,9 @@ class GroundEstimationNode {
     //## Background subtraction ##
     //############################
     //bool background_subtraction = true;
-    int ground_estimation_mode = 2; // automatic
+    int ground_estimation_mode = 0; // manual by default//2; // automatic
     //# Flag enabling manual grond selection via ssh:
-    bool remote_ground_selection = true; //#false
+    bool remote_ground_selection = false;// false == using opencv as the viewer  //true; //#false
     //# Flag stating if the ground should be read from file, if present:
     bool read_ground_from_file = true;
     //# Flag that locks the ground plane update:
@@ -252,6 +252,7 @@ class GroundEstimationNode {
     tf::StampedTransform world_inverse_transform;
     pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
 
+    // this node is forced to have manual ground estimation, unless otherwise stated
     GroundEstimationNode(ros::NodeHandle& nh, std::string sensor_string):
       node_(nh), it(node_)
       {
@@ -269,11 +270,13 @@ class GroundEstimationNode {
           std::cout << "use_headclusters: " << use_headclusters << std::endl;
           use_pose_model = master_config["use_pose_model"];
           std::cout << "use_pose_model: " << use_pose_model << std::endl;
-          ground_estimation_mode = master_config["ground_estimation_mode"];
-          std::cout << "ground_estimation_mode: " << ground_estimation_mode << std::endl;
-          remote_ground_selection = master_config["remote_ground_selection"];
+         
+          //ground_estimation_mode = master_config["ground_estimation_mode"];
+          //std::cout << "ground_estimation_mode: " << ground_estimation_mode << std::endl;
+          //remote_ground_selection = master_config["remote_ground_selection"];
           std::cout << "remote_ground_selection: " << remote_ground_selection << std::endl;
           read_ground_from_file = master_config["read_ground_from_file"];
+         
           std::cout << "read_ground_from_file: " << read_ground_from_file << std::endl; 
           lock_ground = master_config["lock_ground"]; 
           std::cout << "lock_ground: " << lock_ground << std::endl;
