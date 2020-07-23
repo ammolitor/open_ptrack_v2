@@ -30,6 +30,7 @@
 #include <boost/format.hpp>
 #include <ros/ros.h>
 #include <ros/package.h>
+#include <ros/console.h>
 #include <cv_bridge/cv_bridge.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_sequencer.h>
@@ -332,8 +333,9 @@ class TVMNode {
         catch(const std::exception& e)
         {
           std::cerr << "json reading failure (master_config/zone_json): "<< e.what() << '\n';
+          ROS_WARN_STREAM("TVMNode will NOT behave as expected!");
           // exit here
-          return 0;
+          //return 0;
         }
         
         // Publish Messages
