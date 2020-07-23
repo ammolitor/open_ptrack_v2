@@ -400,7 +400,7 @@ class TVMNode {
         if (use_saved_ground_file){
           // Read ground from file, if the file exists: 
           // we use this when we've manually calibrated the node from master
-          std::string ground_filename = ros::package::getPath("recognition") + "/cfg/ground_" + frame_id + ".txt";
+          std::string ground_filename = ros::package::getPath("recognition") + "/cfg/ground_" + sensor_string + ".txt";
           std::ifstream infile(ground_filename.c_str());
           if (infile.good())
           {

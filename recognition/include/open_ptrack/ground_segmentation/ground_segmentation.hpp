@@ -546,10 +546,19 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::computeMulticam
   ground_coeffs = compute();
 
   std::string frame_id = cloud_->header.frame_id;
-  if (strcmp(frame_id.substr(0,1).c_str(), "/") == 0)
-  {
-    frame_id = frame_id.substr(1, frame_id.length()-1);
-  }
+  //if (strcmp(frame_id.substr(0,1).c_str(), "/") == 0)
+  //{
+  //  frame_id = frame_id.substr(1, frame_id.length()-1);
+  //}
+  // this is for the realsense only...
+  std::string frame_id_tmp = frame_id;
+  int pos = frame_id_tmp.find("_color_optical_frame");
+  if (pos != std::string::npos)
+    frame_id_tmp.replace(pos, std::string("_color_optical_frame").size(), "");
+  pos = frame_id_tmp.find("_depth_optical_frame");
+  if (pos != std::string::npos)
+    frame_id_tmp.replace(pos, std::string("_depth_optical_frame").size(), "");
+  frame_id = frame_id_tmp;
 
   // If manual ground plane selection, save the result to file:
   if (ground_estimation_mode_ == 0)
