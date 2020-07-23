@@ -410,7 +410,7 @@ class TVMNode {
             for (unsigned int row_ind = 0; row_ind < 4; row_ind++)
             {
               getline (ground_file, line);
-              std::cout << std::atof(line.c_str() << std::endl;
+              std::cout << std::atof(line.c_str()) << std::endl;
               ground_coeffs(row_ind) = std::atof(line.c_str());
             }
             ground_file.close();
