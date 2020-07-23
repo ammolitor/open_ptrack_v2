@@ -413,7 +413,7 @@ class TVMNode {
             }
             ground_file.close();
 
-            ground_estimated = true;
+            //ground_estimated = true;
             std::cout << "Chosen ground plane read from file." << std::endl;
             std::cout << "Ground plane coefficients: " << ground_coeffs(0) << " " << ground_coeffs(1) << " " << ground_coeffs(2) << " " << ground_coeffs(3) << "." << std::endl;
             estimate_ground_plane = false;
