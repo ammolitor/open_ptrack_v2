@@ -261,7 +261,7 @@ class TVMNode {
     pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
     bool listen_for_ground = false;
 
-    TVMNode(ros::NodeHandle& nh, std::string sensor_string, bool use_dynamic_reconfigure, bool ground_from_master):
+    TVMNode(ros::NodeHandle& nh, std::string sensor_string, bool use_dynamic_reconfigure):
       node_(nh), it(node_)
       {
         try
