@@ -1043,6 +1043,7 @@ class GroundEstimationNode {
           coeffs_msg->ground_coeffs.z = ground_coeffs(2);
           coeffs_msg->ground_coeffs.w = ground_coeffs(3);
           coeffs_pub.publish(coeffs_msg);
+          //std::cout << "press cntrl+c anytime to exit" << std::endl;
         }
       }
     }

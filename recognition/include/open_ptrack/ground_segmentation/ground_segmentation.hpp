@@ -555,11 +555,11 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::computeMulticam
   if (ground_estimation_mode_ == 0)
   {
     std::ofstream ground_file;
-    ground_file.open ((ros::package::getPath("detection") + "/conf/ground_" + frame_id + ".txt").c_str());
+    ground_file.open ((ros::package::getPath("recognition") + "/cfg/ground_" + frame_id + ".txt").c_str());
     ground_file << ground_coeffs;
     ground_file.close();
 
-    std::cout << "Ground plane saved to " << ros::package::getPath("detection") + "/conf/ground_" + frame_id + ".txt" << std::endl;
+    std::cout << "Ground plane saved to " << ros::package::getPath("recognition") + "/cfg/ground_" + frame_id + ".txt" << std::endl;
   }
 
   bool ground_estimated = false;
@@ -568,7 +568,7 @@ open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>::computeMulticam
     if (ground_estimation_mode_ > 0) // automatic or semi-automatic mode
     {
       // Read ground from file, if the file exists:
-      std::string ground_filename = ros::package::getPath("detection") + "/conf/ground_" + frame_id + ".txt";
+      std::string ground_filename = ros::package::getPath("recognition") + "/cfg/ground_" + frame_id + ".txt";
       std::ifstream infile(ground_filename.c_str());
       if (infile.good())
       {

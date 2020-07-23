@@ -44,7 +44,7 @@
 #include <tf_conversions/tf_eigen.h>
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
-#include <opt_msgs/DetectionArray.h>
+#include <opt_msgs/GroundCoeffs.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -125,6 +125,7 @@ class TVMNode {
     image_transport::ImageTransport it;
     ros::ServiceServer camera_info_matrix_server;
     ros::Subscriber camera_info_matrix;
+    ros::Subscriber ground_coeffs_sub;
     dynamic_reconfigure::Server<recognition::GenDetectionConfig> cfg_server;
 
   public:
@@ -154,7 +155,7 @@ class TVMNode {
     json zone_json;
     json master_json;
     int n_zones;
-    bool json_found = false;
+    bool zone_json_found = false;
 
     //############################
     //## Background subtraction ##
@@ -207,6 +208,7 @@ class TVMNode {
     bool fast_no_clustering = false;
     bool view_pointcloud = false;
     bool ground_from_extrinsic_calibration = false;
+    bool use_saved_ground_file = false;
 
     //###################################
     //## Ground + Clustering Variables ##
@@ -257,8 +259,9 @@ class TVMNode {
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
     pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
+    bool listen_for_ground = false;
 
-    TVMNode(ros::NodeHandle& nh, std::string sensor_string, bool use_dynamic_reconfigure):
+    TVMNode(ros::NodeHandle& nh, std::string sensor_string, bool use_dynamic_reconfigure, bool ground_from_master):
       node_(nh), it(node_)
       {
         try
@@ -324,16 +327,19 @@ class TVMNode {
           view_pointcloud = master_config["view_pointcloud"];
           std::cout << "view_pointcloud: " << view_pointcloud << std::endl;
           ground_from_extrinsic_calibration = master_config["ground_from_extrinsic_calibration"];
+          use_saved_ground_file = master_config["use_saved_ground_file"];
+          
+          // zone json will ALWAYS be last. 
           std::string zone_json_path = master_config["zone_json_path"];
           std::string area_hard_coded_path = master_package_path + zone_json_path;
           std::ifstream area_json_read(area_hard_coded_path);
           area_json_read >> zone_json;
-          json_found = true;
+          zone_json_found = true;
         }
         catch(const std::exception& e)
         {
           std::cerr << "json reading failure (master_config/zone_json): "<< e.what() << '\n';
-          ROS_WARN_STREAM("TVMNode will NOT behave as expected!");
+          ROS_WARN_STREAM("TVMNode may not behave as expected!");
           // exit here
           //return 0;
         }
@@ -347,6 +353,11 @@ class TVMNode {
 
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &TVMNode::camera_info_callback, this);
+        // listen to the main node's broadcast for ground coeffs
+        //if (ground_from_master){
+        //  listen_for_ground = true;
+        //  ground_coeffs_sub = node_.subscribe(sensor_string + "/ground_coeffs/", 1, &TVMNode::ground_coeffs_callback, this);
+        //}
 
         // fast_no_clustering means you HAVE to use pose to be able to get the height of an object == use_pose_model
         if (fast_no_clustering && !use_pose_model){
@@ -386,6 +397,36 @@ class TVMNode {
         rgb_image_ = pcl::PointCloud<pcl::RGB>::Ptr(new pcl::PointCloud<pcl::RGB>);
         // reset here after vars have been called...
         ground_estimator = open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
+        if (use_saved_ground_file){
+          // Read ground from file, if the file exists: 
+          // we use this when we've manually calibrated the node from master
+          std::string ground_filename = ros::package::getPath("recognition") + "/cfg/ground_" + frame_id + ".txt";
+          std::ifstream infile(ground_filename.c_str());
+          if (infile.good())
+          {
+            std::ifstream ground_file (ground_filename.c_str());
+            std::string line;
+            for (unsigned int row_ind = 0; row_ind < 4; row_ind++)
+            {
+              getline (ground_file, line);
+              ground_coeffs(row_ind) = std::atof(line.c_str());
+            }
+            ground_file.close();
+
+            ground_estimated = true;
+            std::cout << "Chosen ground plane read from file." << std::endl;
+            std::cout << "Ground plane coefficients: " << ground_coeffs(0) << " " << ground_coeffs(1) << " " << ground_coeffs(2) << " " << ground_coeffs(3) << "." << std::endl;
+            estimate_ground_plane = false;
+          }
+          else
+          {
+            std::cout << "Ground plane file not found!" << std::endl;
+            std::cout << "Defaulting to master.json commands for aquiring ground plane!" << std::endl;
+            use_saved_ground_file = false;
+            estimate_ground_plane = true;
+          }
+        }
+        // listen to ground pla
       }
 
     /**
@@ -402,6 +443,21 @@ class TVMNode {
       _constant_y = 1.0f /  msg->K[4];
       camera_info_available_flag = true;
     }
+
+    // listen for the master's broadcast of ground coeffs
+    //void ground_coeffs_callback(const GroundCoeffs::ConstPtr & msg){
+    //  if (!listen_for_ground){
+    //    ground_coeffs_sub.shutdown();
+    //  }
+    //  //Eigen::VectorXf ground_vec;
+    //  ground_coeffs(0) = coeffs_msg->ground_coeffs.x;
+    //  ground_coeffs(1) = coeffs_msg->ground_coeffs.y;
+    //  ground_coeffs(2) = coeffs_msg->ground_coeffs.z;
+    //  ground_coeffs(3) = coeffs_msg->ground_coeffs.w;
+    //  listen_for_ground = false;
+    //  ground_coeffs_sub.shutdown();
+    //}
+
 
     /**
      * \brief sets the background of the given camera for background removal.
@@ -1637,7 +1693,7 @@ class TVMNode {
                   draw_skelaton(cv_image_clone, points);
 
 
-                  if (json_found){                
+                  if (zone_json_found){                
                     bool inside_area_cube = false;
                     int zone_id;
                     std::string zone_string;                  
@@ -2136,7 +2192,7 @@ class TVMNode {
                   converter.Vector3fToVector3((1+head_centroid_compensation/top3d.norm())*top3d, detection_msg.top);
                   converter.Vector3fToVector3((1+head_centroid_compensation/bottom3d.norm())*bottom3d, detection_msg.bottom);
 
-                  if (json_found){                
+                  if (zone_json_found){                
                     bool inside_area_cube = false;
                     int zone_id;
                     std::string zone_string;                  
@@ -2808,7 +2864,7 @@ class TVMNode {
               skeleton.joints[14] = joint3D_chest;
               draw_skelaton(cv_image_clone, points);
 
-              if (json_found){                
+              if (zone_json_found){                
                 bool inside_area_cube = false;
                 int zone_id;
                 std::string zone_string;                  

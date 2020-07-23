@@ -43,5 +43,6 @@
     "fast_no_clustering" : true,
     "view_pointcloud" : true,
     "ground_from_extrinsic_calibration" : false,
-    "zone_json_path" : "/cfg/area.json"
+    "zone_json_path" : "/cfg/area.json",
+    "use_saved_ground_file" : false
 }
