@@ -400,6 +400,7 @@ class TVMNode {
         if (use_saved_ground_file){
           // Read ground from file, if the file exists: 
           // we use this when we've manually calibrated the node from master
+          std::count << "Reading from groundfile!" << std::endl;
           std::string ground_filename = ros::package::getPath("recognition") + "/cfg/ground_" + sensor_string + ".txt";
           std::ifstream infile(ground_filename.c_str());
           if (infile.good())
@@ -409,6 +410,7 @@ class TVMNode {
             for (unsigned int row_ind = 0; row_ind < 4; row_ind++)
             {
               getline (ground_file, line);
+              std::cout << std::atof(line.c_str() << std::endl;
               ground_coeffs(row_ind) = std::atof(line.c_str());
             }
             ground_file.close();

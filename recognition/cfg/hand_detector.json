@@ -10,6 +10,7 @@
   "gpu"                          : true,
   "max_capable_depth"            : 6.25,
   "override_threshold"           : 0.5,
+  "nms_threshold"                : 0.4,
   "n_zones"                      : 1,
   "zone_json_path"               : "/cfg/sink_area.json",
   "use_pointcloud"               : true
