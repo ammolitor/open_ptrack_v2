@@ -9,11 +9,11 @@
     "face_detector_path" :        "/data/face_detector",
     "detector_path" :             "/data/object_detector",
     "max_capable_depth":          6.25,
-    "n_zones":                    3,
+    "n_zones":                    1,
     "use_headclusters":           false,
     "use_pose_model":             true,
     "__n_zones__comment__":       "door, sink, cutting station",
-    "__depth__comment__":         "realsense max is 10.0, kinect is 6.25",
+    "__depth__comment__":         "realsense max is 10.0, kinect is 6.25 - however, it seems less accurate after 6.25 regardless of cam",
     "ground_estimation_mode" : 2, 
     "remote_ground_selection" : true, 
     "read_ground_from_file" : true,
@@ -42,5 +42,6 @@
     "_filter_height_comment": "filter height is so that we can get the height of clusters and just only take the ones that are relatively ppl sized",
     "fast_no_clustering" : true,
     "view_pointcloud" : true,
-    "ground_from_extrinsic_calibration" : false
+    "ground_from_extrinsic_calibration" : false,
+    "zone_json_path" : "/cfg/area.json"
 }

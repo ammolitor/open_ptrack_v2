@@ -257,7 +257,7 @@ class TVMNode {
     tf::StampedTransform world_inverse_transform;
     pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
 
-    TVMNode(ros::NodeHandle& nh, std::string sensor_string, json zone, bool use_dynamic_reconfigure):
+    TVMNode(ros::NodeHandle& nh, std::string sensor_string, bool use_dynamic_reconfigure):
       node_(nh), it(node_)
       {
         try
@@ -323,11 +323,17 @@ class TVMNode {
           view_pointcloud = master_config["view_pointcloud"];
           std::cout << "view_pointcloud: " << view_pointcloud << std::endl;
           ground_from_extrinsic_calibration = master_config["ground_from_extrinsic_calibration"];
+          std::string zone_json_path = master_config["zone_json_path"];
+          std::string area_hard_coded_path = master_package_path + zone_json_path;
+          std::ifstream area_json_read(area_hard_coded_path);
+          area_json_read >> zone_json;
           json_found = true;
         }
         catch(const std::exception& e)
         {
-          std::cerr << "json master/area not found: "<< e.what() << '\n';
+          std::cerr << "json reading failure (master_config/zone_json): "<< e.what() << '\n';
+          // exit here
+          return 0;
         }
         
         // Publish Messages
@@ -374,7 +380,7 @@ class TVMNode {
         // maybe...
         transform = transform.Identity();
         anti_transform = transform.inverse();
-        zone_json = zone;
+        //zone_json = zone;
         rgb_image_ = pcl::PointCloud<pcl::RGB>::Ptr(new pcl::PointCloud<pcl::RGB>);
         // reset here after vars have been called...
         ground_estimator = open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
@@ -3062,12 +3068,12 @@ class TVMNode {
 int main(int argc, char** argv) {
   std::string sensor_name;
   double max_distance;
-  json zone_json;
+  // json zone_json;
   bool use_dynamic_reconfigure;
-  std::string area_package_path = ros::package::getPath("recognition");
-  std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
-  std::ifstream area_json_read(area_hard_coded_path);
-  area_json_read >> zone_json;
+  // std::string area_package_path = ros::package::getPath("recognition");
+  // std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
+  // std::ifstream area_json_read(area_hard_coded_path);
+  // area_json_read >> zone_json;
 
   std::cout << "--- tvm_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_detection_node");
@@ -3078,8 +3084,9 @@ int main(int argc, char** argv) {
   pnh.param("use_dynamic_reconfigure", use_dynamic_reconfigure, false);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  TVMNode node(nh, sensor_name, zone_json, use_dynamic_reconfigure);
+  TVMNode node(nh, sensor_name, use_dynamic_reconfigure);
   std::cout << "TVMNode init " << std::endl;
   ros::spin();
   return 0;
 }
+ 
