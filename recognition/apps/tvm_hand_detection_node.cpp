@@ -431,6 +431,12 @@ class TVMHandDetectionNode {
               double world_x_max;
               double world_y_max;
               double world_z_max;
+              double sensor_x_min;
+              double sensor_y_min;
+              double sensor_z_min;
+              double sensor_x_max;
+              double sensor_y_max;
+              double sensor_z_max;
               tf::Vector3 min_point;
               tf::Vector3 max_point;
               for (zone_id = 0; zone_id < n_zones; zone_id++)
@@ -736,10 +742,14 @@ class TVMHandDetectionNode {
               double world_x_max;
               double world_y_max;
               double world_z_max;
+              double sensor_x_min;
+              double sensor_y_min;
+              double sensor_z_min;
+              double sensor_x_max;
+              double sensor_y_max;
+              double sensor_z_max;
               tf::Vector3 min_point;
               tf::Vector3 max_point;
-              Eigen::Vector3d min_vec;
-              Eigen::Vector3d max_vec;
               for (zone_id = 0; zone_id < n_zones; zone_id++)
               {
                 // need a world view here bc each detection was transformed
