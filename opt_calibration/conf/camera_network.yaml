@@ -14,6 +14,10 @@ network:
         id: "realsense_4"
         serial: "919122070953"
         people_detector: hog
+      - type: realsense
+        id: "realsense_5"
+        serial: "834412071442"
+        people_detector: hog
   - pc: "xps8930-02"
     sensors:
       - type: realsense
