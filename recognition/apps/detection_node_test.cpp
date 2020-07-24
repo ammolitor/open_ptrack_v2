@@ -423,6 +423,7 @@ class TVMNode {
             //ground_estimated = true;
             std::cout << "Chosen ground plane read from file." << std::endl;
             std::cout << "Ground plane coefficients: " << ground_coeffs(0) << " " << ground_coeffs(1) << " " << ground_coeffs(2) << " " << ground_coeffs(3) << "." << std::endl;
+            sqrt_ground_coeffs = (ground_coeffs - Eigen::Vector4f(0.0f, 0.0f, 0.0f, ground_coeffs(3))).norm();
             estimate_ground_plane = false;
           }
           else
@@ -2345,8 +2346,8 @@ class TVMNode {
           std::cout << "DEBUG sqrt_ground_coeffs : " << sqrt_ground_coeffs << std::endl;
           std::cout << "DEBUG ground_coeffs : " <<ground_coeffs << std::endl;
         }
-        std::cout << "DEBUG sqrt_ground_coeffs : " << sqrt_ground_coeffs << std::endl;
-        std::cout << "DEBUG ground_coeffs : " <<ground_coeffs << std::endl;
+        // std::cout << "DEBUG sqrt_ground_coeffs : " << sqrt_ground_coeffs << std::endl;
+        // std::cout << "DEBUG ground_coeffs : " <<ground_coeffs << std::endl;
         // set message vars here
         open_ptrack::opt_utils::Conversions converter; 
         std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
