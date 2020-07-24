@@ -13,7 +13,8 @@
   "nms_threshold"                : 0.4,
   "n_zones"                      : 1,
   "zone_json_path"               : "/cfg/sink_area.json",
-  "use_pointcloud"               : true
+  "use_pointcloud"               : true,
+  "use_transforms"               : false
 
 }
   

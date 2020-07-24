@@ -174,6 +174,7 @@ class TVMHandDetectionNode {
     float nms_threshold = 0.5;
     float max_capable_depth = 6.25;
     bool use_pointcloud;
+    bool use_transforms = false; // false by default
 
 
     double rate_value = 1.0;
@@ -212,6 +213,7 @@ class TVMHandDetectionNode {
           std::cout << "max_capable_depth: " << max_capable_depth << std::endl;
           override_threshold = master_config["override_threshold"];
           nms_threshold = master_config["nms_threshold"];
+          use_transforms = master_config["use_transforms"];
           std::string zone_json_path = master_config["zone_json_path"];
           std::string area_hard_coded_path = package_path + zone_json_path;
           std::ifstream area_json_read(area_hard_coded_path);
@@ -275,11 +277,13 @@ class TVMHandDetectionNode {
                   const sensor_msgs::Image::ConstPtr& depth_image) {
         
       std::cout << "running algorithm callback" << std::endl;
-      //Calculate direct and inverse transforms between camera and world frame:
-      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
-                                  world_transform);
-      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
-                                  world_inverse_transform);
+      if (use_transforms){
+        //Calculate direct and inverse transforms between camera and world frame:
+        tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
+                                    world_transform);
+        tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
+                                    world_inverse_transform);
+      }
       // set message vars here
       cv_bridge::CvImagePtr cv_ptr_rgb;
       cv_bridge::CvImage::Ptr  cv_ptr_depth;
@@ -377,8 +381,9 @@ class TVMHandDetectionNode {
           if(std::isfinite(median_depth) && std::isfinite(mx) && std::isfinite(my)){
             
             tf::Vector3 point_3D(mx, my, median_depth);
-            
-            point_3D = world_transform(point_3D);
+            if (use_transforms){
+              point_3D = world_transform(point_3D);
+            }
 
             opt_msgs::Detection detection_msg;
 
@@ -426,6 +431,8 @@ class TVMHandDetectionNode {
               double world_x_max;
               double world_y_max;
               double world_z_max;
+              tf::Vector3 min_point;
+              tf::Vector3 max_point;
               for (zone_id = 0; zone_id < n_zones; zone_id++)
               {
                 // need a world view here bc each detection was transformed
@@ -439,29 +446,58 @@ class TVMHandDetectionNode {
                 // type must be number but is null...
                 //https://github.com/nlohmann/json/issues/1593
 
-                // translate between world and frame
-                world_x_min = zone_json[zone_string]["min"]["world"]["x"];
-                world_y_min = zone_json[zone_string]["min"]["world"]["y"];
-                world_z_min = zone_json[zone_string]["min"]["world"]["z"];
-                world_x_max = zone_json[zone_string]["max"]["world"]["x"];
-                world_y_max = zone_json[zone_string]["max"]["world"]["y"];
-                world_z_max = zone_json[zone_string]["max"]["world"]["z"];
+                if (use_transforms){
+                  // translate between world and frame
+                  world_x_min = zone_json[zone_string]["min"]["world"]["x"];
+                  world_y_min = zone_json[zone_string]["min"]["world"]["y"];
+                  world_z_min = zone_json[zone_string]["min"]["world"]["z"];
+                  world_x_max = zone_json[zone_string]["max"]["world"]["x"];
+                  world_y_max = zone_json[zone_string]["max"]["world"]["y"];
+                  world_z_max = zone_json[zone_string]["max"]["world"]["z"];
 
-                //std::cout << "world_x_min: " << world_x_min << std::endl;
-                //std::cout << "world_y_min: " << world_y_min << std::endl;
-                //std::cout << "world_z_min: " << world_z_min << std::endl;
-                //std::cout << "world_x_max: " << world_x_max << std::endl;
-                //std::cout << "world_y_max: " << world_y_max << std::endl;
-                //std::cout << "world_z_max: " << world_z_max << std::endl;
+                  //std::cout << "world_x_min: " << world_x_min << std::endl;
+                  //std::cout << "world_y_min: " << world_y_min << std::endl;
+                  //std::cout << "world_z_min: " << world_z_min << std::endl;
+                  //std::cout << "world_x_max: " << world_x_max << std::endl;
+                  //std::cout << "world_y_max: " << world_y_max << std::endl;
+                  //std::cout << "world_z_max: " << world_z_max << std::endl;
 
-                Eigen::Vector3d min_vec;
-                Eigen::Vector3d max_vec;
-                tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
-                tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
-                
-                min_point = world_inverse_transform(min_point);
-                max_point = world_inverse_transform(max_point);
+                  min_point.setX(world_x_min);
+                  min_point.setY(world_y_min);
+                  min_point.setZ(world_z_min);
+                  max_point.setX(world_x_max);
+                  max_point.setY(world_y_max);
+                  max_point.setZ(world_z_max);
+                  
+                  min_point = world_inverse_transform(min_point);
+                  max_point = world_inverse_transform(max_point);
+                } else {
+                  //just uses the predefined bounding box
+                  sensor_x_min = zone_json[zone_string]["min"][sensor_name]["x"];
+                  sensor_y_min = zone_json[zone_string]["min"][sensor_name]["y"];
+                  sensor_z_min = zone_json[zone_string]["min"][sensor_name]["z"];
+                  sensor_x_max = zone_json[zone_string]["max"][sensor_name]["x"];
+                  sensor_y_max = zone_json[zone_string]["max"][sensor_name]["y"];
+                  sensor_z_max = zone_json[zone_string]["max"][sensor_name]["z"];
 
+                  //std::cout << "sensor_x_min: " << sensor_x_min << std::endl;
+                  //std::cout << "sensor_y_min: " << sensor_y_min << std::endl;
+                  //std::cout << "sensor_z_min: " << sensor_z_min << std::endl;
+                  //std::cout << "sensor_x_max: " << sensor_x_max << std::endl;
+                  //std::cout << "sensor_y_max: " << sensor_y_max << std::endl;
+                  //std::cout << "sensor_z_max: " << sensor_z_max << std::endl;
+
+                  //Eigen::Vector3d min_vec;
+                  //Eigen::Vector3d max_vec;
+                  //tf::Vector3 min_point(sensor_x_min, sensor_y_min, sensor_z_min);
+                  //tf::Vector3 max_point(sensor_x_max, sensor_y_max, sensor_z_max);
+                  min_point.setX(sensor_x_min);
+                  min_point.setY(sensor_y_min);
+                  min_point.setZ(sensor_z_min);
+                  max_point.setX(sensor_x_max);
+                  max_point.setY(sensor_y_max);
+                  max_point.setZ(sensor_z_max);
+                }
                 x_min = min_point.getX();
                 y_min = min_point.getY();
                 z_min = min_point.getZ();
@@ -524,10 +560,12 @@ class TVMHandDetectionNode {
         
       std::cout << "running algorithm callback" << std::endl;
       //Calculate direct and inverse transforms between camera and world frame:
-      tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
-                                  world_transform);
-      tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
-                                  world_inverse_transform);
+      if (use_transforms){
+        tf_listener.lookupTransform("/world", sensor_name, ros::Time(0),
+                                    world_transform);
+        tf_listener.lookupTransform(sensor_name, "/world", ros::Time(0),
+                                    world_inverse_transform);
+      }
       // set message vars here
       //cv_bridge::CvImagePtr cv_ptr_rgb;
       //cv_bridge::CvImage::Ptr  cv_ptr_depth;
@@ -649,7 +687,9 @@ class TVMHandDetectionNode {
             
             tf::Vector3 point_3D(mx, my, median_depth);
             
-            point_3D = world_transform(point_3D);
+            if (use_transforms){
+              point_3D = world_transform(point_3D);
+            }
 
             opt_msgs::Detection detection_msg;
             detection_msg.box_3D.p1.x = point_3D.getX();
@@ -696,6 +736,10 @@ class TVMHandDetectionNode {
               double world_x_max;
               double world_y_max;
               double world_z_max;
+              tf::Vector3 min_point;
+              tf::Vector3 max_point;
+              Eigen::Vector3d min_vec;
+              Eigen::Vector3d max_vec;
               for (zone_id = 0; zone_id < n_zones; zone_id++)
               {
                 // need a world view here bc each detection was transformed
@@ -709,29 +753,60 @@ class TVMHandDetectionNode {
                 // type must be number but is null...
                 //https://github.com/nlohmann/json/issues/1593
 
-                // translate between world and frame
-                world_x_min = zone_json[zone_string]["min"]["world"]["x"];
-                world_y_min = zone_json[zone_string]["min"]["world"]["y"];
-                world_z_min = zone_json[zone_string]["min"]["world"]["z"];
-                world_x_max = zone_json[zone_string]["max"]["world"]["x"];
-                world_y_max = zone_json[zone_string]["max"]["world"]["y"];
-                world_z_max = zone_json[zone_string]["max"]["world"]["z"];
+                if (use_transforms){
+                  // translate between world and frame
+                  world_x_min = zone_json[zone_string]["min"]["world"]["x"];
+                  world_y_min = zone_json[zone_string]["min"]["world"]["y"];
+                  world_z_min = zone_json[zone_string]["min"]["world"]["z"];
+                  world_x_max = zone_json[zone_string]["max"]["world"]["x"];
+                  world_y_max = zone_json[zone_string]["max"]["world"]["y"];
+                  world_z_max = zone_json[zone_string]["max"]["world"]["z"];
 
-                //std::cout << "world_x_min: " << world_x_min << std::endl;
-                //std::cout << "world_y_min: " << world_y_min << std::endl;
-                //std::cout << "world_z_min: " << world_z_min << std::endl;
-                //std::cout << "world_x_max: " << world_x_max << std::endl;
-                //std::cout << "world_y_max: " << world_y_max << std::endl;
-                //std::cout << "world_z_max: " << world_z_max << std::endl;
+                  //std::cout << "world_x_min: " << world_x_min << std::endl;
+                  //std::cout << "world_y_min: " << world_y_min << std::endl;
+                  //std::cout << "world_z_min: " << world_z_min << std::endl;
+                  //std::cout << "world_x_max: " << world_x_max << std::endl;
+                  //std::cout << "world_y_max: " << world_y_max << std::endl;
+                  //std::cout << "world_z_max: " << world_z_max << std::endl;
 
-                Eigen::Vector3d min_vec;
-                Eigen::Vector3d max_vec;
-                tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
-                tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
-                
-                min_point = world_inverse_transform(min_point);
-                max_point = world_inverse_transform(max_point);
+                  //tf::Vector3 min_point(world_x_min, world_y_min, world_z_min);
+                  min_point.setX(world_x_min);
+                  min_point.setY(world_y_min);
+                  min_point.setZ(world_z_min);
+                  max_point.setX(world_x_max);
+                  max_point.setY(world_y_max);
+                  max_point.setZ(world_z_max);
+                  //tf::Vector3 max_point(world_x_max, world_y_max, world_z_max);
+                  
+                  min_point = world_inverse_transform(min_point);
+                  max_point = world_inverse_transform(max_point);
+                } else {
+                  //just uses the predefined bounding box
+                  sensor_x_min = zone_json[zone_string]["min"][sensor_name]["x"];
+                  sensor_y_min = zone_json[zone_string]["min"][sensor_name]["y"];
+                  sensor_z_min = zone_json[zone_string]["min"][sensor_name]["z"];
+                  sensor_x_max = zone_json[zone_string]["max"][sensor_name]["x"];
+                  sensor_y_max = zone_json[zone_string]["max"][sensor_name]["y"];
+                  sensor_z_max = zone_json[zone_string]["max"][sensor_name]["z"];
 
+                  //std::cout << "sensor_x_min: " << sensor_x_min << std::endl;
+                  //std::cout << "sensor_y_min: " << sensor_y_min << std::endl;
+                  //std::cout << "sensor_z_min: " << sensor_z_min << std::endl;
+                  //std::cout << "sensor_x_max: " << sensor_x_max << std::endl;
+                  //std::cout << "sensor_y_max: " << sensor_y_max << std::endl;
+                  //std::cout << "sensor_z_max: " << sensor_z_max << std::endl;
+
+                  //tf::Vector3 min_point = tf::Vector3(sensor_x_min, sensor_y_min, sensor_z_min);
+                  //tf::Vector3 max_point(sensor_x_max, sensor_y_max, sensor_z_max);
+
+                  min_point.setX(sensor_x_min);
+                  min_point.setY(sensor_y_min);
+                  min_point.setZ(sensor_z_min);
+                  max_point.setX(sensor_x_max);
+                  max_point.setY(sensor_y_max);
+                  max_point.setZ(sensor_z_max);
+
+                }
                 x_min = min_point.getX();
                 y_min = min_point.getY();
                 z_min = min_point.getZ();
@@ -797,6 +872,7 @@ class TVMHandDetectionNode {
       max_capable_depth = config.max_capable_depth;
       override_threshold = config.override_threshold;
       nms_threshold = config.nms_threshold;
+      use_transforms = config.use_transforms;
     }
 };
 
