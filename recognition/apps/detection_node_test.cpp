@@ -398,6 +398,7 @@ class TVMNode {
         // reset here after vars have been called...
         ground_estimator = open_ptrack::ground_segmentation::GroundplaneEstimation<PointT>(ground_estimation_mode, remote_ground_selection);
         if (use_saved_ground_file){
+          //Eigen::VectorXf ground_vec
           // Read ground from file, if the file exists: 
           // we use this when we've manually calibrated the node from master
           std::cout << "Reading from groundfile!" << std::endl;
@@ -2344,7 +2345,8 @@ class TVMNode {
           std::cout << "DEBUG sqrt_ground_coeffs : " << sqrt_ground_coeffs << std::endl;
           std::cout << "DEBUG ground_coeffs : " <<ground_coeffs << std::endl;
         }
-
+        std::cout << "DEBUG sqrt_ground_coeffs : " << sqrt_ground_coeffs << std::endl;
+        std::cout << "DEBUG ground_coeffs : " <<ground_coeffs << std::endl;
         // set message vars here
         open_ptrack::opt_utils::Conversions converter; 
         std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
