@@ -59,7 +59,7 @@ class SkeletonDetection : public Detection
 
 protected:
   /** \brief ROS message containing skeleton detection information */
-  rtpose_wrapper::SkeletonMsg detection_msg_;
+  opt_msgs::SkeletonMsg detection_msg_;
 
   static int debug_count;
   /**
@@ -72,12 +72,12 @@ protected:
 public:
 
   /** \brief Constructor. */
-  SkeletonDetection(const rtpose_wrapper::SkeletonMsg &detection,
+  SkeletonDetection(const opt_msgs::SkeletonMsg &detection,
                     open_ptrack::detection::DetectionSource* source);
   bool
-  isValidJoint(const rtpose_wrapper::Joint3DMsg& joint) const;
+  isValidJoint(const opt_msgs::Joint3DMsg& joint) const;
 
-  inline rtpose_wrapper::SkeletonMsg
+  inline opt_msgs::SkeletonMsg
   getSkeletonMsg() const { return detection_msg_; }
 
   /** \brief Destructor. */
@@ -100,7 +100,7 @@ public:
   friend std::ostream& operator<<(std::ostream& ss, const SkeletonDetection &s);
 
   static Eigen::Vector3d
-  averageOverValidJoints(const std::vector<rtpose_wrapper::Joint3DMsg> &joints);
+  averageOverValidJoints(const std::vector<opt_msgs::Joint3DMsg> &joints);
   static Eigen::Vector3d
   averageOverValidJoints(const std::vector<geometry_msgs::Point> &joints);
 

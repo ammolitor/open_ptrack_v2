@@ -62,8 +62,8 @@
 #include <opt_msgs/SkeletonTrackArray.h>
 #include <opt_msgs/StandardSkeletonTrackArray.h>
 #include <opt_msgs/IDArray.h>
-#include <rtpose_wrapper/SkeletonMsg.h>
-#include <rtpose_wrapper/SkeletonArrayMsg.h>
+#include <opt_msgs/SkeletonMsg.h>
+#include <opt_msgs/SkeletonArrayMsg.h>
 #include <body_pose_recognition/standardpose.h>
 //#include <open_ptrack/opt_utils/ImageConverter.h>
 
@@ -191,7 +191,7 @@ createVisMarker
   {
     if (remove_head_in_rviz)
       if (i == SkeletonJoints::HEAD) continue;
-    const rtpose_wrapper::Joint3DMsg& j = skel_det.getSkeletonMsg().joints[i];
+    const opt_msgs::Joint3DMsg& j = skel_det.getSkeletonMsg().joints[i];
     if (not std::isfinite(j.x + j.y + j.z)) continue;
     visualization_msgs::Marker joint_marker;
     joint_marker.header.frame_id = "world";
@@ -232,9 +232,9 @@ createVisMarker
         continue;
     geometry_msgs::Point p1;
     geometry_msgs::Point p2;
-    const rtpose_wrapper::Joint3DMsg& j1 =
+    const opt_msgs::Joint3DMsg& j1 =
         skel_det.getSkeletonMsg().joints[it->first];
-    const rtpose_wrapper::Joint3DMsg& j2 =
+    const opt_msgs::Joint3DMsg& j2 =
         skel_det.getSkeletonMsg().joints[it->second];
     if (not std::isfinite(j1.x + j1.y + j1.z)
         or not std::isfinite(j2.x + j2.y + j2.z)) continue;
@@ -502,7 +502,7 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
  * \param[in] msg the DetectionArray message.
  */
 void
-detection_cb(const rtpose_wrapper::SkeletonArrayMsg::ConstPtr& msg)
+detection_cb(const opt_msgs::SkeletonArrayMsg::ConstPtr& msg)
 {
   // Read message header information:
   std::string frame_id = msg->header.frame_id;
@@ -596,7 +596,7 @@ detection_cb(const rtpose_wrapper::SkeletonArrayMsg::ConstPtr& msg)
     // Create a SkeletonDetection object
     // for every skeleton in the detection message:
     std::vector<open_ptrack::detection::SkeletonDetection> detections_vector;
-    for(std::vector<rtpose_wrapper::SkeletonMsg>::const_iterator
+    for(std::vector<opt_msgs::SkeletonMsg>::const_iterator
         it = msg->skeletons.begin(), end = msg->skeletons.end();
         it != end; it++)
     {
@@ -605,7 +605,7 @@ detection_cb(const rtpose_wrapper::SkeletonArrayMsg::ConstPtr& msg)
       open_ptrack::detection::SkeletonDetection& lst = detections_vector.back();
       for(uint i = 0, size = lst.getSkeletonMsg().joints.size(); i < size; ++i)
       {
-        rtpose_wrapper::Joint3DMsg& j = lst.getSkeletonMsg().joints[i];
+        opt_msgs::Joint3DMsg& j = lst.getSkeletonMsg().joints[i];
         if (j.confidence < _min_confidence_per_joint)
         {
           j.x = j.y = j.z = std::numeric_limits<double>::quiet_NaN();

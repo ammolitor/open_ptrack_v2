@@ -49,7 +49,7 @@ namespace tracking
 {
 
 geometry_msgs::Point
-getGeomMsgsPoint(const rtpose_wrapper::Joint3DMsg& joint)
+getGeomMsgsPoint(const opt_msgs::Joint3DMsg& joint)
 {
   geometry_msgs::Point p;
   p.x = joint.x;
@@ -64,7 +64,7 @@ SkeletonTrack::SkeletonTrack(int id,
                              std::string frame_id, double position_variance,
                              double acceleration_variance, double period,
                              bool velocity_in_motion_term,
-                             const std::vector<rtpose_wrapper::Joint3DMsg>& joints):
+                             const std::vector<opt_msgs::Joint3DMsg>& joints):
   Track3D(id, frame_id, position_variance, acceleration_variance, period,
         velocity_in_motion_term), all_joint_tracks_initialized_(false)
 {
@@ -89,7 +89,7 @@ SkeletonTrack::~SkeletonTrack()
 }
 
 bool
-SkeletonTrack::anyNaNs(const std::vector<rtpose_wrapper::Joint3DMsg>& joints)
+SkeletonTrack::anyNaNs(const std::vector<opt_msgs::Joint3DMsg>& joints)
 {
   for(size_t i = 0; i < SkeletonJoints::SIZE; ++i)
   {
@@ -102,7 +102,7 @@ SkeletonTrack::anyNaNs(const std::vector<rtpose_wrapper::Joint3DMsg>& joints)
 void
 SkeletonTrack::init(double x, double y, double z, double height, double distance, int zone_id, cv::Rect box,
                     open_ptrack::detection::DetectionSource* detection_source,
-                    const std::vector<rtpose_wrapper::Joint3DMsg>& joints)
+                    const std::vector<opt_msgs::Joint3DMsg>& joints)
 {
   Track3D::init(x,y,z,height,distance, zone_id, box, detection_source);
   bool any_nan = anyNaNs(joints);
@@ -111,7 +111,7 @@ SkeletonTrack::init(double x, double y, double z, double height, double distance
   for(int i = 0, end = joint_tracks_.size();
       i != end and not any_nan; ++i)
   {
-    const rtpose_wrapper::Joint3DMsg& bj = joints[i];
+    const opt_msgs::Joint3DMsg& bj = joints[i];
     joint_tracks_[i] -> init(bj.x, bj.y, bj.z, 10,
                              Eigen::Vector3d(bj.x, bj.y, bj.z).norm(),
                              zone_id, box,
@@ -144,7 +144,7 @@ SkeletonTrack::update(
     int zone_id,
     cv::Rect box,
     open_ptrack::detection::DetectionSource* detection_source,
-    const std::vector<rtpose_wrapper::Joint3DMsg>& joints,
+    const std::vector<opt_msgs::Joint3DMsg>& joints,
     bool first_update)
 {
   Track3D::update(x,y,z,height,distance,data_assocation_score,
@@ -154,7 +154,7 @@ SkeletonTrack::update(
   {
     for(int i = 0, end = SkeletonJoints::SIZE; i != end; ++i)
     {
-      const rtpose_wrapper::Joint3DMsg& bj = joints[i];
+      const opt_msgs::Joint3DMsg& bj = joints[i];
       joint_tracks_[i] -> update(bj.x, bj.y, bj.z, 10,
                                  Eigen::Vector3d(bj.x, bj.y, bj.z).norm(), bj.confidence,
                                  bj.confidence - 1, bj.confidence + 1, 0, zone_id, box,
@@ -171,7 +171,7 @@ SkeletonTrack::update(
       for(int i = 0, end = joint_tracks_.size();
           i != end; ++i)
       {
-        const rtpose_wrapper::Joint3DMsg& bj = joints[i];
+        const opt_msgs::Joint3DMsg& bj = joints[i];
         joint_tracks_[i] -> init(bj.x, bj.y, bj.z, 10,
                                  Eigen::Vector3d(bj.x, bj.y, bj.z).norm(),
                                  zone_id,
@@ -261,7 +261,7 @@ SkeletonTrack::toMsg(opt_msgs::SkeletonTrack& track_msg, bool vertical)
 //  for(uint i = 0, end = joint_tracks_.size(); i != end; ++i)
 //  {
 //    opt_msgs::Track3D m;
-//    const rtpose_wrapper::Joint3DMsg& j = joint_tracks_[i]->getState();
+//    const opt_msgs::Joint3DMsg& j = joint_tracks_[i]->getState();
 //    m.confidence = j.confidence;
 //    m.x = j.x;
 //    m.y = j.y;
@@ -271,7 +271,7 @@ SkeletonTrack::toMsg(opt_msgs::SkeletonTrack& track_msg, bool vertical)
 //  }
 //}
 bool
-SkeletonTrack::isValid(const rtpose_wrapper::Joint3DMsg& joint)
+SkeletonTrack::isValid(const opt_msgs::Joint3DMsg& joint)
 {
   return std::isfinite(joint.x) and std::isfinite(joint.y)
       and std::isfinite(joint.z);
@@ -423,8 +423,8 @@ SkeletonTrack::createMarker(visualization_msgs::MarkerArray::Ptr& msg,
   for(auto it = SkeletonLinks::LINKS.begin(), end = SkeletonLinks::LINKS.end();
       it != end; ++it)
   {
-    const rtpose_wrapper::Joint3DMsg& p1 = raw_joints_tmp_[it->first];
-    const rtpose_wrapper::Joint3DMsg& p2 = raw_joints_tmp_[it->second];
+    const opt_msgs::Joint3DMsg& p1 = raw_joints_tmp_[it->first];
+    const opt_msgs::Joint3DMsg& p2 = raw_joints_tmp_[it->second];
     if( isValid(p1)
         and
         isValid(p2))

@@ -1244,7 +1244,7 @@ class TVMNode {
       viewer.addCoordinateSystem (0.5, "axis", 0); 
       viewer.setBackgroundColor (0, 0, 0, 0); 
       viewer.setPosition (800, 400); 
-      viewer.setCameraPosition(-9, 0, -5,     10, 0, 5,     0, -1, 0,      0);
+      viewer.setCameraPosition(0,0,-2,0,-1,0,0);;
       viewer.spinOnce ();
       viewer.removeAllShapes();
       viewer.removeAllPointClouds();
@@ -3051,7 +3051,7 @@ class TVMNode {
         viewer.addCoordinateSystem (0.5, "axis", 0); 
         viewer.setBackgroundColor (0, 0, 0, 0); 
         viewer.setPosition (800, 400); 
-        viewer.setCameraPosition(-9, 0, -5,     10, 0, 5,     0, -1, 0,      0);
+        viewer.setCameraPosition(0,0,-2,0,-1,0,0);;
         viewer.spinOnce ();
         viewer.removeAllShapes();
         viewer.removeAllPointClouds();
