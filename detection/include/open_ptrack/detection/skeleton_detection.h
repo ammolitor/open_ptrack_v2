@@ -46,7 +46,7 @@
 #include <open_ptrack/detection/detection.h>
 #include <opt_msgs/Detection.h>
 #include <open_ptrack/detection/detection_source.h>
-#include <rtpose_wrapper/SkeletonMsg.h>
+#include <opt_msgs/SkeletonMsg.h>
 #include <numeric>
 
 namespace open_ptrack
