@@ -36,7 +36,7 @@ def available_cpu_count():
         if m:
             res = bin(int(m.group(1).replace(',', ''), 16)).count('1')
             if res > 0:
-                return res
+                return res 
     except IOError:
         pass
 
@@ -456,6 +456,24 @@ def compile_simple_pose(use_compiler=False):
         tvm_compiler('simple_pose', mod, params, target)
     return mod, params, target
 
+
+def compile_mobile_pose(use_compiler=False):
+    print("compiling pose detector")
+    target = 'cuda -libs=cudnn,cublas'
+    if not CUDA:
+        target = 'llvm'
+    if ARCH == 'aarch64':
+        target += ' -model={}'.format(ARGS.board)
+    block = model_zoo.get_model('mobile_pose_mobilenetv3_small', pretrained=True)
+    block.hybridize(static_alloc=True)
+    mod, params = relay.frontend.from_mxnet(block, shape={'data': MODEL_CONFIG["mobile_pose"]["shape"]}, dtype='float32')
+    #net = mod["main"]
+    #net = relay.Function(net.params, net.body, None, net.type_params, net.attrs)
+    #mod = tvm.IRModule.from_expr(net)
+    if use_compiler:
+        tvm_compiler('mobile_pose', mod, params, target)
+    return mod, params, target
+
 def compile_face_detector(use_compiler=False):
     print("compiling face detector")
     target = 'cuda -libs=cudnn,cublas'
@@ -527,7 +545,7 @@ def load_raw_model(path_base):
     return loaded_json, loaded_lib, loaded_params
 
 if __name__ == '__main__':
-    AVAILABLE_MODELS = {'object_detector', 'simple_pose', 'face_detector', 'face_embedder', 'hand_detector', 'nonms_hand_detector','nonms_object_detector', 'pose_pipeline_nonms', 'pose_pipeline'}
+    AVAILABLE_MODELS = {'object_detector', 'simple_pose','mobile_pose', 'face_detector', 'face_embedder', 'hand_detector', 'nonms_hand_detector','nonms_object_detector', 'pose_pipeline_nonms', 'pose_pipeline'}
     PARSER = argparse.ArgumentParser(description='')
     PARSER.add_argument('--network', type=str, default='nonms_object_detector', help='Network Architecture')
     PARSER.add_argument('--target', type=str, default='cuda', help='Deploy Target')
@@ -624,6 +642,15 @@ if __name__ == '__main__':
                 'cuda': CUDA,
                 'compile': compile_simple_pose,
                 'name': 'simple_pose',
+            },
+        'mobile_pose':
+            {
+                'shape': (1, 3, 256, 192),
+                'output_name': 'pose.{}.{}'.format(ARCH, suffix),
+                'dtype': 'float32',
+                'cuda': CUDA,
+                'compile': compile_mobile_pose,
+                'name': 'mobile_pose',
             },
         'face_detector':
             {
