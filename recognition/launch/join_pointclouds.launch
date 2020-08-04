@@ -5,7 +5,7 @@
   <include file="$(find opt_calibration)/launch/opt_calibration_results.launch"/>
 
   <!-- Launch object detection node -->
-  <node pkg="recognition" type="join_pointcloud"
+  <node pkg="recognition" type="join_pointclouds"
         name="join_pointcloud" output="screen" respawn="false">
 
   </node>

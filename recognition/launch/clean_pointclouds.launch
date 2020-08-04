@@ -16,7 +16,7 @@
 
 
   <!-- Launch object detection node -->
-  <node pkg="recognition" type="clean_pointcloud"
+  <node pkg="recognition" type="clean_pointclouds"
         name="$(arg sensor_name)_clean_pointcloud" output="screen" respawn="false">
 
     <param name="sensor_name"               value="$(arg sensor_name)" />
