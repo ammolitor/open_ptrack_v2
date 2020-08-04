@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Launch object detection node -->
+  <node pkg="recognition" type="join_pointcloud"
+        name="join_pointcloud" output="screen" respawn="false">
+
+  </node>
+
+</launch>
