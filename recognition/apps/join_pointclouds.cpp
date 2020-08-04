@@ -319,22 +319,23 @@ class VisNode {
       //    cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
       //    }
       //}
-
+      std::cout << "cloud_ size: " << cloud_.size() << std::endl;
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
       pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
       pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, frame_transforms[frame_id_tmp]);
-
+      std::cout << "cloud_xyzrgb size: " << cloud_xyzrgb.size() << std::endl;
       //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
       //    ++cloud_it)
       //  cloud_it->rgb = colors.at(i).rgb;
 
       *clouds_stacked += cloud_xyzrgb;
       
+      std::cout << "clouds stacked size: " << clouds_stacked.size() << std::endl;
       // Publish point clouds
       clouds_stacked->header.frame_id = "world";
       cloud_pub.publish(clouds_stacked);
 
-      //viewer.
+
     }
 };
 
