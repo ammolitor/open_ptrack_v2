@@ -91,7 +91,7 @@
 #include <open_ptrack/hungarian/Hungarian.h>
 #include <nlohmann/json.hpp>
 #include <recognition/GenDetectionConfig.h>
-
+#include <pcl/common/colors.h>
 /// yolo specific args
 //#include <open_ptrack/tvm_detection_helpers.hpp>
 //#include <open_ptrack/NoNMSPoseFromConfig.hpp>
@@ -276,6 +276,7 @@ class VisNode {
 
     void callback(const PointCloudT::ConstPtr& cloud_) {
       // Read message header information:
+      pcl::GlasbeyLUT colors;
       PointCloudPtr clouds_stacked(new PointCloud);
       std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
       std::string frame_id = cloud_header.frame_id;
@@ -313,12 +314,11 @@ class VisNode {
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
       pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
       pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, frame_transforms[frame_id_tmp]);
-      last_received_cloud[frame_id] = cloud_xyzrgb;
       std::cout << "cloud_xyzrgb size: " << cloud_xyzrgb.size() << std::endl;
-      //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
-      //    ++cloud_it)
-      //  cloud_it->rgb = colors.at(i).rgb;
-
+      for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
+          ++cloud_it)
+        cloud_it->rgb = colors.at(i).rgb;
+      last_received_cloud[frame_id] = cloud_xyzrgb;
       std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>>::iterator it = last_received_cloud.begin();
 
       while (it != last_received_cloud.end())
