@@ -299,8 +299,7 @@ class VisNode {
       Eigen::Affine3d pose_inverse_transform;
       try {
         pose_inverse_transform = frame_transforms[frame_id_tmp];
-      
-      } catch {
+      } catch(const std::exception& e) {
         //Calculate direct and inverse transforms between camera and world frame:
         tf_listener.lookupTransform("/world", frame_id, ros::Time(0), transform);
         tf_listener.lookupTransform(frame_id, "/world", ros::Time(0), inverse_transform);
@@ -333,9 +332,9 @@ class VisNode {
       
       // Publish point clouds
       clouds_stacked->header.frame_id = "world";
-      cloud_pub->publish(clouds_stacked);
+      cloud_pub.publish(clouds_stacked);
 
-      return true;
+
     }
 };
 
