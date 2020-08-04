@@ -261,6 +261,7 @@ class VisNode {
     bool listen_for_ground = false;
     PointCloudPtr clouds_stacked = PointCloudPtr (new PointCloud);
     std::map<std::string, Eigen::Affine3d> frame_transforms;
+    std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>> last_received_cloud;
 
     VisNode(ros::NodeHandle& nh):
       node_(nh), it(node_)
@@ -275,8 +276,7 @@ class VisNode {
 
     void callback(const PointCloudT::ConstPtr& cloud_) {
       // Read message header information:
-
-
+      PointCloudPtr clouds_stacked(new PointCloud);
       std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
       std::string frame_id = cloud_header.frame_id;
       ros::Time frame_time = cloud_header.stamp;
@@ -290,7 +290,7 @@ class VisNode {
       frame_id_tmp.replace(pos, std::string("_depth_optical_frame").size(), "");
       
       frame_id = frame_id_tmp;
-
+      
       // add to pointcloud vis
       //pcl::transformPointCloud(cloud_, PtrPointCloud, inverse_transform.matrix());
       tf::StampedTransform transform;
@@ -309,33 +309,30 @@ class VisNode {
         frame_transforms[frame_id_tmp] = pose_inverse_transform;
       }
       
-      // fill xyzrgb
-      //for (int i=0;i<cloud_->height;i++)
-      //{
-      ///    for (int j=0;j<cloud_->width;j++)
-      //    {
-      //    cloud_xyzrgb->at(j,i).x = cloud_->at(j,i).x;
-      //    cloud_xyzrgb->at(j,i).y = cloud_->at(j,i).y;
-      //    cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
-      //    }
-      //}
       std::cout << "cloud_ size: " << cloud_->size() << std::endl;
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
       pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
       pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, frame_transforms[frame_id_tmp]);
+      last_received_cloud[frame_id] = cloud_xyzrgb;
       std::cout << "cloud_xyzrgb size: " << cloud_xyzrgb.size() << std::endl;
       //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
       //    ++cloud_it)
       //  cloud_it->rgb = colors.at(i).rgb;
 
-      *clouds_stacked += cloud_xyzrgb;
+      std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>>::iterator it = last_received_cloud.begin();
+
+      while (it != mapOfWordCount.end())
+      {
+          std::string frame_identifier = it->first;
+          pcl::PointCloud<pcl::PointXYZRGB>> cloud_xyzrgb = it->second;
+          *clouds_stacked += cloud_xyzrgb;
+          it++;
+      }
       
       std::cout << "clouds stacked size: " << clouds_stacked->size() << std::endl;
       // Publish point clouds
       clouds_stacked->header.frame_id = "world";
       cloud_pub.publish(clouds_stacked);
-
-
     }
 };
 
