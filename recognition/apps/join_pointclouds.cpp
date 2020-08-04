@@ -319,7 +319,7 @@ class VisNode {
       //    cloud_xyzrgb->at(j,i).z = cloud_->at(j,i).z;
       //    }
       //}
-      std::cout << "cloud_ size: " << cloud_.size() << std::endl;
+      std::cout << "cloud_ size: " << cloud_->size() << std::endl;
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
       pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
       pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, frame_transforms[frame_id_tmp]);
@@ -330,7 +330,7 @@ class VisNode {
 
       *clouds_stacked += cloud_xyzrgb;
       
-      std::cout << "clouds stacked size: " << clouds_stacked.size() << std::endl;
+      std::cout << "clouds stacked size: " << clouds_stacked->size() << std::endl;
       // Publish point clouds
       clouds_stacked->header.frame_id = "world";
       cloud_pub.publish(clouds_stacked);
