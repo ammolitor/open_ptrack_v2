@@ -117,7 +117,7 @@ class CleanerNode {
   private:
     // Publishers
     ros::Publisher detections_pub;
-    ros::Publisher skeleton_pub;
+    ros::Publisher cloud_pub;
     image_transport::Publisher image_pub;
     ros::NodeHandle node_;
     ros::Subscriber point_cloud_approximate_sync_;
@@ -344,12 +344,9 @@ class CleanerNode {
         }
         
         // Publish Messages
-        detections_pub = node_.advertise<opt_msgs::DetectionArray>("/objects_detector/detections", 3);
 
         // Subscribe to Messages
-        image_pub = it.advertise(sensor_string + "/objects_detector/image", 1);
-        skeleton_pub = node_.advertise<opt_msgs::SkeletonArrayMsg>("/detector/skeletons", 1);
-        cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("/cleaned_clouds", 1))
+        cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("/cleaned_clouds", 1);
 
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &CleanerNode::camera_info_callback, this);
@@ -1386,7 +1383,7 @@ class CleanerNode {
         cv::Mat cv_image_clone;
         
         // set detection variables here
-        open_ptrack::models::yoloresults* output;
+        //open_ptrack::models::yoloresults* output;
         cv::Size image_size;
         float height;
         float width;

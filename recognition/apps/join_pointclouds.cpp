@@ -117,7 +117,7 @@ class VisNode {
   private:
     // Publishers
     ros::Publisher detections_pub;
-    ros::Publisher skeleton_pub;
+    ros::Publisher cloud_pub;
     image_transport::Publisher image_pub;
     ros::NodeHandle node_;
     ros::Subscriber point_cloud_approximate_sync_;
@@ -259,7 +259,7 @@ class VisNode {
     tf::StampedTransform world_inverse_transform;
     pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
     bool listen_for_ground = false;
-    PointCloudT::Ptr clouds_stacked(new PointCloudT);
+    PointCloudPtr clouds_stacked = PointCloudPtr (new PointCloud);
     std::map<std::string, Eigen::Affine3d> frame_transforms;
 
     VisNode(ros::NodeHandle& nh):
@@ -267,7 +267,7 @@ class VisNode {
       {
       
         //n cameras??
-        cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("/world_cloud", 1))
+        cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("/world_cloud", 1);
         point_cloud_approximate_sync_ = node_.subscribe("/cleaned_clouds", 1, &VisNode::callback, this);
 
       }
@@ -302,8 +302,8 @@ class VisNode {
       
       } catch {
         //Calculate direct and inverse transforms between camera and world frame:
-        tf_listener->lookupTransform(world_frame_id, frame_id, ros::Time(0), transform);
-        tf_listener->lookupTransform(frame_id, world_frame_id, ros::Time(0), inverse_transform);
+        tf_listener.lookupTransform("/world", frame_id, ros::Time(0), transform);
+        tf_listener.lookupTransform(frame_id, "/world", ros::Time(0), inverse_transform);
 
         tf::transformTFToEigen(transform, pose_transform);
         tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
@@ -322,7 +322,7 @@ class VisNode {
       //}
 
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
-      copyPointCloud(*cloud_], cloud_xyzrgb);
+      pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
       pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, frame_transforms[frame_id_tmp]);
 
       //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
