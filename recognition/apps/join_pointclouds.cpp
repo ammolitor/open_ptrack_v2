@@ -317,7 +317,7 @@ class VisNode {
       std::cout << "cloud_xyzrgb size: " << cloud_xyzrgb.size() << std::endl;
       for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
           ++cloud_it)
-        cloud_it->rgb = colors.at(i).rgb;
+        cloud_it->rgb = colors.at(0).rgb;
       last_received_cloud[frame_id] = cloud_xyzrgb;
       std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>>::iterator it = last_received_cloud.begin();
 
