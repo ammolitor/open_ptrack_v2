@@ -985,7 +985,7 @@ class CleanerNode {
       transform_ = transform_pre;
       ground_coeffs_new = ground_coeffs_new_pre;
       no_ground_cloud_rotated = no_ground_cloud_rotated_pre;
-      return no_ground_cloud_rotated
+      return no_ground_cloud_rotated;
     }
 
     /**
@@ -1391,7 +1391,7 @@ class CleanerNode {
         double duration;
 
         PointCloudPtr foreground = create_foreground(cloud_);
-        foreground->header.frame_id = cloud_->header;
+        foreground->header = cloud_->header;
     
         cloud_pub.publish(foreground);
 

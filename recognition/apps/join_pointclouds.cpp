@@ -334,7 +334,7 @@ class VisNode {
       clouds_stacked->header.frame_id = "world";
       cloud_pub.publish(clouds_stacked);
 
-
+      //viewer.
     }
 };
 
