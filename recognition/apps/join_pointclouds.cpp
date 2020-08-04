@@ -321,10 +321,10 @@ class VisNode {
 
       std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>>::iterator it = last_received_cloud.begin();
 
-      while (it != mapOfWordCount.end())
+      while (it != last_received_cloud.end())
       {
           std::string frame_identifier = it->first;
-          pcl::PointCloud<pcl::PointXYZRGB>> cloud_xyzrgb = it->second;
+          pcl::PointCloud<pcl::PointXYZRGB> cloud_xyzrgb = it->second;
           *clouds_stacked += cloud_xyzrgb;
           it++;
       }
