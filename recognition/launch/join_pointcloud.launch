@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <launch>
 
+  <!-- Load calibration results -->
+  <include file="$(find opt_calibration)/launch/opt_calibration_results.launch"/>
+
   <!-- Launch object detection node -->
   <node pkg="recognition" type="join_pointcloud"
         name="join_pointcloud" output="screen" respawn="false">
