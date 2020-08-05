@@ -258,8 +258,8 @@ class VisNode {
     tf::StampedTransform world2rgb_transform;
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
-    //pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
-    pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
+    pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
+    //pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
     bool listen_for_ground = false;
     PointCloudPtr clouds_stacked = PointCloudPtr (new PointCloud);
     std::map<std::string, Eigen::Affine3d> frame_transforms;
@@ -336,9 +336,9 @@ class VisNode {
       clouds_stacked->header.frame_id = "world";
       cloud_pub.publish(clouds_stacked);
 
-      //pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_xyzrgb);
-      //viewer.addPointCloud<PointT> (cloud_xyzrgb, rgb, "temp_cloud");
-      viewer.showCloud (clouds_stacked);
+      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_);
+      viewer.addPointCloud<PointT> (cloud_, rgb, "temp_cloud");
+      //viewer.showCloud (clouds_stacked);
       viewer.addCoordinateSystem (0.5, "axis", 0); 
       viewer.setBackgroundColor (0, 0, 0, 0); 
       //viewer.setPosition (800, 400); 
