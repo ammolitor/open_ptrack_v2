@@ -319,12 +319,12 @@ class VisNode {
       tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
       //frame_transforms[frame_id] = pose_inverse_transform;
       
-
-      Eigen::Matrix3d m = pose_inverse_transform.rotation();
-      Eigen::Vector3d v = pose_inverse_transform.translation();
-      std::cout << "Rotation: " << std::endl << m << std::endl;
-      std::cout << "Translation: " << std::endl << v << std::endl;
-      std::cout << "Matrix: " << pose_inverse_transform.matrix() << std::endl;
+      // debug info
+      //Eigen::Matrix3d m = pose_inverse_transform.rotation();
+      //Eigen::Vector3d v = pose_inverse_transform.translation();
+      //std::cout << "Rotation: " << std::endl << m << std::endl;
+      //std::cout << "Translation: " << std::endl << v << std::endl;
+      //std::cout << "Matrix: " << pose_inverse_transform.matrix() << std::endl;
 
       std::cout << "cloud_ size: " << cloud_->size() << std::endl;
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
@@ -385,7 +385,7 @@ class VisNode {
       //    cloud_for_vis->at(j,i).z = cloud_xyzrgb.at(j,i).z;
       //    }
       //}
-      pcl::copyPointCloud(cloud_xyzrgb, *cloud_for_vis);
+      pcl::copyPointCloud(*clouds_stacked, *cloud_for_vis);
 
       pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_for_vis);
       viewer.addPointCloud<PointT> (cloud_for_vis, rgb, "temp_cloud");
