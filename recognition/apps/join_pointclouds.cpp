@@ -391,7 +391,7 @@ class VisNode {
         }
         //cloud_xyzrgb = registration_matrix * cloud_xyzrgb;
         Eigen::Affine3d registration_transform;
-        registration_transform.translation() << registration_matrix(0), registration_matrix(1), registration_matrix(3);
+        registration_transform.matrix() << registration_matrix;
         pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, registration_transform);
       }
 
