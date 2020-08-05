@@ -112,6 +112,28 @@ typedef pcl::PointCloud<PointT> PointCloud;
 typedef boost::shared_ptr<PointCloud> PointCloudPtr;
 typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
 
+Eigen::Matrix4d
+readMatrixFromFile (std::string filename)
+{
+  Eigen::Matrix4d matrix;
+  std::string line;
+  std::ifstream myfile (filename.c_str());
+  if (myfile.is_open())
+  {
+    int k = 0;
+    std::string number;
+    while (myfile >> number)
+    {
+      matrix(int(k/4), int(k%4)) = std::atof(number.c_str());
+      k++;
+    }
+    myfile.close();
+  }
+
+  std::cout << matrix << std::endl;
+
+  return matrix;
+}
 
 /** \brief BaseNode estimates the ground plane equation from a 3D point cloud */
 class VisNode {
