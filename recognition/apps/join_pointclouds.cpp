@@ -264,6 +264,7 @@ class VisNode {
     PointCloudPtr clouds_stacked = PointCloudPtr (new PointCloud);
     std::map<std::string, Eigen::Affine3d> frame_transforms;
     std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>> last_received_cloud;
+    bool calibration_refinement = true;
 
     VisNode(ros::NodeHandle& nh):
       node_(nh), it(node_)
@@ -277,6 +278,169 @@ class VisNode {
 
 
     void callback(const PointCloudT::ConstPtr& cloud_) {
+      // Read message header information:
+      pcl::GlasbeyLUT colors;
+      PointCloudPtr clouds_stacked(new PointCloud);
+      std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
+      std::string frame_id = cloud_header.frame_id;
+      ros::Time frame_time = cloud_header.stamp;
+
+      std::string frame_id_tmp = frame_id;
+      int pos = frame_id_tmp.find("_color_optical_frame");
+      if (pos != std::string::npos)
+        frame_id_tmp.replace(pos, std::string("_color_optical_frame").size(), "");
+      pos = frame_id_tmp.find("_depth_optical_frame");
+      if (pos != std::string::npos)
+      frame_id_tmp.replace(pos, std::string("_depth_optical_frame").size(), "");
+      
+      frame_id = frame_id_tmp;
+      
+
+      // add to pointcloud vis
+      //pcl::transformPointCloud(cloud_, PtrPointCloud, inverse_transform.matrix());
+      tf::StampedTransform transform;
+      tf::StampedTransform inverse_transform;
+      Eigen::Affine3d pose_transform;
+      Eigen::Affine3d pose_inverse_transform;
+      //try {
+      //  pose_inverse_transform = frame_transforms[frame_id];
+      //} catch(const std::exception& e) {
+      //  //Calculate direct and inverse transforms between camera and world frame:
+      //  tf_listener.lookupTransform("/world", frame_id, ros::Time(0), transform);
+      //  tf_listener.lookupTransform(frame_id, "/world", ros::Time(0), inverse_transform);
+      //
+      //  tf::transformTFToEigen(transform, pose_transform);
+      //  tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
+      //  frame_transforms[frame_id] = pose_inverse_transform;
+      //}
+      
+      tf_listener.lookupTransform("/world", frame_id, ros::Time(0), transform);
+      tf_listener.lookupTransform(frame_id, "/world", ros::Time(0), inverse_transform);
+
+      tf::transformTFToEigen(transform, pose_transform);
+      tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
+      //frame_transforms[frame_id] = pose_inverse_transform;
+      
+      // debug info
+      //Eigen::Matrix3d m = pose_inverse_transform.rotation();
+      //Eigen::Vector3d v = pose_inverse_transform.translation();
+      //std::cout << "Rotation: " << std::endl << m << std::endl;
+      //std::cout << "Translation: " << std::endl << v << std::endl;
+      //std::cout << "Matrix: " << pose_inverse_transform.matrix() << std::endl;
+
+      std::cout << "cloud_ size: " << cloud_->size() << std::endl;
+      pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
+      pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
+      pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, pose_inverse_transform);
+
+
+      // Detection correction by means of calibration refinement:
+      if (calibration_refinement)
+      {
+        if (strcmp(frame_id.substr(0,1).c_str(), "/") == 0)
+        {
+          frame_id = frame_id.substr(1, frame_id.size() - 1);
+        }
+
+        Eigen::Matrix4d registration_matrix;
+        std::map<std::string, Eigen::Matrix4d>::iterator registration_matrices_iterator = registration_matrices.find(frame_id);
+        if (registration_matrices_iterator != registration_matrices.end())
+        { // camera already present
+          registration_matrix = registration_matrices_iterator->second;
+        }
+        else
+        { // camera not present
+          std::cout << "Reading refinement matrix of " << frame_id << " from file." << std::endl;
+          std::string refinement_filename = ros::package::getPath("opt_calibration") + "/conf/registration_" + frame_id + ".txt";
+          std::ifstream f(refinement_filename.c_str());
+          if (f.good()) // if the file exists
+          {
+            f.close();
+            registration_matrix = readMatrixFromFile (refinement_filename);
+            registration_matrices.insert(std::pair<std::string, Eigen::Matrix4d> (frame_id, registration_matrix));
+          }
+          else  // if the file does not exist
+          {
+            // insert the identity matrix
+            std::cout << "Refinement file not found! Not doing refinement for this sensor." << std::endl;
+            registration_matrices.insert(std::pair<std::string, Eigen::Matrix4d> (frame_id, Eigen::Matrix4d::Identity()));
+          }
+        }
+        //cloud_xyzrgb = registration_matrix * cloud_xyzrgb;
+        Eigen::Affine3d registration_transform;
+        registration_transform << registration_matrix(0), registration_matrix(1), registration_matrix(3);
+        pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, registration_transform);
+      }
+
+      std::cout << "cloud_xyzrgb size: " << cloud_xyzrgb.size() << std::endl;
+      //PointCloudT::ConstPtr::iterator it2 = cloud_->points.begin();
+      //pcl::PointCloud<pcl::PointXYZRGB>::iterator it;
+      //pcl::PointCloud<pcl::PointXYZ>::iterator it2;
+      //for(pcl::PointCloud<pcl::PointXYZRGB>::iterator it = cloud_xyzrgb.points.begin(); it != cloud_xyzrgb.points.end(); ++it,++it2)
+  
+      // debug output -- all inf
+      //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end(); ++cloud_it)
+      //{
+      //  std::cout << "cloud_it->x: " << cloud_it->x << std::endl;
+      //  std::cout << "cloud_it->y: " << cloud_it->y << std::endl;
+      //  std::cout << "cloud_it->z: " << cloud_it->z << std::endl;
+      //}
+
+      //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
+      //    ++cloud_it)
+      //  cloud_it->rgb = colors.at(0).rgb;
+      last_received_cloud[frame_id] = cloud_xyzrgb;
+      std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>>::iterator it = last_received_cloud.begin();
+
+      while (it != last_received_cloud.end())
+      {
+          std::string frame_identifier = it->first;
+          pcl::PointCloud<pcl::PointXYZRGB> cloud_xyzrgb = it->second;
+          *clouds_stacked += cloud_xyzrgb;
+          it++;
+      }
+      
+      std::cout << "clouds stacked size: " << clouds_stacked->size() << std::endl;
+      // Publish point clouds
+      clouds_stacked->header.frame_id = "world";
+      cloud_pub.publish(clouds_stacked);
+
+
+      // Create XYZ cloud for viz
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_for_vis(new pcl::PointCloud<pcl::PointXYZRGB>);
+      //https://answers.ros.org/question/9515/how-to-convert-between-different-point-cloud-types-using-pcl/
+      //pcl::PointXYZRGB xyzrgb_point;
+      //cloud_for_vis->points.resize(cloud_xyzrgb.width * cloud_xyzrgb.height, xyzrgb_point);
+      //cloud_for_vis->width = cloud_xyzrgb.width;
+      //cloud_for_vis->height = cloud_xyzrgb.height;
+      //cloud_for_vis->is_dense = false;
+
+      // fill xyzrgb
+      //for (int i=0;i<cloud_xyzrgb.height;i++)
+     // {
+      //    for (int j=0;j<cloud_xyzrgb.width;j++)
+      //    {
+      //    cloud_for_vis->at(j,i).x = cloud_xyzrgb.at(j,i).x;
+      //    cloud_for_vis->at(j,i).y = cloud_xyzrgb.at(j,i).y;
+      //    cloud_for_vis->at(j,i).z = cloud_xyzrgb.at(j,i).z;
+      //    }
+      //}
+      pcl::copyPointCloud(*clouds_stacked, *cloud_for_vis);
+
+      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_for_vis);
+      viewer.addPointCloud<PointT> (cloud_for_vis, rgb, "temp_cloud");
+      //viewer.showCloud (clouds_stacked);
+      viewer.addCoordinateSystem (0.5, "axis", 0); 
+      viewer.setBackgroundColor (0, 0, 0, 0); 
+      //viewer.setPosition (800, 400); 
+      //viewer.setCameraPosition(0,0,-2,0,-1,0,0);;
+      viewer.spinOnce ();
+      viewer.removeAllShapes();
+      viewer.removeAllPointClouds();  
+    }
+
+
+    void new_callback(const PointCloudT::ConstPtr& cloud_) {
       // Read message header information:
       pcl::GlasbeyLUT colors;
       PointCloudPtr clouds_stacked(new PointCloud);
@@ -398,6 +562,8 @@ class VisNode {
       viewer.removeAllShapes();
       viewer.removeAllPointClouds();  
     }
+
+
 };
 
 int main(int argc, char** argv) {
