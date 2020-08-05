@@ -334,8 +334,8 @@ class VisNode {
       clouds_stacked->header.frame_id = "world";
       cloud_pub.publish(clouds_stacked);
 
-      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(clouds_stacked);
-      viewer.addPointCloud<PointT> (clouds_stacked, rgb, "temp_cloud");
+      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_xyzrgb);
+      viewer.addPointCloud<PointT> (cloud_xyzrgb, rgb, "temp_cloud");
       viewer.addCoordinateSystem (0.5, "axis", 0); 
       viewer.setBackgroundColor (0, 0, 0, 0); 
       //viewer.setPosition (800, 400); 
