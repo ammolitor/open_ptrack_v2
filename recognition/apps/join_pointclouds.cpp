@@ -97,6 +97,7 @@
 //#include <open_ptrack/NoNMSPoseFromConfig.hpp>
 //#include <open_ptrack/NoNMSYoloFromConfig.hpp>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/visualization/cloud_viewer.h>
 
 using json = nlohmann::json;
 typedef sensor_msgs::Image Image;
