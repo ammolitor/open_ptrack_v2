@@ -319,12 +319,18 @@ class VisNode {
 
 
       std::cout << "cloud_xyzrgb size: " << cloud_xyzrgb.size() << std::endl;
-      PointCloudT::ConstPtr::iterator it2 = cloud_->points.begin();
-      for(pcl::PointCloud<pcl::PointXYZRGB>::iterator it = cloud_xyzrgb.points.begin(); it != cloud_xyzrgb.points.end(); ++it,++it2)
+      //PointCloudT::ConstPtr::iterator it2 = cloud_->points.begin();
+      //pcl::PointCloud<pcl::PointXYZRGB>::iterator it;
+      //pcl::PointCloud<pcl::PointXYZ>::iterator it2;
+      //for(pcl::PointCloud<pcl::PointXYZRGB>::iterator it = cloud_xyzrgb.points.begin(); it != cloud_xyzrgb.points.end(); ++it,++it2)
+  
+      // debug output
+      for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end(); ++cloud_it)
       {
-        std::cout << it << "==?" << *it2 << std::endl;
-      } 
-
+        std::cout << "cloud_it->x: " << cloud_it->x << std::endl;
+        std::cout << "cloud_it->y: " << cloud_it->y << std::endl;
+        std::cout << "cloud_it->z: " << cloud_it->z << std::endl;
+      }
 
       //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
       //    ++cloud_it)
