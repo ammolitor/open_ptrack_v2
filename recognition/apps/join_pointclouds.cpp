@@ -300,19 +300,26 @@ class VisNode {
       tf::StampedTransform inverse_transform;
       Eigen::Affine3d pose_transform;
       Eigen::Affine3d pose_inverse_transform;
-      try {
-        pose_inverse_transform = frame_transforms[frame_id];
-      } catch(const std::exception& e) {
-        //Calculate direct and inverse transforms between camera and world frame:
-        tf_listener.lookupTransform("/world", frame_id, ros::Time(0), transform);
-        tf_listener.lookupTransform(frame_id, "/world", ros::Time(0), inverse_transform);
-
-        tf::transformTFToEigen(transform, pose_transform);
-        tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
-        frame_transforms[frame_id] = pose_inverse_transform;
-      }
-      //std::cout << frame_transforms[frame_id] << std::endl;
+      //try {
+      //  pose_inverse_transform = frame_transforms[frame_id];
+      //} catch(const std::exception& e) {
+      //  //Calculate direct and inverse transforms between camera and world frame:
+      //  tf_listener.lookupTransform("/world", frame_id, ros::Time(0), transform);
+      //  tf_listener.lookupTransform(frame_id, "/world", ros::Time(0), inverse_transform);
+      //
+      //  tf::transformTFToEigen(transform, pose_transform);
+      //  tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
+      //  frame_transforms[frame_id] = pose_inverse_transform;
+      //}
       
+      tf_listener.lookupTransform("/world", frame_id, ros::Time(0), transform);
+      tf_listener.lookupTransform(frame_id, "/world", ros::Time(0), inverse_transform);
+
+      tf::transformTFToEigen(transform, pose_transform);
+      tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
+      //frame_transforms[frame_id] = pose_inverse_transform;
+      
+
       Eigen::Matrix3d m = pose_inverse_transform.rotation();
       Eigen::Vector3d v = pose_inverse_transform.translation();
       std::cout << "Rotation: " << std::endl << m << std::endl;
