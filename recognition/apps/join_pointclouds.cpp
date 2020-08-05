@@ -97,7 +97,7 @@
 //#include <open_ptrack/NoNMSPoseFromConfig.hpp>
 //#include <open_ptrack/NoNMSYoloFromConfig.hpp>
 #include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/visualization/cloud_viewer.h>
+//#include <pcl/visualization/cloud_viewer.h>
 
 using json = nlohmann::json;
 typedef sensor_msgs::Image Image;
@@ -336,8 +336,30 @@ class VisNode {
       clouds_stacked->header.frame_id = "world";
       cloud_pub.publish(clouds_stacked);
 
-      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_);
-      viewer.addPointCloud<PointT> (cloud_, rgb, "temp_cloud");
+
+      // Create XYZ cloud for viz
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_for_vis(new pcl::PointCloud<pcl::PointXYZRGB>);
+      //https://answers.ros.org/question/9515/how-to-convert-between-different-point-cloud-types-using-pcl/
+      pcl::PointXYZRGB xyzrgb_point;
+      cloud_for_vis->points.resize(cloud_xyzrgb.width * cloud_xyzrgb.height, xyzrgb_point);
+      cloud_for_vis->width = cloud_xyzrgb.width;
+      cloud_for_vis->height = cloud_xyzrgb.height;
+      cloud_for_vis->is_dense = false;
+
+      // fill xyzrgb
+      for (int i=0;i<cloud_xyzrgb.height;i++)
+      {
+          for (int j=0;j<cloud_xyzrgb.width;j++)
+          {
+          cloud_for_vis->at(j,i).x = cloud_xyzrgb.at(j,i).x;
+          cloud_for_vis->at(j,i).y = cloud_xyzrgb.at(j,i).y;
+          cloud_for_vis->at(j,i).z = cloud_xyzrgb.at(j,i).z;
+          }
+      }
+
+
+      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_for_vis);
+      viewer.addPointCloud<PointT> (cloud_for_vis, rgb, "temp_cloud");
       //viewer.showCloud (clouds_stacked);
       viewer.addCoordinateSystem (0.5, "axis", 0); 
       viewer.setBackgroundColor (0, 0, 0, 0); 
