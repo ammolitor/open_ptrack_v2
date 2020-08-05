@@ -301,7 +301,7 @@ class VisNode {
       Eigen::Affine3d pose_transform;
       Eigen::Affine3d pose_inverse_transform;
       try {
-        pose_inverse_transform = frame_transforms[frame_id_tmp];
+        pose_inverse_transform = frame_transforms[frame_id];
       } catch(const std::exception& e) {
         //Calculate direct and inverse transforms between camera and world frame:
         tf_listener.lookupTransform("/world", frame_id, ros::Time(0), transform);
@@ -309,15 +309,15 @@ class VisNode {
 
         tf::transformTFToEigen(transform, pose_transform);
         tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
-        frame_transforms[frame_id_tmp] = pose_inverse_transform;
+        frame_transforms[frame_id] = pose_inverse_transform;
       }
-      std::cout << frame_transforms[frame_id_tmp] << std::endl;
+      //std::cout << frame_transforms[frame_id] << std::endl;
       std::cout << pose_inverse_transform << std::endl;
 
       std::cout << "cloud_ size: " << cloud_->size() << std::endl;
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
       pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
-      pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, frame_transforms[frame_id_tmp]);
+      pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, pose_inverse_transform);
 
 
       std::cout << "cloud_xyzrgb size: " << cloud_xyzrgb.size() << std::endl;
