@@ -340,23 +340,23 @@ class VisNode {
       // Create XYZ cloud for viz
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_for_vis(new pcl::PointCloud<pcl::PointXYZRGB>);
       //https://answers.ros.org/question/9515/how-to-convert-between-different-point-cloud-types-using-pcl/
-      pcl::PointXYZRGB xyzrgb_point;
-      cloud_for_vis->points.resize(cloud_xyzrgb.width * cloud_xyzrgb.height, xyzrgb_point);
-      cloud_for_vis->width = cloud_xyzrgb.width;
-      cloud_for_vis->height = cloud_xyzrgb.height;
-      cloud_for_vis->is_dense = false;
+      //pcl::PointXYZRGB xyzrgb_point;
+      //cloud_for_vis->points.resize(cloud_xyzrgb.width * cloud_xyzrgb.height, xyzrgb_point);
+      //cloud_for_vis->width = cloud_xyzrgb.width;
+      //cloud_for_vis->height = cloud_xyzrgb.height;
+      //cloud_for_vis->is_dense = false;
 
       // fill xyzrgb
-      for (int i=0;i<cloud_xyzrgb.height;i++)
-      {
-          for (int j=0;j<cloud_xyzrgb.width;j++)
-          {
-          cloud_for_vis->at(j,i).x = cloud_xyzrgb.at(j,i).x;
-          cloud_for_vis->at(j,i).y = cloud_xyzrgb.at(j,i).y;
-          cloud_for_vis->at(j,i).z = cloud_xyzrgb.at(j,i).z;
-          }
-      }
-
+      //for (int i=0;i<cloud_xyzrgb.height;i++)
+     // {
+      //    for (int j=0;j<cloud_xyzrgb.width;j++)
+      //    {
+      //    cloud_for_vis->at(j,i).x = cloud_xyzrgb.at(j,i).x;
+      //    cloud_for_vis->at(j,i).y = cloud_xyzrgb.at(j,i).y;
+      //    cloud_for_vis->at(j,i).z = cloud_xyzrgb.at(j,i).z;
+      //    }
+      //}
+      pcl::copyPointCloud(*cloud_xyzrgb, cloud_for_vis);
 
       pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_for_vis);
       viewer.addPointCloud<PointT> (cloud_for_vis, rgb, "temp_cloud");
