@@ -316,10 +316,19 @@ class VisNode {
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
       pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
       pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, frame_transforms[frame_id_tmp]);
+
+
       std::cout << "cloud_xyzrgb size: " << cloud_xyzrgb.size() << std::endl;
-      for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
-          ++cloud_it)
-        cloud_it->rgb = colors.at(0).rgb;
+      PointCloudT::ConstPtr::iterator it2 = cloud_->points.begin();
+      for(pcl::PointCloud<pcl::PointXYZRGB>::iterator it = cloud_xyzrgb.points.begin(); it != cloud_xyzrgb.points.end(); ++it,++it2)
+      {
+        std::cout << it << "==?" << *it2 << std::endl;
+      } 
+
+
+      //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
+      //    ++cloud_it)
+      //  cloud_it->rgb = colors.at(0).rgb;
       last_received_cloud[frame_id] = cloud_xyzrgb;
       std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>>::iterator it = last_received_cloud.begin();
 
@@ -367,7 +376,7 @@ class VisNode {
       //viewer.setCameraPosition(0,0,-2,0,-1,0,0);;
       viewer.spinOnce ();
       viewer.removeAllShapes();
-      viewer.removeAllPointClouds();
+      viewer.removeAllPointClouds();  
     }
 };
 
