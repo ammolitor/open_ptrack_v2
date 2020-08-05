@@ -311,7 +311,9 @@ class VisNode {
         tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
         frame_transforms[frame_id_tmp] = pose_inverse_transform;
       }
-      
+      std::cout << frame_transforms[frame_id_tmp] << std::endl;
+      std::cout << pose_inverse_transform << std::endl;
+
       std::cout << "cloud_ size: " << cloud_->size() << std::endl;
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
       pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
@@ -324,13 +326,13 @@ class VisNode {
       //pcl::PointCloud<pcl::PointXYZ>::iterator it2;
       //for(pcl::PointCloud<pcl::PointXYZRGB>::iterator it = cloud_xyzrgb.points.begin(); it != cloud_xyzrgb.points.end(); ++it,++it2)
   
-      // debug output
-      for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end(); ++cloud_it)
-      {
-        std::cout << "cloud_it->x: " << cloud_it->x << std::endl;
-        std::cout << "cloud_it->y: " << cloud_it->y << std::endl;
-        std::cout << "cloud_it->z: " << cloud_it->z << std::endl;
-      }
+      // debug output -- all inf
+      //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end(); ++cloud_it)
+      //{
+      //  std::cout << "cloud_it->x: " << cloud_it->x << std::endl;
+      //  std::cout << "cloud_it->y: " << cloud_it->y << std::endl;
+      //  std::cout << "cloud_it->z: " << cloud_it->z << std::endl;
+      //}
 
       //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
       //    ++cloud_it)
