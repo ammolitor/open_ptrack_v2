@@ -312,7 +312,12 @@ class VisNode {
         frame_transforms[frame_id] = pose_inverse_transform;
       }
       //std::cout << frame_transforms[frame_id] << std::endl;
-      std::cout << pose_inverse_transform << std::endl;
+      
+      Eigen::Matrix3d m = pose_inverse_transform.rotation();
+      Eigen::Vector3d v = pose_inverse_transform.translation();
+      std::cout << "Rotation: " << std::endl << m << std::endl;
+      std::cout << "Translation: " << std::endl << v << std::endl;
+      std::cout << "Matrix: " << pose_inverse_transform.matrix() << std::endl;
 
       std::cout << "cloud_ size: " << cloud_->size() << std::endl;
       pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
