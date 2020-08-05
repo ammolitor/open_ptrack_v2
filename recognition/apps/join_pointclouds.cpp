@@ -257,7 +257,8 @@ class VisNode {
     tf::StampedTransform world2rgb_transform;
     tf::StampedTransform world_transform;
     tf::StampedTransform world_inverse_transform;
-    pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
+    //pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
+    pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
     bool listen_for_ground = false;
     PointCloudPtr clouds_stacked = PointCloudPtr (new PointCloud);
     std::map<std::string, Eigen::Affine3d> frame_transforms;
