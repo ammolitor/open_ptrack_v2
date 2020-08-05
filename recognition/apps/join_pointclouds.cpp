@@ -356,7 +356,7 @@ class VisNode {
       //    cloud_for_vis->at(j,i).z = cloud_xyzrgb.at(j,i).z;
       //    }
       //}
-      pcl::copyPointCloud(*cloud_xyzrgb, cloud_for_vis);
+      pcl::copyPointCloud(cloud_xyzrgb, cloud_for_vis);
 
       pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_for_vis);
       viewer.addPointCloud<PointT> (cloud_for_vis, rgb, "temp_cloud");
