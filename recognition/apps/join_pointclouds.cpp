@@ -265,6 +265,7 @@ class VisNode {
     std::map<std::string, Eigen::Affine3d> frame_transforms;
     std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>> last_received_cloud;
     bool calibration_refinement = true;
+    std::map<std::string, Eigen::Matrix4d> registration_matrices;
 
     VisNode(ros::NodeHandle& nh):
       node_(nh), it(node_)
