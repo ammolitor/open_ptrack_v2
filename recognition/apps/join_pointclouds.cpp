@@ -168,7 +168,9 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
   // for (size_t cam_index = 0; cam_index < n_cams; cam_index++){
     CalibrationData calibData;
     std::string cam = "cam" + cam_index;
+    std::cout << "starting read of " << cam << std::endl;
     if (cam_index == 0) {
+      
       std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
       std::cout << "read: distortion_coeffs" << std::endl;
       std::vector<double> intrinsics = kalibr_config[cam]["intrinsics"];
