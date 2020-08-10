@@ -192,7 +192,7 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
       //}
     } else {
       std::vector<std::vector<double>> values = kalibr_config[cam]["T_cn_cnm1"];
-      std::cout << "read: " << values << std::endl;
+      std::cout << "read: values " << std::endl;
       calibData.T_cn_cnm1 << values[0][0], values[0][1], values[0][2], values[0][3],
             values[1][0], values[1][1], values[1][2], values[1][3],
             values[2][0], values[2][1], values[2][2], values[2][3],
