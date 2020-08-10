@@ -170,9 +170,9 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
     std::string cam = "cam" + cam_index;
     if (cam_index == 0) {
       std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
-      std::cout << "read: " << distortion_coeffs << std::endl;
+      std::cout << "read: distortion_coeffs" << std::endl;
       std::vector<double> intrinsics = kalibr_config[cam]["intrinsics"];
-      std::cout << "read: " << intrinsics << std::endl;
+      std::cout << "read: intrinsics" << std::endl;
       std::string rostopic = kalibr_config[cam]["rostopic"];
       std::cout << "read: " << rostopic << std::endl;
       std::string frame_id_tmp = rostopic;
