@@ -169,10 +169,12 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
     CalibrationData calibData;
     std::string cam = "cam" + cam_index;
     if (cam_index == 0) {
-
       std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
+      std::cout << "read: " << distortion_coeffs << std::endl;
       std::vector<double> intrinsics = kalibr_config[cam]["intrinsics"];
+      std::cout << "read: " << intrinsics << std::endl;
       std::string rostopic = kalibr_config[cam]["rostopic"];
+      std::cout << "read: " << rostopic << std::endl;
       std::string frame_id_tmp = rostopic;
       int pos = frame_id_tmp.find("/color/image_raw");
       if (pos != std::string::npos)
@@ -190,6 +192,7 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
       //}
     } else {
       std::vector<std::vector<double>> values = kalibr_config[cam]["T_cn_cnm1"];
+      std::cout << "read: " << values << std::endl;
       calibData.T_cn_cnm1 << values[0][0], values[0][1], values[0][2], values[0][3],
             values[1][0], values[1][1], values[1][2], values[1][3],
             values[2][0], values[2][1], values[2][2], values[2][3],
