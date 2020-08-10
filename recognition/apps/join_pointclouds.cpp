@@ -164,7 +164,8 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
   std::ifstream kalibr_json_read(hard_coded_path); 
   kalibr_json_read >> kalibr_config;
   int cam_index = 0;
-  while (true){
+  bool process = true;
+  while (process){
   // for (size_t cam_index = 0; cam_index < n_cams; cam_index++){
     CalibrationData calibData;
     std::string cam = "cam" + std::to_string(cam_index);
@@ -193,32 +194,41 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
       //  calibData.T_cn_cnm1 = calibData.T_cn_cnm1.identity();
       //}
     } else {
-      std::vector<std::vector<double>> values = kalibr_config[cam]["T_cn_cnm1"];
-      std::cout << "read: values " << std::endl;
-      calibData.T_cn_cnm1 << values[0][0], values[0][1], values[0][2], values[0][3],
-            values[1][0], values[1][1], values[1][2], values[1][3],
-            values[2][0], values[2][1], values[2][2], values[2][3],
-            values[3][0], values[3][1], values[3][2], values[3][3];      
-      std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
-      std::vector<double> intrinsics = kalibr_config[cam]["intrinsics"];
-      std::string rostopic = kalibr_config[cam]["rostopic"];
-      std::string frame_id_tmp = rostopic;
-      int pos = frame_id_tmp.find("/color/image_raw");
-      if (pos != std::string::npos)
-        frame_id_tmp.replace(pos, std::string("/color/image_raw").size(), "");
-      pos = frame_id_tmp.find("/");
-      if (pos != std::string::npos)
-        frame_id_tmp.replace(pos, std::string("/").size(), "");    
-      calibData.frame_id = frame_id_tmp;
-      calibData.distortion_coeffs  = distortion_coeffs;
-      calibData.intrinsics = intrinsics;
 
-      Eigen::Matrix<double,3,3> R = calibData.T_cn_cnm1.block<3,3>(0,0);
-      Eigen::Matrix<double,3,3> I = Eigen::Matrix<double,3,3>::Identity();
-      if (R == I) {
-        //ROS_ERROR_STREAM(cam << " cannot have an identity rotation in T_cn_cnm1. Perturb values as needed.");
-        Eigen::AngleAxisd a(0.00001,Eigen::Vector3d::UnitX());
-        calibData.T_cn_cnm1.block<3,3>(0,0) = a.toRotationMatrix();
+      try
+      {
+        std::vector<std::vector<double>> values = kalibr_config[cam]["T_cn_cnm1"];
+        std::cout << "read: values " << std::endl;
+        calibData.T_cn_cnm1 << values[0][0], values[0][1], values[0][2], values[0][3],
+              values[1][0], values[1][1], values[1][2], values[1][3],
+              values[2][0], values[2][1], values[2][2], values[2][3],
+              values[3][0], values[3][1], values[3][2], values[3][3];      
+        std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
+        std::vector<double> intrinsics = kalibr_config[cam]["intrinsics"];
+        std::string rostopic = kalibr_config[cam]["rostopic"];
+        std::string frame_id_tmp = rostopic;
+        int pos = frame_id_tmp.find("/color/image_raw");
+        if (pos != std::string::npos)
+          frame_id_tmp.replace(pos, std::string("/color/image_raw").size(), "");
+        pos = frame_id_tmp.find("/");
+        if (pos != std::string::npos)
+          frame_id_tmp.replace(pos, std::string("/").size(), "");    
+        calibData.frame_id = frame_id_tmp;
+        calibData.distortion_coeffs  = distortion_coeffs;
+        calibData.intrinsics = intrinsics;
+
+        Eigen::Matrix<double,3,3> R = calibData.T_cn_cnm1.block<3,3>(0,0);
+        Eigen::Matrix<double,3,3> I = Eigen::Matrix<double,3,3>::Identity();
+        if (R == I) {
+          //ROS_ERROR_STREAM(cam << " cannot have an identity rotation in T_cn_cnm1. Perturb values as needed.");
+          Eigen::AngleAxisd a(0.00001,Eigen::Vector3d::UnitX());
+          calibData.T_cn_cnm1.block<3,3>(0,0) = a.toRotationMatrix();
+        }
+      }
+      catch(const std::exception& e)
+      {
+        std::cerr << e.what() << '\n';
+        process = false;
       }
     }
     lookup[calibData.frame_id] = calibData;
