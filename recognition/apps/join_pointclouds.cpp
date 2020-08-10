@@ -167,7 +167,7 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
   while (true){
   // for (size_t cam_index = 0; cam_index < n_cams; cam_index++){
     CalibrationData calibData;
-    std::string cam = "cam" + cam_index;
+    std::string cam = "cam" + std::to_string(cam_index);
     std::cout << "starting read of " << cam << std::endl;
     if (cam_index == 0) {
       
