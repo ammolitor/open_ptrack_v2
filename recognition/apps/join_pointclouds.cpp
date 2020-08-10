@@ -163,15 +163,16 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
   std::string hard_coded_path = package_path + local_filepath; //"/cfg/kalibr.json";
   std::ifstream kalibr_json_read(hard_coded_path); 
   kalibr_json_read >> kalibr_config;
-
-  for (size_t cam_index = 0; cam_index < n_cams; cam_index++){
+  cam_index = 0;
+  while (true){
+  // for (size_t cam_index = 0; cam_index < n_cams; cam_index++){
     CalibrationData calibData;
     std::sting cam = "cam" + cam_index;
     if (cam_index == 0) {
 
-      std::vector<double> distortion_coeffs = j[cam]["distortion_coeffs"];
-      std::vector<double> intrinsics = j[cam]["intrinsics"];
-      std::string rostopic = j[cam]["rostopic"];
+      std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
+      std::vector<double> intrinsics = kalibr_config[cam]["intrinsics"];
+      std::string rostopic = kalibr_config[cam]["rostopic"];
       std::string frame_id_tmp = rostopic;
       int pos = frame_id_tmp.find("/color/image_raw");
       if (pos != std::string::npos)
@@ -182,20 +183,20 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
       calibData.frame_id = frame_id_tmp;
       calibData.distortion_coeffs  = distortion_coeffs;
       calibData.intrinsics = intrinsics;
-      calibData.T_cn_cnm1 = calibData.T_cn_cnm1.identity();
+      calibData.T_cn_cnm1 = calibData.T_cn_cnm1::Identity();
       //if (calibData.T_cn_cnm1 != identity()) {
       //  ROS_WARN_STREAM("Cam0 had a non-identity T_cn_cnm1 specified!");
       //  calibData.T_cn_cnm1 = calibData.T_cn_cnm1.identity();
       //}
     } else {
-      std::vector<std::vector<double>> values = j[cam]["T_cn_cnm1"];
+      std::vector<std::vector<double>> values = kalibr_config[cam]["T_cn_cnm1"];
       calibData.T_cn_cnm1 << values[0][0], values[0][1], values[0][2], values[0][3],
             values[1][0], values[1][1], values[1][2], values[1][3],
             values[2][0], values[2][1], values[2][2], values[2][3],
             values[3][0], values[3][1], values[3][2], values[3][3];      
-      std::vector<double> distortion_coeffs = j[cam]["distortion_coeffs"];
-      std::vector<double> intrinsics = j[cam]["intrinsics"];
-      std::string rostopic = j[cam]["rostopic"];
+      std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
+      std::vector<double> intrinsics = kalibr_config[cam]["intrinsics"];
+      std::string rostopic = kalibr_config[cam]["rostopic"];
       std::string frame_id_tmp = rostopic;
       int pos = frame_id_tmp.find("/color/image_raw");
       if (pos != std::string::npos)
@@ -216,6 +217,7 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
       }
     }
     lookup[calibData.frame_id] = calibData;
+    cam_index++;
   }
   return lookup;
 }
