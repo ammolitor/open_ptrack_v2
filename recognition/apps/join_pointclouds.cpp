@@ -135,7 +135,7 @@ readMatrixFromFile (std::string filename)
   return matrix;
 }
 
-  struct CalibrationData {
+struct CalibrationData {
     std::string       frame_id;
     //CameraIntrinsics  intrinsics;
     std::vector<double> distortion_coeffs;
@@ -154,7 +154,7 @@ readMatrixFromFile (std::string filename)
     bool              fixExtrinsics{false};
     bool              active{true};
     // 
-  }
+  };
 
 std::map<std::string, CalibrationData> read_calibration_data(std::string local_filepath){
   std::map<std::string, CalibrationData> lookup;
@@ -163,8 +163,7 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
   std::string hard_coded_path = package_path + local_filepath; //"/cfg/kalibr.json";
   std::ifstream kalibr_json_read(hard_coded_path); 
   kalibr_json_read >> kalibr_config;
-  
-  
+
   for (size_t cam_index = 0; cam_index < n_cams; cam_index++){
     CalibrationData calibData;
     std::sting cam = "cam" + cam_index;
