@@ -8,7 +8,7 @@
   <!-- Launch object detection node -->
   <node pkg="recognition" type="join_pointclouds"
         name="join_pointcloud" output="screen" respawn="false">
-        <arg name="use_kalibr" value="$(arg use_kalibr)" />
+        <param name="use_kalibr" value="$(arg use_kalibr)" />
 
   </node>
 
