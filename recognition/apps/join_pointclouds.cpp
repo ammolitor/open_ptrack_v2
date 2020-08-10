@@ -135,6 +135,94 @@ readMatrixFromFile (std::string filename)
   return matrix;
 }
 
+  struct CalibrationData {
+    std::string       frame_id;
+    //CameraIntrinsics  intrinsics;
+    std::vector<double> distortion_coeffs;
+    std::vector<double> intrinsics; // K Matrix
+    std::vector<int>    resolution;
+    std::string distortion_model;
+    std::string camera_model;
+    // extrinsics
+    Eigen::Matrix<double, 4, 4>  T_cam_imu;
+    Eigen::Matrix<double, 4, 4>  T_cn_cnm1;
+    std::string       rostopic;
+    int               tagCount{0};
+    int               rotateCode{-1};
+    int               flipCode{2};
+    bool              fixIntrinsics{false};
+    bool              fixExtrinsics{false};
+    bool              active{true};
+    // 
+  }
+
+std::map<std::string, CalibrationData> lookup; read_calibration_data(std::string local_filepath){
+  std::map<std::string, CalibrationData> lookup;
+  
+  json kalibr_config;
+  std::string package_path = ros::package::getPath("recognition");
+  std::string hard_coded_path = package_path + local_filepath; //"/cfg/kalibr.json";
+  std::ifstream kalibr_json_read(hard_coded_path); 
+  kalibr_json_read >> kalibr_config;
+  
+  
+  for (size_t cam_index = 0; cam_index < n_cams; cam_index++){
+    CalibrationData calibData;
+    std::sting cam = "cam" + cam_index;
+    if (cam_index == 0) {
+
+      std::vector<double> distortion_coeffs = j[cam]["distortion_coeffs"];
+      std::vector<double> intrinsics = j[cam]["intrinsics"];
+      std::string rostopic = j[cam]["rostopic"];
+      std::string frame_id_tmp = rostopic;
+      int pos = frame_id_tmp.find("/color/image_raw");
+      if (pos != std::string::npos)
+        frame_id_tmp.replace(pos, std::string("/color/image_raw").size(), "");
+      pos = frame_id_tmp.find("/");
+      if (pos != std::string::npos)
+        frame_id_tmp.replace(pos, std::string("/").size(), "");    
+      calibData.frame_id = frame_id_tmp;
+      calibData.distortion_coeffs  = distortion_coeffs;
+      calibData.intrinsics = intrinsics;
+      calibData.T_cn_cnm1 = calibData.T_cn_cnm1.identity();
+      //if (calibData.T_cn_cnm1 != identity()) {
+      //  ROS_WARN_STREAM("Cam0 had a non-identity T_cn_cnm1 specified!");
+      //  calibData.T_cn_cnm1 = calibData.T_cn_cnm1.identity();
+      //}
+    } else {
+      std::vector<std::vector<double>> values = j[key]["T_cn_cnm1"];
+      calibData.T_cn_cnm1 << values[0][0], values[0][1], values[0][2], values[0][3],
+            values[1][0], values[1][1], values[1][2], values[1][3],
+            values[2][0], values[2][1], values[2][2], values[2][3],
+            values[3][0], values[3][1], values[3][2], values[3][3];      
+      std::vector<double> distortion_coeffs = j[cam]["distortion_coeffs"];
+      std::vector<double> intrinsics = j[cam]["intrinsics"];
+      std::string rostopic = j[cam]["rostopic"];
+      std::string frame_id_tmp = rostopic;
+      int pos = frame_id_tmp.find("/color/image_raw");
+      if (pos != std::string::npos)
+        frame_id_tmp.replace(pos, std::string("/color/image_raw").size(), "");
+      pos = frame_id_tmp.find("/");
+      if (pos != std::string::npos)
+        frame_id_tmp.replace(pos, std::string("/").size(), "");    
+      calibData.frame_id = frame_id_tmp;
+      calibData.distortion_coeffs  = distortion_coeffs;
+      calibData.intrinsics = intrinsics;
+
+      Eigen::Matrix<double,3,3> R = calibData.T_cn_cnm1.block<3,3>(0,0);
+      Eigen::Matrix<double,3,3> I = Eigen::Matrix<double,3,3>::Identity();
+      if (R == I) {
+        //ROS_ERROR_STREAM(cam << " cannot have an identity rotation in T_cn_cnm1. Perturb values as needed.");
+        Eigen::AngleAxisd a(0.00001,Eigen::Vector3d::UnitX());
+        calibData.T_cn_cnm1.block<3,3>(0,0) = a.toRotationMatrix();
+      }
+    }
+    lookup[calibData.frame_id] = calibData;
+  }
+  return lookup;
+}
+
+
 /** \brief BaseNode estimates the ground plane equation from a 3D point cloud */
 class VisNode {
   private:
@@ -289,15 +377,163 @@ class VisNode {
     bool calibration_refinement = true;
     std::map<std::string, Eigen::Matrix4d> registration_matrices;
 
-    VisNode(ros::NodeHandle& nh):
+    std::map<std::string, CalibrationData> kalibr_lookup;
+
+    VisNode(ros::NodeHandle& nh, bool use_kalibr):
       node_(nh), it(node_)
       {
       
         //n cameras??
         cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("/world_cloud", 1);
-        point_cloud_approximate_sync_ = node_.subscribe("/cleaned_clouds", 1, &VisNode::callback, this);
+        
+        if (use_kalibr){
+          point_cloud_approximate_sync_ = node_.subscribe("/cleaned_clouds", 1, &VisNode::kalibr_callback, this);
+          kalibr_lookup = read_calibration_data("/cfg/kalibr.json");
+        } else {
+          point_cloud_approximate_sync_ = node_.subscribe("/cleaned_clouds", 1, &VisNode::callback, this);
+        }
 
       }
+
+
+    void kalibr_callback(const PointCloudT::ConstPtr& cloud_) {
+      // Read message header information:
+      pcl::GlasbeyLUT colors;
+      PointCloudPtr clouds_stacked(new PointCloud);
+      std_msgs::Header cloud_header = pcl_conversions::fromPCL(cloud_->header);
+      std::string frame_id = cloud_header.frame_id;
+      ros::Time frame_time = cloud_header.stamp;
+
+      std::string frame_id_tmp = frame_id;
+      int pos = frame_id_tmp.find("_color_optical_frame");
+      if (pos != std::string::npos)
+        frame_id_tmp.replace(pos, std::string("_color_optical_frame").size(), "");
+      pos = frame_id_tmp.find("_depth_optical_frame");
+      if (pos != std::string::npos)
+      frame_id_tmp.replace(pos, std::string("_depth_optical_frame").size(), "");
+      frame_id = frame_id_tmp;
+      CalibrationData calibData = kalibr_lookup[frame_id];
+
+      Eigen::Affine3d pose_inverse_transform;
+
+      // debug info
+      //Eigen::Matrix3d m = pose_inverse_transform.rotation();
+      //Eigen::Vector3d v = pose_inverse_transform.translation();
+      //std::cout << "Rotation: " << std::endl << m << std::endl;
+      //std::cout << "Translation: " << std::endl << v << std::endl;
+      //std::cout << "Matrix: " << pose_inverse_transform.matrix() << std::endl;
+
+      std::cout << "cloud_ size: " << cloud_->size() << std::endl;
+      pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
+      pcl::copyPointCloud(*cloud_, cloud_xyzrgb);
+
+      pose_inverse_transform.matrix() << calibData.T_cn_cnm1;
+      pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, pose_inverse_transform);
+
+      // Detection correction by means of calibration refinement:
+      //if (calibration_refinement)
+      //{
+      //  if (strcmp(frame_id.substr(0,1).c_str(), "/") == 0)
+      //  {
+      //    frame_id = frame_id.substr(1, frame_id.size() - 1);
+      //  }
+      //
+      //  Eigen::Matrix4d registration_matrix;
+      //  std::map<std::string, Eigen::Matrix4d>::iterator registration_matrices_iterator = registration_matrices.find(frame_id);
+      //  if (registration_matrices_iterator != registration_matrices.end())
+      //  { // camera already present
+      //    registration_matrix = registration_matrices_iterator->second;
+      //  }
+      //  else
+      //  { // camera not present
+      //    std::cout << "Reading refinement matrix of " << frame_id << " from file." << std::endl;
+      //    std::string refinement_filename = ros::package::getPath("opt_calibration") + "/conf/registration_" + frame_id + ".txt";
+      //    std::ifstream f(refinement_filename.c_str());
+      //    if (f.good()) // if the file exists
+      //    {
+      //      f.close();
+      //     registration_matrix = readMatrixFromFile (refinement_filename);
+      //      registration_matrices.insert(std::pair<std::string, Eigen::Matrix4d> (frame_id, registration_matrix));
+      //    }
+      //    else  // if the file does not exist
+      //    {
+      //      // insert the identity matrix
+      //      std::cout << "Refinement file not found! Not doing refinement for this sensor." << std::endl;
+      //      registration_matrices.insert(std::pair<std::string, Eigen::Matrix4d> (frame_id, Eigen::Matrix4d::Identity()));
+      //    }
+      //  }
+      //  //cloud_xyzrgb = registration_matrix * cloud_xyzrgb;
+      //  Eigen::Affine3d registration_transform;
+      //  registration_transform.matrix() << registration_matrix;
+      //  pcl::transformPointCloud(cloud_xyzrgb, cloud_xyzrgb, registration_transform);
+      //}
+
+      std::cout << "cloud_xyzrgb size: " << cloud_xyzrgb.size() << std::endl;
+      //PointCloudT::ConstPtr::iterator it2 = cloud_->points.begin();
+      //pcl::PointCloud<pcl::PointXYZRGB>::iterator it;
+      //pcl::PointCloud<pcl::PointXYZ>::iterator it2;
+      //for(pcl::PointCloud<pcl::PointXYZRGB>::iterator it = cloud_xyzrgb.points.begin(); it != cloud_xyzrgb.points.end(); ++it,++it2)
+  
+      // debug output -- all inf
+      //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end(); ++cloud_it)
+      //{
+      //  std::cout << "cloud_it->x: " << cloud_it->x << std::endl;
+      //  std::cout << "cloud_it->y: " << cloud_it->y << std::endl;
+      //  std::cout << "cloud_it->z: " << cloud_it->z << std::endl;
+      //}
+
+      //for (pcl::PointCloud<pcl::PointXYZRGB>::iterator cloud_it(cloud_xyzrgb.begin()); cloud_it != cloud_xyzrgb.end();
+      //    ++cloud_it)
+      //  cloud_it->rgb = colors.at(0).rgb;
+      last_received_cloud[frame_id] = cloud_xyzrgb;
+      std::map<std::string, pcl::PointCloud<pcl::PointXYZRGB>>::iterator it = last_received_cloud.begin();
+
+      while (it != last_received_cloud.end())
+      {
+          std::string frame_identifier = it->first;
+          pcl::PointCloud<pcl::PointXYZRGB> cloud_xyzrgb = it->second;
+          *clouds_stacked += cloud_xyzrgb;
+          it++;
+      }
+      
+      std::cout << "clouds stacked size: " << clouds_stacked->size() << std::endl;
+      // Publish point clouds
+      clouds_stacked->header.frame_id = "world";
+      cloud_pub.publish(clouds_stacked);
+
+
+      // Create XYZ cloud for viz
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_for_vis(new pcl::PointCloud<pcl::PointXYZRGB>);
+      //https://answers.ros.org/question/9515/how-to-convert-between-different-point-cloud-types-using-pcl/
+      //pcl::PointXYZRGB xyzrgb_point;
+      //cloud_for_vis->points.resize(cloud_xyzrgb.width * cloud_xyzrgb.height, xyzrgb_point);
+      //cloud_for_vis->width = cloud_xyzrgb.width;
+      //cloud_for_vis->height = cloud_xyzrgb.height;
+      //cloud_for_vis->is_dense = false;
+
+      // fill xyzrgb
+      //for (int i=0;i<cloud_xyzrgb.height;i++)
+     // {
+      //    for (int j=0;j<cloud_xyzrgb.width;j++)
+      //    {
+      //    cloud_for_vis->at(j,i).x = cloud_xyzrgb.at(j,i).x;
+      //    cloud_for_vis->at(j,i).y = cloud_xyzrgb.at(j,i).y;
+      //    cloud_for_vis->at(j,i).z = cloud_xyzrgb.at(j,i).z;
+      //    }
+      //}
+      pcl::copyPointCloud(*clouds_stacked, *cloud_for_vis);
+
+      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_for_vis);
+      viewer.addPointCloud<PointT> (cloud_for_vis, rgb, "temp_cloud");
+      //viewer.showCloud (clouds_stacked);
+      viewer.addCoordinateSystem (0.5, "axis", 0); 
+      viewer.setBackgroundColor (0, 0, 0, 0); 
+      //viewer.setPosition (800, 400); 
+      //viewer.setCameraPosition(0,0,-2,0,-1,0,0);;
+      viewer.spinOnce ();
+      viewer.removeAllShapes();
+      viewer.removeAllPointClouds();  
+    }
 
 
     void callback(const PointCloudT::ConstPtr& cloud_) {
@@ -317,7 +553,6 @@ class VisNode {
       frame_id_tmp.replace(pos, std::string("_depth_optical_frame").size(), "");
       
       frame_id = frame_id_tmp;
-      
 
       // add to pointcloud vis
       //pcl::transformPointCloud(cloud_, PtrPointCloud, inverse_transform.matrix());
@@ -462,7 +697,6 @@ class VisNode {
       viewer.removeAllPointClouds();  
     }
 
-
     void new_callback(const PointCloudT::ConstPtr& cloud_) {
       // Read message header information:
       pcl::GlasbeyLUT colors;
@@ -590,25 +824,15 @@ class VisNode {
 };
 
 int main(int argc, char** argv) {
-  std::string sensor_name;
-  double max_distance;
-  // json zone_json;
-  bool use_dynamic_reconfigure;
-  // std::string area_package_path = ros::package::getPath("recognition");
-  // std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
-  // std::ifstream area_json_read(area_hard_coded_path);
-  // area_json_read >> zone_json;
+  bool use_kalibr;
 
-  std::cout << "--- tvm_detection_node ---" << std::endl;
   ros::init(argc, argv, "tvm_detection_node");
-  // something is off here... with the private namespace
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
-  pnh.param("sensor_name", sensor_name, std::string("d435"));
-  pnh.param("use_dynamic_reconfigure", use_dynamic_reconfigure, false);
-  std::cout << "sensor_name: " << sensor_name << std::endl;
+  pnh.param("use_kalibr", use_kalibr, false);
+  std::cout << "use_kalibr: " << use_kalibr << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  VisNode node(nh);
+  VisNode node(nh, use_kalibr);
   std::cout << "VisNode init " << std::endl;
   ros::spin();
   return 0;
