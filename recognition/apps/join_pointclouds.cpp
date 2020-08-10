@@ -183,7 +183,7 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
       calibData.frame_id = frame_id_tmp;
       calibData.distortion_coeffs  = distortion_coeffs;
       calibData.intrinsics = intrinsics;
-      calibData.T_cn_cnm1 = calibData.T_cn_cnm1::Identity();
+      calibData.T_cn_cnm1 = Eigen::Matrix<double,4,4>::Identity();
       //if (calibData.T_cn_cnm1 != identity()) {
       //  ROS_WARN_STREAM("Cam0 had a non-identity T_cn_cnm1 specified!");
       //  calibData.T_cn_cnm1 = calibData.T_cn_cnm1.identity();
