@@ -156,9 +156,8 @@ readMatrixFromFile (std::string filename)
     // 
   }
 
-std::map<std::string, CalibrationData> lookup; read_calibration_data(std::string local_filepath){
+std::map<std::string, CalibrationData> read_calibration_data(std::string local_filepath){
   std::map<std::string, CalibrationData> lookup;
-  
   json kalibr_config;
   std::string package_path = ros::package::getPath("recognition");
   std::string hard_coded_path = package_path + local_filepath; //"/cfg/kalibr.json";
@@ -190,7 +189,7 @@ std::map<std::string, CalibrationData> lookup; read_calibration_data(std::string
       //  calibData.T_cn_cnm1 = calibData.T_cn_cnm1.identity();
       //}
     } else {
-      std::vector<std::vector<double>> values = j[key]["T_cn_cnm1"];
+      std::vector<std::vector<double>> values = j[cam]["T_cn_cnm1"];
       calibData.T_cn_cnm1 << values[0][0], values[0][1], values[0][2], values[0][3],
             values[1][0], values[1][1], values[1][2], values[1][3],
             values[2][0], values[2][1], values[2][2], values[2][3],
