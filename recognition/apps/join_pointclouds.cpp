@@ -163,11 +163,11 @@ std::map<std::string, CalibrationData> read_calibration_data(std::string local_f
   std::string hard_coded_path = package_path + local_filepath; //"/cfg/kalibr.json";
   std::ifstream kalibr_json_read(hard_coded_path); 
   kalibr_json_read >> kalibr_config;
-  cam_index = 0;
+  int cam_index = 0;
   while (true){
   // for (size_t cam_index = 0; cam_index < n_cams; cam_index++){
     CalibrationData calibData;
-    std::sting cam = "cam" + cam_index;
+    std::string cam = "cam" + cam_index;
     if (cam_index == 0) {
 
       std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
