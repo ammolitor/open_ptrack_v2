@@ -1023,6 +1023,8 @@ class CloudMerger
       std::cout << "merging clouds" << std::endl;
       outCl->outCloud.clear(); //clear before use. Header info is not cleared.
       for(int i = 0 ; i < this->nsensors ; i++){
+         
+        std::cout << "[" + << i << "] cloud size : "<< inClAry[i]->tfdinCloud.size() << std::endl;
         outCl->outCloud += inClAry[i]->tfdinCloud;
       }
       //initialize header info with first Cloud info
