@@ -861,10 +861,10 @@ class InputCloud
     ros::Subscriber sub;
     Eigen::Matrix4f transform;
     // pcl::PointCloud<pcl::PointXYZ> inCloud;
-    pcl::PointCloud < pcl::PointXYZRGB > inCloud
+    pcl::PointCloud < pcl::PointXYZRGB > inCloud;
   public:
     // pcl::PointCloud<pcl::PointXYZ> tfdinCloud;
-    pcl::PointCloud < pcl::PointXYZRGB > tfdinCloud
+    pcl::PointCloud < pcl::PointXYZRGB > tfdinCloud;
     CalibrationData calibData;
   public:
     InputCloud(std::string topic,ros::NodeHandle nh)
@@ -951,7 +951,7 @@ class OutputCloud
     std::string topic_name;
     std::string frame_id;
   public:
-    pcl::PointCloud<pcl::PointXYZ> outCloud;
+    pcl::PointCloud<pcl::PointXYZRGB> outCloud;
     sensor_msgs::PointCloud2 outCloudMsg;
     ros::Publisher pub;
   public:
