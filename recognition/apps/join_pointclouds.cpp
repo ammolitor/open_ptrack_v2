@@ -1019,6 +1019,8 @@ class CloudMerger
       * velodyne drivers publish messages every 100ms(10hz)
       * Is it ok?
       */
+      ros::Time start = ros::Time::now();
+      std::cout << "merging clouds" << std::endl;
       outCl->outCloud.clear(); //clear before use. Header info is not cleared.
       for(int i = 0 ; i < this->nsensors ; i++){
         outCl->outCloud += inClAry[i]->tfdinCloud;
@@ -1044,7 +1046,9 @@ class CloudMerger
       //viewer.setCameraPosition(0,0,-2,0,-1,0,0);;
       viewer.spinOnce ();
       viewer.removeAllShapes();
-      viewer.removeAllPointClouds();  
+      viewer.removeAllPointClouds();
+      double end = ros::Time::now().toSec() - start.toSec();
+      std::cout << "total time: " << end << std::endl;
     }
     ~CloudMerger() {}
 };//class CloudMerger
