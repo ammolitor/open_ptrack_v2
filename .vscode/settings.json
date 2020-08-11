@@ -63,6 +63,7 @@
         "eigen": "cpp",
         "*.ipp": "cpp",
         "*.txx": "cpp",
-        "forward_list": "cpp"
+        "forward_list": "cpp",
+        "regex": "cpp"
     }
 }

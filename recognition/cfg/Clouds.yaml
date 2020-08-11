@@ -1,0 +1,13 @@
+#input topic info, (yaw,pitch,roll in degree/ x,y,z in meter)
+CloudIn1:
+  topic_name: /d415/cleaned_clouds
+CloudIn2:
+  topic_name: /realsense02/cleaned_clouds
+#CloudIn3:
+#  topic_name: /realsense03/cleaned_clouds
+#CloudIn4:
+#  topic_name: /realsense04/cleaned_clouds
+#output topic info (frame_id for virtual frame)
+CloudOut:
+  topic_name: cleaned_clouds
+  frame_id: world

@@ -5,6 +5,7 @@
   <arg name="serial_no" default="" />
   <arg name="standalone" default="true" />
   <arg name="use_pointcloud" default="true" />
+  <arg name="use_cloudmerge" default="false" />
 
   <group if="$(arg standalone)" >
     <!-- Start the realsense -->
@@ -20,6 +21,7 @@
         name="$(arg sensor_name)_clean_pointcloud" output="screen" respawn="false">
 
     <param name="sensor_name"               value="$(arg sensor_name)" />
+    <param name="use_cloudmerge"               value="$(arg use_cloudmerge)" />
 
   </node>
 

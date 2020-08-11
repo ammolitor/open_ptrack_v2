@@ -260,7 +260,7 @@ class CleanerNode {
     pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
     bool listen_for_ground = false;
 
-    CleanerNode(ros::NodeHandle& nh, std::string sensor_string, bool use_dynamic_reconfigure):
+    CleanerNode(ros::NodeHandle& nh, std::string sensor_string, bool use_dynamic_reconfigure, bool use_cloudmerge):
       node_(nh), it(node_)
       {
         try
@@ -346,7 +346,12 @@ class CleanerNode {
         // Publish Messages
 
         // Subscribe to Messages
-        cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("/cleaned_clouds", 1);
+        if (use_cloudmerge){ 
+           cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("/"+ sensor_string + "/cleaned_clouds", 1);
+        } else {
+           cloud_pub = node_.advertise<sensor_msgs::PointCloud2>("/cleaned_clouds", 1);
+        }
+       
 
         // Camera callback for intrinsics matrix update
         camera_info_matrix = node_.subscribe(sensor_string + "/color/camera_info", 10, &CleanerNode::camera_info_callback, this);
@@ -359,7 +364,7 @@ class CleanerNode {
 
         // dynamic reconfigure eats cpu cycles; so it's good for testing, 
         // but on an already constrained device, it's not really a good option
-        if (use_dynamic_reconfigure){
+        if (, bool use_cloudmerge){
           cfg_server.setCallback(boost::bind(&CleanerNode::cfg_callback, this, _1, _2)); 
         }
         sensor_name = sensor_string;
@@ -1467,6 +1472,7 @@ int main(int argc, char** argv) {
   double max_distance;
   // json zone_json;
   bool use_dynamic_reconfigure;
+  bool use_cloudmerge;
   // std::string area_package_path = ros::package::getPath("recognition");
   // std::string area_hard_coded_path = area_package_path + "/cfg/area.json";
   // std::ifstream area_json_read(area_hard_coded_path);
@@ -1479,9 +1485,10 @@ int main(int argc, char** argv) {
   ros::NodeHandle nh;
   pnh.param("sensor_name", sensor_name, std::string("d435"));
   pnh.param("use_dynamic_reconfigure", use_dynamic_reconfigure, false);
+  pnh.param("use_cloudmerge", use_cloudmerge, false);
   std::cout << "sensor_name: " << sensor_name << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  CleanerNode node(nh, sensor_name, use_dynamic_reconfigure);
+  CleanerNode node(nh, sensor_name, use_dynamic_reconfigure, use_cloudmerge);
   std::cout << "CleanerNode init " << std::endl;
   ros::spin();
   return 0;

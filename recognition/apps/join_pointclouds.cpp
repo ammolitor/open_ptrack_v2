@@ -92,6 +92,7 @@
 #include <nlohmann/json.hpp>
 #include <recognition/GenDetectionConfig.h>
 #include <pcl/common/colors.h>
+#include <regex> 
 /// yolo specific args
 //#include <open_ptrack/tvm_detection_helpers.hpp>
 //#include <open_ptrack/NoNMSPoseFromConfig.hpp>
@@ -111,6 +112,9 @@ typedef pcl::PointCloud<PointT> PointCloudT;
 typedef pcl::PointCloud<PointT> PointCloud;
 typedef boost::shared_ptr<PointCloud> PointCloudPtr;
 typedef boost::shared_ptr<const PointCloud> PointCloudConstPtr;
+
+// change as needed...
+#define MAX_NSENSORS 100
 
 Eigen::Matrix4d
 readMatrixFromFile (std::string filename)
@@ -153,6 +157,7 @@ struct CalibrationData {
     bool              fixIntrinsics{false};
     bool              fixExtrinsics{false};
     bool              active{true};
+    Eigen::Affine3d pose_inverse_transform;
     // 
   };
 
@@ -834,22 +839,262 @@ class VisNode {
       viewer.removeAllShapes();
       viewer.removeAllPointClouds();  
     }
-
-
 };
+
+std::string find_frame_id(std::string topic){
+  std::regex rgx("^/*[0-9a-zA-Z_]+[/]");
+  std::frame_id_tmp;
+  std::match_results<std::string::iterator> match;
+  if (std::regex_search(topic.begin(), topic.end(), match, rgx))
+    std::cout << "match: " << match[0] << '\n';
+  frame_id_tmp = match[0];
+  frame_id_tmp.erase(std::remove(frame_id_tmp.begin(), frame_id_tmp.end(), '/'), frame_id_tmp.end());
+  return frame_id_tmp;
+}
+
+class InputCloud
+{
+  private:
+    pose ps;
+    std::string topic_name;
+    std::string frame_id;
+    ros::Subscriber sub;
+    Eigen::Matrix4f transform;
+    pcl::PointCloud<pcl::PointXYZ> inCloud;
+  public:
+    pcl::PointCloud<pcl::PointXYZ> tfdinCloud;
+    CalibrationData calibData;
+  public:
+    InputCloud(std::string topic,ros::NodeHandle nh)
+    {
+
+      std::string topic_frame_id = find_frame_id(topic);
+      //if (temp.length()== 0){
+      // throw blah blah blah
+      //}
+
+      json kalibr_config;
+      std::string package_path = ros::package::getPath("recognition");
+      std::string hard_coded_path = package_path + local_filepath; //"/cfg/kalibr.json";
+      std::ifstream kalibr_json_read(hard_coded_path); 
+      kalibr_json_read >> kalibr_config;
+
+      int cam_index = 0;
+      bool process = true;
+      while (process){
+        std::string cam = "cam" + std::to_string(cam_index);
+        std::string rostopic = kalibr_config[cam]["rostopic"];
+        std::string rostopic_frame_id = find_frame_id(rostopic);
+        
+        try
+        {
+          if (rostopic_frame_id == topic_frame_id){
+            std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
+            std::vector<double> intrinsics = kalibr_config[cam]["intrinsics"];
+            calibData.frame_id = rostopic_frame_id;
+            calibData.distortion_coeffs  = distortion_coeffs;
+            calibData.intrinsics = intrinsics;
+            //calibData.T_cn_cnm1 = Eigen::Matrix<double,4,4>::Identity();
+            if (cam_index == 0) {
+              calibData.T_cn_cnm1 = Eigen::Matrix<double,4,4>::Identity();
+            } else {
+              std::vector<std::vector<double>> values = kalibr_config[cam]["T_cn_cnm1"];
+              std::cout << "read: values " << std::endl;
+              calibData.T_cn_cnm1 << values[0][0], values[0][1], values[0][2], values[0][3],
+                    values[1][0], values[1][1], values[1][2], values[1][3],
+                    values[2][0], values[2][1], values[2][2], values[2][3],
+                    values[3][0], values[3][1], values[3][2], values[3][3];
+              Eigen::Matrix<double,3,3> R = calibData.T_cn_cnm1.block<3,3>(0,0);
+              Eigen::Matrix<double,3,3> I = Eigen::Matrix<double,3,3>::Identity();
+              if (R == I) {
+                //ROS_ERROR_STREAM(cam << " cannot have an identity rotation in T_cn_cnm1. Perturb values as needed.");
+                Eigen::AngleAxisd a(0.00001,Eigen::Vector3d::UnitX());
+                calibData.T_cn_cnm1.block<3,3>(0,0) = a.toRotationMatrix();
+              }
+            }
+            process = false;
+          } 
+        }
+        catch(const std::exception& e)
+        {
+          std::cerr << e.what() << '\n';
+          process = false;
+        }
+        cam_index++;
+      }
+
+      pose_inverse_transform.matrix() << calibData.T_cn_cnm1;
+      
+      //initialize InputCloud
+      // this->ps = p;
+      this->topic_name = topic;
+      //this->transform = poseTotfmatrix();
+      sub = nh.subscribe(topic_name,1,&InputCloud::cloudCallback,this);
+    }
+    ~InputCloud() {}
+    void cloudCallback(const PointCloudT::ConstPtr& input)
+    {
+      // not sure if you need this????
+      pcl::fromROSMsg(*input,this->inCloud);
+      pcl::transformPointCloud(this->inCloud, this->tfdinCloud, pose_inverse_transform);
+    }
+    Eigen::Matrix4f poseTotfmatrix()
+    {
+      Eigen::Matrix4f tfMatrix = Eigen::Matrix4f::Identity();
+      Eigen::AngleAxisd rollAngle(this->ps.roll,Eigen::Vector3d::UnitX());
+      Eigen::AngleAxisd pitchAngle(this->ps.pitch,Eigen::Vector3d::UnitY());
+      Eigen::AngleAxisd yawAngle(this->ps.yaw,Eigen::Vector3d::UnitZ());
+      
+      Eigen::Quaternion<double> q =  yawAngle * pitchAngle * rollAngle;
+
+      Eigen::Matrix3d rotationMatrix = q.matrix();
+      for(int i = 0 ; i < 3 ; i++)
+        for(int j = 0 ; j < 3 ; j++)
+          tfMatrix(i,j) = rotationMatrix(i,j);
+      
+      //transform x,y,z (gap from virtual frame)
+      tfMatrix(0,3) = this->ps.x;
+      tfMatrix(1,3) = this->ps.y;
+      tfMatrix(2,3) = this->ps.z;
+
+      std::cout << "tfMatrix" << std::endl;
+      std::cout << tfMatrix << std::endl;	
+      return tfMatrix;
+    }
+};//class InputCloud
+
+
+class OutputCloud
+{
+  private:
+    std::string topic_name;
+    std::string frame_id;
+  public:
+    pcl::PointCloud<pcl::PointXYZ> outCloud;
+    sensor_msgs::PointCloud2 outCloudMsg;
+    ros::Publisher pub;
+  public:
+    OutputCloud(std::string topic, std::string frame, ros::NodeHandle nh)
+    {
+      this->topic_name = topic;
+      this->frame_id = frame;
+      pub = nh.advertise<sensor_msgs::PointCloud2>(this->topic_name,1);
+      this->outCloud.header.frame_id = this->frame_id;
+    }
+    ~OutputCloud() {}
+};//class OutputCloud
+
+
+class CloudMerger
+{
+  private:
+    int nsensors;
+    InputCloud* inClAry[MAX_NSENSORS];
+    OutputCloud* outCl;
+  public:
+    CloudMerger(ros::NodeHandle node, ros::NodeHandle private_nh)
+    {
+      //use private node handle to get parameters
+      std::string s_key("CloudIn0"); //searching key (input)
+      std::string so_key("CloudOut"); //searching key (output)
+      std::string key;
+      this->nsensors = 0;
+      
+      //get all parameters
+      for(int i = 1 ; i <= MAX_NSENSORS ; i++){
+        //Searching key must be Cloud[1] ~ Cloud[MAX_NSENSORS]
+        s_key[s_key.find((i + '0') - 1)] = i + '0';
+        if(private_nh.searchParam(s_key, key)){
+          std::string topic_name(s_key); //set to default
+
+          if(!private_nh.getParam(key+"/topic_name",topic_name)){
+            std::cout << "not found : "<< key +"/topic_name" << std::endl;
+          }
+
+          this->nsensors++;
+          inClAry[i-1] = new InputCloud(topic_name, node);
+        }
+      }
+      if(this->nsensors == 0) std::cout << "No input data found" << std::endl;
+      //outputCloud object
+      if(private_nh.searchParam(so_key,key)){
+        std::string topic_name(so_key); //set to default
+        std::string frame_id("default_frame_id"); //set to default
+        if(!private_nh.getParam(key+"/topic_name",topic_name)){
+          std::cout << "not found : "<< key +"/topic_name" << std::endl;
+        }
+        if(!private_nh.getParam(key+"/frame_id", frame_id)){
+          std::cout << "not found : "<< key +"/frame_id" << std::endl;
+        }		
+        outCl = new OutputCloud(topic_name, frame_id, node);
+      }
+    }
+    void mergeNpub()
+    {
+      /* synchronization problem
+      * Time stamp of 4 sensors are apparently different.
+      * velodyne drivers publish messages every 100ms(10hz)
+      * Is it ok?
+      */
+      outCl->outCloud.clear(); //clear before use. Header info is not cleared.
+      for(int i = 0 ; i < this->nsensors ; i++){
+        outCl->outCloud += inClAry[i]->tfdinCloud;
+      }
+      //initialize header info with first Cloud info
+      outCl->outCloud.header.seq = inClAry[0]->tfdinCloud.header.seq;
+      outCl->outCloud.header.stamp = inClAry[0]->tfdinCloud.header.stamp;
+      pcl::toROSMsg(outCl->outCloud,outCl->outCloudMsg);
+      outCl->pub.publish(outCl->outCloudMsg);
+
+
+      // Create XYZ cloud for viz
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_for_vis(new pcl::PointCloud<pcl::PointXYZRGB>);
+
+      pcl::copyPointCloud(*outCl->outCloud, *cloud_for_vis);
+
+      pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_for_vis);
+      viewer.addPointCloud<PointT> (cloud_for_vis, rgb, "temp_cloud");
+      //viewer.showCloud (clouds_stacked);
+      viewer.addCoordinateSystem (0.5, "axis", 0); 
+      viewer.setBackgroundColor (0, 0, 0, 0); 
+      //viewer.setPosition (800, 400); 
+      //viewer.setCameraPosition(0,0,-2,0,-1,0,0);;
+      viewer.spinOnce ();
+      viewer.removeAllShapes();
+      viewer.removeAllPointClouds();  
+    }
+    ~CloudMerger() {}
+};//class CloudMerger
+
 
 int main(int argc, char** argv) {
   bool use_kalibr;
+  bool use_cloudmerger;
 
   ros::init(argc, argv, "tvm_detection_node");
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("use_kalibr", use_kalibr, false);
+  pnh.param("use_cloudmerger", use_cloudmerger, false);
   std::cout << "use_kalibr: " << use_kalibr << std::endl;
   std::cout << "nodehandle init " << std::endl; 
-  VisNode node(nh, use_kalibr);
-  std::cout << "VisNode init " << std::endl;
-  ros::spin();
+  
+  if (use_cloudmerger){
+    ros::Rate loop_rate(10);
+    CloudMerger::CloudMerger *cm = new CloudMerger::CloudMerger(nh, pnh);
+    // Spin
+    while(ros::ok())
+    {
+      cm->mergeNpub();
+      ros::spinOnce();
+      loop_rate.sleep();
+    }
+  }
+  else {
+    VisNode node(nh, use_kalibr);
+    std::cout << "VisNode init " << std::endl;
+    ros::spin();
+  }
   return 0;
 }
  
