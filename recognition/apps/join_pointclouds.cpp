@@ -845,7 +845,7 @@ std::string find_frame_id(std::string topic){
   std::regex rgx("^/*[0-9a-zA-Z_]+[/]");
   std::string frame_id_tmp;
   std::match_results<std::string::iterator> match;
-  std::regex_search(topic.begin(), topic.end(), match, rgx)
+  std::regex_search(topic.begin(), topic.end(), match, rgx);
   frame_id_tmp = match[0];
   frame_id_tmp.erase(std::remove(frame_id_tmp.begin(), frame_id_tmp.end(), '/'), frame_id_tmp.end());
   return frame_id_tmp;
