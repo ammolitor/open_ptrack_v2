@@ -860,9 +860,11 @@ class InputCloud
     std::string frame_id;
     ros::Subscriber sub;
     Eigen::Matrix4f transform;
-    pcl::PointCloud<pcl::PointXYZ> inCloud;
+    // pcl::PointCloud<pcl::PointXYZ> inCloud;
+    pcl::PointCloud < pcl::PointXYZRGB > inCloud
   public:
-    pcl::PointCloud<pcl::PointXYZ> tfdinCloud;
+    // pcl::PointCloud<pcl::PointXYZ> tfdinCloud;
+    pcl::PointCloud < pcl::PointXYZRGB > tfdinCloud
     CalibrationData calibData;
   public:
     InputCloud(std::string topic,ros::NodeHandle nh)
@@ -934,8 +936,10 @@ class InputCloud
     ~InputCloud() {}
     void cloudCallback(const PointCloudT::ConstPtr& input)
     {
+      // pcl::PointCloud < pcl::PointXYZRGB > cloud_xyzrgb;
+      pcl::copyPointCloud(*input, this->inCloud);
       // not sure if you need this????
-      pcl::fromROSMsg(*input,this->inCloud);
+      //pcl::fromROSMsg(*input, this->inCloud);
       pcl::transformPointCloud(this->inCloud, this->tfdinCloud, calibData.pose_inverse_transform);
     }
 };//class InputCloud
@@ -1059,7 +1063,7 @@ int main(int argc, char** argv) {
   
   if (use_cloudmerger){
     ros::Rate loop_rate(10);
-    CloudMerger::CloudMerger *cm = new CloudMerger::CloudMerger(nh, pnh);
+    CloudMerger *cm = new CloudMerger(nh, pnh);
     // Spin
     while(ros::ok())
     {
