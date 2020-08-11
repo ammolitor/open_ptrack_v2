@@ -1032,7 +1032,7 @@ class CloudMerger
       // Create XYZ cloud for viz
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_for_vis(new pcl::PointCloud<pcl::PointXYZRGB>);
 
-      pcl::copyPointCloud(*outCl->outCloud, *cloud_for_vis);
+      pcl::copyPointCloud(outCl->outCloud, *cloud_for_vis);
 
       pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb(cloud_for_vis);
       viewer.addPointCloud<PointT> (cloud_for_vis, rgb, "temp_cloud");
