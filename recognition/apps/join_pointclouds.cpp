@@ -843,7 +843,7 @@ class VisNode {
 
 std::string find_frame_id(std::string topic){
   std::regex rgx("^/*[0-9a-zA-Z_]+[/]");
-  std::frame_id_tmp;
+  std::string frame_id_tmp;
   std::match_results<std::string::iterator> match;
   if (std::regex_search(topic.begin(), topic.end(), match, rgx))
     std::cout << "match: " << match[0] << '\n';
@@ -855,7 +855,7 @@ std::string find_frame_id(std::string topic){
 class InputCloud
 {
   private:
-    pose ps;
+    //pose ps;
     std::string topic_name;
     std::string frame_id;
     ros::Subscriber sub;
@@ -875,7 +875,7 @@ class InputCloud
 
       json kalibr_config;
       std::string package_path = ros::package::getPath("recognition");
-      std::string hard_coded_path = package_path + local_filepath; //"/cfg/kalibr.json";
+      std::string hard_coded_path = package_path + "/cfg/kalibr.json";
       std::ifstream kalibr_json_read(hard_coded_path); 
       kalibr_json_read >> kalibr_config;
 
@@ -923,7 +923,7 @@ class InputCloud
         cam_index++;
       }
 
-      pose_inverse_transform.matrix() << calibData.T_cn_cnm1;
+      calibData.pose_inverse_transform.matrix() << calibData.T_cn_cnm1;
       
       //initialize InputCloud
       // this->ps = p;
@@ -936,30 +936,7 @@ class InputCloud
     {
       // not sure if you need this????
       pcl::fromROSMsg(*input,this->inCloud);
-      pcl::transformPointCloud(this->inCloud, this->tfdinCloud, pose_inverse_transform);
-    }
-    Eigen::Matrix4f poseTotfmatrix()
-    {
-      Eigen::Matrix4f tfMatrix = Eigen::Matrix4f::Identity();
-      Eigen::AngleAxisd rollAngle(this->ps.roll,Eigen::Vector3d::UnitX());
-      Eigen::AngleAxisd pitchAngle(this->ps.pitch,Eigen::Vector3d::UnitY());
-      Eigen::AngleAxisd yawAngle(this->ps.yaw,Eigen::Vector3d::UnitZ());
-      
-      Eigen::Quaternion<double> q =  yawAngle * pitchAngle * rollAngle;
-
-      Eigen::Matrix3d rotationMatrix = q.matrix();
-      for(int i = 0 ; i < 3 ; i++)
-        for(int j = 0 ; j < 3 ; j++)
-          tfMatrix(i,j) = rotationMatrix(i,j);
-      
-      //transform x,y,z (gap from virtual frame)
-      tfMatrix(0,3) = this->ps.x;
-      tfMatrix(1,3) = this->ps.y;
-      tfMatrix(2,3) = this->ps.z;
-
-      std::cout << "tfMatrix" << std::endl;
-      std::cout << tfMatrix << std::endl;	
-      return tfMatrix;
+      pcl::transformPointCloud(this->inCloud, this->tfdinCloud, calibData.pose_inverse_transform);
     }
 };//class InputCloud
 
@@ -992,6 +969,7 @@ class CloudMerger
     InputCloud* inClAry[MAX_NSENSORS];
     OutputCloud* outCl;
   public:
+    pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
     CloudMerger(ros::NodeHandle node, ros::NodeHandle private_nh)
     {
       //use private node handle to get parameters

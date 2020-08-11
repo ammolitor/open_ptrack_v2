@@ -364,7 +364,7 @@ class CleanerNode {
 
         // dynamic reconfigure eats cpu cycles; so it's good for testing, 
         // but on an already constrained device, it's not really a good option
-        if (, bool use_cloudmerge){
+        if (use_dynamic_reconfigure){
           cfg_server.setCallback(boost::bind(&CleanerNode::cfg_callback, this, _1, _2)); 
         }
         sensor_name = sensor_string;
