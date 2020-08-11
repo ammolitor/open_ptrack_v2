@@ -1051,17 +1051,17 @@ class CloudMerger
 
 int main(int argc, char** argv) {
   bool use_kalibr;
-  bool use_cloudmerger;
+  bool use_cloudmerge;
 
   ros::init(argc, argv, "tvm_detection_node");
   ros::NodeHandle pnh("~");
   ros::NodeHandle nh;
   pnh.param("use_kalibr", use_kalibr, false);
-  pnh.param("use_cloudmerger", use_cloudmerger, false);
+  pnh.param("use_cloudmerge", use_cloudmerge, false);
   std::cout << "use_kalibr: " << use_kalibr << std::endl;
   std::cout << "nodehandle init " << std::endl; 
   
-  if (use_cloudmerger){
+  if (use_cloudmerge){
     ros::Rate loop_rate(10);
     CloudMerger *cm = new CloudMerger(nh, pnh);
     // Spin
