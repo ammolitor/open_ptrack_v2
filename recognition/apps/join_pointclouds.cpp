@@ -845,8 +845,7 @@ std::string find_frame_id(std::string topic){
   std::regex rgx("^/*[0-9a-zA-Z_]+[/]");
   std::string frame_id_tmp;
   std::match_results<std::string::iterator> match;
-  if (std::regex_search(topic.begin(), topic.end(), match, rgx))
-    std::cout << "match: " << match[0] << '\n';
+  std::regex_search(topic.begin(), topic.end(), match, rgx)
   frame_id_tmp = match[0];
   frame_id_tmp.erase(std::remove(frame_id_tmp.begin(), frame_id_tmp.end(), '/'), frame_id_tmp.end());
   return frame_id_tmp;
@@ -871,6 +870,7 @@ class InputCloud
     {
 
       std::string topic_frame_id = find_frame_id(topic);
+
       //if (temp.length()== 0){
       // throw blah blah blah
       //}
@@ -891,6 +891,7 @@ class InputCloud
         try
         {
           if (rostopic_frame_id == topic_frame_id){
+            std::cout << "rostopic_frame_id match: " << rostopic_frame_id << '\n';
             std::vector<double> distortion_coeffs = kalibr_config[cam]["distortion_coeffs"];
             std::vector<double> intrinsics = kalibr_config[cam]["intrinsics"];
             calibData.frame_id = rostopic_frame_id;
