@@ -865,8 +865,12 @@ class InputCloud
     // pcl::PointCloud<pcl::PointXYZ> tfdinCloud;
     pcl::PointCloud < pcl::PointXYZRGB > tfdinCloud;
     CalibrationData calibData;
+    bool use_kalibr = false;
+    bool calibration_refinement = true;
+    tf::TransformListener tf_listener;
+    std::map<std::string, Eigen::Matrix4d> registration_matrices;
   public:
-    InputCloud(std::string topic,ros::NodeHandle nh)
+    InputCloud(std::string topic,ros::NodeHandle nh, bool use_kalibr)
     {
 
       std::string topic_frame_id = find_frame_id(topic);
@@ -925,7 +929,7 @@ class InputCloud
         }
         cam_index++;
       }
-
+      use_tf = use_opttf;
       calibData.pose_inverse_transform.matrix() << calibData.T_cn_cnm1;
       
       //initialize InputCloud
@@ -941,7 +945,62 @@ class InputCloud
       pcl::copyPointCloud(*input, this->inCloud);
       // not sure if you need this????
       //pcl::fromROSMsg(*input, this->inCloud);
-      pcl::transformPointCloud(this->inCloud, this->tfdinCloud, calibData.pose_inverse_transform);
+      if (!use_kalibr){
+        tf::StampedTransform inverse_transform;
+        Eigen::Affine3d pose_inverse_transform;
+        tf_listener.lookupTransform(calibData.frame_id, "/world", ros::Time(0), inverse_transform);
+        tf::transformTFToEigen(inverse_transform, pose_inverse_transform);
+        // debug info
+        //Eigen::Matrix3d m = pose_inverse_transform.rotation();
+        //Eigen::Vector3d v = pose_inverse_transform.translation();
+        //std::cout << "Rotation: " << std::endl << m << std::endl;
+        //std::cout << "Translation: " << std::endl << v << std::endl;
+        //std::cout << "Matrix: " << pose_inverse_transform.matrix() << std::endl;
+
+        pcl::transformPointCloud(this->inCloud, this->tfdinCloud, pose_inverse_transform);
+
+        // Detection correction by means of calibration refinement:
+        if (calibration_refinement)
+        {
+          if (strcmp(calibData.frame_id.substr(0,1).c_str(), "/") == 0)
+          {
+            calibData.frame_id = calibData.frame_id.substr(1, calibData.frame_id.size() - 1);
+          }
+
+          Eigen::Matrix4d registration_matrix;
+          std::map<std::string, Eigen::Matrix4d>::iterator registration_matrices_iterator = registration_matrices.find(calibData.frame_id);
+          if (registration_matrices_iterator != registration_matrices.end())
+          { // camera already present
+            registration_matrix = registration_matrices_iterator->second;
+          }
+          else
+          { // camera not present
+            std::cout << "Reading refinement matrix of " << calibData.frame_id << " from file." << std::endl;
+            std::string refinement_filename = ros::package::getPath("opt_calibration") + "/conf/registration_" + calibData.frame_id + ".txt";
+            std::ifstream f(refinement_filename.c_str());
+            if (f.good()) // if the file exists
+            {
+              f.close();
+              registration_matrix = readMatrixFromFile (refinement_filename);
+              registration_matrices.insert(std::pair<std::string, Eigen::Matrix4d> (calibData.frame_id, registration_matrix));
+            }
+            else  // if the file does not exist
+            {
+              // insert the identity matrix
+              std::cout << "Refinement file not found! Not doing refinement for this sensor." << std::endl;
+              registration_matrices.insert(std::pair<std::string, Eigen::Matrix4d> (calibData.frame_id, Eigen::Matrix4d::Identity()));
+            }
+          }
+          //cloud_xyzrgb = registration_matrix * cloud_xyzrgb;
+          Eigen::Affine3d registration_transform;
+          registration_transform.matrix() << registration_matrix;
+          pcl::transformPointCloud(this->tfdinCloud, this->tfdinCloud, registration_transform);
+        }
+
+      }
+      else { 
+        pcl::transformPointCloud(this->inCloud, this->tfdinCloud, calibData.pose_inverse_transform);
+      }
     }
 };//class InputCloud
 
@@ -975,7 +1034,7 @@ class CloudMerger
     OutputCloud* outCl;
   public:
     pcl::visualization::PCLVisualizer viewer = pcl::visualization::PCLVisualizer ("3D Viewer");
-    CloudMerger(ros::NodeHandle node, ros::NodeHandle private_nh)
+    CloudMerger(ros::NodeHandle node, ros::NodeHandle private_nh, bool use_kalibr)
     {
       //use private node handle to get parameters
       std::string s_key("CloudIn0"); //searching key (input)
@@ -995,7 +1054,7 @@ class CloudMerger
           }
 
           this->nsensors++;
-          inClAry[i-1] = new InputCloud(topic_name, node);
+          inClAry[i-1] = new InputCloud(topic_name, node, use_kalibr);
         }
       }
       if(this->nsensors == 0) std::cout << "No input data found" << std::endl;
@@ -1070,7 +1129,7 @@ int main(int argc, char** argv) {
   
   if (use_cloudmerge){
     ros::Rate loop_rate(10);
-    CloudMerger *cm = new CloudMerger(nh, pnh);
+    CloudMerger *cm = new CloudMerger(nh, pnh, use_kalibr);
     // Spin
     while(ros::ok())
     {
