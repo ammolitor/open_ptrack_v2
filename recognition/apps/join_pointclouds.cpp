@@ -870,7 +870,7 @@ class InputCloud
     tf::TransformListener tf_listener;
     std::map<std::string, Eigen::Matrix4d> registration_matrices;
   public:
-    InputCloud(std::string topic,ros::NodeHandle nh, bool use_kalibr)
+    InputCloud(std::string topic,ros::NodeHandle nh, bool use_kalibr_)
     {
 
       std::string topic_frame_id = find_frame_id(topic);
@@ -929,7 +929,7 @@ class InputCloud
         }
         cam_index++;
       }
-      use_tf = use_opttf;
+      use_kalibr = use_kalibr_;
       calibData.pose_inverse_transform.matrix() << calibData.T_cn_cnm1;
       
       //initialize InputCloud
