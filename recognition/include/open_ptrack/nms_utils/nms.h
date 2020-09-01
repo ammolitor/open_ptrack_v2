@@ -105,10 +105,72 @@ namespace open_ptrack
         float area(){
             return (xmax - xmin) * (ymax - ymin);
         }
+    };
 
+
+    class sortable_mask_result {
+    public:
+        sortable_mask_result() {
+        }
+
+        ~sortable_mask_result() {
+        }
+
+        bool operator<(const sortable_mask_result &t) const {
+            return probs < t.probs;
+        }
+
+        bool operator>(const sortable_mask_result &t) const {
+            return probs > t.probs;
+        }
+
+        float& operator[](int i) {
+            assert(0 <= i && i <= 4);
+
+            if (i == 0) 
+                return xmin;
+            if (i == 1) 
+                return ymin;
+            if (i == 2) 
+                return xmax;
+            if (i == 3) 
+                return ymax;
+            return xmin;
+        }
+
+        float operator[](int i) const {
+            assert(0 <= i && i <= 4);
+
+            if (i == 0) 
+                return xmin;
+            if (i == 1) 
+                return ymin;
+            if (i == 2) 
+                return xmax;
+            if (i == 3) 
+                return ymax;
+            else{
+                return 0;
+            }
+        }
+
+        int index;
+        int cls;
+        float probs;
+        float xmin;
+        float ymin;
+        float xmax;
+        float ymax;
+        int global_idx;
+
+        float area(){
+            return (xmax - xmin) * (ymax - ymin);
+        }
     };
 
     void tvm_nms_cpu(std::vector<sortable_result>& boxes, MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& filterOutBoxes);
+
+    /// methods for opencv based nms
 
     //template<typename _Tp> static inline
     //double jaccardDistance(const cv::Rect_<_Tp>& a, const cv::Rect_<_Tp>& b);
@@ -135,6 +197,20 @@ namespace open_ptrack
                             std::vector<int>& indices);
 
     void opencv_nms(MatF tvm_output, float cls_threshold, float nms_threshold, std::vector<sortable_result>& boxes);
+
+    /// methods for https://github.com/jeetkanjani7/Parallel_NMS/blob/master/cpu/nms.cpp based nms
+
+
+    struct boxes
+    {
+        float x,y,w,h,s;
+
+    }typedef box;
+
+    float IOUcalc(box b1, box b2);
+
+    void nms_best(box *b, int count, bool *res);
+{
 
 
   } /* namespace nms_utils */

@@ -233,5 +233,67 @@ void open_ptrack::nms_utils::opencv_nms( MatF tvm_output, float cls_threshold, f
         boxes.push_back(res);
     }
 }
+
+\
+        ///float *at(int channel, int row, int col){
+         //   assert(m_data != NULL);
+         //   assert(row < m_rows);
+         //   assert(col < m_cols);
+         //   assert(channel < m_channels);
+         //   return m_data + (channel * m_rows * m_cols) + row * m_cols + col;
+
+
+void open_ptrack::nms_utils::opencv_nms_mask( MatF conf_preds, MatF conf_indicies, MatF decoded_boxes, float cls_threshold, float nms_threshold, std::vector<sortable_result>& boxes) {
+
+    //ulsMatF(int cols, int rows, int channels)
+    //at(int channel, int row, int col)
+    //6, 322560, 1
+
+
+    std::vector<cv::Rect> localBoxes;
+    std::vector<float> localConfidences;
+    std::vector<size_t> classIndices;
+    std::vector<int> nmsIndices;
+
+    int valid_count = 0;
+    for(int i = 0; i < conf_preds.getRows(); ++i){
+      int class_value = static_cast<int>(*conf_indicies.at(0, 0, i));
+      // just do people
+      if (*conf_preds.at(0, i, index) >= cls_threshold && class_value == 0){
+        cv::Rect rect;
+        rect.x = *decoded_boxes.at(0, i, 0);
+        rect.y = *decoded_boxes.at(0, i, 1);
+        rect.width = *decoded_boxes.at(0, i, 2);// - *decoded_boxes.at(0, i, 0);
+        rect.height = *decoded_boxes.at(0, i, 3);// - *decoded_boxes.at(0, i, 1);
+        localBoxes.push_back(rect);
+        localConfidences.push_back(*conf_preds.at(0, i, index));
+        classIndices.push_back(*conf_indicies.at(0, 0, i)); // class_value
+        valid_count+=1;
+      }
+    }
+
+    boxes.clear();
+    if(localBoxes.size() == 0)
+        return;
+
+    NMSBoxes(localBoxes, localConfidences, cls_threshold, nms_threshold, nmsIndices);
+    for (size_t i = 0; i < nmsIndices.size(); i++)
+    {
+        size_t idx = nmsIndices[i];
+        sortable_mask_result res;
+        res.index = i;
+        res.global_idx = idx;
+        res.cls = 0; // automatically 0 for person
+        res.probs = localConfidences[idx];
+        res.xmin = localBoxes[idx].x;
+        res.ymin = localBoxes[idx].y;
+        //TODO nto sure if this is width or xmax
+        res.xmax = localBoxes[idx].x + localBoxes[idx].width;
+        res.ymax = localBoxes[idx].y + localBoxes[idx].height;
+        // res.masks = conf_preds.at(0, i, 0)
+        boxes.push_back(res);
+    }
+}
+
 //https://docs.opencv.org/master/d4/db9/samples_2dnn_2object_detection_8cpp-example.html
 #endif /* OPEN_PTRACK_NMS_UTILS_NMS_HPP_ */
